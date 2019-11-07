@@ -1,0 +1,13 @@
+.divider {
+  border-top: 1px solid #767676;
+  margin: 0 0 20px;
+  width: 100%;
+}
+
+.divider.divider_short {
+  border-top-width: 5px;
+  height: 30px; /* if we use height to replace margin it becomes easier to click in edit mode */
+  margin: 25px 0 0;
+  max-width: 72px;
+  width: 12%;
+}

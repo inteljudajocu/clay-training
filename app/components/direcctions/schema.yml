@@ -1,0 +1,60 @@
+_description: |
+  Direcctions list for recipe.
+
+
+items:
+  _label: direcctions
+  _has:
+    input: complex-list
+    props:
+      - prop: direcctions
+        _label: direcctions
+        _has:
+          input: text
+title:
+  _label: direcctions
+  _has:
+    input: text
+prep:
+  _label: pre-time
+  _has:
+    input: text
+cook:
+  _label: Cook time
+  _has:
+    input: text
+readytime:
+  _label: estimated time
+  _has:
+    input: text
+nutrition:
+    _label: nutrition facts
+    _has:
+      input: text
+nutritiondetail:
+  _label: nutrition detail
+  _has:
+    input: text
+nutritionlink:
+  _label: nutrion link
+  _has:
+    input: text
+    type: url
+
+
+
+_groups:
+  settings:
+    fields:
+      - title
+      - items (List Items)
+      - prep
+      - cook
+      - readytime
+      - nutrition
+      - nutritiondetail
+      - nutritionlink
+    _placeholder:
+      text: New step
+      height: 30px
+      ifEmpty: items

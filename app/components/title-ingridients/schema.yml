@@ -1,0 +1,70 @@
+_description: |
+  A simple title component.
+
+title:
+  _has:
+    input: text
+  
+time:
+  _label: Duration Title
+  _has:
+    input: text
+
+servings:
+  _label: Servings Title
+  _has:
+    input: text
+
+calories:
+  _label: Calories Title
+  _has:
+    input: text
+
+items:
+  _label: ingridients
+  _has:
+    input: complex-list
+    props:
+      - prop: ingridients
+        _label: ingridients
+        _has:
+          input: text
+ 
+features:
+  _has:
+    input: segmented-button-group
+    multiple: true
+    options:
+    - title: Options
+      values:
+      - icon: /media/icons8-heart-64.svg
+        text: 'Heart'
+        value: heart
+      - icon: /media/icons8-person-64.svg
+        text: 'I made it'
+        value: person
+      - icon: /media/icons8-rating-24.svg
+        text: 'Rate it'
+        value: rating
+      - icon: /media/icons8-printer-24.svg
+        text: 'Print'
+        value: print
+      - icon: /media/icons8-pinterest-16.svg
+        text: 'Pinterest'
+        value: pinterest
+      - icon: /media/icons8-facebook-100.svg
+        text: 'Facebook'
+        value: facebook      
+
+_groups:
+  settings:
+    fields:
+      - title
+      - time
+      - servings
+      - calories
+      - features
+      - items (List Items)
+    _placeholder:
+      height: 50px
+      ifEmpty: title AND time AND servings AND calories

@@ -1,0 +1,67 @@
+/* Fonts */
+
+/* Colors */
+
+/* Wrapper */
+
+.list {
+    clear: both;
+    font: 16px / 1 Helvetica, sans-serif;
+    margin: 15px 0;
+    position: relative;
+  }
+
+.list .list-items {
+        counter-reset: listitem;
+        margin: 0;
+      }
+
+.list .list-item {
+        counter-increment: listitem;
+        padding: 0 0 5px;
+      }
+
+.list.custom-indicator {
+        clear: none;
+      }
+
+.list.custom-indicator .list-items {
+        padding: 0;
+      }
+
+.list.custom-indicator .list-item {
+        -webkit-box-align: baseline;
+        -webkit-align-items: baseline;
+            -ms-flex-align: baseline;
+                align-items: baseline;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        list-style-type: none;
+        position: relative;
+      }
+
+.list.custom-indicator .list-item:before {
+        -webkit-box-flex: 0;
+        -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+                flex: 0 0 auto;
+        margin: 0 12px 0 22px;
+      }
+
+.list.custom-indicator ul .list-item:before {
+        background-color: #ec2c00;
+        border-radius: 50%;
+        content: '';
+        height: 6px;
+        position: relative;
+        top: -3px;
+        width: 6px;
+      }
+
+.list.custom-indicator ol .list-item:before {
+        color: #ec2c00;
+        content: counter(listitem) '.';
+        font-weight: 700;
+      }

@@ -1,0 +1,30 @@
+.tags .title {
+    display: inline;
+    font: 12px / 16px Courier;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .tags .tags-list {
+    display: inline;
+    font: 12px / 16px Courier;
+    letter-spacing: 3px;
+    padding: 0;
+    text-transform: uppercase;
+  }
+  .tags .tags-list .tags-list-item {
+      display: inline;
+    }
+  .tags .tags-list .tags-list-item.hidden,
+    .tags .tags-list .tags-list-item.invisible {
+      display: none;
+    }
+  .tags .tags-list .tags-list-item a {
+      color: #000;
+      text-decoration: none;
+    }
+  .tags .tags-list .tags-list-item a:active,
+    .tags .tags-list .tags-list-item a:hover,
+    .tags .tags-list .tags-list-item a:focus {
+      -webkit-box-shadow: 0 1px 0 #0c71fa;
+              box-shadow: 0 1px 0 #0c71fa;
+    }

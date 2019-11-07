@@ -1,0 +1,76 @@
+{{#if @root.locals.user}}
+  {{! if a user is logged in, we display either the view-mode or edit-mode toolbar, and associated scripts, styles, and templates }}
+  <div data-uri="{{ default _ref _self }}" class="clay-kiln">
+    {{! load kiln font if user is logged in }}
+    <style>
+      /* Noto font - regular, regular italic, bold (no bold italic) */
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700');
+      /* Material Design Icon Font */
+      @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+    </style>
+    <script>
+      // start scaffolding kiln stuff
+      window.kiln = window.kiln || {};
+    </script>
+    {{#if @root.locals.edit}}
+      {{! show edit mode styles and preload data}}
+      <style>
+          {{{ read 'node_modules/clay-kiln/dist/clay-kiln-edit.css' }}}
+      </style>
+
+      <script>
+        // scaffold kiln preloading stuff (models, templates, schemae, data, locals),
+        window.kiln.componentModels = window.kiln.componentModels || {};
+        window.kiln.componentTemplates = window.kiln.componentTemplates || {};
+        window.kiln.preloadSchemas = window.kiln.preloadSchemas || {};
+
+        // then preload schemae and data for components on the page
+        {{#each @root._componentSchemas}}
+          window.kiln.preloadSchemas['{{ this.name }}'] = {{{ stringify (yaml (read this.schema)) }}};
+        {{/each}}
+        {{#if @root._layoutData}}
+          window.kiln.layout = {{{ stringify @root._layoutData }}};
+          window.kiln.layout.schema = {{{ stringify (yaml (read @root._layoutData.schema)) }}};
+        {{/if}}
+        window.kiln.preloadData = {{{ default (replace (stringify @root) '</script>' '<"+"/script>') '{}' }}};
+        window.kiln.locals = {{{ default (stringify @root.locals) '{}' }}};
+        // and add the environment variables for model.js
+        window.process = window.process || {};
+        window.process.env = {{{ default (stringify @root._envVars) '{}' }}};
+      </script>
+    {{else}}
+      {{! show view mode styles, only preload site and user data}}
+      <style>
+          {{{ read 'node_modules/clay-kiln/dist/clay-kiln-view.css' }}}
+      </style>
+
+      <script>
+        window.kiln.preloadSite = {{{ default (stringify @root.locals.site) '{}' }}};
+        window.kiln.preloadUser = {{{ default (stringify @root.locals.user) '{}' }}};
+      </script>
+    {{/if}}
+
+    {{! always show toolbar when logged in}}
+    <div id="kiln-app"></div>
+
+    {{! show different scripts in view/edit mode }}
+    {{#if @root.locals.edit}}
+      <script src="{{ default @root.locals.site.assetHost @root.locals.site.assetPath }}/js/clay-kiln-edit.js?version={{ kilnVersion }}"></script>
+    {{else}}
+      <script src="{{ default @root.locals.site.assetHost @root.locals.site.assetPath }}/js/clay-kiln-view.js?version={{ kilnVersion }}"></script>
+
+      {{! logo to display when going into edit mode }}
+      <div class="clay-kiln-logo">{{{ read 'node_modules/clay-kiln/media/clay-logo.svg' }}}</div>
+    {{/if}}
+  </div>
+{{else}}
+  {{! if no user is logged in, only have the toggle to enter edit mode }}
+  <style>
+    {{{ read 'node_modules/clay-kiln/dist/clay-kiln-view-public.css' }}}
+  </style>
+  <div class="clay-kiln-logo">{{{ read 'node_modules/clay-kiln/media/clay-logo.svg' }}}</div>
+  {{! secret code to enter edit mode }}
+  <script>
+    {{{ read 'node_modules/clay-kiln/dist/clay-kiln-view-public.js' }}}
+  </script>
+{{/if}}

@@ -1,0 +1,41 @@
+<div  data-uri="{{ default _ref _self }}" data-editable="settings">
+      <div class="title-ingridients-options">
+              <button class="title-ingridients-options-button">Save</button>
+              <button class="title-ingridients-options-button">I made it</button>
+              <button class="title-ingridients-options-button"> Rate it</button>
+              <button class="title-ingridients-options-button">Print</button>
+              <button class="title-ingridients-options-button">Pin</button>
+              <button class="title-ingridients-options-button">Share</button>
+      </div>
+      <div class="title-ingridients">
+                <div class="title-ingridients-title">
+                      {{#if title}}<h2 >{{ title }}</h2>{{/if}}
+                </div>
+                <div class="title-ingridients-feat">
+                        {{#if time}} <h3 class="feature title-ingridients-vdivider">Cook time: {{ time }}</h3>{{/if}}
+                        {{#if servings}} <h3 class="feature title-ingridients-vdivider">Servings: {{ servings }}</h3>{{/if}}
+                        {{#if calories}} <h3 class="feature">Calories: {{ calories }}</h3>{{/if}}
+                </div>
+      </div>
+      <div class="title-ingridients-divider">
+              <div class="title-ingridients-list">
+                <ul>
+                        {{#each items as |item|}}
+                        {{#if item.ingridients}}<li><span>{{{ item.ingridients }}}</span></li>{{/if}}
+                        {{/each}}
+                </ul>
+                </div>
+                <div class="title-ingridients-check">
+                        <div class="title-ingdrients-sale">
+                                <H2>On Sale</H2>
+                                <h6>What's on sale near you.</h6>
+                        </div>
+                        <div class="title-ingdrients-settings">
+                        <input type="checkbox" class="custom-control-input" id="customSwitches">
+                        <label class="custom-control-label" for="customSwitches"> <i></i> Setting</label>
+                        </div>
+
+
+                </div>
+      </div>
+</div>

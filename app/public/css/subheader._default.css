@@ -1,0 +1,39 @@
+.subheader {
+  color: #000;
+  margin: 0 0 1em;
+}
+
+   h4.subheader {
+    font: bold 22px Helvetica, sans-serif;
+    line-height: 1.09;
+  }
+
+   h3.subheader {
+    font: bold 28px Helvetica, sans-serif;
+    line-height: 1.09;
+  }
+
+   h3.subheader > .link {
+      padding: 3px 0 0 5px;
+    }
+
+   h2.subheader {
+    font: bold 38px Helvetica, sans-serif;
+    line-height: 1.05;
+  }
+
+   h2.subheader > .link {
+      padding: 0 0 0 5px;
+    }
+
+   .subheader:hover .link {
+      opacity: 1;
+    }
+
+   .subheader .link {
+    opacity: 0;
+    padding: 2px 0 0 5px;
+    position: absolute;
+    -webkit-transition: opacity 150ms ease;
+    transition: opacity 150ms ease;
+  }

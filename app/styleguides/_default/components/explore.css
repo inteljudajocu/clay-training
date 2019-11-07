@@ -1,0 +1,43 @@
+$divider_color: #767676;
+
+.explore-recipe-single{
+    width: 20%;
+    margin-top: 0%;
+    margin-bottom: 0%;
+}
+
+h2{
+    margin-bottom: 0%;
+}
+
+ul{
+    list-style-type: none;
+}
+
+.explore-recipe-single > h5,h6{
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.explore-image{
+    width: 300%;
+    height: 100%;
+}
+
+.explore-score{
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.explore-recipe-mul{
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.explore-recipe {
+    border-top: 1px solid $divider_color;
+    margin: 0 0 20px;
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+  }

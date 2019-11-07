@@ -1,0 +1,327 @@
+/*
+  Explicitly using a class name which does not match the component name as a class name just called `image`
+  could have dangerous cascading issues.  This will give some safety around accidentally influencing
+  incorrect styles.
+ */
+
+.image-cmpt {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  margin: 40px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.image-cmpt .image-link {
+    color: #000;
+    display: block;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+
+.image-cmpt.inset {
+    float: left;
+    margin: 0 40px 0 -100px;
+    width: 330px;
+  }
+
+.image-cmpt.break-out {
+    width: 900px;
+  }
+
+.image-cmpt.square.inline .image-cmpt-figcaption, .image-cmpt.square.break-out .image-cmpt-figcaption, .image-cmpt.deep-vertical.inline .image-cmpt-figcaption, .image-cmpt.deep-vertical.break-out .image-cmpt-figcaption, .image-cmpt.vertical.inline .image-cmpt-figcaption, .image-cmpt.vertical.break-out .image-cmpt-figcaption {
+      -webkit-align-self: flex-end;
+          -ms-flex-item-align: end;
+              align-self: flex-end;
+      margin-left: 20px;
+      max-width: 120px;
+      word-break: break-word;
+    }
+
+.image-cmpt.horizontal {
+    margin: 0 0 40px -100px;
+  }
+
+.image-cmpt.horizontal.inset {
+      margin: 0 40px 0 -100px;
+    }
+
+@media screen and (max-width: 1179.9px) {
+    .image-cmpt.inset {
+      margin: 0 40px 0 -60px;
+    }
+
+    .image-cmpt.horizontal {
+      margin: 40px 0 40px -60px;
+    }
+
+    .image-cmpt.horizontal.inset {
+      margin: 0 40px 0 -60px;
+    }
+
+    .image-cmpt.flex.break-out {
+      margin: 0 0 40px -60px;
+    }
+
+    .image-cmpt.break-out {
+      width: 700px;
+    }
+  }
+
+@media screen and (max-width: 767.9px) {
+
+.image-cmpt {
+    margin: 24px 0
+}
+
+    .image-cmpt.inset {
+      float: none;
+      margin: 24px 0; /* this is twice defined so that the precedence works with the table definition of this class */
+      width: 100%;
+    }
+
+    .image-cmpt.horizontal {
+      margin: 24px 0;
+    }
+
+    .image-cmpt.horizontal.inset {
+      margin: 24px 0;
+    }
+
+    .image-cmpt.flex.break-out {
+      margin: 0;
+    }
+
+    .image-cmpt.break-out {
+      width: 100%;
+    }
+
+    .image-cmpt.square.inline .image-cmpt-figcaption,
+    .image-cmpt.square.break-out .image-cmpt-figcaption,
+    .image-cmpt.deep-vertical.inline .image-cmpt-figcaption,
+    .image-cmpt.deep-vertical.break-out .image-cmpt-figcaption,
+    .image-cmpt.vertical.inline .image-cmpt-figcaption,
+    .image-cmpt.vertical.break-out .image-cmpt-figcaption {
+      margin: 6px 0 0;
+      max-width: 100%;
+    }
+  }
+
+.image-cmpt .image-container .img-figure:before {
+    content: '';
+    display: block;
+  }
+
+.image-cmpt .image-container .img-data {
+    display: block;
+    width: 100%;
+  }
+
+.image-cmpt .image-container.bordered .img-data {
+    border: 1px solid #bdbdbd;
+  }
+
+.image-cmpt .image-container.flex {
+    width: 50%;
+    height: 50%;
+  }
+
+.image-cmpt .image-container.flex .img-figure {
+      position: unset;
+    }
+
+.image-cmpt .image-container.flex .image-wrapper {
+      position: unset;
+    }
+
+.image-cmpt .image-container.horizontal {
+    padding-bottom: calc((467/700) * (100% - 0px));
+    width: calc(100% - 0px);
+  }
+
+.image-cmpt .image-container.horizontal.inset {
+    padding-bottom: calc((467/700) * 100%);
+    width: 100%;
+  }
+
+.image-cmpt .image-container.horizontal .img-figure {
+    width: calc(50% - 0px);
+  }
+
+.image-cmpt .image-container.horizontal .img-figure:before {
+      padding-top: calc(((4/6)) * 100%);
+    }
+
+.image-cmpt .image-container.horizontal.inset .img-figure {
+    width: 50%;
+    height: 50%;
+    position:left;
+  }
+
+.image-cmpt .image-container.square {
+    padding-bottom: calc((460/460) * (100% - 140px));
+    width: calc(100% - 140px);
+  }
+
+.image-cmpt .image-container.square.inset {
+    padding-bottom: calc((460/460) * 100%);
+    width: 100%;
+  }
+
+.image-cmpt .image-container.square .img-figure {
+    width: calc(50% - 140px);
+  }
+
+.image-cmpt .image-container.square .img-figure:before {
+      padding-top: calc(((1/1)) * 100%);
+    }
+
+.image-cmpt .image-container.square.inset .img-figure {
+    width: 50%;
+    height: 50%;
+    position:left;
+  }
+
+.image-cmpt .image-container.vertical {
+    padding-bottom: calc((575/460) * (100% - 140px));
+    width: calc(100% - 140px);
+  }
+
+.image-cmpt .image-container.vertical.inset {
+    padding-bottom: calc((575/460) * 100%);
+    width: 100%;
+  }
+
+.image-cmpt .image-container.vertical .img-figure {
+    width: calc(50% - 140px);
+  }
+
+.image-cmpt .image-container.vertical .img-figure:before {
+      padding-top: calc(((5/4)) * 100%);
+    }
+
+.image-cmpt .image-container.vertical.inset .img-figure {
+    width: 50%;
+    height: 50%;
+    position:left;
+  }
+
+.image-cmpt .image-container.deep-vertical {
+    padding-bottom: calc((690/460) * (100% - 140px));
+    width: calc(100% - 140px);
+  }
+
+.image-cmpt .image-container.deep-vertical.inset {
+    padding-bottom: calc((690/460) * 100%);
+    width: 100%;
+  }
+
+.image-cmpt .image-container.deep-vertical .img-figure {
+    width: calc(50% - 140px);
+  }
+
+.image-cmpt .image-container.deep-vertical .img-figure:before {
+      padding-top: calc(((6/4)) * 100%);
+    }
+
+.image-cmpt .image-container.deep-vertical.inset .img-figure {
+    width: 50%;
+    height: 50%;
+    position:left;
+  }
+
+@media screen and (max-width: 767.9px) {
+    .image-cmpt .image-container.horizontal {
+    padding-bottom: calc((223/335) * (100% - 0px));
+    width: calc(100% - 0px);
+  }
+    .image-cmpt .image-container.horizontal.inset {
+    padding-bottom: calc((223/335) * 100%);
+    width: 100%;
+  }
+    .image-cmpt .image-container.horizontal .img-figure {
+    width: calc(50% - 0px);
+  }
+
+    .image-cmpt .image-container.horizontal .img-figure:before {
+      padding-top: calc(((4/6)) * 100%);
+    }
+    .image-cmpt .image-container.horizontal.inset .img-figure {
+    width: 50%;
+    height: 50%;
+    position:left;
+  }
+    .image-cmpt .image-container.square {
+    padding-bottom: calc((335/335) * (100% - 0px));
+    width: calc(100% - 0px);
+  }
+    .image-cmpt .image-container.square.inset {
+    padding-bottom: calc((335/335) * 100%);
+    width: 100%;
+  }
+    .image-cmpt .image-container.square .img-figure {
+    width: calc(50% - 0px);
+  }
+
+    .image-cmpt .image-container.square .img-figure:before {
+      padding-top: calc(((1/1)) * 100%);
+    }
+    .image-cmpt .image-container.square.inset .img-figure {
+    width: 50%;
+    height: 50%;
+    position:left;
+  }
+    .image-cmpt .image-container.vertical {
+    padding-bottom: calc((419/335) * (100% - 0px));
+    width: calc(100% - 0px);
+  }
+    .image-cmpt .image-container.vertical.inset {
+    padding-bottom: calc((419/335) * 100%);
+    width: 100%;
+  }
+    .image-cmpt .image-container.vertical .img-figure {
+    width: calc(50% - 0px);
+  }
+
+    .image-cmpt .image-container.vertical .img-figure:before {
+      padding-top: calc(((5/4)) * 100%);
+    }
+    .image-cmpt .image-container.vertical.inset .img-figure {
+    width: 50%;
+    height: 50%;
+    position:left;
+  }
+    .image-cmpt .image-container.deep-vertical {
+    padding-bottom: calc((502/335) * (100% - 0px));
+    width: calc(100% - 0px);
+  }
+    .image-cmpt .image-container.deep-vertical.inset {
+    padding-bottom: calc((502/335) * 100%);
+    width: 100%;
+  }
+    .image-cmpt .image-container.deep-vertical .img-figure {
+    width: calc(50% - 0px);
+  }
+
+    .image-cmpt .image-container.deep-vertical .img-figure:before {
+      padding-top: calc(((6/4)) * 100%);
+    }
+    .image-cmpt .image-container.deep-vertical.inset .img-figure {
+    width: 50%;
+    height: 50%;
+    position:left;
+  }
+  }

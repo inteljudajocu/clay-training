@@ -1,0 +1,73 @@
+description: |
+  In Article Single Image
+
+title:
+  _label: Recipe title
+  _has:
+    input: text
+
+author:
+  _label: author
+  _has:
+    input: text
+
+recipeD:
+  _label: Recipe description
+  _has:
+    input: text
+
+reviews:
+  _label: quantity of reviews
+  _has:
+    input: range
+    min: 0
+    max: 10000
+
+photos:
+  _label: quantity of photos
+  _has:
+    input: range
+    min: 0
+    max: 10000
+
+madeit:
+  _label: quantity of people that have made it
+  _has:
+    input: range
+    min: 0
+    max: 10000
+
+imageUrl:
+  _label: URL
+  _has:
+    input: text
+    type: url
+    validate:
+      required: true
+    help: Must be an image URL
+# clickUrl:
+#   _label: Click URL
+#   _has:
+#     input: text
+#     type: url
+#     help: If the image should be hyperlinked, add that URL here
+# imageAlt:
+#   _label: Alt Text
+#   _has:
+#     input: text
+#     help: Alternative text for screen readers
+
+_groups:
+  settings:
+    fields:
+      - title
+      - author
+      - recipeD
+      - reviews
+      - photos
+      - madeit
+      - imageUrl (Image)
+    _placeholder:
+      text: New Recipe
+      height: 250px
+      ifEmpty: imageUrl

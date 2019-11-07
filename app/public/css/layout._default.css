@@ -1,0 +1,143 @@
+/* Fonts */
+
+/* Colors */
+
+/* Wrapper */
+
+html {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  min-height: 100%;
+  min-width: 320px;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+     -moz-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+          text-size-adjust: 100%;
+  width: 100%;
+}
+
+*,
+:after,
+:before {
+  -webkit-box-sizing: inherit;
+          box-sizing: inherit;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizelegibility;
+}
+
+::-moz-selection {
+  background-color: #e7e7e7;
+}
+
+::selection {
+  background-color: #e7e7e7;
+}
+
+.layout a:focus,
+.layout button:focus,
+.layout input:focus,
+.layout select:focus,
+.layout textarea:focus {
+  outline: dotted 1px;
+}
+
+.layout .kiln-field button:focus,
+.layout .kiln-field input:focus,
+.layout .kiln-field select:focus,
+.layout .kiln-field textarea:focus,
+.layout .kiln-wrapper button:focus,
+.layout .kiln-wrapper input:focus,
+.layout .kiln-wrapper select:focus,
+.layout .kiln-wrapper textarea:focus {
+  outline: 0;
+}
+
+.layout {
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.layout > .page-header,
+  .layout > .wrapper,
+  .layout > .bottom {
+    margin: auto;
+  }
+
+.layout > .page-header,
+  .layout > .top {
+    margin: 20px auto;
+  }
+
+.layout > .bottom {
+    width: 100vw;
+  }
+
+.layout > .wrapper {
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 10px;
+    padding-left: 10px;
+    width: 100%;
+  }
+
+@media screen and (max-width: 767.9px) {
+    .layout > .bottom,
+    .layout > .wrapper {
+      padding: 0 20px;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1179.9px) {
+    .layout > .wrapper,
+    .layout > .bottom {
+      padding: 0 7vw;
+    }
+
+    .layout > .top {
+      margin: 20px 50px;
+    }
+
+    .layout > .secondary > *:not(.ad) {
+      margin: 0 7vw;
+    }
+    .layout > .wrapper {
+      min-width: 600px;
+    }
+}
+
+@media screen and (min-width: 1180px) {
+    .layout > .bottom {
+      width: 1180px;
+    }
+
+    .layout > .bottom,
+    .layout > .page-header,
+    .layout > .top,
+    .layout > .wrapper {
+      margin: 0 auto;
+    }
+
+    .layout > .wrapper {
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+          -ms-flex-align: center;
+              align-items: center;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+          -ms-flex-pack: center;
+              justify-content: center;
+      max-width: 600px;
+    }
+
+    .layout.kiln-edit-mode .wrapper > .main {
+      width: 100%;
+    }
+}

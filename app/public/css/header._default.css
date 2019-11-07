@@ -1,0 +1,87 @@
+/* Fonts */
+
+/* Colors */
+
+/* Wrapper */
+
+header.header {
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+header.header .header-inner {
+    text-align: center;
+  }
+
+header.header .header__logo-link:focus {
+    outline: none;
+  }
+
+@media screen and (min-width: 1180px) {
+
+header.header {
+    margin: 27px auto 20px;
+    max-width: 600px
+}
+  }
+
+.header__tagline {
+  font-family: Grotesk, sans-serif;
+  margin: 15px 0;
+}
+
+.header__logo-link,
+.header__title-logo{
+  display: inline-block;
+}
+
+.header__logo-link svg, .header__logo-link .header__logo, .header__title-logo svg, .header__title-logo .header__logo {
+    max-width: 100%;
+    width: -webkit-max-content;
+    width: -moz-max-content;
+    width: max-content;
+  }
+
+.header__social-icons {
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.header__social-icons svg {
+    height: auto;
+    width: 26px;
+  }
+
+.header__social-icons .share-link {
+    margin-right: 20px;
+    position: relative;
+  }
+
+.header__social-icons .share-link span:last-child {
+      border: none;
+      clip: rect(0 0 0 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      width: 1px;
+    }
+
+.header__social-icons .share-link:last-child {
+    margin-right: 0;
+  }
+
+.header__social-icons .share-link:focus {
+    outline: none;
+  }

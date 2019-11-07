@@ -1,0 +1,36 @@
+$divider_color: #767676;
+
+.direclist{
+    
+}
+
+.prepa{
+    display: flex;
+    width: 30%;
+}
+
+.direction-vdivider{
+    border-right: outset black;
+    padding-right: 5%;
+    height: inherit;
+}
+
+ul{
+    list-style-type: decimal;
+}
+
+.prepa > h4{
+    text-align: center;
+    padding-top: 0px;
+    margin-right: 5%;
+}
+
+.prepa > .direcctions-nutrition{
+    text-align: right;
+}
+
+.direcctions-divider {
+    border-top: 1px solid $divider_color;
+    margin: 0 0 20px;
+    width: 100%;
+  }

@@ -1,0 +1,34 @@
+<div data-uri="{{ default _ref _self }}" data-editable="settings">
+  <h2>{{ title }}</h2>
+  <div class="direcctions-divider" >
+    <div class="prepa">
+      {{#if prep}}<h4 class="direction-vdivider">Prep: {{prep}}</h4>{{/if}}
+      {{#if cook}}<h4 class="direction-vdivider">Cook: {{cook}}</h4>{{/if}}
+      {{#if readytime}}<h4 >Estimated: {{readytime}}</h4>{{/if}}
+    </div>
+    <div class="direclist">
+      <ul>
+        {{#each items as |item|}}
+          {{#if item.direcctions}}<li><span>{{{ item.direcctions }}}</span></li>{{/if}}
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+  <div class="direcctions-divider">
+    <h2>{{ nutrition }}</h2>
+    <div class="direcctions-nutrition">
+      <p>{{ nutritiondetail }}<a href={{ nutritionlink }} > see details</a></p>
+      <button> <i></i>I made it!</button>
+    </div>
+  </div>
+  <div>
+    <h2>Share it</h2>
+    <div class="direcctions-divider">
+      <button>Pin</button>
+      <button>FB</button>
+      <button>Twtr</button>
+      <button>Email</button>
+    </div>
+  </div>
+</div>
+

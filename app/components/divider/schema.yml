@@ -1,0 +1,42 @@
+_description: |
+  A simple divider between other components. Can provide an optional title for the divider.
+
+title:
+  _label: Divider Title
+  _placeholder:
+    height: 20px
+    text: Divider Title
+  _has:
+    input: text
+
+time:
+  _label: Duration Title
+  _placeholder:
+    height: 20px
+    text: Duration
+  _has:
+    input: text
+
+servings:
+  _label: Servings Title
+  _placeholder:
+    height: 20px
+    text: Servings
+  _has:
+    input: text
+
+calories:
+  _label: Calories Title
+  _placeholder:
+    height: 20px
+    text: Calories
+  _has:
+    input: text
+
+_groups:
+  heardering:
+    fields:
+      - title
+      - time
+      - servings
+      - calories

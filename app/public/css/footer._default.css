@@ -1,0 +1,52 @@
+.footer .logo-wrapper {
+    margin: 0 auto 15px auto;
+    width: 112px;
+  }
+  .footer .follow-icons {
+    margin: 0 0 7px;
+    text-align: center;
+  }
+  .footer .links {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+    font: bold 14px / 39px GroteskNarrow, sans-serif;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  .footer .links a {
+      margin: 0 14px;
+      text-decoration: none;
+    }
+  .footer .links a:visited {
+      color: black;
+    }
+  .footer .copyright {
+    font: 500 9px / 25px Grotesk, sans-serif;
+    letter-spacing: 3px;
+    margin: 0 0 21px;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+@media screen and (min-width: 1180px) {
+    .footer .logo-wrapper {
+      margin: 0 auto 22px auto;
+    }
+
+    .footer .follow-icons {
+      margin: 0 0 40px;
+    }
+
+    .footer .links {
+      font: 19px GroteskNarrow, sans-serif;
+    }
+}
