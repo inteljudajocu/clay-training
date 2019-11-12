@@ -1,88 +1,19 @@
-window.modules["395"] = [function(require,module,exports){var hasOwnProperty = Object.prototype.hasOwnProperty;
-var walk = require(65).walk;
+window.modules["395"] = [function(require,module,exports){var walk = require(57).walkUp;
+var handlers = {
+    Atrule: require(388),
+    Rule: require(392),
+    Declaration: require(390),
+    TypeSelector: require(393),
+    Comment: require(389),
+    Operator: require(391),
+    WhiteSpace: require(394)
+};
 
-function cleanUnused(selectorList, usageData) {
-    selectorList.children.each(function(selector, item, list) {
-        var shouldRemove = false;
-
-        walk(selector, function(node) {
-            // ignore nodes in nested selectors
-            if (this.selector === null || this.selector === selectorList) {
-                switch (node.type) {
-                    case 'SelectorList':
-                        // TODO: remove toLowerCase when pseudo selectors will be normalized
-                        // ignore selectors inside :not()
-                        if (this['function'] === null || this['function'].name.toLowerCase() !== 'not') {
-                            if (cleanUnused(node, usageData)) {
-                                shouldRemove = true;
-                            }
-                        }
-                        break;
-
-                    case 'ClassSelector':
-                        if (usageData.whitelist !== null &&
-                            usageData.whitelist.classes !== null &&
-                            !hasOwnProperty.call(usageData.whitelist.classes, node.name)) {
-                            shouldRemove = true;
-                        }
-                        if (usageData.blacklist !== null &&
-                            usageData.blacklist.classes !== null &&
-                            hasOwnProperty.call(usageData.blacklist.classes, node.name)) {
-                            shouldRemove = true;
-                        }
-                        break;
-
-                    case 'IdSelector':
-                        if (usageData.whitelist !== null &&
-                            usageData.whitelist.ids !== null &&
-                            !hasOwnProperty.call(usageData.whitelist.ids, node.name)) {
-                            shouldRemove = true;
-                        }
-                        if (usageData.blacklist !== null &&
-                            usageData.blacklist.ids !== null &&
-                            hasOwnProperty.call(usageData.blacklist.ids, node.name)) {
-                            shouldRemove = true;
-                        }
-                        break;
-
-                    case 'TypeSelector':
-                        // TODO: remove toLowerCase when type selectors will be normalized
-                        // ignore universal selectors
-                        if (node.name.charAt(node.name.length - 1) !== '*') {
-                            if (usageData.whitelist !== null &&
-                                usageData.whitelist.tags !== null &&
-                                !hasOwnProperty.call(usageData.whitelist.tags, node.name.toLowerCase())) {
-                                shouldRemove = true;
-                            }
-                            if (usageData.blacklist !== null &&
-                                usageData.blacklist.tags !== null &&
-                                hasOwnProperty.call(usageData.blacklist.tags, node.name.toLowerCase())) {
-                                shouldRemove = true;
-                            }
-                        }
-                        break;
-                }
-            }
-        });
-
-        if (shouldRemove) {
-            list.remove(item);
+module.exports = function(ast, options) {
+    walk(ast, function(node, item, list) {
+        if (handlers.hasOwnProperty(node.type)) {
+            handlers[node.type].call(this, node, item, list, options);
         }
     });
-
-    return selectorList.children.isEmpty();
-}
-
-module.exports = function cleanRuleset(node, item, list, options) {
-    var usageData = options.usage;
-
-    if (usageData && (usageData.whitelist !== null || usageData.blacklist !== null)) {
-        cleanUnused(node.prelude, usageData);
-    }
-
-    if (node.prelude.children.isEmpty() ||
-        node.block.children.isEmpty()) {
-        list.remove(item);
-    }
 };
-}, {"65":65}];
+}, {"57":57,"388":388,"389":389,"390":390,"391":391,"392":392,"393":393,"394":394}];

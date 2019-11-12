@@ -1,6 +1,8 @@
-window.modules["607"] = [function(require,module,exports){var splice = require(606);
+window.modules["607"] = [function(require,module,exports){var isBlank = require(632);
+var trim = require(573);
 
-module.exports = function insert(str, i, substr) {
-  return splice(str, i, 0, substr);
+module.exports = function words(str, delimiter) {
+  if (isBlank(str)) return [];
+  return trim(str, delimiter).split(delimiter || /\s+/);
 };
-}, {"606":606}];
+}, {"573":573,"632":632}];

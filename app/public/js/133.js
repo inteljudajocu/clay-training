@@ -1,48 +1,62 @@
-window.modules["133"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+window.modules["133"] = [function(require,module,exports){var endsWith = require(75).endsWith;
+var TYPE = require(75).TYPE;
 
-var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+var WHITESPACE = TYPE.WhiteSpace;
+var COMMENT = TYPE.Comment;
+var FUNCTION = TYPE.Function;
+var COLON = TYPE.Colon;
+var SEMICOLON = TYPE.Semicolon;
+var EXCLAMATIONMARK = TYPE.ExclamationMark;
 
-function consumeRaw(startToken) {
-    return this.Raw(startToken, LEFTCURLYBRACKET, 0, false, true);
+// 'progid:' ws* 'DXImageTransform.Microsoft.' ident ws* '(' .* ')'
+function checkProgid(scanner) {
+    var offset = 0;
+
+    for (var type; type = scanner.lookupType(offset); offset++) {
+        if (type !== WHITESPACE && type !== COMMENT) {
+            break;
+        }
+    }
+
+    if (scanner.lookupValue(offset, 'alpha(') ||
+        scanner.lookupValue(offset, 'chroma(') ||
+        scanner.lookupValue(offset, 'dropshadow(')) {
+        if (scanner.lookupType(offset) !== FUNCTION) {
+            return false;
+        }
+    } else {
+        if (scanner.lookupValue(offset, 'progid') === false ||
+            scanner.lookupType(offset + 1) !== COLON) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 module.exports = {
-    name: 'Rule',
+    name: 'Value',
     structure: {
-        prelude: ['SelectorList', 'Raw'],
-        block: ['Block']
+        children: [[]]
     },
-    parse: function() {
-        var startToken = this.scanner.currentToken;
-        var startOffset = this.scanner.tokenStart;
-        var prelude;
-        var block;
-
-        if (this.parseRulePrelude) {
-            prelude = this.tolerantParse(this.SelectorList, consumeRaw);
-
-            if (this.tolerant && !this.scanner.eof) {
-                if (prelude.type !== 'Raw' && this.scanner.tokenType !== LEFTCURLYBRACKET) {
-                    prelude = consumeRaw.call(this, startToken);
-                }
-            }
-        } else {
-            prelude = consumeRaw.call(this, startToken);
+    parse: function(property) {
+        // special parser for filter property since it can contains non-standart syntax for old IE
+        if (property !== null && endsWith(property, 'filter') && checkProgid(this.scanner)) {
+            this.scanner.skipSC();
+            return this.Raw(this.scanner.currentToken, EXCLAMATIONMARK, SEMICOLON, false, false);
         }
 
-        block = this.Block(true);
+        var start = this.scanner.tokenStart;
+        var children = this.readSequence(this.scope.Value);
 
         return {
-            type: 'Rule',
-            loc: this.getLocation(startOffset, this.scanner.tokenStart),
-            prelude: prelude,
-            block: block
+            type: 'Value',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            children: children
         };
     },
     generate: function(processChunk, node) {
-        this.generate(processChunk, node.prelude);
-        this.generate(processChunk, node.block);
-    },
-    walkContext: 'rule'
+        this.each(processChunk, node);
+    }
 };
-}, {"82":82}];
+}, {"75":75}];

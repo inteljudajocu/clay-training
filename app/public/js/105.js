@@ -1,41 +1,36 @@
-window.modules["105"] = [function(require,module,exports){var List = require(61);
+window.modules["105"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
+var ASTERISK = TYPE.Asterisk;
+var SOLIDUS = TYPE.Solidus;
+
+// '/*' .* '*/'
 module.exports = {
-    name: 'AtrulePrelude',
+    name: 'Comment',
     structure: {
-        children: [[]]
+        value: String
     },
-    parse: function(name) {
-        var children = null;
+    parse: function() {
+        var start = this.scanner.tokenStart;
+        var end = this.scanner.tokenEnd;
 
-        if (name !== null) {
-            name = name.toLowerCase();
+        if ((end - start + 2) >= 2 &&
+            this.scanner.source.charCodeAt(end - 2) === ASTERISK &&
+            this.scanner.source.charCodeAt(end - 1) === SOLIDUS) {
+            end -= 2;
         }
 
-        if (this.atrule.hasOwnProperty(name)) {
-            // custom consumer
-            if (typeof this.atrule[name].prelude === 'function') {
-                children = this.atrule[name].prelude.call(this);
-            }
-        } else {
-            // default consumer
-            this.scanner.skipSC();
-            children = this.readSequence(this.scope.AtrulePrelude);
-        }
-
-        if (children === null) {
-            children = new List();
-        }
+        this.scanner.next();
 
         return {
-            type: 'AtrulePrelude',
-            loc: this.getLocationFromList(children),
-            children: children
+            type: 'Comment',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            value: this.scanner.source.substring(start + 2, end)
         };
     },
     generate: function(processChunk, node) {
-        this.each(processChunk, node);
-    },
-    walkContext: 'atrulePrelude'
+        processChunk('/*');
+        processChunk(node.value);
+        processChunk('*/');
+    }
 };
-}, {"61":61}];
+}, {"75":75}];

@@ -1,34 +1,32 @@
-window.modules["410"] = [function(require,module,exports){var UNICODE = '\\\\[0-9a-f]{1,6}(\\r\\n|[ \\n\\r\\t\\f])?';
-var ESCAPE = '(' + UNICODE + '|\\\\[^\\n\\r\\f0-9a-fA-F])';
-var NONPRINTABLE = '\u0000\u0008\u000b\u000e-\u001f\u007f';
-var SAFE_URL = new RegExp('^(' + ESCAPE + '|[^\"\'\\(\\)\\\\\\s' + NONPRINTABLE + '])*$', 'i');
+window.modules["410"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
+    var prev = item.prev;
+    var next = item.next;
 
-module.exports = function(node) {
-    var value = node.value;
-
-    if (value.type !== 'String') {
-        return;
+    if (next !== null) {
+        if (next.data.type === 'WhiteSpace' && (prev === null || prev.data.type === 'WhiteSpace')) {
+            list.remove(next);
+        }
+    } else if (prev !== null && prev.data.type === 'WhiteSpace') {
+        list.remove(prev);
     }
 
-    var quote = value.value[0];
-    var url = value.value.substr(1, value.value.length - 2);
+    list.remove(item);
+}
 
-    // convert `\\` to `/`
-    url = url.replace(/\\\\/g, '/');
-
-    // remove quotes when safe
-    // https://www.w3.org/TR/css-syntax-3/#url-unquoted-diagram
-    if (SAFE_URL.test(url)) {
-        node.value = {
-            type: 'Raw',
-            loc: node.value.loc,
-            value: url
-        };
-    } else {
-        // use double quotes if string has no double quotes
-        // otherwise use original quotes
-        // TODO: make better quote type selection
-        node.value.value = url.indexOf('"') === -1 ? '"' + url + '"' : quote + url + quote;
-    }
+module.exports = function compressBorder(node) {
+    node.children.each(function(node, item, list) {
+        if (node.type === 'Identifier' && node.name.toLowerCase() === 'none') {
+            if (list.head === list.tail) {
+                // replace `none` for zero when `none` is a single term
+                item.data = {
+                    type: 'Number',
+                    loc: node.loc,
+                    value: '0'
+                };
+            } else {
+                removeItemAndRedundantWhiteSpace(list, item);
+            }
+        }
+    });
 };
 }, {}];

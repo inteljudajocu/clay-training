@@ -1,40 +1,38 @@
-window.modules["365"] = [function(require,module,exports){var castPath = require(296),
-    isArguments = require(274),
-    isArray = require(273),
-    isIndex = require(276),
-    isLength = require(319),
-    toKey = require(295);
+window.modules["365"] = [function(require,module,exports){/** Used to detect hot functions by number of calls within a span of milliseconds. */
+var HOT_COUNT = 800,
+    HOT_SPAN = 16;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeNow = Date.now;
 
 /**
- * Checks if `path` exists on `object`.
+ * Creates a function that'll short out and invoke `identity` instead
+ * of `func` when it's called `HOT_COUNT` or more times in `HOT_SPAN`
+ * milliseconds.
  *
  * @private
- * @param {Object} object The object to query.
- * @param {Array|string} path The path to check.
- * @param {Function} hasFunc The function to check properties.
- * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ * @param {Function} func The function to restrict.
+ * @returns {Function} Returns the new shortable function.
  */
-function hasPath(object, path, hasFunc) {
-  path = castPath(path, object);
+function shortOut(func) {
+  var count = 0,
+      lastCalled = 0;
 
-  var index = -1,
-      length = path.length,
-      result = false;
+  return function() {
+    var stamp = nativeNow(),
+        remaining = HOT_SPAN - (stamp - lastCalled);
 
-  while (++index < length) {
-    var key = toKey(path[index]);
-    if (!(result = object != null && hasFunc(object, key))) {
-      break;
+    lastCalled = stamp;
+    if (remaining > 0) {
+      if (++count >= HOT_COUNT) {
+        return arguments[0];
+      }
+    } else {
+      count = 0;
     }
-    object = object[key];
-  }
-  if (result || ++index != length) {
-    return result;
-  }
-  length = object == null ? 0 : object.length;
-  return !!length && isLength(length) && isIndex(key, length) &&
-    (isArray(object) || isArguments(object));
+    return func.apply(undefined, arguments);
+  };
 }
 
-module.exports = hasPath;
-}, {"273":273,"274":274,"276":276,"295":295,"296":296,"319":319}];
+module.exports = shortOut;
+}, {}];

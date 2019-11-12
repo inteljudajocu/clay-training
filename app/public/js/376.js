@@ -1,63 +1,67 @@
-window.modules["376"] = [function(require,module,exports){var baseGetTag = require(298),
-    getPrototype = require(362),
-    isObjectLike = require(306);
+window.modules["376"] = [function(require,module,exports){var isObject = require(12),
+    isSymbol = require(339);
 
-/** `Object#toString` result references. */
-var objectTag = '[object Object]';
+/** Used as references for various `Number` constants. */
+var NAN = 0 / 0;
 
-/** Used for built-in method references. */
-var funcProto = Function.prototype,
-    objectProto = Object.prototype;
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
 
-/** Used to resolve the decompiled source of functions. */
-var funcToString = funcProto.toString;
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
 
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
 
-/** Used to infer the `Object` constructor. */
-var objectCtorString = funcToString.call(Object);
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
 
 /**
- * Checks if `value` is a plain object, that is, an object created by the
- * `Object` constructor or one with a `[[Prototype]]` of `null`.
+ * Converts `value` to a number.
  *
  * @static
  * @memberOf _
- * @since 0.8.0
+ * @since 4.0.0
  * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
  * @example
  *
- * function Foo() {
- *   this.a = 1;
- * }
+ * _.toNumber(3.2);
+ * // => 3.2
  *
- * _.isPlainObject(new Foo);
- * // => false
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
  *
- * _.isPlainObject([1, 2, 3]);
- * // => false
+ * _.toNumber(Infinity);
+ * // => Infinity
  *
- * _.isPlainObject({ 'x': 0, 'y': 0 });
- * // => true
- *
- * _.isPlainObject(Object.create(null));
- * // => true
+ * _.toNumber('3.2');
+ * // => 3.2
  */
-function isPlainObject(value) {
-  if (!isObjectLike(value) || baseGetTag(value) != objectTag) {
-    return false;
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
   }
-  var proto = getPrototype(value);
-  if (proto === null) {
-    return true;
+  if (isSymbol(value)) {
+    return NAN;
   }
-  var Ctor = hasOwnProperty.call(proto, 'constructor') && proto.constructor;
-  return typeof Ctor == 'function' && Ctor instanceof Ctor &&
-    funcToString.call(Ctor) == objectCtorString;
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
 }
 
-module.exports = isPlainObject;
-}, {"298":298,"306":306,"362":362}];
+module.exports = toNumber;
+}, {"12":12,"339":339}];

@@ -1,33 +1,46 @@
-window.modules["108"] = [function(require,module,exports){var TYPE = require(82).TYPE;
-var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
-var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
+window.modules["108"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
 
-// currently only Grid Layout uses square brackets, but left it universal
-// https://drafts.csswg.org/css-grid/#track-sizing
-// [ ident* ]
+// special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
+function readUnit(scanner) {
+    var unit = scanner.getTokenValue();
+    var backSlashPos = unit.indexOf('\\');
+
+    if (backSlashPos > 0) {
+        // patch token offset
+        scanner.tokenStart += backSlashPos;
+
+        // return part before backslash
+        return unit.substring(0, backSlashPos);
+    }
+
+    // no backslash in unit name
+    scanner.next();
+
+    return unit;
+}
+
+// number ident
 module.exports = {
-    name: 'Brackets',
+    name: 'Dimension',
     structure: {
-        children: [[]]
+        value: String,
+        unit: String
     },
-    parse: function(readSequence, recognizer) {
+    parse: function() {
         var start = this.scanner.tokenStart;
-        var children = null;
-
-        this.scanner.eat(LEFTSQUAREBRACKET);
-        children = readSequence.call(this, recognizer);
-        this.scanner.eat(RIGHTSQUAREBRACKET);
+        var value = this.scanner.consume(NUMBER);
+        var unit = readUnit(this.scanner);
 
         return {
-            type: 'Brackets',
+            type: 'Dimension',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            children: children
+            value: value,
+            unit: unit
         };
     },
     generate: function(processChunk, node) {
-        processChunk('[');
-        this.each(processChunk, node);
-        processChunk(']');
+        processChunk(node.value);
+        processChunk(node.unit);
     }
 };
-}, {"82":82}];
+}, {"75":75}];

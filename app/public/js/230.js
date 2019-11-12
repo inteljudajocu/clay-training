@@ -1,28 +1,10 @@
-window.modules["230"] = [function(require,module,exports){module.exports = ProxyHandler;
+window.modules["230"] = [function(require,module,exports){var freeGlobal = require(352);
 
-function ProxyHandler(cbs) {
-    this._cbs = cbs || {};
-}
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
-var EVENTS = require(221).EVENTS;
-Object.keys(EVENTS).forEach(function(name) {
-    if (EVENTS[name] === 0) {
-        name = "on" + name;
-        ProxyHandler.prototype[name] = function() {
-            if (this._cbs[name]) this._cbs[name]();
-        };
-    } else if (EVENTS[name] === 1) {
-        name = "on" + name;
-        ProxyHandler.prototype[name] = function(a) {
-            if (this._cbs[name]) this._cbs[name](a);
-        };
-    } else if (EVENTS[name] === 2) {
-        name = "on" + name;
-        ProxyHandler.prototype[name] = function(a, b) {
-            if (this._cbs[name]) this._cbs[name](a, b);
-        };
-    } else {
-        throw Error("wrong number of arguments");
-    }
-});
-}, {"221":221}];
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+module.exports = root;
+}, {"352":352}];

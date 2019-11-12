@@ -1,66 +1,15 @@
-window.modules["391"] = [function(require,module,exports){var resolveKeyword = require(65).keyword;
-
-module.exports = function cleanAtrule(node, item, list) {
-    if (node.block) {
-        // otherwise removed at-rule don't prevent @import for removal
-        if (this.stylesheet !== null) {
-            this.stylesheet.firstAtrulesAllowed = false;
-        }
-
-        if (node.block.children.isEmpty()) {
-            list.remove(item);
-            return;
-        }
+window.modules["391"] = [function(require,module,exports){// remove white spaces around operators when safe
+module.exports = function cleanWhitespace(node, item, list) {
+    if (node.value === '+' || node.value === '-') {
+        return;
     }
 
-    switch (node.name) {
-        case 'charset':
-            if (!node.prelude || node.prelude.children.isEmpty()) {
-                list.remove(item);
-                return;
-            }
+    if (item.prev !== null && item.prev.data.type === 'WhiteSpace') {
+        list.remove(item.prev);
+    }
 
-            // if there is any rule before @charset -> remove it
-            if (item.prev) {
-                list.remove(item);
-                return;
-            }
-
-            break;
-
-        case 'import':
-            if (this.stylesheet === null || !this.stylesheet.firstAtrulesAllowed) {
-                list.remove(item);
-                return;
-            }
-
-            // if there are some rules that not an @import or @charset before @import
-            // remove it
-            list.prevUntil(item.prev, function(rule) {
-                if (rule.type === 'Atrule') {
-                    if (rule.name === 'import' || rule.name === 'charset') {
-                        return;
-                    }
-                }
-
-                this.root.firstAtrulesAllowed = false;
-                list.remove(item);
-                return true;
-            }, this);
-
-            break;
-
-        default:
-            var keyword = resolveKeyword(node.name);
-            if (keyword.name === 'keyframes' ||
-                keyword.name === 'media' ||
-                keyword.name === 'supports') {
-
-                // drop at-rule with no prelude
-                if (!node.prelude || node.prelude.children.isEmpty()) {
-                    list.remove(item);
-                }
-            }
+    if (item.next !== null && item.next.data.type === 'WhiteSpace') {
+        list.remove(item.next);
     }
 };
-}, {"65":65}];
+}, {}];

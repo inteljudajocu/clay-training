@@ -1,17 +1,23 @@
-window.modules["247"] = [function(require,module,exports){var assocIndexOf = require(285);
+window.modules["247"] = [function(require,module,exports){var getMapData = require(354);
 
 /**
- * Checks if a list cache value for `key` exists.
+ * Sets the map `key` to `value`.
  *
  * @private
- * @name has
- * @memberOf ListCache
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ * @name set
+ * @memberOf MapCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the map cache instance.
  */
-function listCacheHas(key) {
-  return assocIndexOf(this.__data__, key) > -1;
+function mapCacheSet(key, value) {
+  var data = getMapData(this, key),
+      size = data.size;
+
+  data.set(key, value);
+  this.size += data.size == size ? 0 : 1;
+  return this;
 }
 
-module.exports = listCacheHas;
-}, {"285":285}];
+module.exports = mapCacheSet;
+}, {"354":354}];

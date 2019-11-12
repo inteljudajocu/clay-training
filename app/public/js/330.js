@@ -1,21 +1,15 @@
 window.modules["330"] = [function(require,module,exports){/**
- * A specialized version of `matchesProperty` for source values suitable
- * for strict equality comparisons, i.e. `===`.
+ * The base implementation of `_.property` without support for deep paths.
  *
  * @private
  * @param {string} key The key of the property to get.
- * @param {*} srcValue The value to match.
- * @returns {Function} Returns the new spec function.
+ * @returns {Function} Returns the new accessor function.
  */
-function matchesStrictComparable(key, srcValue) {
+function baseProperty(key) {
   return function(object) {
-    if (object == null) {
-      return false;
-    }
-    return object[key] === srcValue &&
-      (srcValue !== undefined || (key in Object(object)));
+    return object == null ? undefined : object[key];
   };
 }
 
-module.exports = matchesStrictComparable;
+module.exports = baseProperty;
 }, {}];

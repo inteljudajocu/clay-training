@@ -1,27 +1,21 @@
 window.modules["273"] = [function(require,module,exports){/**
- * Checks if `value` is classified as an `Array` object.
+ * The base implementation of `_.times` without support for iteratee shorthands
+ * or max array length checks.
  *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array, else `false`.
- * @example
- *
- * _.isArray([1, 2, 3]);
- * // => true
- *
- * _.isArray(document.body.children);
- * // => false
- *
- * _.isArray('abc');
- * // => false
- *
- * _.isArray(_.noop);
- * // => false
+ * @private
+ * @param {number} n The number of times to invoke `iteratee`.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the array of results.
  */
-var isArray = Array.isArray;
+function baseTimes(n, iteratee) {
+  var index = -1,
+      result = Array(n);
 
-module.exports = isArray;
+  while (++index < n) {
+    result[index] = iteratee(index);
+  }
+  return result;
+}
+
+module.exports = baseTimes;
 }, {}];

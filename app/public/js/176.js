@@ -1,26 +1,26 @@
-window.modules["176"] = [function(require,module,exports){var parse = require(16)
+window.modules["176"] = [function(require,module,exports){var startOfWeek = require(181)
 
 /**
- * @category Day Helpers
- * @summary Return the start of a day for the given date.
+ * @category ISO Week Helpers
+ * @summary Return the start of an ISO week for the given date.
  *
  * @description
- * Return the start of a day for the given date.
+ * Return the start of an ISO week for the given date.
  * The result will be in the local timezone.
  *
+ * ISO week-numbering year: http://en.wikipedia.org/wiki/ISO_week_date
+ *
  * @param {Date|String|Number} date - the original date
- * @returns {Date} the start of a day
+ * @returns {Date} the start of an ISO week
  *
  * @example
- * // The start of a day for 2 September 2014 11:55:00:
- * var result = startOfDay(new Date(2014, 8, 2, 11, 55, 0))
- * //=> Tue Sep 02 2014 00:00:00
+ * // The start of an ISO week for 2 September 2014 11:55:00:
+ * var result = startOfISOWeek(new Date(2014, 8, 2, 11, 55, 0))
+ * //=> Mon Sep 01 2014 00:00:00
  */
-function startOfDay (dirtyDate) {
-  var date = parse(dirtyDate)
-  date.setHours(0, 0, 0, 0)
-  return date
+function startOfISOWeek (dirtyDate) {
+  return startOfWeek(dirtyDate, {weekStartsOn: 1})
 }
 
-module.exports = startOfDay
-}, {"16":16}];
+module.exports = startOfISOWeek
+}, {"181":181}];

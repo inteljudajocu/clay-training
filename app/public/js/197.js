@@ -1,25 +1,83 @@
-window.modules["197"] = [function(require,module,exports){var getChildren = exports.getChildren = function(elem){
-	return elem.children;
-};
+window.modules["197"] = [function(require,module,exports){var inverseXML = getInverseObj(require(202)),
+    xmlReplacer = getInverseReplacer(inverseXML);
 
-var getParent = exports.getParent = function(elem){
-	return elem.parent;
-};
+exports.XML = getInverse(inverseXML, xmlReplacer);
 
-exports.getSiblings = function(elem){
-	var parent = getParent(elem);
-	return parent ? getChildren(parent) : [elem];
-};
+var inverseHTML = getInverseObj(require(200)),
+    htmlReplacer = getInverseReplacer(inverseHTML);
 
-exports.getAttributeValue = function(elem, name){
-	return elem.attribs && elem.attribs[name];
-};
+exports.HTML = getInverse(inverseHTML, htmlReplacer);
 
-exports.hasAttrib = function(elem, name){
-	return !!elem.attribs && hasOwnProperty.call(elem.attribs, name);
-};
+function getInverseObj(obj) {
+    return Object.keys(obj)
+        .sort()
+        .reduce(function(inverse, name) {
+            inverse[obj[name]] = "&" + name + ";";
+            return inverse;
+        }, {});
+}
 
-exports.getName = function(elem){
-	return elem.name;
-};
-}, {}];
+function getInverseReplacer(inverse) {
+    var single = [],
+        multiple = [];
+
+    Object.keys(inverse).forEach(function(k) {
+        if (k.length === 1) {
+            single.push("\\" + k);
+        } else {
+            multiple.push(k);
+        }
+    });
+
+    //TODO add ranges
+    multiple.unshift("[" + single.join("") + "]");
+
+    return new RegExp(multiple.join("|"), "g");
+}
+
+var re_nonASCII = /[^\0-\x7F]/g,
+    re_astralSymbols = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+
+function singleCharReplacer(c) {
+    return (
+        "&#x" +
+        c
+            .charCodeAt(0)
+            .toString(16)
+            .toUpperCase() +
+        ";"
+    );
+}
+
+function astralReplacer(c) {
+    // http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+    var high = c.charCodeAt(0);
+    var low = c.charCodeAt(1);
+    var codePoint = (high - 0xd800) * 0x400 + low - 0xdc00 + 0x10000;
+    return "&#x" + codePoint.toString(16).toUpperCase() + ";";
+}
+
+function getInverse(inverse, re) {
+    function func(name) {
+        return inverse[name];
+    }
+
+    return function(data) {
+        return data
+            .replace(re, func)
+            .replace(re_astralSymbols, astralReplacer)
+            .replace(re_nonASCII, singleCharReplacer);
+    };
+}
+
+var re_xmlChars = getInverseReplacer(inverseXML);
+
+function escapeXML(data) {
+    return data
+        .replace(re_xmlChars, singleCharReplacer)
+        .replace(re_astralSymbols, astralReplacer)
+        .replace(re_nonASCII, singleCharReplacer);
+}
+
+exports.escape = escapeXML;
+}, {"200":200,"202":202}];

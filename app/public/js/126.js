@@ -1,22 +1,33 @@
-window.modules["126"] = [function(require,module,exports){// '/' | '*' | ',' | ':' | '+' | '-'
-module.exports = {
-    name: 'Operator',
+window.modules["126"] = [function(require,module,exports){module.exports = {
+    name: 'Selector',
     structure: {
-        value: String
+        children: [[
+            'TypeSelector',
+            'IdSelector',
+            'ClassSelector',
+            'AttributeSelector',
+            'PseudoClassSelector',
+            'PseudoElementSelector',
+            'Combinator',
+            'WhiteSpace'
+        ]]
     },
     parse: function() {
-        var start = this.scanner.tokenStart;
+        var children = this.readSequence(this.scope.Selector);
 
-        this.scanner.next();
+        // nothing were consumed
+        if (children.isEmpty()) {
+            this.scanner.error('Selector is expected');
+        }
 
         return {
-            type: 'Operator',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            value: this.scanner.substrToCursor(start)
+            type: 'Selector',
+            loc: this.getLocationFromList(children),
+            children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.value);
+        this.each(processChunk, node);
     }
 };
 }, {}];

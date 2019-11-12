@@ -1,18 +1,11 @@
-window.modules["589"] = [function(require,module,exports){var makeString = require(578);
-var escapeChars = require(590);
+window.modules["589"] = [function(require,module,exports){module.exports = function() {
+  var result = {};
 
-var regexString = '[';
-for(var key in escapeChars) {
-  regexString += key;
-}
-regexString += ']';
+  for (var prop in this) {
+    if (!this.hasOwnProperty(prop) || prop.match(/^(?:include|contains|reverse|join|map|wrap)$/)) continue;
+    result[prop] = this[prop];
+  }
 
-var regex = new RegExp( regexString, 'g');
-
-module.exports = function escapeHTML(str) {
-
-  return makeString(str).replace(regex, function(m) {
-    return '&' + escapeChars[m] + ';';
-  });
+  return result;
 };
-}, {"578":578,"590":590}];
+}, {}];

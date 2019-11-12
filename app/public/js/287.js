@@ -1,15 +1,26 @@
-window.modules["287"] = [function(require,module,exports){var baseForOwn = require(288),
-    createBaseEach = require(289);
-
-/**
- * The base implementation of `_.forEach` without support for iteratee shorthands.
+window.modules["287"] = [function(require,module,exports){/**
+ * Creates a base function for methods like `_.forIn` and `_.forOwn`.
  *
  * @private
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array|Object} Returns `collection`.
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {Function} Returns the new base function.
  */
-var baseEach = createBaseEach(baseForOwn);
+function createBaseFor(fromRight) {
+  return function(object, iteratee, keysFunc) {
+    var index = -1,
+        iterable = Object(object),
+        props = keysFunc(object),
+        length = props.length;
 
-module.exports = baseEach;
-}, {"288":288,"289":289}];
+    while (length--) {
+      var key = props[fromRight ? length : ++index];
+      if (iteratee(iterable[key], key, iterable) === false) {
+        break;
+      }
+    }
+    return object;
+  };
+}
+
+module.exports = createBaseFor;
+}, {}];

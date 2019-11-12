@@ -1,34 +1,23 @@
-window.modules["323"] = [function(require,module,exports){var baseIsEqual = require(307),
-    get = require(15),
-    hasIn = require(334),
-    isKey = require(332),
-    isStrictComparable = require(333),
-    matchesStrictComparable = require(330),
-    toKey = require(295);
-
-/** Used to compose bitmasks for value comparisons. */
-var COMPARE_PARTIAL_FLAG = 1,
-    COMPARE_UNORDERED_FLAG = 2;
+window.modules["323"] = [function(require,module,exports){var baseEach = require(282),
+    isArrayLike = require(324);
 
 /**
- * The base implementation of `_.matchesProperty` which doesn't clone `srcValue`.
+ * The base implementation of `_.map` without support for iteratee shorthands.
  *
  * @private
- * @param {string} path The path of the property to get.
- * @param {*} srcValue The value to match.
- * @returns {Function} Returns the new spec function.
+ * @param {Array|Object} collection The collection to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the new mapped array.
  */
-function baseMatchesProperty(path, srcValue) {
-  if (isKey(path) && isStrictComparable(srcValue)) {
-    return matchesStrictComparable(toKey(path), srcValue);
-  }
-  return function(object) {
-    var objValue = get(object, path);
-    return (objValue === undefined && objValue === srcValue)
-      ? hasIn(object, path)
-      : baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG);
-  };
+function baseMap(collection, iteratee) {
+  var index = -1,
+      result = isArrayLike(collection) ? Array(collection.length) : [];
+
+  baseEach(collection, function(value, key, collection) {
+    result[++index] = iteratee(value, key, collection);
+  });
+  return result;
 }
 
-module.exports = baseMatchesProperty;
-}, {"15":15,"295":295,"307":307,"330":330,"332":332,"333":333,"334":334}];
+module.exports = baseMap;
+}, {"282":282,"324":324}];

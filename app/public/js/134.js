@@ -1,33 +1,27 @@
-window.modules["134"] = [function(require,module,exports){module.exports = {
-    name: 'Selector',
+window.modules["134"] = [function(require,module,exports){var WHITESPACE = require(75).TYPE.WhiteSpace;
+var SPACE = Object.freeze({
+    type: 'WhiteSpace',
+    loc: null,
+    value: ' '
+});
+
+module.exports = {
+    name: 'WhiteSpace',
     structure: {
-        children: [[
-            'TypeSelector',
-            'IdSelector',
-            'ClassSelector',
-            'AttributeSelector',
-            'PseudoClassSelector',
-            'PseudoElementSelector',
-            'Combinator',
-            'WhiteSpace'
-        ]]
+        value: String
     },
     parse: function() {
-        var children = this.readSequence(this.scope.Selector);
+        this.scanner.eat(WHITESPACE);
+        return SPACE;
 
-        // nothing were consumed
-        if (children.isEmpty()) {
-            this.scanner.error('Selector is expected');
-        }
-
-        return {
-            type: 'Selector',
-            loc: this.getLocationFromList(children),
-            children: children
-        };
+        // return {
+        //     type: 'WhiteSpace',
+        //     loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+        //     value: this.scanner.consume(WHITESPACE)
+        // };
     },
     generate: function(processChunk, node) {
-        this.each(processChunk, node);
+        processChunk(node.value);
     }
 };
-}, {}];
+}, {"75":75}];

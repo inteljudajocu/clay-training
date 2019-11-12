@@ -1,144 +1,66 @@
-window.modules["388"] = [function(require,module,exports){var csstree = require(65);
-var parse = csstree.parse;
-var compress = require(399);
-var translate = csstree.translate;
-var translateWithSourceMap = csstree.translateWithSourceMap;
+window.modules["388"] = [function(require,module,exports){var resolveKeyword = require(57).keyword;
 
-function debugOutput(name, options, startTime, data) {
-    if (options.debug) {
-        console.error('## ' + name + ' done in %d ms\n', Date.now() - startTime);
-    }
-
-    return data;
-}
-
-function createDefaultLogger(level) {
-    var lastDebug;
-
-    return function logger(title, ast) {
-        var line = title;
-
-        if (ast) {
-            line = '[' + ((Date.now() - lastDebug) / 1000).toFixed(3) + 's] ' + line;
+module.exports = function cleanAtrule(node, item, list) {
+    if (node.block) {
+        // otherwise removed at-rule don't prevent @import for removal
+        if (this.stylesheet !== null) {
+            this.stylesheet.firstAtrulesAllowed = false;
         }
 
-        if (level > 1 && ast) {
-            var css = translate(ast, true);
+        if (node.block.children.isEmpty()) {
+            list.remove(item);
+            return;
+        }
+    }
 
-            // when level 2, limit css to 256 symbols
-            if (level === 2 && css.length > 256) {
-                css = css.substr(0, 256) + '...';
+    switch (node.name) {
+        case 'charset':
+            if (!node.prelude || node.prelude.children.isEmpty()) {
+                list.remove(item);
+                return;
             }
 
-            line += '\n  ' + css + '\n';
-        }
+            // if there is any rule before @charset -> remove it
+            if (item.prev) {
+                list.remove(item);
+                return;
+            }
 
-        console.error(line);
-        lastDebug = Date.now();
-    };
-}
+            break;
 
-function copy(obj) {
-    var result = {};
+        case 'import':
+            if (this.stylesheet === null || !this.stylesheet.firstAtrulesAllowed) {
+                list.remove(item);
+                return;
+            }
 
-    for (var key in obj) {
-        result[key] = obj[key];
+            // if there are some rules that not an @import or @charset before @import
+            // remove it
+            list.prevUntil(item.prev, function(rule) {
+                if (rule.type === 'Atrule') {
+                    if (rule.name === 'import' || rule.name === 'charset') {
+                        return;
+                    }
+                }
+
+                this.root.firstAtrulesAllowed = false;
+                list.remove(item);
+                return true;
+            }, this);
+
+            break;
+
+        default:
+            var keyword = resolveKeyword(node.name);
+            if (keyword.name === 'keyframes' ||
+                keyword.name === 'media' ||
+                keyword.name === 'supports') {
+
+                // drop at-rule with no prelude
+                if (!node.prelude || node.prelude.children.isEmpty()) {
+                    list.remove(item);
+                }
+            }
     }
-
-    return result;
-}
-
-function buildCompressOptions(options) {
-    options = copy(options);
-
-    if (typeof options.logger !== 'function' && options.debug) {
-        options.logger = createDefaultLogger(options.debug);
-    }
-
-    return options;
-}
-
-function runHandler(ast, options, handlers) {
-    if (!Array.isArray(handlers)) {
-        handlers = [handlers];
-    }
-
-    handlers.forEach(function(fn) {
-        fn(ast, options);
-    });
-}
-
-function minify(context, source, options) {
-    options = options || {};
-
-    var filename = options.filename || '<unknown>';
-    var result;
-
-    // parse
-    var ast = debugOutput('parsing', options, Date.now(),
-        parse(source, {
-            context: context,
-            filename: filename,
-            positions: Boolean(options.sourceMap)
-        })
-    );
-
-    // before compress handlers
-    if (options.beforeCompress) {
-        debugOutput('beforeCompress', options, Date.now(),
-            runHandler(ast, options, options.beforeCompress)
-        );
-    }
-
-    // compress
-    var compressResult = debugOutput('compress', options, Date.now(),
-        compress(ast, buildCompressOptions(options))
-    );
-
-    // after compress handlers
-    if (options.afterCompress) {
-        debugOutput('afterCompress', options, Date.now(),
-            runHandler(compressResult, options, options.afterCompress)
-        );
-    }
-
-    // translate
-    if (options.sourceMap) {
-        result = debugOutput('translateWithSourceMap', options, Date.now(), (function() {
-            var tmp = translateWithSourceMap(compressResult.ast);
-            tmp.map._file = filename; // since other tools can relay on file in source map transform chain
-            tmp.map.setSourceContent(filename, source);
-            return tmp;
-        })());
-    } else {
-        result = debugOutput('translate', options, Date.now(), {
-            css: translate(compressResult.ast),
-            map: null
-        });
-    }
-
-    return result;
-}
-
-function minifyStylesheet(source, options) {
-    return minify('stylesheet', source, options);
-}
-
-function minifyBlock(source, options) {
-    return minify('declarationList', source, options);
-}
-
-module.exports = {
-    version: require(403).version,
-
-    // main methods
-    minify: minifyStylesheet,
-    minifyBlock: minifyBlock,
-
-    // compress an AST
-    compress: compress,
-
-    // css syntax parser/walkers/generator/etc
-    syntax: csstree
 };
-}, {"65":65,"399":399,"403":403}];
+}, {"57":57}];

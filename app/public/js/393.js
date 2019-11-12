@@ -1,5 +1,19 @@
-window.modules["393"] = [function(require,module,exports){module.exports = function cleanDeclartion(node, item, list) {
-    if (node.value.children && node.value.children.isEmpty()) {
+window.modules["393"] = [function(require,module,exports){// remove useless universal selector
+module.exports = function cleanType(node, item, list) {
+    var name = item.data.name;
+
+    // check it's a non-namespaced universal selector
+    if (name !== '*') {
+        return;
+    }
+
+    // remove when universal selector before other selectors
+    var nextType = item.next && item.next.data.type;
+    if (nextType === 'IdSelector' ||
+        nextType === 'ClassSelector' ||
+        nextType === 'AttributeSelector' ||
+        nextType === 'PseudoClassSelector' ||
+        nextType === 'PseudoElementSelector') {
         list.remove(item);
     }
 };

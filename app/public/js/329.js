@@ -1,34 +1,35 @@
-window.modules["329"] = [function(require,module,exports){var isFunction = require(316),
-    isLength = require(319);
+window.modules["329"] = [function(require,module,exports){var baseHasIn = require(296),
+    hasPath = require(360);
 
 /**
- * Checks if `value` is array-like. A value is considered array-like if it's
- * not a function and has a `value.length` that's an integer greater than or
- * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
+ * Checks if `path` is a direct or inherited property of `object`.
  *
  * @static
  * @memberOf _
  * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path to check.
+ * @returns {boolean} Returns `true` if `path` exists, else `false`.
  * @example
  *
- * _.isArrayLike([1, 2, 3]);
+ * var object = _.create({ 'a': _.create({ 'b': 2 }) });
+ *
+ * _.hasIn(object, 'a');
  * // => true
  *
- * _.isArrayLike(document.body.children);
+ * _.hasIn(object, 'a.b');
  * // => true
  *
- * _.isArrayLike('abc');
+ * _.hasIn(object, ['a', 'b']);
  * // => true
  *
- * _.isArrayLike(_.noop);
+ * _.hasIn(object, 'b');
  * // => false
  */
-function isArrayLike(value) {
-  return value != null && isLength(value.length) && !isFunction(value);
+function hasIn(object, path) {
+  return object != null && hasPath(object, path, baseHasIn);
 }
 
-module.exports = isArrayLike;
-}, {"316":316,"319":319}];
+module.exports = hasIn;
+}, {"296":296,"360":360}];

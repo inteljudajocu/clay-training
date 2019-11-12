@@ -1,13 +1,13 @@
 window.modules["article.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(15),
-    striptags = require(17),
-    dateFormat = require(19),
-    dateParse = require(16),
-    utils = require(18),
+var _get = require(2),
+    striptags = require(3),
+    dateFormat = require(6),
+    dateParse = require(5),
+    utils = require(4),
     has = utils.has,
     // convenience
-sanitize = require(14);
+sanitize = require(1);
 /**
  * only allow emphasis, italic, and strikethroughs in headlines
  * @param  {string} oldHeadline
@@ -84,4 +84,4 @@ module.exports.save = function (uri, data, locals) {
   generateFeedImage(data);
   return data;
 };
-}, {"14":14,"15":15,"16":16,"17":17,"18":18,"19":19}];
+}, {"1":1,"2":2,"3":3,"4":4,"5":5,"6":6}];

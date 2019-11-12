@@ -1,32 +1,21 @@
 window.modules["71"] = [function(require,module,exports){'use strict';
 
-module.exports = function walk(node, fn, context) {
-    switch (node.type) {
-        case 'Group':
-            node.terms.forEach(function(term) {
-                walk(term, fn, context);
-            });
-            break;
+var createCustomError = require(70);
 
-        case 'Function':
-        case 'Parentheses':
-            walk(node.children, fn, context);
-            break;
+var SyntaxParseError = function(message, syntaxStr, offset) {
+    var error = createCustomError('SyntaxParseError', message);
 
-        case 'Keyword':
-        case 'Type':
-        case 'Property':
-        case 'Combinator':
-        case 'Comma':
-        case 'Slash':
-        case 'String':
-        case 'Percent':
-            break;
+    error.rawMessage = message;
+    error.syntax = syntaxStr;
+    error.offset = offset;
+    error.message = error.rawMessage + '\n' +
+        '  ' + error.syntax + '\n' +
+        '--' + new Array((error.offset || error.syntax.length) + 1).join('-') + '^';
 
-        default:
-            throw new Error('Unknown type: ' + node.type);
-    }
-
-    fn.call(context, node);
+    return error;
 };
-}, {}];
+
+module.exports = {
+    SyntaxParseError: SyntaxParseError
+};
+}, {"70":70}];

@@ -1,20 +1,8 @@
-window.modules["595"] = [function(require,module,exports){/*
-We're explicitly defining the list of entities that might see in escape HTML strings
-*/
-var htmlEntities = {
-  nbsp: ' ',
-  cent: '¢',
-  pound: '£',
-  yen: '¥',
-  euro: '€',
-  copy: '©',
-  reg: '®',
-  lt: '<',
-  gt: '>',
-  quot: '"',
-  amp: '&',
-  apos: '\''
-};
+window.modules["595"] = [function(require,module,exports){var capitalize = require(575);
+var underscored = require(596);
+var trim = require(573);
 
-module.exports = htmlEntities;
-}, {}];
+module.exports = function humanize(str) {
+  return capitalize(trim(underscored(str).replace(/_id$/, '').replace(/_/g, ' ')));
+};
+}, {"573":573,"575":575,"596":596}];

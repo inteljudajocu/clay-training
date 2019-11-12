@@ -1,16 +1,27 @@
-window.modules["241"] = [function(require,module,exports){var nativeCreate = require(366);
+window.modules["241"] = [function(require,module,exports){var assocIndexOf = require(280);
 
 /**
- * Removes all key-value entries from the hash.
+ * Sets the list cache `key` to `value`.
  *
  * @private
- * @name clear
- * @memberOf Hash
+ * @name set
+ * @memberOf ListCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the list cache instance.
  */
-function hashClear() {
-  this.__data__ = nativeCreate ? nativeCreate(null) : {};
-  this.size = 0;
+function listCacheSet(key, value) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  if (index < 0) {
+    ++this.size;
+    data.push([key, value]);
+  } else {
+    data[index][1] = value;
+  }
+  return this;
 }
 
-module.exports = hashClear;
-}, {"366":366}];
+module.exports = listCacheSet;
+}, {"280":280}];

@@ -1,58 +1,36 @@
-window.modules["225"] = [function(require,module,exports){module.exports = CollectingHandler;
+window.modules["225"] = [function(require,module,exports){module.exports = Stream;
 
-function CollectingHandler(cbs) {
-    this._cbs = cbs || {};
-    this.events = [];
+var Parser = require(226);
+
+function Stream(options) {
+    Parser.call(this, new Cbs(this), options);
 }
 
-var EVENTS = require(221).EVENTS;
+require(221)(Stream, Parser);
+
+Stream.prototype.readable = true;
+
+function Cbs(scope) {
+    this.scope = scope;
+}
+
+var EVENTS = require(215).EVENTS;
+
 Object.keys(EVENTS).forEach(function(name) {
     if (EVENTS[name] === 0) {
-        name = "on" + name;
-        CollectingHandler.prototype[name] = function() {
-            this.events.push([name]);
-            if (this._cbs[name]) this._cbs[name]();
+        Cbs.prototype["on" + name] = function() {
+            this.scope.emit(name);
         };
     } else if (EVENTS[name] === 1) {
-        name = "on" + name;
-        CollectingHandler.prototype[name] = function(a) {
-            this.events.push([name, a]);
-            if (this._cbs[name]) this._cbs[name](a);
+        Cbs.prototype["on" + name] = function(a) {
+            this.scope.emit(name, a);
         };
     } else if (EVENTS[name] === 2) {
-        name = "on" + name;
-        CollectingHandler.prototype[name] = function(a, b) {
-            this.events.push([name, a, b]);
-            if (this._cbs[name]) this._cbs[name](a, b);
+        Cbs.prototype["on" + name] = function(a, b) {
+            this.scope.emit(name, a, b);
         };
     } else {
-        throw Error("wrong number of arguments");
+        throw Error("wrong number of arguments!");
     }
 });
-
-CollectingHandler.prototype.onreset = function() {
-    this.events = [];
-    if (this._cbs.onreset) this._cbs.onreset();
-};
-
-CollectingHandler.prototype.restart = function() {
-    if (this._cbs.onreset) this._cbs.onreset();
-
-    for (var i = 0, len = this.events.length; i < len; i++) {
-        if (this._cbs[this.events[i][0]]) {
-            var num = this.events[i].length;
-
-            if (num === 1) {
-                this._cbs[this.events[i][0]]();
-            } else if (num === 2) {
-                this._cbs[this.events[i][0]](this.events[i][1]);
-            } else {
-                this._cbs[this.events[i][0]](
-                    this.events[i][1],
-                    this.events[i][2]
-                );
-            }
-        }
-    }
-};
-}, {"221":221}];
+}, {"215":215,"221":221,"226":226}];

@@ -1,6 +1,10 @@
-window.modules["594"] = [function(require,module,exports){var makeString = require(578);
-
-module.exports = function escapeRegExp(str) {
-  return makeString(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+window.modules["594"] = [function(require,module,exports){module.exports = function strRepeat(str, qty){
+  if (qty < 1) return '';
+  var result = '';
+  while (qty > 0) {
+    if (qty & 1) result += str;
+    qty >>= 1, str += str;
+  }
+  return result;
 };
-}, {"578":578}];
+}, {}];

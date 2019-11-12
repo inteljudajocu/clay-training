@@ -1,16 +1,33 @@
-window.modules["100"] = [function(require,module,exports){var List = require(61);
+window.modules["100"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
+var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
 
-// https://drafts.csswg.org/css-images-4/#element-notation
-// https://developer.mozilla.org/en-US/docs/Web/CSS/element
-module.exports = function() {
-    this.scanner.skipSC();
+// currently only Grid Layout uses square brackets, but left it universal
+// https://drafts.csswg.org/css-grid/#track-sizing
+// [ ident* ]
+module.exports = {
+    name: 'Brackets',
+    structure: {
+        children: [[]]
+    },
+    parse: function(readSequence, recognizer) {
+        var start = this.scanner.tokenStart;
+        var children = null;
 
-    var id = this.IdSelector();
+        this.scanner.eat(LEFTSQUAREBRACKET);
+        children = readSequence.call(this, recognizer);
+        this.scanner.eat(RIGHTSQUAREBRACKET);
 
-    this.scanner.skipSC();
-
-    return new List().appendData(
-        id
-    );
+        return {
+            type: 'Brackets',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            children: children
+        };
+    },
+    generate: function(processChunk, node) {
+        processChunk('[');
+        this.each(processChunk, node);
+        processChunk(']');
+    }
 };
-}, {"61":61}];
+}, {"75":75}];

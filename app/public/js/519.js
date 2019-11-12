@@ -2,123 +2,256 @@ window.modules["519"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _supportsColor = require(19);
 
-var _container = require(515);
+var _supportsColor2 = _interopRequireDefault(_supportsColor);
 
-var _container2 = _interopRequireDefault(_container);
+var _chalk = require(19);
 
-var _list = require(531);
+var _chalk2 = _interopRequireDefault(_chalk);
 
-var _list2 = _interopRequireDefault(_list);
+var _terminalHighlight = require(520);
+
+var _terminalHighlight2 = _interopRequireDefault(_terminalHighlight);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 /**
- * Represents a CSS rule: a selector followed by a declaration block.
+ * The CSS parser throws this error for broken CSS.
  *
- * @extends Container
+ * Custom parsers can throw this error for broken custom syntax using
+ * the {@link Node#error} method.
+ *
+ * PostCSS will use the input source map to detect the original error location.
+ * If you wrote a Sass file, compiled it to CSS and then parsed it with PostCSS,
+ * PostCSS will show the original position in the Sass file.
+ *
+ * If you need the position in the PostCSS input
+ * (e.g., to debug the previous compiler), use `error.input.file`.
  *
  * @example
- * const root = postcss.parse('a{}');
- * const rule = root.first;
- * rule.type       //=> 'rule'
- * rule.toString() //=> 'a{}'
+ * // Catching and checking syntax error
+ * try {
+ *   postcss.parse('a{')
+ * } catch (error) {
+ *   if ( error.name === 'CssSyntaxError' ) {
+ *     error //=> CssSyntaxError
+ *   }
+ * }
+ *
+ * @example
+ * // Raising error from plugin
+ * throw node.error('Unknown variable', { plugin: 'postcss-vars' });
  */
-var Rule = function (_Container) {
-  _inherits(Rule, _Container);
+var CssSyntaxError = function () {
 
-  function Rule(defaults) {
-    _classCallCheck(this, Rule);
+    /**
+     * @param {string} message  - error message
+     * @param {number} [line]   - source line of the error
+     * @param {number} [column] - source column of the error
+     * @param {string} [source] - source code of the broken file
+     * @param {string} [file]   - absolute path to the broken file
+     * @param {string} [plugin] - PostCSS plugin name, if error came from plugin
+     */
+    function CssSyntaxError(message, line, column, source, file, plugin) {
+        _classCallCheck(this, CssSyntaxError);
 
-    var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
+        /**
+         * @member {string} - Always equal to `'CssSyntaxError'`. You should
+         *                    always check error type
+         *                    by `error.name === 'CssSyntaxError'` instead of
+         *                    `error instanceof CssSyntaxError`, because
+         *                    npm could have several PostCSS versions.
+         *
+         * @example
+         * if ( error.name === 'CssSyntaxError' ) {
+         *   error //=> CssSyntaxError
+         * }
+         */
+        this.name = 'CssSyntaxError';
+        /**
+         * @member {string} - Error message.
+         *
+         * @example
+         * error.message //=> 'Unclosed block'
+         */
+        this.reason = message;
 
-    _this.type = 'rule';
-    if (!_this.nodes) _this.nodes = [];
-    return _this;
-  }
+        if (file) {
+            /**
+             * @member {string} - Absolute path to the broken file.
+             *
+             * @example
+             * error.file       //=> 'a.sass'
+             * error.input.file //=> 'a.css'
+             */
+            this.file = file;
+        }
+        if (source) {
+            /**
+             * @member {string} - Source code of the broken file.
+             *
+             * @example
+             * error.source       //=> 'a { b {} }'
+             * error.input.column //=> 'a b { }'
+             */
+            this.source = source;
+        }
+        if (plugin) {
+            /**
+             * @member {string} - Plugin name, if error came from plugin.
+             *
+             * @example
+             * error.plugin //=> 'postcss-vars'
+             */
+            this.plugin = plugin;
+        }
+        if (typeof line !== 'undefined' && typeof column !== 'undefined') {
+            /**
+             * @member {number} - Source line of the error.
+             *
+             * @example
+             * error.line       //=> 2
+             * error.input.line //=> 4
+             */
+            this.line = line;
+            /**
+             * @member {number} - Source column of the error.
+             *
+             * @example
+             * error.column       //=> 1
+             * error.input.column //=> 4
+             */
+            this.column = column;
+        }
 
-  /**
-   * An array containing the rule’s individual selectors.
-   * Groups of selectors are split at commas.
-   *
-   * @type {string[]}
-   *
-   * @example
-   * const root = postcss.parse('a, b { }');
-   * const rule = root.first;
-   *
-   * rule.selector  //=> 'a, b'
-   * rule.selectors //=> ['a', 'b']
-   *
-   * rule.selectors = ['a', 'strong'];
-   * rule.selector //=> 'a, strong'
-   */
+        this.setMessage();
 
-
-  _createClass(Rule, [{
-    key: 'selectors',
-    get: function get() {
-      return _list2.default.comma(this.selector);
-    },
-    set: function set(values) {
-      var match = this.selector ? this.selector.match(/,\s*/) : null;
-      var sep = match ? match[0] : ',' + this.raw('between', 'beforeOpen');
-      this.selector = values.join(sep);
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, CssSyntaxError);
+        }
     }
 
-    /**
-     * @memberof Rule#
-     * @member {string} selector - the rule’s full selector represented
-     *                             as a string
-     *
-     * @example
-     * const root = postcss.parse('a, b { }');
-     * const rule = root.first;
-     * rule.selector //=> 'a, b'
-     */
+    CssSyntaxError.prototype.setMessage = function setMessage() {
+        /**
+         * @member {string} - Full error text in the GNU error format
+         *                    with plugin, file, line and column.
+         *
+         * @example
+         * error.message //=> 'a.css:1:1: Unclosed block'
+         */
+        this.message = this.plugin ? this.plugin + ': ' : '';
+        this.message += this.file ? this.file : '<css input>';
+        if (typeof this.line !== 'undefined') {
+            this.message += ':' + this.line + ':' + this.column;
+        }
+        this.message += ': ' + this.reason;
+    };
 
     /**
-     * @memberof Rule#
-     * @member {object} raws - Information to generate byte-to-byte equal
-     *                         node string as it was in the origin input.
+     * Returns a few lines of CSS source that caused the error.
      *
-     * Every parser saves its own properties,
-     * but the default CSS parser uses:
+     * If the CSS has an input source map without `sourceContent`,
+     * this method will return an empty string.
      *
-     * * `before`: the space symbols before the node. It also stores `*`
-     *   and `_` symbols before the declaration (IE hack).
-     * * `after`: the space symbols after the last child of the node
-     *   to the end of the node.
-     * * `between`: the symbols between the property and value
-     *   for declarations, selector and `{` for rules, or last parameter
-     *   and `{` for at-rules.
-     * * `semicolon`: contains `true` if the last child has
-     *   an (optional) semicolon.
-     * * `ownSemicolon`: contains `true` if there is semicolon after rule.
-     *
-     * PostCSS cleans selectors from comments and extra spaces,
-     * but it stores origin content in raws properties.
-     * As such, if you don’t change a declaration’s value,
-     * PostCSS will use the raw value with comments.
+     * @param {boolean} [color] whether arrow will be colored red by terminal
+     *                          color codes. By default, PostCSS will detect
+     *                          color support by `process.stdout.isTTY`
+     *                          and `window.process.env.NODE_DISABLE_COLORS`.
      *
      * @example
-     * const root = postcss.parse('a {\n  color:black\n}')
-     * root.first.first.raws //=> { before: '', between: ' ', after: '\n' }
+     * error.showSourceCode() //=> "  4 | }
+     *                        //      5 | a {
+     *                        //    > 6 |   bad
+     *                        //        |   ^
+     *                        //      7 | }
+     *                        //      8 | b {"
+     *
+     * @return {string} few lines of CSS source that caused the error
      */
 
-  }]);
 
-  return Rule;
-}(_container2.default);
+    CssSyntaxError.prototype.showSourceCode = function showSourceCode(color) {
+        var _this = this;
 
-exports.default = Rule;
+        if (!this.source) return '';
+
+        var css = this.source;
+        if (typeof color === 'undefined') color = _supportsColor2.default.stdout;
+        if (color) css = (0, _terminalHighlight2.default)(css);
+
+        var lines = css.split(/\r?\n/);
+        var start = Math.max(this.line - 3, 0);
+        var end = Math.min(this.line + 2, lines.length);
+
+        var maxWidth = String(end).length;
+
+        function mark(text) {
+            if (color && _chalk2.default.red) {
+                return _chalk2.default.red.bold(text);
+            } else {
+                return text;
+            }
+        }
+        function aside(text) {
+            if (color && _chalk2.default.gray) {
+                return _chalk2.default.gray(text);
+            } else {
+                return text;
+            }
+        }
+
+        return lines.slice(start, end).map(function (line, index) {
+            var number = start + 1 + index;
+            var gutter = ' ' + (' ' + number).slice(-maxWidth) + ' | ';
+            if (number === _this.line) {
+                var spacing = aside(gutter.replace(/\d/g, ' ')) + line.slice(0, _this.column - 1).replace(/[^\t]/g, ' ');
+                return mark('>') + aside(gutter) + line + '\n ' + spacing + mark('^');
+            } else {
+                return ' ' + aside(gutter) + line;
+            }
+        }).join('\n');
+    };
+
+    /**
+     * Returns error position, message and source code of the broken part.
+     *
+     * @example
+     * error.toString() //=> "CssSyntaxError: app.css:1:1: Unclosed block
+     *                  //    > 1 | a {
+     *                  //        | ^"
+     *
+     * @return {string} error position, message and source code
+     */
+
+
+    CssSyntaxError.prototype.toString = function toString() {
+        var code = this.showSourceCode();
+        if (code) {
+            code = '\n\n' + code + '\n';
+        }
+        return this.name + ': ' + this.message + code;
+    };
+
+    /**
+     * @memberof CssSyntaxError#
+     * @member {Input} input - Input object with PostCSS internal information
+     *                         about input file. If input has source map
+     *                         from previous tool, PostCSS will use origin
+     *                         (for example, Sass) source. You can use this
+     *                         object to get PostCSS input source.
+     *
+     * @example
+     * error.input.file //=> 'a.css'
+     * error.file       //=> 'a.sass'
+     */
+
+    return CssSyntaxError;
+}();
+
+exports.default = CssSyntaxError;
 module.exports = exports['default'];
 
-}, {"515":515,"531":531}];
+}, {"19":19,"520":520}];

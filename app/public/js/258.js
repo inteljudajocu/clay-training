@@ -1,28 +1,19 @@
-window.modules["258"] = [function(require,module,exports){var MapCache = require(250),
-    setCacheAdd = require(259),
-    setCacheHas = require(260);
-
-/**
- *
- * Creates an array cache object to store unique values.
+window.modules["258"] = [function(require,module,exports){/**
+ * Removes `key` and its value from the stack.
  *
  * @private
- * @constructor
- * @param {Array} [values] The values to cache.
+ * @name delete
+ * @memberOf Stack
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
  */
-function SetCache(values) {
-  var index = -1,
-      length = values == null ? 0 : values.length;
+function stackDelete(key) {
+  var data = this.__data__,
+      result = data['delete'](key);
 
-  this.__data__ = new MapCache;
-  while (++index < length) {
-    this.add(values[index]);
-  }
+  this.size = data.size;
+  return result;
 }
 
-// Add methods to `SetCache`.
-SetCache.prototype.add = SetCache.prototype.push = setCacheAdd;
-SetCache.prototype.has = setCacheHas;
-
-module.exports = SetCache;
-}, {"250":250,"259":259,"260":260}];
+module.exports = stackDelete;
+}, {}];

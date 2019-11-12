@@ -1,40 +1,28 @@
-window.modules["85"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
-
-var STRING = TYPE.String;
-var IDENTIFIER = TYPE.Identifier;
-var URL = TYPE.Url;
-var LEFTPARENTHESIS = TYPE.LeftParenthesis;
-
-module.exports = {
-    parse: {
-        prelude: function() {
-            var children = new List();
-
-            this.scanner.skipSC();
-
-            switch (this.scanner.tokenType) {
-                case STRING:
-                    children.appendData(this.String());
-                    break;
-
-                case URL:
-                    children.appendData(this.Url());
-                    break;
-
-                default:
-                    this.scanner.error('String or url() is expected');
-            }
-
-            if (this.scanner.lookupNonWSType(0) === IDENTIFIER ||
-                this.scanner.lookupNonWSType(0) === LEFTPARENTHESIS) {
-                children.appendData(this.WhiteSpace());
-                children.appendData(this.MediaQueryList());
-            }
-
-            return children;
+window.modules["85"] = [function(require,module,exports){module.exports = {
+    parseContext: {
+        default: 'StyleSheet',
+        stylesheet: 'StyleSheet',
+        atrule: 'Atrule',
+        atrulePrelude: function(options) {
+            return this.AtrulePrelude(options.atrule ? String(options.atrule) : null);
         },
-        block: null
-    }
+        mediaQueryList: 'MediaQueryList',
+        mediaQuery: 'MediaQuery',
+        rule: 'Rule',
+        selectorList: 'SelectorList',
+        selector: 'Selector',
+        block: function() {
+            return this.Block(true);
+        },
+        declarationList: 'DeclarationList',
+        declaration: 'Declaration',
+        value: function(options) {
+            return this.Value(options.property ? String(options.property) : null);
+        }
+    },
+    scope: require(87),
+    atrule: require(78),
+    pseudo: require(86),
+    node: require(83)
 };
-}, {"61":61,"82":82}];
+}, {"78":78,"83":83,"86":86,"87":87}];

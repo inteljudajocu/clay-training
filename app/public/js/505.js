@@ -1,123 +1,107 @@
 window.modules["505"] = [function(require,module,exports){'use strict';
 
-exports.__esModule = true;
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/**
- * Represents a plugin’s warning. It can be created using {@link Node#warn}.
- *
- * @example
- * if ( decl.important ) {
- *     decl.warn(result, 'Avoid !important', { word: '!important' });
- * }
- */
-var Warning = function () {
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-  /**
-   * @param {string} text        - warning message
-   * @param {Object} [opts]      - warning options
-   * @param {Node}   opts.node   - CSS node that caused the warning
-   * @param {string} opts.word   - word in CSS source that caused the warning
-   * @param {number} opts.index  - index in CSS node string that caused
-   *                               the warning
-   * @param {string} opts.plugin - name of the plugin that created
-   *                               this warning. {@link Result#warn} fills
-   *                               this property automatically.
-   */
-  function Warning(text) {
-    var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-    _classCallCheck(this, Warning);
+var tokenizer = require(506);
+var Comment = require(507);
+var Parser = require(508);
 
-    /**
-     * @member {string} - Type to filter warnings from
-     *                    {@link Result#messages}. Always equal
-     *                    to `"warning"`.
-     *
-     * @example
-     * const nonWarning = result.messages.filter(i => i.type !== 'warning')
-     */
-    this.type = 'warning';
-    /**
-     * @member {string} - The warning message.
-     *
-     * @example
-     * warning.text //=> 'Try to avoid !important'
-     */
-    this.text = text;
+var SafeParser = function (_Parser) {
+  _inherits(SafeParser, _Parser);
 
-    if (opts.node && opts.node.source) {
-      var pos = opts.node.positionBy(opts);
-      /**
-       * @member {number} - Line in the input file
-       *                    with this warning’s source
-       *
-       * @example
-       * warning.line //=> 5
-       */
-      this.line = pos.line;
-      /**
-       * @member {number} - Column in the input file
-       *                    with this warning’s source.
-       *
-       * @example
-       * warning.column //=> 6
-       */
-      this.column = pos.column;
-    }
+  function SafeParser() {
+    _classCallCheck(this, SafeParser);
 
-    for (var opt in opts) {
-      this[opt] = opts[opt];
-    }
+    return _possibleConstructorReturn(this, _Parser.apply(this, arguments));
   }
 
-  /**
-   * Returns a warning position and message.
-   *
-   * @example
-   * warning.toString() //=> 'postcss-lint:a.css:10:14: Avoid !important'
-   *
-   * @return {string} warning position and message
-   */
+  SafeParser.prototype.createTokenizer = function createTokenizer() {
+    this.tokenizer = tokenizer(this.input, { ignoreErrors: true });
+  };
 
+  SafeParser.prototype.comment = function comment(token) {
+    var node = new Comment();
+    this.init(node, token[2], token[3]);
+    node.source.end = { line: token[4], column: token[5] };
 
-  Warning.prototype.toString = function toString() {
-    if (this.node) {
-      return this.node.error(this.text, {
-        plugin: this.plugin,
-        index: this.index,
-        word: this.word
-      }).message;
-    } else if (this.plugin) {
-      return this.plugin + ': ' + this.text;
+    var text = token[1].slice(2);
+    if (text.slice(-2) === '*/') text = text.slice(0, -2);
+
+    if (/^\s*$/.test(text)) {
+      node.text = '';
+      node.raws.left = text;
+      node.raws.right = '';
     } else {
-      return this.text;
+      var match = text.match(/^(\s*)([^]*[^\s])(\s*)$/);
+      node.text = match[2];
+      node.raws.left = match[1];
+      node.raws.right = match[3];
     }
   };
 
-  /**
-   * @memberof Warning#
-   * @member {string} plugin - The name of the plugin that created
-   *                           it will fill this property automatically.
-   *                           this warning. When you call {@link Node#warn}
-   *
-   * @example
-   * warning.plugin //=> 'postcss-important'
-   */
+  SafeParser.prototype.decl = function decl(tokens) {
+    if (tokens.length > 1) {
+      _Parser.prototype.decl.call(this, tokens);
+    }
+  };
 
-  /**
-   * @memberof Warning#
-   * @member {Node} node - Contains the CSS node that caused the warning.
-   *
-   * @example
-   * warning.node.toString() //=> 'color: white !important'
-   */
+  SafeParser.prototype.unclosedBracket = function unclosedBracket() {};
 
-  return Warning;
-}();
+  SafeParser.prototype.unknownWord = function unknownWord(tokens) {
+    this.spaces += tokens.map(function (i) {
+      return i[1];
+    }).join('');
+  };
 
-exports.default = Warning;
-module.exports = exports['default'];
+  SafeParser.prototype.unexpectedClose = function unexpectedClose() {
+    this.current.raws.after += '}';
+  };
 
-}, {}];
+  SafeParser.prototype.doubleColon = function doubleColon() {};
+
+  SafeParser.prototype.unnamedAtrule = function unnamedAtrule(node) {
+    node.name = '';
+  };
+
+  SafeParser.prototype.precheckMissedSemicolon = function precheckMissedSemicolon(tokens) {
+    var colon = this.colon(tokens);
+    if (colon === false) return;
+
+    var split = void 0;
+    for (split = colon - 1; split >= 0; split--) {
+      if (tokens[split][0] === 'word') break;
+    }
+    for (split -= 1; split >= 0; split--) {
+      if (tokens[split][0] !== 'space') {
+        split += 1;
+        break;
+      }
+    }
+    var other = tokens.splice(split, tokens.length - split);
+    this.decl(other);
+  };
+
+  SafeParser.prototype.checkMissedSemicolon = function checkMissedSemicolon() {};
+
+  SafeParser.prototype.endFile = function endFile() {
+    if (this.current.nodes && this.current.nodes.length) {
+      this.current.raws.semicolon = this.semicolon;
+    }
+    this.current.raws.after = (this.current.raws.after || '') + this.spaces;
+
+    while (this.current.parent) {
+      this.current = this.current.parent;
+      this.current.raws.after = '';
+    }
+  };
+
+  return SafeParser;
+}(Parser);
+
+module.exports = SafeParser;
+
+}, {"506":506,"507":507,"508":508}];

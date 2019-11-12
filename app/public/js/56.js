@@ -1,15 +1,9 @@
-window.modules["56"] = [function(require,module,exports){'use strict';
-
-const isUriStringCheck = require(58);
-
-/**
- * First test if argument is a String. If true, test if '/_components/' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
+window.modules["56"] = [function(require,module,exports){/*
+ * Copyright 2009-2011 Mozilla Foundation and contributors
+ * Licensed under the New BSD license. See LICENSE.txt or:
+ * http://opensource.org/licenses/BSD-3-Clause
  */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
-  return uri.toLowerCase().indexOf('/_components/') > -1;
-};
-}, {"58":58}];
+exports.SourceMapGenerator = require(164).SourceMapGenerator;
+exports.SourceMapConsumer = require(163).SourceMapConsumer;
+exports.SourceNode = require(165).SourceNode;
+}, {"163":163,"164":164,"165":165}];

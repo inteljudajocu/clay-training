@@ -1,18 +1,27 @@
-window.modules["337"] = [function(require,module,exports){var identity = require(321),
-    overRest = require(338),
-    setToString = require(339);
-
-/**
- * The base implementation of `_.rest` which doesn't validate or coerce arguments.
+window.modules["337"] = [function(require,module,exports){/**
+ * Creates a function that returns `value`.
  *
- * @private
- * @param {Function} func The function to apply a rest parameter to.
- * @param {number} [start=func.length-1] The start position of the rest parameter.
- * @returns {Function} Returns the new function.
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Util
+ * @param {*} value The value to return from the new function.
+ * @returns {Function} Returns the new constant function.
+ * @example
+ *
+ * var objects = _.times(2, _.constant({ 'a': 1 }));
+ *
+ * console.log(objects);
+ * // => [{ 'a': 1 }, { 'a': 1 }]
+ *
+ * console.log(objects[0] === objects[1]);
+ * // => true
  */
-function baseRest(func, start) {
-  return setToString(overRest(func, start, identity), func + '');
+function constant(value) {
+  return function() {
+    return value;
+  };
 }
 
-module.exports = baseRest;
-}, {"321":321,"338":338,"339":339}];
+module.exports = constant;
+}, {}];

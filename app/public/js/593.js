@@ -1,11 +1,20 @@
-window.modules["593"] = [function(require,module,exports){var escapeRegExp = require(594);
-
-module.exports = function defaultToWhiteSpace(characters) {
-  if (characters == null)
-    return '\\s';
-  else if (characters.source)
-    return characters.source;
-  else
-    return '[' + escapeRegExp(characters) + ']';
+window.modules["593"] = [function(require,module,exports){/*
+We're explicitly defining the list of entities that might see in escape HTML strings
+*/
+var htmlEntities = {
+  nbsp: ' ',
+  cent: '¢',
+  pound: '£',
+  yen: '¥',
+  euro: '€',
+  copy: '©',
+  reg: '®',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  amp: '&',
+  apos: '\''
 };
-}, {"594":594}];
+
+module.exports = htmlEntities;
+}, {}];

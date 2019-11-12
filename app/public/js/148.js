@@ -1,10 +1,4 @@
-window.modules["148"] = [function(require,module,exports){var List = require(61);
-
-module.exports = {
-    parse: function() {
-        return new List().appendData(
-            this.Identifier()
-        );
-    }
+window.modules["148"] = [function(require,module,exports){module.exports = {
+    getNode: require(149)
 };
-}, {"61":61}];
+}, {"149":149}];

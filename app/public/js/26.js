@@ -1,78 +1,18 @@
-window.modules["26"] = [function(require,module,exports){var baseKeys = require(325),
-    getTag = require(309),
-    isArguments = require(274),
-    isArray = require(273),
-    isArrayLike = require(329),
-    isBuffer = require(275),
-    isPrototype = require(326),
-    isTypedArray = require(277);
+window.modules["26"] = [function(require,module,exports){'use strict';
 
-/** `Object#toString` result references. */
-var mapTag = '[object Map]',
-    setTag = '[object Set]';
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
+const isUriStringCheck = require(50);
 
 /**
- * Checks if `value` is an empty object, collection, map, or set.
- *
- * Objects are considered empty if they have no own enumerable string keyed
- * properties.
- *
- * Array-like values such as `arguments` objects, arrays, buffers, strings, or
- * jQuery-like collections are considered empty if they have a `length` of `0`.
- * Similarly, maps and sets are considered empty if they have a `size` of `0`.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is empty, else `false`.
- * @example
- *
- * _.isEmpty(null);
- * // => true
- *
- * _.isEmpty(true);
- * // => true
- *
- * _.isEmpty(1);
- * // => true
- *
- * _.isEmpty([1, 2, 3]);
- * // => false
- *
- * _.isEmpty({ 'a': 1 });
- * // => false
+ * First test if the argument passed in is a String. If true, get component version from uri.
+ * Otherwise throw an error.
+ * @example /_components/foo/instances/bar@published returns published
+ * @param  {string} uri
+ * @return {string|null}
  */
-function isEmpty(value) {
-  if (value == null) {
-    return true;
-  }
-  if (isArrayLike(value) &&
-      (isArray(value) || typeof value == 'string' || typeof value.splice == 'function' ||
-        isBuffer(value) || isTypedArray(value) || isArguments(value))) {
-    return !value.length;
-  }
-  var tag = getTag(value);
-  if (tag == mapTag || tag == setTag) {
-    return !value.size;
-  }
-  if (isPrototype(value)) {
-    return !baseKeys(value).length;
-  }
-  for (var key in value) {
-    if (hasOwnProperty.call(value, key)) {
-      return false;
-    }
-  }
-  return true;
-}
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  const result = /\/_components\/.+?@(.+)/.exec(uri);
 
-module.exports = isEmpty;
-}, {"273":273,"274":274,"275":275,"277":277,"309":309,"325":325,"326":326,"329":329}];
+  return result && result[1];
+};
+}, {"50":50}];

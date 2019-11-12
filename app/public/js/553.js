@@ -1,130 +1,266 @@
-window.modules["553"] = [function(require,module,exports){"use strict";
+window.modules["553"] = [function(require,module,exports){(function (process){
+"use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _container = _interopRequireDefault(require(539));
+var _lazyResult = _interopRequireDefault(require(543));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
-
 /**
- * Represents a CSS file and contains all its parsed nodes.
- *
- * @extends Container
+ * Contains plugins to process CSS. Create one `Processor` instance,
+ * initialize its plugins, and then use that instance on numerous CSS files.
  *
  * @example
- * const root = postcss.parse('a{color:black} b{z-index:2}')
- * root.type         //=> 'root'
- * root.nodes.length //=> 2
+ * const processor = postcss([autoprefixer, precss])
+ * processor.process(css1).then(result => console.log(result.css))
+ * processor.process(css2).then(result => console.log(result.css))
  */
-var Root =
+var Processor =
 /*#__PURE__*/
-function (_Container) {
-  _inheritsLoose(Root, _Container);
-
-  function Root(defaults) {
-    var _this;
-
-    _this = _Container.call(this, defaults) || this;
-    _this.type = 'root';
-    if (!_this.nodes) _this.nodes = [];
-    return _this;
-  }
-
-  var _proto = Root.prototype;
-
-  _proto.removeChild = function removeChild(child, ignore) {
-    var index = this.index(child);
-
-    if (!ignore && index === 0 && this.nodes.length > 1) {
-      this.nodes[1].raws.before = this.nodes[index].raws.before;
+function () {
+  /**
+   * @param {Array.<Plugin|pluginFunction>|Processor} plugins PostCSS plugins.
+   *        See {@link Processor#use} for plugin format.
+   */
+  function Processor(plugins) {
+    if (plugins === void 0) {
+      plugins = [];
     }
 
-    return _Container.prototype.removeChild.call(this, child);
-  };
+    /**
+     * Current PostCSS version.
+     *
+     * @type {string}
+     *
+     * @example
+     * if (result.processor.version.split('.')[0] !== '6') {
+     *   throw new Error('This plugin works only with PostCSS 6')
+     * }
+     */
+    this.version = '7.0.14';
+    /**
+     * Plugins added to this processor.
+     *
+     * @type {pluginFunction[]}
+     *
+     * @example
+     * const processor = postcss([autoprefixer, precss])
+     * processor.plugins.length //=> 2
+     */
 
-  _proto.normalize = function normalize(child, sample, type) {
-    var nodes = _Container.prototype.normalize.call(this, child);
-
-    if (sample) {
-      if (type === 'prepend') {
-        if (this.nodes.length > 1) {
-          sample.raws.before = this.nodes[1].raws.before;
-        } else {
-          delete sample.raws.before;
-        }
-      } else if (this.first !== sample) {
-        for (var _iterator = nodes, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-          var _ref;
-
-          if (_isArray) {
-            if (_i >= _iterator.length) break;
-            _ref = _iterator[_i++];
-          } else {
-            _i = _iterator.next();
-            if (_i.done) break;
-            _ref = _i.value;
-          }
-
-          var node = _ref;
-          node.raws.before = sample.raws.before;
-        }
-      }
-    }
-
-    return nodes;
+    this.plugins = this.normalize(plugins);
   }
   /**
-   * Returns a {@link Result} instance representing the root’s CSS.
+   * Adds a plugin to be used as a CSS processor.
    *
-   * @param {processOptions} [opts] Options with only `to` and `map` keys.
+   * PostCSS plugin can be in 4 formats:
+   * * A plugin created by {@link postcss.plugin} method.
+   * * A function. PostCSS will pass the function a @{link Root}
+   *   as the first argument and current {@link Result} instance
+   *   as the second.
+   * * An object with a `postcss` method. PostCSS will use that method
+   *   as described in #2.
+   * * Another {@link Processor} instance. PostCSS will copy plugins
+   *   from that instance into this one.
    *
-   * @return {Result} Result with current root’s CSS.
+   * Plugins can also be added by passing them as arguments when creating
+   * a `postcss` instance (see [`postcss(plugins)`]).
+   *
+   * Asynchronous plugins should return a `Promise` instance.
+   *
+   * @param {Plugin|pluginFunction|Processor} plugin PostCSS plugin
+   *                                                 or {@link Processor}
+   *                                                 with plugins.
    *
    * @example
-   * const root1 = postcss.parse(css1, { from: 'a.css' })
-   * const root2 = postcss.parse(css2, { from: 'b.css' })
-   * root1.append(root2)
-   * const result = root1.toResult({ to: 'all.css', map: true })
+   * const processor = postcss()
+   *   .use(autoprefixer)
+   *   .use(precss)
+   *
+   * @return {Processes} Current processor to make methods chain.
+   */
+
+
+  var _proto = Processor.prototype;
+
+  _proto.use = function use(plugin) {
+    this.plugins = this.plugins.concat(this.normalize([plugin]));
+    return this;
+  }
+  /**
+   * Parses source CSS and returns a {@link LazyResult} Promise proxy.
+   * Because some plugins can be asynchronous it doesn’t make
+   * any transformations. Transformations will be applied
+   * in the {@link LazyResult} methods.
+   *
+   * @param {string|toString|Result} css String with input CSS or any object
+   *                                     with a `toString()` method,
+   *                                     like a Buffer. Optionally, send
+   *                                     a {@link Result} instance
+   *                                     and the processor will take
+   *                                     the {@link Root} from it.
+   * @param {processOptions} [opts]      Options.
+   *
+   * @return {LazyResult} Promise proxy.
+   *
+   * @example
+   * processor.process(css, { from: 'a.css', to: 'a.out.css' })
+   *   .then(result => {
+   *      console.log(result.css)
+   *   })
    */
   ;
 
-  _proto.toResult = function toResult(opts) {
+  _proto.process = function (_process) {
+    function process(_x) {
+      return _process.apply(this, arguments);
+    }
+
+    process.toString = function () {
+      return _process.toString();
+    };
+
+    return process;
+  }(function (css, opts) {
     if (opts === void 0) {
       opts = {};
     }
 
-    var LazyResult = require(546);
+    if (this.plugins.length === 0 && opts.parser === opts.stringifier) {
+      if (window.process.env.NODE_ENV !== 'production') {
+        if (typeof console !== 'undefined' && console.warn) {
+          console.warn('You did not set any plugins, parser, or stringifier. ' + 'Right now, PostCSS does nothing. Pick plugins for your case ' + 'on https://www.postcss.parts/ and use them in postcss.config.js.');
+        }
+      }
+    }
 
-    var Processor = require(556);
+    return new _lazyResult.default(this, css, opts);
+  });
 
-    var lazy = new LazyResult(new Processor(), this, opts);
-    return lazy.stringify();
-  }
-  /**
-   * @memberof Root#
-   * @member {object} raws Information to generate byte-to-byte equal
-   *                       node string as it was in the origin input.
-   *
-   * Every parser saves its own properties,
-   * but the default CSS parser uses:
-   *
-   * * `after`: the space symbols after the last child to the end of file.
-   * * `semicolon`: is the last child has an (optional) semicolon.
-   *
-   * @example
-   * postcss.parse('a {}\n').raws //=> { after: '\n' }
-   * postcss.parse('a {}').raws   //=> { after: '' }
-   */
-  ;
+  _proto.normalize = function normalize(plugins) {
+    var normalized = [];
 
-  return Root;
-}(_container.default);
+    for (var _iterator = plugins, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+      var _ref;
 
-var _default = Root;
+      if (_isArray) {
+        if (_i >= _iterator.length) break;
+        _ref = _iterator[_i++];
+      } else {
+        _i = _iterator.next();
+        if (_i.done) break;
+        _ref = _i.value;
+      }
+
+      var i = _ref;
+      if (i.postcss) i = i.postcss;
+
+      if (typeof i === 'object' && Array.isArray(i.plugins)) {
+        normalized = normalized.concat(i.plugins);
+      } else if (typeof i === 'function') {
+        normalized.push(i);
+      } else if (typeof i === 'object' && (i.parse || i.stringify)) {
+        if (window.process.env.NODE_ENV !== 'production') {
+          throw new Error('PostCSS syntaxes cannot be used as plugins. Instead, please use ' + 'one of the syntax/parser/stringifier options as outlined ' + 'in your PostCSS runner documentation.');
+        }
+      } else {
+        throw new Error(i + ' is not a PostCSS plugin');
+      }
+    }
+
+    return normalized;
+  };
+
+  return Processor;
+}();
+
+var _default = Processor;
+/**
+ * @callback builder
+ * @param {string} part          Part of generated CSS connected to this node.
+ * @param {Node}   node          AST node.
+ * @param {"start"|"end"} [type] Node’s part type.
+ */
+
+/**
+ * @callback parser
+ *
+ * @param {string|toString} css   String with input CSS or any object
+ *                                with toString() method, like a Buffer.
+ * @param {processOptions} [opts] Options with only `from` and `map` keys.
+ *
+ * @return {Root} PostCSS AST
+ */
+
+/**
+ * @callback stringifier
+ *
+ * @param {Node} node       Start node for stringifing. Usually {@link Root}.
+ * @param {builder} builder Function to concatenate CSS from node’s parts
+ *                          or generate string and source map.
+ *
+ * @return {void}
+ */
+
+/**
+ * @typedef {object} syntax
+ * @property {parser} parse          Function to generate AST by string.
+ * @property {stringifier} stringify Function to generate string by AST.
+ */
+
+/**
+ * @typedef {object} toString
+ * @property {function} toString
+ */
+
+/**
+ * @callback pluginFunction
+ * @param {Root} root     Parsed input CSS.
+ * @param {Result} result Result to set warnings or check other plugins.
+ */
+
+/**
+ * @typedef {object} Plugin
+ * @property {function} postcss PostCSS plugin function.
+ */
+
+/**
+ * @typedef {object} processOptions
+ * @property {string} from             The path of the CSS source file.
+ *                                     You should always set `from`,
+ *                                     because it is used in source map
+ *                                     generation and syntax error messages.
+ * @property {string} to               The path where you’ll put the output
+ *                                     CSS file. You should always set `to`
+ *                                     to generate correct source maps.
+ * @property {parser} parser           Function to generate AST by string.
+ * @property {stringifier} stringifier Class to generate string by AST.
+ * @property {syntax} syntax           Object with `parse` and `stringify`.
+ * @property {object} map              Source map options.
+ * @property {boolean} map.inline                    Does source map should
+ *                                                   be embedded in the output
+ *                                                   CSS as a base64-encoded
+ *                                                   comment.
+ * @property {string|object|false|function} map.prev Source map content
+ *                                                   from a previous
+ *                                                   processing step
+ *                                                   (for example, Sass).
+ *                                                   PostCSS will try to find
+ *                                                   previous map automatically,
+ *                                                   so you could disable it by
+ *                                                   `false` value.
+ * @property {boolean} map.sourcesContent            Does PostCSS should set
+ *                                                   the origin content to map.
+ * @property {string|false} map.annotation           Does PostCSS should set
+ *                                                   annotation comment to map.
+ * @property {string} map.from                       Override `from` in map’s
+ *                                                   sources`.
+ */
+
 exports.default = _default;
 module.exports = exports.default;
 
-}, {"539":539,"546":546,"556":556}];
+
+}).call(this,require(382))}, {"382":382,"543":543}];

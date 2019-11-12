@@ -1,234 +1,383 @@
-window.modules["222"] = [function(require,module,exports){/**
- * Truncate HTML string and keep tag safe.
- *
- * @method truncate
- * @param {String} string string needs to be truncated
- * @param {Number} maxLength length of truncated string
- * @param {Object} options (optional)
- * @param {Boolean} [options.keepImageTag] flag to specify if keep image tag, false by default
- * @param {Boolean} [options.truncateLastWord] truncates last word, true by default
- * @param {Number} [options.slop] tolerance when options.truncateLastWord is false before we give up and just truncate at the maxLength position, 10 by default (but not greater than maxLength)
- * @param {Boolean|String} [options.ellipsis] omission symbol for truncated string, '...' by default
- * @return {String} truncated string
- */
-function truncate(string, maxLength, options) {
-    var EMPTY_OBJECT = {},
-        EMPTY_STRING = '',
-        DEFAULT_TRUNCATE_SYMBOL = '...',
-        DEFAULT_SLOP = 10 > maxLength ? maxLength : 10,
-        EXCLUDE_TAGS = ['img', 'br'],   // non-closed tags
-        items = [],                     // stack for saving tags
-        total = 0,                      // record how many characters we traced so far
-        content = EMPTY_STRING,         // truncated text storage
-        KEY_VALUE_REGEX = '([\\w|-]+\\s*(=\\s*"[^"]*")?\\s*)*',
-        IS_CLOSE_REGEX = '\\s*\\/?\\s*',
-        CLOSE_REGEX = '\\s*\\/\\s*',
-        SELF_CLOSE_REGEX = new RegExp('<\\/?\\w+\\s*' + KEY_VALUE_REGEX + CLOSE_REGEX + '>'),
-        HTML_TAG_REGEX = new RegExp('<\\/?\\w+\\s*' + KEY_VALUE_REGEX + IS_CLOSE_REGEX + '>'),
-        URL_REGEX = /(((ftp|https?):\/\/)[\-\w@:%_\+.~#?,&\/\/=]+)|((mailto:)?[_.\w\-]+@([\w][\w\-]+\.)+[a-zA-Z]{2,3})/g, // Simple regexp
-        IMAGE_TAG_REGEX = new RegExp('<img\\s*' + KEY_VALUE_REGEX + IS_CLOSE_REGEX + '>'),
-        WORD_BREAK_REGEX = new RegExp('\\W+', 'g'),
-        matches = true,
-        result,
-        index,
-        tail,
-        tag,
-        selfClose;
+window.modules["222"] = [function(require,module,exports){var Tokenizer = require(223);
 
-    /**
-     * Remove image tag
-     *
-     * @private
-     * @method _removeImageTag
-     * @param {String} string not-yet-processed string
-     * @return {String} string without image tags
-     */
-    function _removeImageTag(string) {
-        var match = IMAGE_TAG_REGEX.exec(string),
-            index,
-            len;
+/*
+	Options:
 
-        if (!match) {
-            return string;
-        }
+	xmlMode: Disables the special behavior for script/style tags (false by default)
+	lowerCaseAttributeNames: call .toLowerCase for each attribute name (true if xmlMode is `false`)
+	lowerCaseTags: call .toLowerCase for each tag name (true if xmlMode is `false`)
+*/
 
-        index = match.index;
-        len = match[0].length;
+/*
+	Callbacks:
 
-        return string.substring(0, index) + string.substring(index + len);
+	oncdataend,
+	oncdatastart,
+	onclosetag,
+	oncomment,
+	oncommentend,
+	onerror,
+	onopentag,
+	onprocessinginstruction,
+	onreset,
+	ontext
+*/
+
+var formTags = {
+    input: true,
+    option: true,
+    optgroup: true,
+    select: true,
+    button: true,
+    datalist: true,
+    textarea: true
+};
+
+var openImpliesClose = {
+    tr: { tr: true, th: true, td: true },
+    th: { th: true },
+    td: { thead: true, th: true, td: true },
+    body: { head: true, link: true, script: true },
+    li: { li: true },
+    p: { p: true },
+    h1: { p: true },
+    h2: { p: true },
+    h3: { p: true },
+    h4: { p: true },
+    h5: { p: true },
+    h6: { p: true },
+    select: formTags,
+    input: formTags,
+    output: formTags,
+    button: formTags,
+    datalist: formTags,
+    textarea: formTags,
+    option: { option: true },
+    optgroup: { optgroup: true }
+};
+
+var voidElements = {
+    __proto__: null,
+    area: true,
+    base: true,
+    basefont: true,
+    br: true,
+    col: true,
+    command: true,
+    embed: true,
+    frame: true,
+    hr: true,
+    img: true,
+    input: true,
+    isindex: true,
+    keygen: true,
+    link: true,
+    meta: true,
+    param: true,
+    source: true,
+    track: true,
+    wbr: true
+};
+
+var foreignContextElements = {
+    __proto__: null,
+    math: true,
+    svg: true
+};
+var htmlIntegrationElements = {
+    __proto__: null,
+    mi: true,
+    mo: true,
+    mn: true,
+    ms: true,
+    mtext: true,
+    "annotation-xml": true,
+    foreignObject: true,
+    desc: true,
+    title: true
+};
+
+var re_nameEnd = /\s|\//;
+
+function Parser(cbs, options) {
+    this._options = options || {};
+    this._cbs = cbs || {};
+
+    this._tagname = "";
+    this._attribname = "";
+    this._attribvalue = "";
+    this._attribs = null;
+    this._stack = [];
+    this._foreignContext = [];
+
+    this.startIndex = 0;
+    this.endIndex = null;
+
+    this._lowerCaseTagNames =
+        "lowerCaseTags" in this._options
+            ? !!this._options.lowerCaseTags
+            : !this._options.xmlMode;
+    this._lowerCaseAttributeNames =
+        "lowerCaseAttributeNames" in this._options
+            ? !!this._options.lowerCaseAttributeNames
+            : !this._options.xmlMode;
+
+    if (this._options.Tokenizer) {
+        Tokenizer = this._options.Tokenizer;
     }
+    this._tokenizer = new Tokenizer(this._options, this);
 
-    /**
-     * Dump all close tags and append to truncated content while reaching upperbound
-     *
-     * @private
-     * @method _dumpCloseTag
-     * @param {String[]} tags a list of tags which should be closed
-     * @return {String} well-formatted html
-     */
-    function _dumpCloseTag(tags) {
-        var html = '';
-
-        tags.reverse().forEach(function (tag, index) {
-            // dump non-excluded tags only
-            if (-1 === EXCLUDE_TAGS.indexOf(tag)) {
-                html += '</' + tag + '>';
-            }
-        });
-
-        return html;
-    }
-
-    /**
-     * Process tag string to get pure tag name
-     *
-     * @private
-     * @method _getTag
-     * @param {String} string original html
-     * @return {String} tag name
-     */
-    function _getTag(string) {
-        var tail = string.indexOf(' ');
-
-        // TODO:
-        // we have to figure out how to handle non-well-formatted HTML case
-        if (-1 === tail) {
-            tail = string.indexOf('>');
-            if (-1 === tail) {
-                throw new Error('HTML tag is not well-formed : ' + string);
-            }
-        }
-
-        return string.substring(1, tail);
-    }
-
-
-    /**
-     * Get the end position for String#substring()
-     *
-     * If options.truncateLastWord is FALSE, we try to the end position up to
-     * options.slop characters to avoid breaking in the middle of a word.
-     *
-     * @private
-     * @method _getEndPosition
-     * @param {String} string original html
-     * @param {Number} tailPos (optional) provided to avoid extending the slop into trailing HTML tag
-     * @return {Number} maxLength
-     */
-    function _getEndPosition (string, tailPos) {
-        var defaultPos = maxLength - total,
-            position = defaultPos,
-            isShort = defaultPos < options.slop,
-            slopPos = isShort ? defaultPos : options.slop - 1,
-            substr,
-            startSlice = isShort ? 0 : defaultPos - options.slop,
-            endSlice = tailPos || (defaultPos + options.slop),
-            result;
-
-        if (!options.truncateLastWord) {
-
-            substr = string.slice(startSlice, endSlice);
-
-            if (tailPos && substr.length <= tailPos) {
-                position = substr.length;
-            }
-            else {
-                while ((result = WORD_BREAK_REGEX.exec(substr)) !== null) {
-                    // a natural break position before the hard break position
-                    if (result.index < slopPos) {
-                        position = defaultPos - (slopPos - result.index);
-                        // keep seeking closer to the hard break position
-                        // unless a natural break is at position 0
-                        if (result.index === 0 && defaultPos <= 1) break;
-                    }
-                    // a natural break position exactly at the hard break position
-                    else if (result.index === slopPos) {
-                        position = defaultPos;
-                        break; // seek no more
-                    }
-                    // a natural break position after the hard break position
-                    else {
-                        position = defaultPos + (result.index - slopPos);
-                        break;  // seek no more
-                    }
-                }
-            }
-            if (string.charAt(position - 1).match(/\s$/)) position--;
-        }
-        return position;
-    }
-
-    options = options || EMPTY_OBJECT;
-    options.ellipsis = (undefined !== options.ellipsis) ? options.ellipsis : DEFAULT_TRUNCATE_SYMBOL;
-    options.truncateLastWord = (undefined !== options.truncateLastWord) ? options.truncateLastWord : true;
-    options.slop = (undefined !== options.slop) ? options.slop : DEFAULT_SLOP;
-
-    while (matches) {
-        matches = HTML_TAG_REGEX.exec(string);
-
-        if (!matches) {
-            if (total >= maxLength) { break; }
-
-            matches = URL_REGEX.exec(string);
-            if (!matches || matches.index >= maxLength) {
-                content += string.substring(0, _getEndPosition(string));
-                break;
-            }
-
-            while (matches) {
-                result = matches[0];
-                index = matches.index;
-                content += string.substring(0, (index + result.length) - total);
-                string = string.substring(index + result.length);
-                matches = URL_REGEX.exec(string);
-            }
-            break;
-        }
-
-        result = matches[0];
-        index = matches.index;
-
-        if (total + index > maxLength) {
-            // exceed given `maxLength`, dump everything to clear stack
-            content += string.substring(0, _getEndPosition(string, index));
-            break;
-        } else {
-            total += index;
-            content += string.substring(0, index);
-        }
-
-        if ('/' === result[1]) {
-            // move out open tag
-            items.pop();
-            selfClose=null;
-        } else {
-            selfClose = SELF_CLOSE_REGEX.exec(result);
-            if (!selfClose) {
-                tag = _getTag(result);
-
-                items.push(tag);
-            }
-        }
-
-        if (selfClose) {
-            content += selfClose[0];
-        } else {
-            content += result;
-        }
-        string = string.substring(index + result.length);
-    }
-
-    if (string.length > maxLength - total && options.ellipsis) {
-        content += options.ellipsis;
-    }
-    content += _dumpCloseTag(items);
-
-    if (!options.keepImageTag) {
-        content = _removeImageTag(content);
-    }
-
-    return content;
+    if (this._cbs.onparserinit) this._cbs.onparserinit(this);
 }
 
-module.exports = truncate;
-}, {}];
+require(221)(Parser, require(204).EventEmitter);
+
+Parser.prototype._updatePosition = function(initialOffset) {
+    if (this.endIndex === null) {
+        if (this._tokenizer._sectionStart <= initialOffset) {
+            this.startIndex = 0;
+        } else {
+            this.startIndex = this._tokenizer._sectionStart - initialOffset;
+        }
+    } else this.startIndex = this.endIndex + 1;
+    this.endIndex = this._tokenizer.getAbsoluteIndex();
+};
+
+//Tokenizer event handlers
+Parser.prototype.ontext = function(data) {
+    this._updatePosition(1);
+    this.endIndex--;
+
+    if (this._cbs.ontext) this._cbs.ontext(data);
+};
+
+Parser.prototype.onopentagname = function(name) {
+    if (this._lowerCaseTagNames) {
+        name = name.toLowerCase();
+    }
+
+    this._tagname = name;
+
+    if (!this._options.xmlMode && name in openImpliesClose) {
+        for (
+            var el;
+            (el = this._stack[this._stack.length - 1]) in
+            openImpliesClose[name];
+            this.onclosetag(el)
+        );
+    }
+
+    if (this._options.xmlMode || !(name in voidElements)) {
+        this._stack.push(name);
+        if (name in foreignContextElements) this._foreignContext.push(true);
+        else if (name in htmlIntegrationElements)
+            this._foreignContext.push(false);
+    }
+
+    if (this._cbs.onopentagname) this._cbs.onopentagname(name);
+    if (this._cbs.onopentag) this._attribs = {};
+};
+
+Parser.prototype.onopentagend = function() {
+    this._updatePosition(1);
+
+    if (this._attribs) {
+        if (this._cbs.onopentag)
+            this._cbs.onopentag(this._tagname, this._attribs);
+        this._attribs = null;
+    }
+
+    if (
+        !this._options.xmlMode &&
+        this._cbs.onclosetag &&
+        this._tagname in voidElements
+    ) {
+        this._cbs.onclosetag(this._tagname);
+    }
+
+    this._tagname = "";
+};
+
+Parser.prototype.onclosetag = function(name) {
+    this._updatePosition(1);
+
+    if (this._lowerCaseTagNames) {
+        name = name.toLowerCase();
+    }
+    
+    if (name in foreignContextElements || name in htmlIntegrationElements) {
+        this._foreignContext.pop();
+    }
+
+    if (
+        this._stack.length &&
+        (!(name in voidElements) || this._options.xmlMode)
+    ) {
+        var pos = this._stack.lastIndexOf(name);
+        if (pos !== -1) {
+            if (this._cbs.onclosetag) {
+                pos = this._stack.length - pos;
+                while (pos--) this._cbs.onclosetag(this._stack.pop());
+            } else this._stack.length = pos;
+        } else if (name === "p" && !this._options.xmlMode) {
+            this.onopentagname(name);
+            this._closeCurrentTag();
+        }
+    } else if (!this._options.xmlMode && (name === "br" || name === "p")) {
+        this.onopentagname(name);
+        this._closeCurrentTag();
+    }
+};
+
+Parser.prototype.onselfclosingtag = function() {
+    if (
+        this._options.xmlMode ||
+        this._options.recognizeSelfClosing ||
+        this._foreignContext[this._foreignContext.length - 1]
+    ) {
+        this._closeCurrentTag();
+    } else {
+        this.onopentagend();
+    }
+};
+
+Parser.prototype._closeCurrentTag = function() {
+    var name = this._tagname;
+
+    this.onopentagend();
+
+    //self-closing tags will be on the top of the stack
+    //(cheaper check than in onclosetag)
+    if (this._stack[this._stack.length - 1] === name) {
+        if (this._cbs.onclosetag) {
+            this._cbs.onclosetag(name);
+        }
+        this._stack.pop();
+        
+    }
+};
+
+Parser.prototype.onattribname = function(name) {
+    if (this._lowerCaseAttributeNames) {
+        name = name.toLowerCase();
+    }
+    this._attribname = name;
+};
+
+Parser.prototype.onattribdata = function(value) {
+    this._attribvalue += value;
+};
+
+Parser.prototype.onattribend = function() {
+    if (this._cbs.onattribute)
+        this._cbs.onattribute(this._attribname, this._attribvalue);
+    if (
+        this._attribs &&
+        !Object.prototype.hasOwnProperty.call(this._attribs, this._attribname)
+    ) {
+        this._attribs[this._attribname] = this._attribvalue;
+    }
+    this._attribname = "";
+    this._attribvalue = "";
+};
+
+Parser.prototype._getInstructionName = function(value) {
+    var idx = value.search(re_nameEnd),
+        name = idx < 0 ? value : value.substr(0, idx);
+
+    if (this._lowerCaseTagNames) {
+        name = name.toLowerCase();
+    }
+
+    return name;
+};
+
+Parser.prototype.ondeclaration = function(value) {
+    if (this._cbs.onprocessinginstruction) {
+        var name = this._getInstructionName(value);
+        this._cbs.onprocessinginstruction("!" + name, "!" + value);
+    }
+};
+
+Parser.prototype.onprocessinginstruction = function(value) {
+    if (this._cbs.onprocessinginstruction) {
+        var name = this._getInstructionName(value);
+        this._cbs.onprocessinginstruction("?" + name, "?" + value);
+    }
+};
+
+Parser.prototype.oncomment = function(value) {
+    this._updatePosition(4);
+
+    if (this._cbs.oncomment) this._cbs.oncomment(value);
+    if (this._cbs.oncommentend) this._cbs.oncommentend();
+};
+
+Parser.prototype.oncdata = function(value) {
+    this._updatePosition(1);
+
+    if (this._options.xmlMode || this._options.recognizeCDATA) {
+        if (this._cbs.oncdatastart) this._cbs.oncdatastart();
+        if (this._cbs.ontext) this._cbs.ontext(value);
+        if (this._cbs.oncdataend) this._cbs.oncdataend();
+    } else {
+        this.oncomment("[CDATA[" + value + "]]");
+    }
+};
+
+Parser.prototype.onerror = function(err) {
+    if (this._cbs.onerror) this._cbs.onerror(err);
+};
+
+Parser.prototype.onend = function() {
+    if (this._cbs.onclosetag) {
+        for (
+            var i = this._stack.length;
+            i > 0;
+            this._cbs.onclosetag(this._stack[--i])
+        );
+    }
+    if (this._cbs.onend) this._cbs.onend();
+};
+
+//Resets the parser to a blank state, ready to parse a new HTML document
+Parser.prototype.reset = function() {
+    if (this._cbs.onreset) this._cbs.onreset();
+    this._tokenizer.reset();
+
+    this._tagname = "";
+    this._attribname = "";
+    this._attribs = null;
+    this._stack = [];
+
+    if (this._cbs.onparserinit) this._cbs.onparserinit(this);
+};
+
+//Parses a complete HTML document and pushes it to the handler
+Parser.prototype.parseComplete = function(data) {
+    this.reset();
+    this.end(data);
+};
+
+Parser.prototype.write = function(chunk) {
+    this._tokenizer.write(chunk);
+};
+
+Parser.prototype.end = function(chunk) {
+    this._tokenizer.end(chunk);
+};
+
+Parser.prototype.pause = function() {
+    this._tokenizer.pause();
+};
+
+Parser.prototype.resume = function() {
+    this._tokenizer.resume();
+};
+
+//alias for backwards compat
+Parser.prototype.parseChunk = Parser.prototype.write;
+Parser.prototype.done = Parser.prototype.end;
+
+module.exports = Parser;
+}, {"204":204,"221":221,"223":223}];

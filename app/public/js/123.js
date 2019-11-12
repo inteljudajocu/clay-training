@@ -1,34 +1,58 @@
-window.modules["123"] = [function(require,module,exports){var List = require(61);
-var COMMA = require(82).TYPE.Comma;
+window.modules["123"] = [function(require,module,exports){var isNumber = require(75).isNumber;
+var TYPE = require(75).TYPE;
+var NUMBER = TYPE.Number;
+var SOLIDUS = TYPE.Solidus;
+var FULLSTOP = TYPE.FullStop;
 
-module.exports = {
-    name: 'MediaQueryList',
-    structure: {
-        children: [['MediaQuery']]
-    },
-    parse: function(relative) {
-        var children = new List();
+// Terms of <ratio> should to be a positive number (not zero or negative)
+// (see https://drafts.csswg.org/mediaqueries-3/#values)
+// However, -o-min-device-pixel-ratio takes fractional values as a ratio's term
+// and this is using by various sites. Therefore we relax checking on parse
+// to test a term is unsigned number without exponent part.
+// Additional checks may to be applied on lexer validation.
+function consumeNumber(scanner) {
+    var value = scanner.consumeNonWS(NUMBER);
 
-        this.scanner.skipSC();
-
-        while (!this.scanner.eof) {
-            children.appendData(this.MediaQuery(relative));
-
-            if (this.scanner.tokenType !== COMMA) {
-                break;
-            }
-
-            this.scanner.next();
+    for (var i = 0; i < value.length; i++) {
+        var code = value.charCodeAt(i);
+        if (!isNumber(code) && code !== FULLSTOP) {
+            scanner.error('Unsigned number is expected', scanner.tokenStart - value.length + i);
         }
+    }
+
+    if (Number(value) === 0) {
+        scanner.error('Zero number is not allowed', scanner.tokenStart - value.length);
+    }
+
+    return value;
+}
+
+// <positive-integer> S* '/' S* <positive-integer>
+module.exports = {
+    name: 'Ratio',
+    structure: {
+        left: String,
+        right: String
+    },
+    parse: function() {
+        var start = this.scanner.tokenStart;
+        var left = consumeNumber(this.scanner);
+        var right;
+
+        this.scanner.eatNonWS(SOLIDUS);
+        right = consumeNumber(this.scanner);
 
         return {
-            type: 'MediaQueryList',
-            loc: this.getLocationFromList(children),
-            children: children
+            type: 'Ratio',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            left: left,
+            right: right
         };
     },
     generate: function(processChunk, node) {
-        this.eachComma(processChunk, node);
+        processChunk(node.left);
+        processChunk('/');
+        processChunk(node.right);
     }
 };
-}, {"61":61,"82":82}];
+}, {"75":75}];

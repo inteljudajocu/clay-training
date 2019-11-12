@@ -1,82 +1,28 @@
 window.modules["23"] = [function(require,module,exports){'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var popup = require(645);
-
-var sharePopUp =
-/*#__PURE__*/
-function () {
-  /**
-   * Create a Popup for share services
-   * @param {Node} shareLink - html anchor tag
-   * @param {string} shareURL - url of page to be shared
-   */
-  function sharePopUp(shareLink, shareURL) {
-    _classCallCheck(this, sharePopUp);
-
-    this.shareLink = shareLink;
-    this.shareURL = shareURL;
-    this.shareService = this.shareLink.getAttribute('data-shareService') || null;
-    this.shareTitle = this.shareLink.getAttribute('title') || 'Clay Starter';
-    this.setDimensions();
-    this.addShareURL();
-    this.addClickHandler();
-  }
-
-  _createClass(sharePopUp, [{
-    key: "addShareURL",
-    value: function addShareURL() {
-      switch (this.shareService) {
-        case 'twitter':
-          this.shareLink.href = "https://twitter.com/share?text=".concat(encodeURIComponent(this.shareTitle), "&url='").concat(this.shareURL, "?utm_source=tw&utm_medium=s3&utm_campaign=sharebutton-t");
-          break;
-
-        case 'facebook':
-          this.shareLink.href = "http://www.facebook.com/sharer/sharer.php?u=".concat(this.shareURL, "?utm_source=fb&utm_medium=s3&utm_campaign=sharebutton-t");
-          break;
-
-        default:
-      }
-    }
-  }, {
-    key: "addClickHandler",
-    value: function addClickHandler() {
-      this.shareLink.addEventListener('click', this.handleClick.bind(this));
-    }
-  }, {
-    key: "handleClick",
-    value: function handleClick(e) {
-      e.preventDefault();
-      var dimensions = this.popupDimensions[this.shareService] || this.popupDimensions.default;
-      popup.openPopUp(this.shareLink.href, dimensions);
-    }
-  }, {
-    key: "setDimensions",
-    value: function setDimensions() {
-      this.popupDimensions = {
-        default: {
-          w: 520,
-          h: 304
-        },
-        facebook: {
-          w: 520,
-          h: 304
-        },
-        twitter: {
-          w: 550,
-          h: 572
-        }
-      };
-    }
-  }]);
-
-  return sharePopUp;
-}();
-
-module.exports = sharePopUp;
-}, {"645":645}];
+module.exports.findComponentRefInPage = require(46);
+module.exports.getComponentInstance = require(27);
+module.exports.getLayoutInstance = require(49);
+module.exports.getComponentName = require(24);
+module.exports.getLayoutName = require(45);
+module.exports.getComponentVersion = require(26);
+module.exports.getPageInstance = require(25);
+module.exports.getPageVersion = require(28);
+module.exports.getListInstance = require(30);
+module.exports.getPrefix = require(29);
+module.exports.isComponent = require(32);
+module.exports.isLayout = require(31);
+module.exports.isLayoutMeta = require(47);
+module.exports.isDefaultComponent = require(33);
+module.exports.isDefaultLayout = require(34);
+module.exports.isPage = require(38);
+module.exports.isPageMeta = require(48);
+module.exports.isPublished = require(35);
+module.exports.isList = require(37);
+module.exports.isUri = require(36);
+module.exports.isUser = require(40);
+module.exports.replaceVersion = require(39);
+module.exports.uriPrefixToSlug = require(41);
+module.exports.uriSlugToPrefix = require(42);
+module.exports.jsonPrefixToSlug = require(43);
+module.exports.jsonSlugToPrefix = require(44);
+}, {"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49}];

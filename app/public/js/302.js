@@ -1,21 +1,29 @@
-window.modules["302"] = [function(require,module,exports){var baseFindIndex = require(290),
-    baseIsNaN = require(304),
-    strictIndexOf = require(303);
+window.modules["302"] = [function(require,module,exports){var baseIsEqualDeep = require(303),
+    isObjectLike = require(301);
 
 /**
- * The base implementation of `_.indexOf` without `fromIndex` bounds checks.
+ * The base implementation of `_.isEqual` which supports partial comparisons
+ * and tracks traversed objects.
  *
  * @private
- * @param {Array} array The array to inspect.
- * @param {*} value The value to search for.
- * @param {number} fromIndex The index to search from.
- * @returns {number} Returns the index of the matched value, else `-1`.
+ * @param {*} value The value to compare.
+ * @param {*} other The other value to compare.
+ * @param {boolean} bitmask The bitmask flags.
+ *  1 - Unordered comparison
+ *  2 - Partial comparison
+ * @param {Function} [customizer] The function to customize comparisons.
+ * @param {Object} [stack] Tracks traversed `value` and `other` objects.
+ * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
  */
-function baseIndexOf(array, value, fromIndex) {
-  return value === value
-    ? strictIndexOf(array, value, fromIndex)
-    : baseFindIndex(array, baseIsNaN, fromIndex);
+function baseIsEqual(value, other, bitmask, customizer, stack) {
+  if (value === other) {
+    return true;
+  }
+  if (value == null || other == null || (!isObjectLike(value) && !isObjectLike(other))) {
+    return value !== value && other !== other;
+  }
+  return baseIsEqualDeep(value, other, bitmask, customizer, baseIsEqual, stack);
 }
 
-module.exports = baseIndexOf;
-}, {"290":290,"303":303,"304":304}];
+module.exports = baseIsEqual;
+}, {"301":301,"303":303}];

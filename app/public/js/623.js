@@ -1,10 +1,28 @@
-window.modules["623"] = [function(require,module,exports){var makeString = require(578);
-var toPositive = require(588);
+window.modules["623"] = [function(require,module,exports){/**
+ * _s.prune: a more elegant version of truncate
+ * prune extra chars, never leaving a half-chopped word.
+ * @author github.com/rwz
+ */
+var makeString = require(576);
+var rtrim = require(621);
 
-module.exports = function startsWith(str, starts, position) {
+module.exports = function prune(str, length, pruneStr) {
   str = makeString(str);
-  starts = '' + starts;
-  position = position == null ? 0 : Math.min(toPositive(position), str.length);
-  return str.lastIndexOf(starts, position) === position;
+  length = ~~length;
+  pruneStr = pruneStr != null ? String(pruneStr) : '...';
+
+  if (str.length <= length) return str;
+
+  var tmpl = function(c) {
+      return c.toUpperCase() !== c.toLowerCase() ? 'A' : ' ';
+    },
+    template = str.slice(0, length + 1).replace(/.(?=\W*\w*$)/g, tmpl); // 'Hello, world' -> 'HellAA AAAAA'
+
+  if (template.slice(template.length - 2).match(/\w\w/))
+    template = template.replace(/\s*\S+$/, '');
+  else
+    template = rtrim(template.slice(0, template.length - 1));
+
+  return (template + pruneStr).length > str.length ? str : str.slice(0, template.length) + pruneStr;
 };
-}, {"578":578,"588":588}];
+}, {"576":576,"621":621}];

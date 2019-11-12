@@ -1,15 +1,6 @@
-window.modules["87"] = [function(require,module,exports){var List = require(61);
-
-module.exports = {
-    parse: {
-        prelude: function() {
-            return new List().appendData(
-                this.SelectorList()
-            );
-        },
-        block: function() {
-            return this.Block(true);
-        }
-    }
+window.modules["87"] = [function(require,module,exports){module.exports = {
+    AtrulePrelude: require(148),
+    Selector: require(150),
+    Value: require(151)
 };
-}, {"61":61}];
+}, {"148":148,"150":150,"151":151}];

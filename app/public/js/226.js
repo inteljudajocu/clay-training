@@ -1,115 +1,26 @@
-window.modules["226"] = [function(require,module,exports){var DomHandler = require(193);
-var DomUtils = require(196);
+window.modules["226"] = [function(require,module,exports){module.exports = Stream;
 
-//TODO: make this a streamable handler
-function FeedHandler(callback, options) {
-    this.init(callback, options);
+var Parser = require(222);
+var WritableStream = require(19).Writable;
+var StringDecoder = require(227).StringDecoder;
+var Buffer = require(21).Buffer;
+
+function Stream(cbs, options) {
+    var parser = (this._parser = new Parser(cbs, options));
+    var decoder = (this._decoder = new StringDecoder());
+
+    WritableStream.call(this, { decodeStrings: false });
+
+    this.once("finish", function() {
+        parser.end(decoder.end());
+    });
 }
 
-require(227)(FeedHandler, DomHandler);
+require(221)(Stream, WritableStream);
 
-FeedHandler.prototype.init = DomHandler;
-
-function getElements(what, where) {
-    return DomUtils.getElementsByTagName(what, where, true);
-}
-function getOneElement(what, where) {
-    return DomUtils.getElementsByTagName(what, where, true, 1)[0];
-}
-function fetch(what, where, recurse) {
-    return DomUtils.getText(
-        DomUtils.getElementsByTagName(what, where, recurse, 1)
-    ).trim();
-}
-
-function addConditionally(obj, prop, what, where, recurse) {
-    var tmp = fetch(what, where, recurse);
-    if (tmp) obj[prop] = tmp;
-}
-
-var isValidFeed = function(value) {
-    return value === "rss" || value === "feed" || value === "rdf:RDF";
+Stream.prototype._write = function(chunk, encoding, cb) {
+    if (chunk instanceof Buffer) chunk = this._decoder.write(chunk);
+    this._parser.write(chunk);
+    cb();
 };
-
-FeedHandler.prototype.onend = function() {
-    var feed = {},
-        feedRoot = getOneElement(isValidFeed, this.dom),
-        tmp,
-        childs;
-
-    if (feedRoot) {
-        if (feedRoot.name === "feed") {
-            childs = feedRoot.children;
-
-            feed.type = "atom";
-            addConditionally(feed, "id", "id", childs);
-            addConditionally(feed, "title", "title", childs);
-            if (
-                (tmp = getOneElement("link", childs)) &&
-                (tmp = tmp.attribs) &&
-                (tmp = tmp.href)
-            )
-                feed.link = tmp;
-            addConditionally(feed, "description", "subtitle", childs);
-            if ((tmp = fetch("updated", childs))) feed.updated = new Date(tmp);
-            addConditionally(feed, "author", "email", childs, true);
-
-            feed.items = getElements("entry", childs).map(function(item) {
-                var entry = {},
-                    tmp;
-
-                item = item.children;
-
-                addConditionally(entry, "id", "id", item);
-                addConditionally(entry, "title", "title", item);
-                if (
-                    (tmp = getOneElement("link", item)) &&
-                    (tmp = tmp.attribs) &&
-                    (tmp = tmp.href)
-                )
-                    entry.link = tmp;
-                if ((tmp = fetch("summary", item) || fetch("content", item)))
-                    entry.description = tmp;
-                if ((tmp = fetch("updated", item)))
-                    entry.pubDate = new Date(tmp);
-                return entry;
-            });
-        } else {
-            childs = getOneElement("channel", feedRoot.children).children;
-
-            feed.type = feedRoot.name.substr(0, 3);
-            feed.id = "";
-            addConditionally(feed, "title", "title", childs);
-            addConditionally(feed, "link", "link", childs);
-            addConditionally(feed, "description", "description", childs);
-            if ((tmp = fetch("lastBuildDate", childs)))
-                feed.updated = new Date(tmp);
-            addConditionally(feed, "author", "managingEditor", childs, true);
-
-            feed.items = getElements("item", feedRoot.children).map(function(
-                item
-            ) {
-                var entry = {},
-                    tmp;
-
-                item = item.children;
-
-                addConditionally(entry, "id", "guid", item);
-                addConditionally(entry, "title", "title", item);
-                addConditionally(entry, "link", "link", item);
-                addConditionally(entry, "description", "description", item);
-                if ((tmp = fetch("pubDate", item)))
-                    entry.pubDate = new Date(tmp);
-                return entry;
-            });
-        }
-    }
-    this.dom = feed;
-    DomHandler.prototype._handleCallback.call(
-        this,
-        feedRoot ? null : Error("couldn't find root of feed")
-    );
-};
-
-module.exports = FeedHandler;
-}, {"193":193,"196":196,"227":227}];
+}, {"19":19,"21":21,"221":221,"222":222,"227":227}];

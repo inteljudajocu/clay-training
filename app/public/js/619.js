@@ -1,8 +1,10 @@
-window.modules["619"] = [function(require,module,exports){var makeString = require(578);
+window.modules["619"] = [function(require,module,exports){var makeString = require(576);
+var slice = [].slice;
 
-module.exports = function swapCase(str) {
-  return makeString(str).replace(/\S/g, function(c) {
-    return c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase();
-  });
+module.exports = function join() {
+  var args = slice.call(arguments),
+    separator = args.shift();
+
+  return args.join(makeString(separator));
 };
-}, {"578":578}];
+}, {"576":576}];

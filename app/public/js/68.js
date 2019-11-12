@@ -1,89 +1,63 @@
 window.modules["68"] = [function(require,module,exports){'use strict';
 
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var keywords = Object.create(null);
-var properties = Object.create(null);
-var HYPHENMINUS = 45; // '-'.charCodeAt()
+var createCustomError = require(70);
+var translateGrammar = require(66);
 
-function isCustomProperty(str, offset) {
-    return str.length - offset >= 2 &&
-           str.charCodeAt(offset) === HYPHENMINUS &&
-           str.charCodeAt(offset + 1) === HYPHENMINUS;
+function getLocation(node, point) {
+    var loc = node && node.loc && node.loc[point];
+
+    return loc
+        ? { offset: loc.offset,
+            line: loc.line,
+            column: loc.column }
+        : null;
 }
 
-function getVendorPrefix(str, offset) {
-    if (str.charCodeAt(offset) === HYPHENMINUS) {
-        // vendor should contain at least one letter
-        var secondDashIndex = str.indexOf('-', offset + 2);
+var SyntaxReferenceError = function(type, referenceName) {
+    var error = createCustomError('SyntaxReferenceError', type + ' `' + referenceName + '`');
 
-        if (secondDashIndex !== -1) {
-            return str.substring(offset, secondDashIndex + 1);
+    error.reference = referenceName;
+
+    return error;
+};
+
+var MatchError = function(message, lexer, syntax, value, badNode) {
+    var error = createCustomError('SyntaxMatchError', message);
+    var errorOffset = -1;
+    var start = getLocation(badNode, 'start');
+    var end = getLocation(badNode, 'end');
+    var css = lexer.syntax.translateMarkup(value, function(node, buffer) {
+        if (node === badNode) {
+            errorOffset = buffer.length;
         }
-    }
-
-    return '';
-}
-
-function getKeywordInfo(keyword) {
-    if (hasOwnProperty.call(keywords, keyword)) {
-        return keywords[keyword];
-    }
-
-    var name = keyword.toLowerCase();
-
-    if (hasOwnProperty.call(keywords, name)) {
-        return keywords[keyword] = keywords[name];
-    }
-
-    var vendor = !isCustomProperty(name, 0) ? getVendorPrefix(name, 0) : '';
-
-    return keywords[keyword] = Object.freeze({
-        vendor: vendor,
-        prefix: vendor,
-        name: name.substr(vendor.length)
     });
-}
 
-function getPropertyInfo(property) {
-    if (hasOwnProperty.call(properties, property)) {
-        return properties[property];
+    if (errorOffset === -1) {
+        errorOffset = css.length;
     }
 
-    var name = property;
-    var hack = property[0];
+    error.rawMessage = message;
+    error.syntax = syntax ? translateGrammar(syntax) : '<generic>';
+    error.css = css;
+    error.mismatchOffset = errorOffset;
+    error.loc = {
+        source: badNode && badNode.loc && badNode.loc.source || '<unknown>',
+        start: start,
+        end: end
+    };
+    error.line = start ? start.line : undefined;
+    error.column = start ? start.column : undefined;
+    error.offset = start ? start.offset : undefined;
+    error.message = message + '\n' +
+        '  syntax: ' + error.syntax + '\n' +
+        '   value: ' + (error.css || '<empty string>') + '\n' +
+        '  --------' + new Array(error.mismatchOffset + 1).join('-') + '^';
 
-    if (hack === '/') {
-        hack = property[1] === '/' ? '//' : '/';
-    } else if (hack !== '_' &&
-               hack !== '*' &&
-               hack !== '$' &&
-               hack !== '#' &&
-               hack !== '+') {
-        hack = '';
-    }
-
-    var custom = isCustomProperty(name, hack.length);
-
-    if (!custom) {
-        name = name.toLowerCase();
-        if (hasOwnProperty.call(properties, name)) {
-            return properties[property] = properties[name];
-        }
-    }
-
-    var vendor = !custom ? getVendorPrefix(name, hack.length) : '';
-
-    return properties[property] = Object.freeze({
-        hack: hack,
-        vendor: vendor,
-        prefix: hack + vendor,
-        name: name.substr(hack.length + vendor.length),
-        custom: custom
-    });
-}
+    return error;
+};
 
 module.exports = {
-    keyword: getKeywordInfo,
-    property: getPropertyInfo
+    SyntaxReferenceError: SyntaxReferenceError,
+    MatchError: MatchError
 };
-}, {}];
+}, {"66":66,"70":70}];

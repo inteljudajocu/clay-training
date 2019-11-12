@@ -1,14 +1,30 @@
 window.modules["301"] = [function(require,module,exports){/**
- * The base implementation of `_.hasIn` without support for deep paths.
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
  *
- * @private
- * @param {Object} [object] The object to query.
- * @param {Array|string} key The key to check.
- * @returns {boolean} Returns `true` if `key` exists, else `false`.
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
  */
-function baseHasIn(object, key) {
-  return object != null && key in Object(object);
+function isObjectLike(value) {
+  return value != null && typeof value == 'object';
 }
 
-module.exports = baseHasIn;
+module.exports = isObjectLike;
 }, {}];

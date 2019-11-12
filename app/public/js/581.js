@@ -1,9 +1,23 @@
-window.modules["581"] = [function(require,module,exports){var capitalize = require(577);
-var camelize = require(574);
-var makeString = require(578);
+window.modules["581"] = [function(require,module,exports){
+var makeString = require(576);
 
-module.exports = function classify(str) {
-  str = makeString(str);
-  return capitalize(camelize(str.replace(/[\W_]/g, ' ')).replace(/\s/g, ''));
+var from  = 'ąàáäâãåæăćčĉęèéëêĝĥìíïîĵłľńňòóöőôõðøśșşšŝťțţŭùúüűûñÿýçżźž',
+  to    = 'aaaaaaaaaccceeeeeghiiiijllnnoooooooossssstttuuuuuunyyczzz';
+
+from += from.toUpperCase();
+to += to.toUpperCase();
+
+to = to.split('');
+
+// for tokens requireing multitoken output
+from += 'ß';
+to.push('ss');
+
+
+module.exports = function cleanDiacritics(str) {
+  return makeString(str).replace(/.{1}/g, function(c){
+    var index = from.indexOf(c);
+    return index === -1 ? c : to[index];
+  });
 };
-}, {"574":574,"577":577,"578":578}];
+}, {"576":576}];

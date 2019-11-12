@@ -1,36 +1,34 @@
-window.modules["319"] = [function(require,module,exports){/** Used as references for various `Number` constants. */
-var MAX_SAFE_INTEGER = 9007199254740991;
+window.modules["319"] = [function(require,module,exports){var baseIsEqual = require(302),
+    get = require(2),
+    hasIn = require(329),
+    isKey = require(327),
+    isStrictComparable = require(328),
+    matchesStrictComparable = require(325),
+    toKey = require(290);
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
 
 /**
- * Checks if `value` is a valid array-like length.
+ * The base implementation of `_.matchesProperty` which doesn't clone `srcValue`.
  *
- * **Note:** This method is loosely based on
- * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
- * @example
- *
- * _.isLength(3);
- * // => true
- *
- * _.isLength(Number.MIN_VALUE);
- * // => false
- *
- * _.isLength(Infinity);
- * // => false
- *
- * _.isLength('3');
- * // => false
+ * @private
+ * @param {string} path The path of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
  */
-function isLength(value) {
-  return typeof value == 'number' &&
-    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+function baseMatchesProperty(path, srcValue) {
+  if (isKey(path) && isStrictComparable(srcValue)) {
+    return matchesStrictComparable(toKey(path), srcValue);
+  }
+  return function(object) {
+    var objValue = get(object, path);
+    return (objValue === undefined && objValue === srcValue)
+      ? hasIn(object, path)
+      : baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG);
+  };
 }
 
-module.exports = isLength;
-}, {}];
+module.exports = baseMatchesProperty;
+}, {"2":2,"290":290,"302":302,"325":325,"327":327,"328":328,"329":329}];

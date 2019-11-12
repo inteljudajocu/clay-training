@@ -1,41 +1,19 @@
-window.modules["350"] = [function(require,module,exports){var assignValue = require(282),
-    baseAssignValue = require(283);
-
-/**
- * Copies properties of `source` to `object`.
+window.modules["350"] = [function(require,module,exports){/**
+ * Converts `set` to an array of its values.
  *
  * @private
- * @param {Object} source The object to copy properties from.
- * @param {Array} props The property identifiers to copy.
- * @param {Object} [object={}] The object to copy properties to.
- * @param {Function} [customizer] The function to customize copied values.
- * @returns {Object} Returns `object`.
+ * @param {Object} set The set to convert.
+ * @returns {Array} Returns the values.
  */
-function copyObject(source, props, object, customizer) {
-  var isNew = !object;
-  object || (object = {});
-
+function setToArray(set) {
   var index = -1,
-      length = props.length;
+      result = Array(set.size);
 
-  while (++index < length) {
-    var key = props[index];
-
-    var newValue = customizer
-      ? customizer(object[key], source[key], key, object, source)
-      : undefined;
-
-    if (newValue === undefined) {
-      newValue = source[key];
-    }
-    if (isNew) {
-      baseAssignValue(object, key, newValue);
-    } else {
-      assignValue(object, key, newValue);
-    }
-  }
-  return object;
+  set.forEach(function(value) {
+    result[++index] = value;
+  });
+  return result;
 }
 
-module.exports = copyObject;
-}, {"282":282,"283":283}];
+module.exports = setToArray;
+}, {}];

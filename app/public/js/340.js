@@ -1,48 +1,15 @@
-window.modules["340"] = [function(require,module,exports){var assignValue = require(282),
-    castPath = require(296),
-    isIndex = require(276),
-    isObject = require(25),
-    toKey = require(295);
-
-/**
- * The base implementation of `_.set`.
+window.modules["340"] = [function(require,module,exports){/**
+ * The base implementation of `_.unary` without support for storing metadata.
  *
  * @private
- * @param {Object} object The object to modify.
- * @param {Array|string} path The path of the property to set.
- * @param {*} value The value to set.
- * @param {Function} [customizer] The function to customize path creation.
- * @returns {Object} Returns `object`.
+ * @param {Function} func The function to cap arguments for.
+ * @returns {Function} Returns the new capped function.
  */
-function baseSet(object, path, value, customizer) {
-  if (!isObject(object)) {
-    return object;
-  }
-  path = castPath(path, object);
-
-  var index = -1,
-      length = path.length,
-      lastIndex = length - 1,
-      nested = object;
-
-  while (nested != null && ++index < length) {
-    var key = toKey(path[index]),
-        newValue = value;
-
-    if (index != lastIndex) {
-      var objValue = nested[key];
-      newValue = customizer ? customizer(objValue, key, nested) : undefined;
-      if (newValue === undefined) {
-        newValue = isObject(objValue)
-          ? objValue
-          : (isIndex(path[index + 1]) ? [] : {});
-      }
-    }
-    assignValue(nested, key, newValue);
-    nested = nested[key];
-  }
-  return object;
+function baseUnary(func) {
+  return function(value) {
+    return func(value);
+  };
 }
 
-module.exports = baseSet;
-}, {"25":25,"276":276,"282":282,"295":295,"296":296}];
+module.exports = baseUnary;
+}, {}];

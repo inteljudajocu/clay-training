@@ -1,8 +1,16 @@
-window.modules["234"] = [function(require,module,exports){var getNative = require(236),
-    root = require(235);
+window.modules["234"] = [function(require,module,exports){var nativeCreate = require(361);
 
-/* Built-in method references that are verified to be native. */
-var DataView = getNative(root, 'DataView');
+/**
+ * Removes all key-value entries from the hash.
+ *
+ * @private
+ * @name clear
+ * @memberOf Hash
+ */
+function hashClear() {
+  this.__data__ = nativeCreate ? nativeCreate(null) : {};
+  this.size = 0;
+}
 
-module.exports = DataView;
-}, {"235":235,"236":236}];
+module.exports = hashClear;
+}, {"361":361}];

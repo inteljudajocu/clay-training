@@ -2,11 +2,11 @@ window.modules["472"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _namespace = require(477);
+var _namespace = require(474);
 
 var _namespace2 = _interopRequireDefault(_namespace);
 
-var _types = require(463);
+var _types = require(460);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -16,24 +16,20 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ClassName = function (_Namespace) {
-    _inherits(ClassName, _Namespace);
+var Tag = function (_Namespace) {
+    _inherits(Tag, _Namespace);
 
-    function ClassName(opts) {
-        _classCallCheck(this, ClassName);
+    function Tag(opts) {
+        _classCallCheck(this, Tag);
 
         var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
 
-        _this.type = _types.CLASS;
+        _this.type = _types.TAG;
         return _this;
     }
 
-    ClassName.prototype.toString = function toString() {
-        return [this.spaces.before, this.ns, String('.' + this.value), this.spaces.after].join('');
-    };
-
-    return ClassName;
+    return Tag;
 }(_namespace2.default);
 
-exports.default = ClassName;
-module.exports = exports['default'];}, {"463":463,"477":477}];
+exports.default = Tag;
+module.exports = exports['default'];}, {"460":460,"474":474}];

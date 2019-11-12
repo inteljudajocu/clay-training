@@ -1,101 +1,83 @@
-window.modules["89"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
+window.modules["89"] = [function(require,module,exports){var List = require(53);
+var Tokenizer = require(75);
+var Lexer = require(59);
+var grammar = require(72);
+var createParser = require(73);
+var createGenerator = require(54);
+var createConvertor = require(52);
+var createWalker = require(91);
+var clone = require(90);
+var names = require(60);
+var mix = require(84);
 
-var WHITESPACE = TYPE.WhiteSpace;
-var COMMENT = TYPE.Comment;
-var IDENTIFIER = TYPE.Identifier;
-var FUNCTION = TYPE.Function;
-var LEFTPARENTHESIS = TYPE.LeftParenthesis;
-var HYPHENMINUS = TYPE.HyphenMinus;
-var COLON = TYPE.Colon;
-
-function consumeRaw() {
-    return new List().appendData(
-        this.Raw(this.scanner.currentToken, 0, 0, false, false)
-    );
-}
-
-function parentheses() {
-    var index = 0;
-
-    this.scanner.skipSC();
-
-    // TODO: make it simplier
-    if (this.scanner.tokenType === IDENTIFIER) {
-        index = 1;
-    } else if (this.scanner.tokenType === HYPHENMINUS &&
-               this.scanner.lookupType(1) === IDENTIFIER) {
-        index = 2;
+function assign(dest, src) {
+    for (var key in src) {
+        dest[key] = src[key];
     }
 
-    if (index !== 0 && this.scanner.lookupNonWSType(index) === COLON) {
-        return new List().appendData(
-            this.Declaration()
-        );
-    }
-
-    return readSequence.call(this);
+    return dest;
 }
 
-function readSequence() {
-    var children = new List();
-    var space = null;
-    var child;
+function createSyntax(config) {
+    var parse = createParser(config);
+    var walker = createWalker(config);
+    var generator = createGenerator(config);
+    var convertor = createConvertor(walker);
 
-    this.scanner.skipSC();
+    var syntax = {
+        List: List,
+        Tokenizer: Tokenizer,
+        Lexer: Lexer,
 
-    scan:
-    while (!this.scanner.eof) {
-        switch (this.scanner.tokenType) {
-            case WHITESPACE:
-                space = this.WhiteSpace();
-                continue;
+        property: names.property,
+        keyword: names.keyword,
 
-            case COMMENT:
-                this.scanner.next();
-                continue;
-
-            case FUNCTION:
-                child = this.Function(consumeRaw, this.scope.AtrulePrelude);
-                break;
-
-            case IDENTIFIER:
-                child = this.Identifier();
-                break;
-
-            case LEFTPARENTHESIS:
-                child = this.Parentheses(parentheses, this.scope.AtrulePrelude);
-                break;
-
-            default:
-                break scan;
-        }
-
-        if (space !== null) {
-            children.appendData(space);
-            space = null;
-        }
-
-        children.appendData(child);
-    }
-
-    return children;
-}
-
-module.exports = {
-    parse: {
-        prelude: function() {
-            var children = readSequence.call(this);
-
-            if (children.isEmpty()) {
-                this.scanner.error('Condition is expected');
-            }
-
-            return children;
+        grammar: grammar,
+        lexer: null,
+        createLexer: function(config) {
+            return new Lexer(config, syntax, syntax.lexer.structure);
         },
-        block: function() {
-            return this.Block(false);
+
+        parse: parse,
+
+        walk: walker.walk,
+        walkUp: walker.walkUp,
+        walkRules: walker.walkRules,
+        walkRulesRight: walker.walkRulesRight,
+        walkDeclarations: walker.walkDeclarations,
+
+        translate: generator.translate,
+        translateWithSourceMap: generator.translateWithSourceMap,
+        translateMarkup: generator.translateMarkup,
+
+        clone: clone,
+        fromPlainObject: convertor.fromPlainObject,
+        toPlainObject: convertor.toPlainObject,
+
+        createSyntax: function(config) {
+            return createSyntax(mix({}, config));
+        },
+        fork: function(extension) {
+            var base = mix({}, config); // copy of config
+            return createSyntax(
+                typeof extension === 'function'
+                    ? extension(base, assign)
+                    : mix(base, extension)
+            );
         }
-    }
+    };
+
+    syntax.lexer = new Lexer({
+        generic: true,
+        types: config.types,
+        properties: config.properties,
+        node: config.node
+    }, syntax);
+
+    return syntax;
 };
-}, {"61":61,"82":82}];
+
+exports.create = function(config) {
+    return createSyntax(mix({}, config));
+};
+}, {"52":52,"53":53,"54":54,"59":59,"60":60,"72":72,"73":73,"75":75,"84":84,"90":90,"91":91}];

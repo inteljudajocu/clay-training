@@ -1,58 +1,126 @@
-window.modules["131"] = [function(require,module,exports){var isNumber = require(82).isNumber;
-var TYPE = require(82).TYPE;
+window.modules["131"] = [function(require,module,exports){var isHex = require(75).isHex;
+var TYPE = require(75).TYPE;
+
+var IDENTIFIER = TYPE.Identifier;
 var NUMBER = TYPE.Number;
-var SOLIDUS = TYPE.Solidus;
+var PLUSSIGN = TYPE.PlusSign;
+var HYPHENMINUS = TYPE.HyphenMinus;
 var FULLSTOP = TYPE.FullStop;
+var QUESTIONMARK = TYPE.QuestionMark;
 
-// Terms of <ratio> should to be a positive number (not zero or negative)
-// (see https://drafts.csswg.org/mediaqueries-3/#values)
-// However, -o-min-device-pixel-ratio takes fractional values as a ratio's term
-// and this is using by various sites. Therefore we relax checking on parse
-// to test a term is unsigned number without exponent part.
-// Additional checks may to be applied on lexer validation.
-function consumeNumber(scanner) {
-    var value = scanner.consumeNonWS(NUMBER);
+function scanUnicodeNumber(scanner) {
+    for (var pos = scanner.tokenStart + 1; pos < scanner.tokenEnd; pos++) {
+        var code = scanner.source.charCodeAt(pos);
 
-    for (var i = 0; i < value.length; i++) {
-        var code = value.charCodeAt(i);
-        if (!isNumber(code) && code !== FULLSTOP) {
-            scanner.error('Unsigned number is expected', scanner.tokenStart - value.length + i);
+        // break on fullstop or hyperminus/plussign after exponent
+        if (code === FULLSTOP || code === PLUSSIGN) {
+            // break token, exclude symbol
+            scanner.tokenStart = pos;
+            return false;
         }
     }
 
-    if (Number(value) === 0) {
-        scanner.error('Zero number is not allowed', scanner.tokenStart - value.length);
-    }
-
-    return value;
+    return true;
 }
 
-// <positive-integer> S* '/' S* <positive-integer>
+// https://drafts.csswg.org/css-syntax-3/#urange
+function scanUnicodeRange(scanner) {
+    var hexStart = scanner.tokenStart + 1; // skip +
+    var hexLength = 0;
+
+    scan: {
+        if (scanner.tokenType === NUMBER) {
+            if (scanner.source.charCodeAt(scanner.tokenStart) !== FULLSTOP && scanUnicodeNumber(scanner)) {
+                scanner.next();
+            } else if (scanner.source.charCodeAt(scanner.tokenStart) !== HYPHENMINUS) {
+                break scan;
+            }
+        } else {
+            scanner.next(); // PLUSSIGN
+        }
+
+        if (scanner.tokenType === HYPHENMINUS) {
+            scanner.next();
+        }
+
+        if (scanner.tokenType === NUMBER) {
+            scanner.next();
+        }
+
+        if (scanner.tokenType === IDENTIFIER) {
+            scanner.next();
+        }
+
+        if (scanner.tokenStart === hexStart) {
+            scanner.error('Unexpected input', hexStart);
+        }
+    }
+
+    // validate for U+x{1,6} or U+x{1,6}-x{1,6}
+    // where x is [0-9a-fA-F]
+    for (var i = hexStart, wasHyphenMinus = false; i < scanner.tokenStart; i++) {
+        var code = scanner.source.charCodeAt(i);
+
+        if (isHex(code) === false && (code !== HYPHENMINUS || wasHyphenMinus)) {
+            scanner.error('Unexpected input', i);
+        }
+
+        if (code === HYPHENMINUS) {
+            // hex sequence shouldn't be an empty
+            if (hexLength === 0) {
+                scanner.error('Unexpected input', i);
+            }
+
+            wasHyphenMinus = true;
+            hexLength = 0;
+        } else {
+            hexLength++;
+
+            // too long hex sequence
+            if (hexLength > 6) {
+                scanner.error('Too long hex sequence', i);
+            }
+        }
+
+    }
+
+    // check we have a non-zero sequence
+    if (hexLength === 0) {
+        scanner.error('Unexpected input', i - 1);
+    }
+
+    // U+abc???
+    if (!wasHyphenMinus) {
+        // consume as many U+003F QUESTION MARK (?) code points as possible
+        for (; hexLength < 6 && !scanner.eof; scanner.next()) {
+            if (scanner.tokenType !== QUESTIONMARK) {
+                break;
+            }
+
+            hexLength++;
+        }
+    }
+}
+
 module.exports = {
-    name: 'Ratio',
+    name: 'UnicodeRange',
     structure: {
-        left: String,
-        right: String
+        value: String
     },
     parse: function() {
         var start = this.scanner.tokenStart;
-        var left = consumeNumber(this.scanner);
-        var right;
 
-        this.scanner.eatNonWS(SOLIDUS);
-        right = consumeNumber(this.scanner);
+        this.scanner.next(); // U or u
+        scanUnicodeRange(this.scanner);
 
         return {
-            type: 'Ratio',
+            type: 'UnicodeRange',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            left: left,
-            right: right
+            value: this.scanner.substrToCursor(start)
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.left);
-        processChunk('/');
-        processChunk(node.right);
+        processChunk(node.value);
     }
 };
-}, {"82":82}];
+}, {"75":75}];

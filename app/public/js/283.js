@@ -1,26 +1,17 @@
-window.modules["283"] = [function(require,module,exports){var defineProperty = require(286);
+window.modules["283"] = [function(require,module,exports){var baseFor = require(286),
+    keys = require(288);
 
 /**
- * The base implementation of `assignValue` and `assignMergeValue` without
- * value checks.
+ * The base implementation of `_.forOwn` without support for iteratee shorthands.
  *
  * @private
- * @param {Object} object The object to modify.
- * @param {string} key The key of the property to assign.
- * @param {*} value The value to assign.
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Object} Returns `object`.
  */
-function baseAssignValue(object, key, value) {
-  if (key == '__proto__' && defineProperty) {
-    defineProperty(object, key, {
-      'configurable': true,
-      'enumerable': true,
-      'value': value,
-      'writable': true
-    });
-  } else {
-    object[key] = value;
-  }
+function baseForOwn(object, iteratee) {
+  return object && baseFor(object, iteratee, keys);
 }
 
-module.exports = baseAssignValue;
-}, {"286":286}];
+module.exports = baseForOwn;
+}, {"286":286,"288":288}];

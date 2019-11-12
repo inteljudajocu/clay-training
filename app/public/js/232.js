@@ -1,26 +1,33 @@
-window.modules["232"] = [function(require,module,exports){module.exports = Stream;
+window.modules["232"] = [function(require,module,exports){var hashClear = require(234),
+    hashDelete = require(233),
+    hashGet = require(237),
+    hashHas = require(236),
+    hashSet = require(235);
 
-var Parser = require(228);
-var WritableStream = require(2).Writable;
-var StringDecoder = require(9).StringDecoder;
-var Buffer = require(4).Buffer;
+/**
+ * Creates a hash object.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function Hash(entries) {
+  var index = -1,
+      length = entries == null ? 0 : entries.length;
 
-function Stream(cbs, options) {
-    var parser = (this._parser = new Parser(cbs, options));
-    var decoder = (this._decoder = new StringDecoder());
-
-    WritableStream.call(this, { decodeStrings: false });
-
-    this.once("finish", function() {
-        parser.end(decoder.end());
-    });
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
 }
 
-require(227)(Stream, WritableStream);
+// Add methods to `Hash`.
+Hash.prototype.clear = hashClear;
+Hash.prototype['delete'] = hashDelete;
+Hash.prototype.get = hashGet;
+Hash.prototype.has = hashHas;
+Hash.prototype.set = hashSet;
 
-Stream.prototype._write = function(chunk, encoding, cb) {
-    if (chunk instanceof Buffer) chunk = this._decoder.write(chunk);
-    this._parser.write(chunk);
-    cb();
-};
-}, {"2":2,"4":4,"9":9,"227":227,"228":228}];
+module.exports = Hash;
+}, {"233":233,"234":234,"235":235,"236":236,"237":237}];

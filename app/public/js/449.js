@@ -2,552 +2,240 @@ window.modules["449"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(433);
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _declaration2 = _interopRequireDefault(_declaration);
+var _lazyResult = require(438);
 
-var _tokenize = require(450);
-
-var _tokenize2 = _interopRequireDefault(_tokenize);
-
-var _comment = require(431);
-
-var _comment2 = _interopRequireDefault(_comment);
-
-var _atRule = require(429);
-
-var _atRule2 = _interopRequireDefault(_atRule);
-
-var _root = require(435);
-
-var _root2 = _interopRequireDefault(_root);
-
-var _rule = require(436);
-
-var _rule2 = _interopRequireDefault(_rule);
+var _lazyResult2 = _interopRequireDefault(_lazyResult);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Parser = function () {
-    function Parser(input) {
-        _classCallCheck(this, Parser);
+/**
+ * Contains plugins to process CSS. Create one `Processor` instance,
+ * initialize its plugins, and then use that instance on numerous CSS files.
+ *
+ * @example
+ * const processor = postcss([autoprefixer, precss]);
+ * processor.process(css1).then(result => console.log(result.css));
+ * processor.process(css2).then(result => console.log(result.css));
+ */
+var Processor = function () {
 
-        this.input = input;
+  /**
+   * @param {Array.<Plugin|pluginFunction>|Processor} plugins - PostCSS
+   *        plugins. See {@link Processor#use} for plugin format.
+   */
+  function Processor() {
+    var plugins = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
-        this.root = new _root2.default();
-        this.current = this.root;
-        this.spaces = '';
-        this.semicolon = false;
+    _classCallCheck(this, Processor);
 
-        this.createTokenizer();
-        this.root.source = { input: input, start: { line: 1, column: 1 } };
+    /**
+     * @member {string} - Current PostCSS version.
+     *
+     * @example
+     * if ( result.processor.version.split('.')[0] !== '6' ) {
+     *   throw new Error('This plugin works only with PostCSS 6');
+     * }
+     */
+    this.version = '6.0.23';
+    /**
+     * @member {pluginFunction[]} - Plugins added to this processor.
+     *
+     * @example
+     * const processor = postcss([autoprefixer, precss]);
+     * processor.plugins.length //=> 2
+     */
+    this.plugins = this.normalize(plugins);
+  }
+
+  /**
+   * Adds a plugin to be used as a CSS processor.
+   *
+   * PostCSS plugin can be in 4 formats:
+   * * A plugin created by {@link postcss.plugin} method.
+   * * A function. PostCSS will pass the function a @{link Root}
+   *   as the first argument and current {@link Result} instance
+   *   as the second.
+   * * An object with a `postcss` method. PostCSS will use that method
+   *   as described in #2.
+   * * Another {@link Processor} instance. PostCSS will copy plugins
+   *   from that instance into this one.
+   *
+   * Plugins can also be added by passing them as arguments when creating
+   * a `postcss` instance (see [`postcss(plugins)`]).
+   *
+   * Asynchronous plugins should return a `Promise` instance.
+   *
+   * @param {Plugin|pluginFunction|Processor} plugin - PostCSS plugin
+   *                                                   or {@link Processor}
+   *                                                   with plugins
+   *
+   * @example
+   * const processor = postcss()
+   *   .use(autoprefixer)
+   *   .use(precss);
+   *
+   * @return {Processes} current processor to make methods chain
+   */
+
+
+  Processor.prototype.use = function use(plugin) {
+    this.plugins = this.plugins.concat(this.normalize([plugin]));
+    return this;
+  };
+
+  /**
+   * Parses source CSS and returns a {@link LazyResult} Promise proxy.
+   * Because some plugins can be asynchronous it doesn’t make
+   * any transformations. Transformations will be applied
+   * in the {@link LazyResult} methods.
+   *
+   * @param {string|toString|Result} css - String with input CSS or
+   *                                       any object with a `toString()`
+   *                                       method, like a Buffer.
+   *                                       Optionally, send a {@link Result}
+   *                                       instance and the processor will
+   *                                       take the {@link Root} from it.
+   * @param {processOptions} [opts]      - options
+   *
+   * @return {LazyResult} Promise proxy
+   *
+   * @example
+   * processor.process(css, { from: 'a.css', to: 'a.out.css' })
+   *   .then(result => {
+   *      console.log(result.css);
+   *   });
+   */
+
+
+  Processor.prototype.process = function process(css) {
+    var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    return new _lazyResult2.default(this, css, opts);
+  };
+
+  Processor.prototype.normalize = function normalize(plugins) {
+    var normalized = [];
+    for (var _iterator = plugins, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+      var _ref;
+
+      if (_isArray) {
+        if (_i >= _iterator.length) break;
+        _ref = _iterator[_i++];
+      } else {
+        _i = _iterator.next();
+        if (_i.done) break;
+        _ref = _i.value;
+      }
+
+      var i = _ref;
+
+      if (i.postcss) i = i.postcss;
+
+      if ((typeof i === 'undefined' ? 'undefined' : _typeof(i)) === 'object' && Array.isArray(i.plugins)) {
+        normalized = normalized.concat(i.plugins);
+      } else if (typeof i === 'function') {
+        normalized.push(i);
+      } else if ((typeof i === 'undefined' ? 'undefined' : _typeof(i)) === 'object' && (i.parse || i.stringify)) {
+        throw new Error('PostCSS syntaxes cannot be used as plugins. ' + 'Instead, please use one of the ' + 'syntax/parser/stringifier options as ' + 'outlined in your PostCSS ' + 'runner documentation.');
+      } else {
+        throw new Error(i + ' is not a PostCSS plugin');
+      }
     }
+    return normalized;
+  };
 
-    Parser.prototype.createTokenizer = function createTokenizer() {
-        this.tokenizer = (0, _tokenize2.default)(this.input);
-    };
-
-    Parser.prototype.parse = function parse() {
-        var token = void 0;
-        while (!this.tokenizer.endOfFile()) {
-            token = this.tokenizer.nextToken();
-
-            switch (token[0]) {
-
-                case 'space':
-                    this.spaces += token[1];
-                    break;
-
-                case ';':
-                    this.freeSemicolon(token);
-                    break;
-
-                case '}':
-                    this.end(token);
-                    break;
-
-                case 'comment':
-                    this.comment(token);
-                    break;
-
-                case 'at-word':
-                    this.atrule(token);
-                    break;
-
-                case '{':
-                    this.emptyRule(token);
-                    break;
-
-                default:
-                    this.other(token);
-                    break;
-            }
-        }
-        this.endFile();
-    };
-
-    Parser.prototype.comment = function comment(token) {
-        var node = new _comment2.default();
-        this.init(node, token[2], token[3]);
-        node.source.end = { line: token[4], column: token[5] };
-
-        var text = token[1].slice(2, -2);
-        if (/^\s*$/.test(text)) {
-            node.text = '';
-            node.raws.left = text;
-            node.raws.right = '';
-        } else {
-            var match = text.match(/^(\s*)([^]*[^\s])(\s*)$/);
-            node.text = match[2];
-            node.raws.left = match[1];
-            node.raws.right = match[3];
-        }
-    };
-
-    Parser.prototype.emptyRule = function emptyRule(token) {
-        var node = new _rule2.default();
-        this.init(node, token[2], token[3]);
-        node.selector = '';
-        node.raws.between = '';
-        this.current = node;
-    };
-
-    Parser.prototype.other = function other(start) {
-        var end = false;
-        var type = null;
-        var colon = false;
-        var bracket = null;
-        var brackets = [];
-
-        var tokens = [];
-        var token = start;
-        while (token) {
-            type = token[0];
-            tokens.push(token);
-
-            if (type === '(' || type === '[') {
-                if (!bracket) bracket = token;
-                brackets.push(type === '(' ? ')' : ']');
-            } else if (brackets.length === 0) {
-                if (type === ';') {
-                    if (colon) {
-                        this.decl(tokens);
-                        return;
-                    } else {
-                        break;
-                    }
-                } else if (type === '{') {
-                    this.rule(tokens);
-                    return;
-                } else if (type === '}') {
-                    this.tokenizer.back(tokens.pop());
-                    end = true;
-                    break;
-                } else if (type === ':') {
-                    colon = true;
-                }
-            } else if (type === brackets[brackets.length - 1]) {
-                brackets.pop();
-                if (brackets.length === 0) bracket = null;
-            }
-
-            token = this.tokenizer.nextToken();
-        }
-
-        if (this.tokenizer.endOfFile()) end = true;
-        if (brackets.length > 0) this.unclosedBracket(bracket);
-
-        if (end && colon) {
-            while (tokens.length) {
-                token = tokens[tokens.length - 1][0];
-                if (token !== 'space' && token !== 'comment') break;
-                this.tokenizer.back(tokens.pop());
-            }
-            this.decl(tokens);
-            return;
-        } else {
-            this.unknownWord(tokens);
-        }
-    };
-
-    Parser.prototype.rule = function rule(tokens) {
-        tokens.pop();
-
-        var node = new _rule2.default();
-        this.init(node, tokens[0][2], tokens[0][3]);
-
-        node.raws.between = this.spacesAndCommentsFromEnd(tokens);
-        this.raw(node, 'selector', tokens);
-        this.current = node;
-    };
-
-    Parser.prototype.decl = function decl(tokens) {
-        var node = new _declaration2.default();
-        this.init(node);
-
-        var last = tokens[tokens.length - 1];
-        if (last[0] === ';') {
-            this.semicolon = true;
-            tokens.pop();
-        }
-        if (last[4]) {
-            node.source.end = { line: last[4], column: last[5] };
-        } else {
-            node.source.end = { line: last[2], column: last[3] };
-        }
-
-        while (tokens[0][0] !== 'word') {
-            if (tokens.length === 1) this.unknownWord(tokens);
-            node.raws.before += tokens.shift()[1];
-        }
-        node.source.start = { line: tokens[0][2], column: tokens[0][3] };
-
-        node.prop = '';
-        while (tokens.length) {
-            var type = tokens[0][0];
-            if (type === ':' || type === 'space' || type === 'comment') {
-                break;
-            }
-            node.prop += tokens.shift()[1];
-        }
-
-        node.raws.between = '';
-
-        var token = void 0;
-        while (tokens.length) {
-            token = tokens.shift();
-
-            if (token[0] === ':') {
-                node.raws.between += token[1];
-                break;
-            } else {
-                node.raws.between += token[1];
-            }
-        }
-
-        if (node.prop[0] === '_' || node.prop[0] === '*') {
-            node.raws.before += node.prop[0];
-            node.prop = node.prop.slice(1);
-        }
-        node.raws.between += this.spacesAndCommentsFromStart(tokens);
-        this.precheckMissedSemicolon(tokens);
-
-        for (var i = tokens.length - 1; i > 0; i--) {
-            token = tokens[i];
-            if (token[1].toLowerCase() === '!important') {
-                node.important = true;
-                var string = this.stringFrom(tokens, i);
-                string = this.spacesFromEnd(tokens) + string;
-                if (string !== ' !important') node.raws.important = string;
-                break;
-            } else if (token[1].toLowerCase() === 'important') {
-                var cache = tokens.slice(0);
-                var str = '';
-                for (var j = i; j > 0; j--) {
-                    var _type = cache[j][0];
-                    if (str.trim().indexOf('!') === 0 && _type !== 'space') {
-                        break;
-                    }
-                    str = cache.pop()[1] + str;
-                }
-                if (str.trim().indexOf('!') === 0) {
-                    node.important = true;
-                    node.raws.important = str;
-                    tokens = cache;
-                }
-            }
-
-            if (token[0] !== 'space' && token[0] !== 'comment') {
-                break;
-            }
-        }
-
-        this.raw(node, 'value', tokens);
-
-        if (node.value.indexOf(':') !== -1) this.checkMissedSemicolon(tokens);
-    };
-
-    Parser.prototype.atrule = function atrule(token) {
-        var node = new _atRule2.default();
-        node.name = token[1].slice(1);
-        if (node.name === '') {
-            this.unnamedAtrule(node, token);
-        }
-        this.init(node, token[2], token[3]);
-
-        var prev = void 0;
-        var shift = void 0;
-        var last = false;
-        var open = false;
-        var params = [];
-
-        while (!this.tokenizer.endOfFile()) {
-            token = this.tokenizer.nextToken();
-
-            if (token[0] === ';') {
-                node.source.end = { line: token[2], column: token[3] };
-                this.semicolon = true;
-                break;
-            } else if (token[0] === '{') {
-                open = true;
-                break;
-            } else if (token[0] === '}') {
-                if (params.length > 0) {
-                    shift = params.length - 1;
-                    prev = params[shift];
-                    while (prev && prev[0] === 'space') {
-                        prev = params[--shift];
-                    }
-                    if (prev) {
-                        node.source.end = { line: prev[4], column: prev[5] };
-                    }
-                }
-                this.end(token);
-                break;
-            } else {
-                params.push(token);
-            }
-
-            if (this.tokenizer.endOfFile()) {
-                last = true;
-                break;
-            }
-        }
-
-        node.raws.between = this.spacesAndCommentsFromEnd(params);
-        if (params.length) {
-            node.raws.afterName = this.spacesAndCommentsFromStart(params);
-            this.raw(node, 'params', params);
-            if (last) {
-                token = params[params.length - 1];
-                node.source.end = { line: token[4], column: token[5] };
-                this.spaces = node.raws.between;
-                node.raws.between = '';
-            }
-        } else {
-            node.raws.afterName = '';
-            node.params = '';
-        }
-
-        if (open) {
-            node.nodes = [];
-            this.current = node;
-        }
-    };
-
-    Parser.prototype.end = function end(token) {
-        if (this.current.nodes && this.current.nodes.length) {
-            this.current.raws.semicolon = this.semicolon;
-        }
-        this.semicolon = false;
-
-        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
-        this.spaces = '';
-
-        if (this.current.parent) {
-            this.current.source.end = { line: token[2], column: token[3] };
-            this.current = this.current.parent;
-        } else {
-            this.unexpectedClose(token);
-        }
-    };
-
-    Parser.prototype.endFile = function endFile() {
-        if (this.current.parent) this.unclosedBlock();
-        if (this.current.nodes && this.current.nodes.length) {
-            this.current.raws.semicolon = this.semicolon;
-        }
-        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
-    };
-
-    Parser.prototype.freeSemicolon = function freeSemicolon(token) {
-        this.spaces += token[1];
-        if (this.current.nodes) {
-            var prev = this.current.nodes[this.current.nodes.length - 1];
-            if (prev && prev.type === 'rule' && !prev.raws.ownSemicolon) {
-                prev.raws.ownSemicolon = this.spaces;
-                this.spaces = '';
-            }
-        }
-    };
-
-    // Helpers
-
-    Parser.prototype.init = function init(node, line, column) {
-        this.current.push(node);
-
-        node.source = { start: { line: line, column: column }, input: this.input };
-        node.raws.before = this.spaces;
-        this.spaces = '';
-        if (node.type !== 'comment') this.semicolon = false;
-    };
-
-    Parser.prototype.raw = function raw(node, prop, tokens) {
-        var token = void 0,
-            type = void 0;
-        var length = tokens.length;
-        var value = '';
-        var clean = true;
-        var next = void 0,
-            prev = void 0;
-        var pattern = /^([.|#])?([\w])+/i;
-
-        for (var i = 0; i < length; i += 1) {
-            token = tokens[i];
-            type = token[0];
-
-            if (type === 'comment' && node.type === 'rule') {
-                prev = tokens[i - 1];
-                next = tokens[i + 1];
-
-                if (prev[0] !== 'space' && next[0] !== 'space' && pattern.test(prev[1]) && pattern.test(next[1])) {
-                    value += token[1];
-                } else {
-                    clean = false;
-                }
-
-                continue;
-            }
-
-            if (type === 'comment' || type === 'space' && i === length - 1) {
-                clean = false;
-            } else {
-                value += token[1];
-            }
-        }
-        if (!clean) {
-            var raw = tokens.reduce(function (all, i) {
-                return all + i[1];
-            }, '');
-            node.raws[prop] = { value: value, raw: raw };
-        }
-        node[prop] = value;
-    };
-
-    Parser.prototype.spacesAndCommentsFromEnd = function spacesAndCommentsFromEnd(tokens) {
-        var lastTokenType = void 0;
-        var spaces = '';
-        while (tokens.length) {
-            lastTokenType = tokens[tokens.length - 1][0];
-            if (lastTokenType !== 'space' && lastTokenType !== 'comment') break;
-            spaces = tokens.pop()[1] + spaces;
-        }
-        return spaces;
-    };
-
-    Parser.prototype.spacesAndCommentsFromStart = function spacesAndCommentsFromStart(tokens) {
-        var next = void 0;
-        var spaces = '';
-        while (tokens.length) {
-            next = tokens[0][0];
-            if (next !== 'space' && next !== 'comment') break;
-            spaces += tokens.shift()[1];
-        }
-        return spaces;
-    };
-
-    Parser.prototype.spacesFromEnd = function spacesFromEnd(tokens) {
-        var lastTokenType = void 0;
-        var spaces = '';
-        while (tokens.length) {
-            lastTokenType = tokens[tokens.length - 1][0];
-            if (lastTokenType !== 'space') break;
-            spaces = tokens.pop()[1] + spaces;
-        }
-        return spaces;
-    };
-
-    Parser.prototype.stringFrom = function stringFrom(tokens, from) {
-        var result = '';
-        for (var i = from; i < tokens.length; i++) {
-            result += tokens[i][1];
-        }
-        tokens.splice(from, tokens.length - from);
-        return result;
-    };
-
-    Parser.prototype.colon = function colon(tokens) {
-        var brackets = 0;
-        var token = void 0,
-            type = void 0,
-            prev = void 0;
-        for (var i = 0; i < tokens.length; i++) {
-            token = tokens[i];
-            type = token[0];
-
-            if (type === '(') {
-                brackets += 1;
-            } else if (type === ')') {
-                brackets -= 1;
-            } else if (brackets === 0 && type === ':') {
-                if (!prev) {
-                    this.doubleColon(token);
-                } else if (prev[0] === 'word' && prev[1] === 'progid') {
-                    continue;
-                } else {
-                    return i;
-                }
-            }
-
-            prev = token;
-        }
-        return false;
-    };
-
-    // Errors
-
-    Parser.prototype.unclosedBracket = function unclosedBracket(bracket) {
-        throw this.input.error('Unclosed bracket', bracket[2], bracket[3]);
-    };
-
-    Parser.prototype.unknownWord = function unknownWord(tokens) {
-        throw this.input.error('Unknown word', tokens[0][2], tokens[0][3]);
-    };
-
-    Parser.prototype.unexpectedClose = function unexpectedClose(token) {
-        throw this.input.error('Unexpected }', token[2], token[3]);
-    };
-
-    Parser.prototype.unclosedBlock = function unclosedBlock() {
-        var pos = this.current.source.start;
-        throw this.input.error('Unclosed block', pos.line, pos.column);
-    };
-
-    Parser.prototype.doubleColon = function doubleColon(token) {
-        throw this.input.error('Double colon', token[2], token[3]);
-    };
-
-    Parser.prototype.unnamedAtrule = function unnamedAtrule(node, token) {
-        throw this.input.error('At-rule without name', token[2], token[3]);
-    };
-
-    Parser.prototype.precheckMissedSemicolon = function precheckMissedSemicolon(tokens) {
-        // Hook for Safe Parser
-        tokens;
-    };
-
-    Parser.prototype.checkMissedSemicolon = function checkMissedSemicolon(tokens) {
-        var colon = this.colon(tokens);
-        if (colon === false) return;
-
-        var founded = 0;
-        var token = void 0;
-        for (var j = colon - 1; j >= 0; j--) {
-            token = tokens[j];
-            if (token[0] !== 'space') {
-                founded += 1;
-                if (founded === 2) break;
-            }
-        }
-        throw this.input.error('Missed semicolon', token[2], token[3]);
-    };
-
-    return Parser;
+  return Processor;
 }();
 
-exports.default = Parser;
+exports.default = Processor;
+
+/**
+ * @callback builder
+ * @param {string} part          - part of generated CSS connected to this node
+ * @param {Node}   node          - AST node
+ * @param {"start"|"end"} [type] - node’s part type
+ */
+
+/**
+ * @callback parser
+ *
+ * @param {string|toString} css   - string with input CSS or any object
+ *                                  with toString() method, like a Buffer
+ * @param {processOptions} [opts] - options with only `from` and `map` keys
+ *
+ * @return {Root} PostCSS AST
+ */
+
+/**
+ * @callback stringifier
+ *
+ * @param {Node} node       - start node for stringifing. Usually {@link Root}.
+ * @param {builder} builder - function to concatenate CSS from node’s parts
+ *                            or generate string and source map
+ *
+ * @return {void}
+ */
+
+/**
+ * @typedef {object} syntax
+ * @property {parser} parse          - function to generate AST by string
+ * @property {stringifier} stringify - function to generate string by AST
+ */
+
+/**
+ * @typedef {object} toString
+ * @property {function} toString
+ */
+
+/**
+ * @callback pluginFunction
+ * @param {Root} root     - parsed input CSS
+ * @param {Result} result - result to set warnings or check other plugins
+ */
+
+/**
+ * @typedef {object} Plugin
+ * @property {function} postcss - PostCSS plugin function
+ */
+
+/**
+ * @typedef {object} processOptions
+ * @property {string} from             - the path of the CSS source file.
+ *                                       You should always set `from`,
+ *                                       because it is used in source map
+ *                                       generation and syntax error messages.
+ * @property {string} to               - the path where you’ll put the output
+ *                                       CSS file. You should always set `to`
+ *                                       to generate correct source maps.
+ * @property {parser} parser           - function to generate AST by string
+ * @property {stringifier} stringifier - class to generate string by AST
+ * @property {syntax} syntax           - object with `parse` and `stringify`
+ * @property {object} map              - source map options
+ * @property {boolean} map.inline                    - does source map should
+ *                                                     be embedded in the output
+ *                                                     CSS as a base64-encoded
+ *                                                     comment
+ * @property {string|object|false|function} map.prev - source map content
+ *                                                     from a previous
+ *                                                     processing step
+ *                                                     (for example, Sass).
+ *                                                     PostCSS will try to find
+ *                                                     previous map
+ *                                                     automatically, so you
+ *                                                     could disable it by
+ *                                                     `false` value.
+ * @property {boolean} map.sourcesContent            - does PostCSS should set
+ *                                                     the origin content to map
+ * @property {string|false} map.annotation           - does PostCSS should set
+ *                                                     annotation comment to map
+ * @property {string} map.from                       - override `from` in map’s
+ *                                                     `sources`
+ */
+
 module.exports = exports['default'];
 
-}, {"429":429,"431":431,"433":433,"435":435,"436":436,"450":450}];
+}, {"438":438}];

@@ -1,20 +1,10 @@
-window.modules["590"] = [function(require,module,exports){/* We're explicitly defining the list of entities we want to escape.
-nbsp is an HTML entity, but we don't want to escape all space characters in a string, hence its omission in this map.
+window.modules["590"] = [function(require,module,exports){var makeString = require(576);
 
-*/
-var escapeChars = {
-  '¢' : 'cent',
-  '£' : 'pound',
-  '¥' : 'yen',
-  '€': 'euro',
-  '©' :'copy',
-  '®' : 'reg',
-  '<' : 'lt',
-  '>' : 'gt',
-  '"' : 'quot',
-  '&' : 'amp',
-  '\'' : '#39'
+module.exports = function adjacent(str, direction) {
+  str = makeString(str);
+  if (str.length === 0) {
+    return '';
+  }
+  return str.slice(0, -1) + String.fromCharCode(str.charCodeAt(str.length - 1) + direction);
 };
-
-module.exports = escapeChars;
-}, {}];
+}, {"576":576}];

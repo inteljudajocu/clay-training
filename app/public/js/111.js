@@ -1,25 +1,25 @@
-window.modules["111"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+window.modules["111"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 var IDENTIFIER = TYPE.Identifier;
-var FULLSTOP = TYPE.FullStop;
+var NUMBERSIGN = TYPE.NumberSign;
 
-// '.' ident
+// '#' ident
 module.exports = {
-    name: 'ClassSelector',
+    name: 'IdSelector',
     structure: {
         name: String
     },
     parse: function() {
-        this.scanner.eat(FULLSTOP);
+        this.scanner.eat(NUMBERSIGN);
 
         return {
-            type: 'ClassSelector',
+            type: 'IdSelector',
             loc: this.getLocation(this.scanner.tokenStart - 1, this.scanner.tokenEnd),
             name: this.scanner.consume(IDENTIFIER)
         };
     },
     generate: function(processChunk, node) {
-        processChunk('.');
+        processChunk('#');
         processChunk(node.name);
     }
 };
-}, {"82":82}];
+}, {"75":75}];

@@ -1,5 +1,6 @@
-window.modules["600"] = [function(require,module,exports){module.exports = function lines(str) {
-  if (str == null) return [];
-  return String(str).split(/\r\n?|\n/);
+window.modules["600"] = [function(require,module,exports){module.exports = function toNumber(num, precision) {
+  if (num == null) return 0;
+  var factor = Math.pow(10, isFinite(precision) ? precision : 0);
+  return Math.round(num * factor) / factor;
 };
 }, {}];

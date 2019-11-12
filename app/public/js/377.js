@@ -1,23 +1,29 @@
-window.modules["377"] = [function(require,module,exports){/**
- * Checks if `value` is `undefined`.
+window.modules["377"] = [function(require,module,exports){var toString = require(343);
+
+/**
+ * Converts `string`, as a whole, to lower case just like
+ * [String#toLowerCase](https://mdn.io/toLowerCase).
  *
  * @static
- * @since 0.1.0
  * @memberOf _
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is `undefined`, else `false`.
+ * @since 4.0.0
+ * @category String
+ * @param {string} [string=''] The string to convert.
+ * @returns {string} Returns the lower cased string.
  * @example
  *
- * _.isUndefined(void 0);
- * // => true
+ * _.toLower('--Foo-Bar--');
+ * // => '--foo-bar--'
  *
- * _.isUndefined(null);
- * // => false
+ * _.toLower('fooBar');
+ * // => 'foobar'
+ *
+ * _.toLower('__FOO_BAR__');
+ * // => '__foo_bar__'
  */
-function isUndefined(value) {
-  return value === undefined;
+function toLower(value) {
+  return toString(value).toLowerCase();
 }
 
-module.exports = isUndefined;
-}, {}];
+module.exports = toLower;
+}, {"343":343}];

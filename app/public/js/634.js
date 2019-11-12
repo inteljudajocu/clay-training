@@ -1,10 +1,10 @@
-window.modules["634"] = [function(require,module,exports){var makeString = require(578);
+window.modules["634"] = [function(require,module,exports){var makeString = require(576);
+var toPositive = require(586);
 
-module.exports = function(str, callback) {
+module.exports = function startsWith(str, starts, position) {
   str = makeString(str);
-
-  if (str.length === 0 || typeof callback !== 'function') return str;
-
-  return str.replace(/./g, callback);
+  starts = '' + starts;
+  position = position == null ? 0 : Math.min(toPositive(position), str.length);
+  return str.lastIndexOf(starts, position) === position;
 };
-}, {"578":578}];
+}, {"576":576,"586":586}];

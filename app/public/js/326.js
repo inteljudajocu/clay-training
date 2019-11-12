@@ -1,19 +1,25 @@
-window.modules["326"] = [function(require,module,exports){/** Used for built-in method references. */
-var objectProto = Object.prototype;
+window.modules["326"] = [function(require,module,exports){var isStrictComparable = require(328),
+    keys = require(288);
 
 /**
- * Checks if `value` is likely a prototype object.
+ * Gets the property names, values, and compare flags of `object`.
  *
  * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the match data of `object`.
  */
-function isPrototype(value) {
-  var Ctor = value && value.constructor,
-      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
+function getMatchData(object) {
+  var result = keys(object),
+      length = result.length;
 
-  return value === proto;
+  while (length--) {
+    var key = result[length],
+        value = object[key];
+
+    result[length] = [key, value, isStrictComparable(value)];
+  }
+  return result;
 }
 
-module.exports = isPrototype;
-}, {}];
+module.exports = getMatchData;
+}, {"288":288,"328":328}];

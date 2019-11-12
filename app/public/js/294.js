@@ -1,25 +1,23 @@
-window.modules["294"] = [function(require,module,exports){var castPath = require(296),
-    toKey = require(295);
+window.modules["294"] = [function(require,module,exports){/** Used for built-in method references. */
+var objectProto = Object.prototype;
 
 /**
- * The base implementation of `_.get` without support for default values.
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var nativeObjectToString = objectProto.toString;
+
+/**
+ * Converts `value` to a string using `Object.prototype.toString`.
  *
  * @private
- * @param {Object} object The object to query.
- * @param {Array|string} path The path of the property to get.
- * @returns {*} Returns the resolved value.
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
  */
-function baseGet(object, path) {
-  path = castPath(path, object);
-
-  var index = 0,
-      length = path.length;
-
-  while (object != null && index < length) {
-    object = object[toKey(path[index++])];
-  }
-  return (index && index == length) ? object : undefined;
+function objectToString(value) {
+  return nativeObjectToString.call(value);
 }
 
-module.exports = baseGet;
-}, {"295":295,"296":296}];
+module.exports = objectToString;
+}, {}];

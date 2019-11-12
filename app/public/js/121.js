@@ -1,74 +1,62 @@
-window.modules["121"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+window.modules["121"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
-var NUMBER = TYPE.Number;
-var LEFTPARENTHESIS = TYPE.LeftParenthesis;
-var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+var FUNCTION = TYPE.Function;
 var COLON = TYPE.Colon;
-var SOLIDUS = TYPE.Solidus;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 
+// : ident [ '(' .. ')' ]?
 module.exports = {
-    name: 'MediaFeature',
+    name: 'PseudoClassSelector',
     structure: {
         name: String,
-        value: ['Identifier', 'Number', 'Dimension', 'Ratio', null]
+        children: [['Raw'], null]
     },
     parse: function() {
         var start = this.scanner.tokenStart;
+        var children = null;
         var name;
-        var value = null;
+        var nameLowerCase;
 
-        this.scanner.eat(LEFTPARENTHESIS);
-        this.scanner.skipSC();
+        this.scanner.eat(COLON);
 
-        name = this.scanner.consume(IDENTIFIER);
-        this.scanner.skipSC();
+        if (this.scanner.tokenType === FUNCTION) {
+            name = this.scanner.consumeFunctionName();
+            nameLowerCase = name.toLowerCase();
 
-        if (this.scanner.tokenType !== RIGHTPARENTHESIS) {
-            this.scanner.eat(COLON);
-            this.scanner.skipSC();
-
-            switch (this.scanner.tokenType) {
-                case NUMBER:
-                    if (this.scanner.lookupType(1) === IDENTIFIER) {
-                        value = this.Dimension();
-                    } else if (this.scanner.lookupNonWSType(1) === SOLIDUS) {
-                        value = this.Ratio();
-                    } else {
-                        value = this.Number();
-                    }
-
-                    break;
-
-                case IDENTIFIER:
-                    value = this.Identifier();
-
-                    break;
-
-                default:
-                    this.scanner.error('Number, dimension, ratio or identifier is expected');
+            if (this.pseudo.hasOwnProperty(nameLowerCase)) {
+                this.scanner.skipSC();
+                children = this.pseudo[nameLowerCase].call(this);
+                this.scanner.skipSC();
+            } else {
+                children = new List().appendData(
+                    this.Raw(this.scanner.currentToken, 0, 0, false, false)
+                );
             }
 
-            this.scanner.skipSC();
+            this.scanner.eat(RIGHTPARENTHESIS);
+        } else {
+            name = this.scanner.consume(IDENTIFIER);
         }
 
-        this.scanner.eat(RIGHTPARENTHESIS);
-
         return {
-            type: 'MediaFeature',
+            type: 'PseudoClassSelector',
             loc: this.getLocation(start, this.scanner.tokenStart),
             name: name,
-            value: value
+            children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk('(');
+        processChunk(':');
         processChunk(node.name);
-        if (node.value !== null) {
-            processChunk(':');
-            this.generate(processChunk, node.value);
+
+        if (node.children !== null) {
+            processChunk('(');
+            this.each(processChunk, node);
+            processChunk(')');
         }
-        processChunk(')');
-    }
+    },
+    walkContext: 'function'
 };
-}, {"82":82}];
+}, {"53":53,"75":75}];

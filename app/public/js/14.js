@@ -1,154 +1,36 @@
-window.modules["14"] = [function(require,module,exports){'use strict';
+window.modules["14"] = [function(require,module,exports){var baseSet = require(335);
 
-var speakingurl = require(570),
-    he = require(213),
-    typogr = require(573),
-    headQuotes = require(214),
-    striptags = require(17),
-    _isString = require(371),
-    _isPlainObject = require(376),
-    _isArray = require(273),
-    _mapValues = require(379),
-    _toLower = require(382),
-    _require = require(212),
-    fold = _require.fold,
-    NON_ALPHANUMERIC_RE = /[_\W]/g;
 /**
- * smarten headlines, curling quotes and replacing dashes and ellipses
- * @param {string} text
- * @returns {string}
- */
-
-
-function toSmartHeadline(text) {
-  return headQuotes(he.decode(text)).replace('---', '—') // em-dash first
-  .replace('--', '–').replace('...', '…');
-}
-/**
- * run typogr's smartypants on text, curling quotes and replacing dashes and ellipses
- * note: this is used for body text and teasers, NOT headlines
- * note: we have to decode quotes, then curl them, then decode them again
- * @param {string} text
- * @returns {string}
- */
-
-
-function toSmartText(text) {
-  return he.decode(typogr(he.decode(text)).chain().smartypants().value());
-}
-/**
- * Removes all unicode from string
- * @param {string} str
- * @returns {string}
- */
-
-
-function stripUnicode(str) {
-  return str.replace(/[^A-Za-z 0-9\.,\?!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]~]*/g, '');
-}
-/**
- * remove all html stuff from a string
- * @param {string} str
- * @returns {string}
- */
-
-
-function toPlainText(str) {
-  // coerce all text into a string. Undefined stuff is just an empty string
-  if (!_isString(str)) {
-    return '';
-  }
-
-  return he.decode(striptags(str.replace(/&nbsp;/g, ' ')));
-}
-/**
- * remove EVERYTHING from the slug, then run it through speakingurl
- * @param {string} str
- * @returns {string}
- */
-
-
-function cleanSlug(str) {
-  return speakingurl(toPlainText(stripUnicode(str)), {
-    custom: {
-      _: '-' // convert underscores to hyphens
-
-    }
-  });
-}
-/**
- * remove empty tags and rando whitespace
- * used when saving wysiwyg content
- * @param {string} str
- * @returns {string}
- */
-
-
-function validateTagContent(str) {
-  var noTags = striptags(str); // if a string ONLY contains tags, return emptystring.
-  // this fixes some issues where browsers insert tags into empty
-  // contenteditable elements, as well as some unrecoverable states where
-  // users added rich text and then deleted it in a specific way that
-  // preserved the tag, e.g. '<strong> </strong>'
-
-  if (noTags === '' || noTags.match(/^\s+$/)) {
-    return '';
-  } else {
-    return str; // otherwise return the string with all tags and everything
-  }
-}
-/**
- * Strip paragraph and line seperators from component data
- * @param {object|array|string} data
- * @returns {object|array|string} sanitized data
- */
-
-
-function recursivelyStripSeperators(data) {
-  if (_isPlainObject(data)) {
-    return _mapValues(data, recursivelyStripSeperators);
-  } else if (_isArray(data)) {
-    return data.map(recursivelyStripSeperators);
-  } else if (_isString(data)) {
-    return data.replace(/(\u2028|\u2029)/g, '');
-  }
-
-  return data;
-}
-/**
- * Removes all non alphanumeric characters from a string
- * @param   {string} str
- * @returns {string}
- */
-
-
-function removeNonAlphanumericCharacters() {
-  var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-  return str.replace(NON_ALPHANUMERIC_RE, '');
-}
-/**
- * normalizeName
+ * Sets the value at `path` of `object`. If a portion of `path` doesn't exist,
+ * it's created. Arrays are created for missing index properties while objects
+ * are created for all other missing properties. Use `_.setWith` to customize
+ * `path` creation.
  *
- * lowercases and converts alphabetic, numeric, and symbolic Unicode characters
- * which are not in the first 127 ASCII characters (the "Basic Latin" Unicode block)
- * into their ASCII equivalents
+ * **Note:** This method mutates `object`.
  *
- * @param {String} name a string to normalize
- * @returns {String}
+ * @static
+ * @memberOf _
+ * @since 3.7.0
+ * @category Object
+ * @param {Object} object The object to modify.
+ * @param {Array|string} path The path of the property to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * var object = { 'a': [{ 'b': { 'c': 3 } }] };
+ *
+ * _.set(object, 'a[0].b.c', 4);
+ * console.log(object.a[0].b.c);
+ * // => 4
+ *
+ * _.set(object, ['x', '0', 'y', 'z'], 5);
+ * console.log(object.x[0].y.z);
+ * // => 5
  */
-
-
-function normalizeName(name) {
-  return fold(_toLower(name.trim()));
+function set(object, path, value) {
+  return object == null ? object : baseSet(object, path, value);
 }
 
-module.exports.toSmartHeadline = toSmartHeadline;
-module.exports.toSmartText = toSmartText;
-module.exports.stripUnicode = stripUnicode;
-module.exports.toPlainText = toPlainText;
-module.exports.cleanSlug = cleanSlug;
-module.exports.validateTagContent = validateTagContent;
-module.exports.recursivelyStripSeperators = recursivelyStripSeperators;
-module.exports.removeNonAlphanumericCharacters = removeNonAlphanumericCharacters;
-module.exports.normalizeName = normalizeName;
-}, {"17":17,"212":212,"213":213,"214":214,"273":273,"371":371,"376":376,"379":379,"382":382,"570":570,"573":573}];
+module.exports = set;
+}, {"335":335}];

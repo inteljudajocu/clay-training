@@ -1,7 +1,37 @@
-window.modules["268"] = [function(require,module,exports){var root = require(235);
+window.modules["268"] = [function(require,module,exports){var baseIsArguments = require(300),
+    isObjectLike = require(301);
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
 
 /** Built-in value references. */
-var Uint8Array = root.Uint8Array;
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
 
-module.exports = Uint8Array;
-}, {"235":235}];
+/**
+ * Checks if `value` is likely an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArguments(function() { return arguments; }());
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsArguments : function(value) {
+  return isObjectLike(value) && hasOwnProperty.call(value, 'callee') &&
+    !propertyIsEnumerable.call(value, 'callee');
+};
+
+module.exports = isArguments;
+}, {"300":300,"301":301}];

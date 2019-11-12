@@ -1,36 +1,18 @@
-window.modules["27"] = [function(require,module,exports){var baseSet = require(340);
+window.modules["27"] = [function(require,module,exports){'use strict';
+
+const isUriStringCheck = require(50);
 
 /**
- * Sets the value at `path` of `object`. If a portion of `path` doesn't exist,
- * it's created. Arrays are created for missing index properties while objects
- * are created for all other missing properties. Use `_.setWith` to customize
- * `path` creation.
- *
- * **Note:** This method mutates `object`.
- *
- * @static
- * @memberOf _
- * @since 3.7.0
- * @category Object
- * @param {Object} object The object to modify.
- * @param {Array|string} path The path of the property to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns `object`.
- * @example
- *
- * var object = { 'a': [{ 'b': { 'c': 3 } }] };
- *
- * _.set(object, 'a[0].b.c', 4);
- * console.log(object.a[0].b.c);
- * // => 4
- *
- * _.set(object, ['x', '0', 'y', 'z'], 5);
- * console.log(object.x[0].y.z);
- * // => 5
+ * First test if argument passed in is a String. If true, get component instance
+ * from uri without the component version. Otherwise, throw an error.
+ * @example /_components/text/instances/0@published returns 0
+ * @param  {string} uri
+ * @return {string|null}
  */
-function set(object, path, value) {
-  return object == null ? object : baseSet(object, path, value);
-}
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  const result = /\/_components\/.+?\/instances\/([^\.@]+)/.exec(uri);
 
-module.exports = set;
-}, {"340":340}];
+  return result && result[1];
+};
+}, {"50":50}];

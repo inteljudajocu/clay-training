@@ -1,19 +1,19 @@
-window.modules["354"] = [function(require,module,exports){/**
- * Converts `map` to its key-value pairs.
+window.modules["354"] = [function(require,module,exports){var isKeyable = require(355);
+
+/**
+ * Gets the data for `map`.
  *
  * @private
- * @param {Object} map The map to convert.
- * @returns {Array} Returns the key-value pairs.
+ * @param {Object} map The map to query.
+ * @param {string} key The reference key.
+ * @returns {*} Returns the map data.
  */
-function mapToArray(map) {
-  var index = -1,
-      result = Array(map.size);
-
-  map.forEach(function(value, key) {
-    result[++index] = [key, value];
-  });
-  return result;
+function getMapData(map, key) {
+  var data = map.__data__;
+  return isKeyable(key)
+    ? data[typeof key == 'string' ? 'string' : 'hash']
+    : data.map;
 }
 
-module.exports = mapToArray;
-}, {}];
+module.exports = getMapData;
+}, {"355":355}];

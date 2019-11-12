@@ -1,19 +1,11 @@
-window.modules["136"] = [function(require,module,exports){var STRING = require(82).TYPE.String;
+window.modules["136"] = [function(require,module,exports){var List = require(53);
+var ALLOW_OF_CLAUSE = true;
 
 module.exports = {
-    name: 'String',
-    structure: {
-        value: String
-    },
     parse: function() {
-        return {
-            type: 'String',
-            loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
-            value: this.scanner.consume(STRING)
-        };
-    },
-    generate: function(processChunk, node) {
-        processChunk(node.value);
+        return new List().appendData(
+            this.Nth(ALLOW_OF_CLAUSE)
+        );
     }
 };
-}, {"82":82}];
+}, {"53":53}];

@@ -1,326 +1,345 @@
-window.modules["445"] = [function(require,module,exports){(function (Buffer){
-'use strict';
+window.modules["445"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _sourceMap = require(447);
-
-var _sourceMap2 = _interopRequireDefault(_sourceMap);
-
-var _path = require(7);
-
-var _path2 = _interopRequireDefault(_path);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var MapGenerator = function () {
-    function MapGenerator(stringify, root, opts) {
-        _classCallCheck(this, MapGenerator);
+var defaultRaw = {
+    colon: ': ',
+    indent: '    ',
+    beforeDecl: '\n',
+    beforeRule: '\n',
+    beforeOpen: ' ',
+    beforeClose: '\n',
+    beforeComment: '\n',
+    after: '\n',
+    emptyBody: '',
+    commentLeft: ' ',
+    commentRight: ' '
+};
 
-        this.stringify = stringify;
-        this.mapOpts = opts.map || {};
-        this.root = root;
-        this.opts = opts;
+function capitalize(str) {
+    return str[0].toUpperCase() + str.slice(1);
+}
+
+var Stringifier = function () {
+    function Stringifier(builder) {
+        _classCallCheck(this, Stringifier);
+
+        this.builder = builder;
     }
 
-    MapGenerator.prototype.isMap = function isMap() {
-        if (typeof this.opts.map !== 'undefined') {
-            return !!this.opts.map;
-        } else {
-            return this.previous().length > 0;
+    Stringifier.prototype.stringify = function stringify(node, semicolon) {
+        this[node.type](node, semicolon);
+    };
+
+    Stringifier.prototype.root = function root(node) {
+        this.body(node);
+        if (node.raws.after) this.builder(node.raws.after);
+    };
+
+    Stringifier.prototype.comment = function comment(node) {
+        var left = this.raw(node, 'left', 'commentLeft');
+        var right = this.raw(node, 'right', 'commentRight');
+        this.builder('/*' + left + node.text + right + '*/', node);
+    };
+
+    Stringifier.prototype.decl = function decl(node, semicolon) {
+        var between = this.raw(node, 'between', 'colon');
+        var string = node.prop + between + this.rawValue(node, 'value');
+
+        if (node.important) {
+            string += node.raws.important || ' !important';
+        }
+
+        if (semicolon) string += ';';
+        this.builder(string, node);
+    };
+
+    Stringifier.prototype.rule = function rule(node) {
+        this.block(node, this.rawValue(node, 'selector'));
+        if (node.raws.ownSemicolon) {
+            this.builder(node.raws.ownSemicolon, node, 'end');
         }
     };
 
-    MapGenerator.prototype.previous = function previous() {
-        var _this = this;
+    Stringifier.prototype.atrule = function atrule(node, semicolon) {
+        var name = '@' + node.name;
+        var params = node.params ? this.rawValue(node, 'params') : '';
 
-        if (!this.previousMaps) {
-            this.previousMaps = [];
-            this.root.walk(function (node) {
-                if (node.source && node.source.input.map) {
-                    var map = node.source.input.map;
-                    if (_this.previousMaps.indexOf(map) === -1) {
-                        _this.previousMaps.push(map);
+        if (typeof node.raws.afterName !== 'undefined') {
+            name += node.raws.afterName;
+        } else if (params) {
+            name += ' ';
+        }
+
+        if (node.nodes) {
+            this.block(node, name + params);
+        } else {
+            var end = (node.raws.between || '') + (semicolon ? ';' : '');
+            this.builder(name + params + end, node);
+        }
+    };
+
+    Stringifier.prototype.body = function body(node) {
+        var last = node.nodes.length - 1;
+        while (last > 0) {
+            if (node.nodes[last].type !== 'comment') break;
+            last -= 1;
+        }
+
+        var semicolon = this.raw(node, 'semicolon');
+        for (var i = 0; i < node.nodes.length; i++) {
+            var child = node.nodes[i];
+            var before = this.raw(child, 'before');
+            if (before) this.builder(before);
+            this.stringify(child, last !== i || semicolon);
+        }
+    };
+
+    Stringifier.prototype.block = function block(node, start) {
+        var between = this.raw(node, 'between', 'beforeOpen');
+        this.builder(start + between + '{', node, 'start');
+
+        var after = void 0;
+        if (node.nodes && node.nodes.length) {
+            this.body(node);
+            after = this.raw(node, 'after');
+        } else {
+            after = this.raw(node, 'after', 'emptyBody');
+        }
+
+        if (after) this.builder(after);
+        this.builder('}', node, 'end');
+    };
+
+    Stringifier.prototype.raw = function raw(node, own, detect) {
+        var value = void 0;
+        if (!detect) detect = own;
+
+        // Already had
+        if (own) {
+            value = node.raws[own];
+            if (typeof value !== 'undefined') return value;
+        }
+
+        var parent = node.parent;
+
+        // Hack for first rule in CSS
+        if (detect === 'before') {
+            if (!parent || parent.type === 'root' && parent.first === node) {
+                return '';
+            }
+        }
+
+        // Floating child without parent
+        if (!parent) return defaultRaw[detect];
+
+        // Detect style by other nodes
+        var root = node.root();
+        if (!root.rawCache) root.rawCache = {};
+        if (typeof root.rawCache[detect] !== 'undefined') {
+            return root.rawCache[detect];
+        }
+
+        if (detect === 'before' || detect === 'after') {
+            return this.beforeAfter(node, detect);
+        } else {
+            var method = 'raw' + capitalize(detect);
+            if (this[method]) {
+                value = this[method](root, node);
+            } else {
+                root.walk(function (i) {
+                    value = i.raws[own];
+                    if (typeof value !== 'undefined') return false;
+                });
+            }
+        }
+
+        if (typeof value === 'undefined') value = defaultRaw[detect];
+
+        root.rawCache[detect] = value;
+        return value;
+    };
+
+    Stringifier.prototype.rawSemicolon = function rawSemicolon(root) {
+        var value = void 0;
+        root.walk(function (i) {
+            if (i.nodes && i.nodes.length && i.last.type === 'decl') {
+                value = i.raws.semicolon;
+                if (typeof value !== 'undefined') return false;
+            }
+        });
+        return value;
+    };
+
+    Stringifier.prototype.rawEmptyBody = function rawEmptyBody(root) {
+        var value = void 0;
+        root.walk(function (i) {
+            if (i.nodes && i.nodes.length === 0) {
+                value = i.raws.after;
+                if (typeof value !== 'undefined') return false;
+            }
+        });
+        return value;
+    };
+
+    Stringifier.prototype.rawIndent = function rawIndent(root) {
+        if (root.raws.indent) return root.raws.indent;
+        var value = void 0;
+        root.walk(function (i) {
+            var p = i.parent;
+            if (p && p !== root && p.parent && p.parent === root) {
+                if (typeof i.raws.before !== 'undefined') {
+                    var parts = i.raws.before.split('\n');
+                    value = parts[parts.length - 1];
+                    value = value.replace(/[^\s]/g, '');
+                    return false;
+                }
+            }
+        });
+        return value;
+    };
+
+    Stringifier.prototype.rawBeforeComment = function rawBeforeComment(root, node) {
+        var value = void 0;
+        root.walkComments(function (i) {
+            if (typeof i.raws.before !== 'undefined') {
+                value = i.raws.before;
+                if (value.indexOf('\n') !== -1) {
+                    value = value.replace(/[^\n]+$/, '');
+                }
+                return false;
+            }
+        });
+        if (typeof value === 'undefined') {
+            value = this.raw(node, null, 'beforeDecl');
+        } else if (value) {
+            value = value.replace(/[^\s]/g, '');
+        }
+        return value;
+    };
+
+    Stringifier.prototype.rawBeforeDecl = function rawBeforeDecl(root, node) {
+        var value = void 0;
+        root.walkDecls(function (i) {
+            if (typeof i.raws.before !== 'undefined') {
+                value = i.raws.before;
+                if (value.indexOf('\n') !== -1) {
+                    value = value.replace(/[^\n]+$/, '');
+                }
+                return false;
+            }
+        });
+        if (typeof value === 'undefined') {
+            value = this.raw(node, null, 'beforeRule');
+        } else if (value) {
+            value = value.replace(/[^\s]/g, '');
+        }
+        return value;
+    };
+
+    Stringifier.prototype.rawBeforeRule = function rawBeforeRule(root) {
+        var value = void 0;
+        root.walk(function (i) {
+            if (i.nodes && (i.parent !== root || root.first !== i)) {
+                if (typeof i.raws.before !== 'undefined') {
+                    value = i.raws.before;
+                    if (value.indexOf('\n') !== -1) {
+                        value = value.replace(/[^\n]+$/, '');
                     }
-                }
-            });
-        }
-
-        return this.previousMaps;
-    };
-
-    MapGenerator.prototype.isInline = function isInline() {
-        if (typeof this.mapOpts.inline !== 'undefined') {
-            return this.mapOpts.inline;
-        }
-
-        var annotation = this.mapOpts.annotation;
-        if (typeof annotation !== 'undefined' && annotation !== true) {
-            return false;
-        }
-
-        if (this.previous().length) {
-            return this.previous().some(function (i) {
-                return i.inline;
-            });
-        } else {
-            return true;
-        }
-    };
-
-    MapGenerator.prototype.isSourcesContent = function isSourcesContent() {
-        if (typeof this.mapOpts.sourcesContent !== 'undefined') {
-            return this.mapOpts.sourcesContent;
-        }
-        if (this.previous().length) {
-            return this.previous().some(function (i) {
-                return i.withContent();
-            });
-        } else {
-            return true;
-        }
-    };
-
-    MapGenerator.prototype.clearAnnotation = function clearAnnotation() {
-        if (this.mapOpts.annotation === false) return;
-
-        var node = void 0;
-        for (var i = this.root.nodes.length - 1; i >= 0; i--) {
-            node = this.root.nodes[i];
-            if (node.type !== 'comment') continue;
-            if (node.text.indexOf('# sourceMappingURL=') === 0) {
-                this.root.removeChild(i);
-            }
-        }
-    };
-
-    MapGenerator.prototype.setSourcesContent = function setSourcesContent() {
-        var _this2 = this;
-
-        var already = {};
-        this.root.walk(function (node) {
-            if (node.source) {
-                var from = node.source.input.from;
-                if (from && !already[from]) {
-                    already[from] = true;
-                    var relative = _this2.relative(from);
-                    _this2.map.setSourceContent(relative, node.source.input.css);
+                    return false;
                 }
             }
         });
+        if (value) value = value.replace(/[^\s]/g, '');
+        return value;
     };
 
-    MapGenerator.prototype.applyPrevMaps = function applyPrevMaps() {
-        for (var _iterator = this.previous(), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref;
-
-            if (_isArray) {
-                if (_i >= _iterator.length) break;
-                _ref = _iterator[_i++];
-            } else {
-                _i = _iterator.next();
-                if (_i.done) break;
-                _ref = _i.value;
-            }
-
-            var prev = _ref;
-
-            var from = this.relative(prev.file);
-            var root = prev.root || _path2.default.dirname(prev.file);
-            var map = void 0;
-
-            if (this.mapOpts.sourcesContent === false) {
-                map = new _sourceMap2.default.SourceMapConsumer(prev.text);
-                if (map.sourcesContent) {
-                    map.sourcesContent = map.sourcesContent.map(function () {
-                        return null;
-                    });
-                }
-            } else {
-                map = prev.consumer();
-            }
-
-            this.map.applySourceMap(map, from, this.relative(root));
-        }
-    };
-
-    MapGenerator.prototype.isAnnotation = function isAnnotation() {
-        if (this.isInline()) {
-            return true;
-        } else if (typeof this.mapOpts.annotation !== 'undefined') {
-            return this.mapOpts.annotation;
-        } else if (this.previous().length) {
-            return this.previous().some(function (i) {
-                return i.annotation;
-            });
-        } else {
-            return true;
-        }
-    };
-
-    MapGenerator.prototype.toBase64 = function toBase64(str) {
-        if (Buffer) {
-            if (Buffer.from && Buffer.from !== Uint8Array.from) {
-                return Buffer.from(str).toString('base64');
-            } else {
-                return new Buffer(str).toString('base64');
-            }
-        } else {
-            return window.btoa(unescape(encodeURIComponent(str)));
-        }
-    };
-
-    MapGenerator.prototype.addAnnotation = function addAnnotation() {
-        var content = void 0;
-
-        if (this.isInline()) {
-
-            content = 'data:application/json;base64,' + this.toBase64(this.map.toString());
-        } else if (typeof this.mapOpts.annotation === 'string') {
-            content = this.mapOpts.annotation;
-        } else {
-            content = this.outputFile() + '.map';
-        }
-
-        var eol = '\n';
-        if (this.css.indexOf('\r\n') !== -1) eol = '\r\n';
-
-        this.css += eol + '/*# sourceMappingURL=' + content + ' */';
-    };
-
-    MapGenerator.prototype.outputFile = function outputFile() {
-        if (this.opts.to) {
-            return this.relative(this.opts.to);
-        } else if (this.opts.from) {
-            return this.relative(this.opts.from);
-        } else {
-            return 'to.css';
-        }
-    };
-
-    MapGenerator.prototype.generateMap = function generateMap() {
-        this.generateString();
-        if (this.isSourcesContent()) this.setSourcesContent();
-        if (this.previous().length > 0) this.applyPrevMaps();
-        if (this.isAnnotation()) this.addAnnotation();
-
-        if (this.isInline()) {
-            return [this.css];
-        } else {
-            return [this.css, this.map];
-        }
-    };
-
-    MapGenerator.prototype.relative = function relative(file) {
-        if (file.indexOf('<') === 0) return file;
-        if (/^\w+:\/\//.test(file)) return file;
-
-        var from = this.opts.to ? _path2.default.dirname(this.opts.to) : '.';
-
-        if (typeof this.mapOpts.annotation === 'string') {
-            from = _path2.default.dirname(_path2.default.resolve(from, this.mapOpts.annotation));
-        }
-
-        file = _path2.default.relative(from, file);
-        if (_path2.default.sep === '\\') {
-            return file.replace(/\\/g, '/');
-        } else {
-            return file;
-        }
-    };
-
-    MapGenerator.prototype.sourcePath = function sourcePath(node) {
-        if (this.mapOpts.from) {
-            return this.mapOpts.from;
-        } else {
-            return this.relative(node.source.input.from);
-        }
-    };
-
-    MapGenerator.prototype.generateString = function generateString() {
-        var _this3 = this;
-
-        this.css = '';
-        this.map = new _sourceMap2.default.SourceMapGenerator({ file: this.outputFile() });
-
-        var line = 1;
-        var column = 1;
-
-        var lines = void 0,
-            last = void 0;
-        this.stringify(this.root, function (str, node, type) {
-            _this3.css += str;
-
-            if (node && type !== 'end') {
-                if (node.source && node.source.start) {
-                    _this3.map.addMapping({
-                        source: _this3.sourcePath(node),
-                        generated: { line: line, column: column - 1 },
-                        original: {
-                            line: node.source.start.line,
-                            column: node.source.start.column - 1
-                        }
-                    });
-                } else {
-                    _this3.map.addMapping({
-                        source: '<no source>',
-                        original: { line: 1, column: 0 },
-                        generated: { line: line, column: column - 1 }
-                    });
-                }
-            }
-
-            lines = str.match(/\n/g);
-            if (lines) {
-                line += lines.length;
-                last = str.lastIndexOf('\n');
-                column = str.length - last;
-            } else {
-                column += str.length;
-            }
-
-            if (node && type !== 'start') {
-                if (node.source && node.source.end) {
-                    _this3.map.addMapping({
-                        source: _this3.sourcePath(node),
-                        generated: { line: line, column: column - 1 },
-                        original: {
-                            line: node.source.end.line,
-                            column: node.source.end.column
-                        }
-                    });
-                } else {
-                    _this3.map.addMapping({
-                        source: '<no source>',
-                        original: { line: 1, column: 0 },
-                        generated: { line: line, column: column - 1 }
-                    });
+    Stringifier.prototype.rawBeforeClose = function rawBeforeClose(root) {
+        var value = void 0;
+        root.walk(function (i) {
+            if (i.nodes && i.nodes.length > 0) {
+                if (typeof i.raws.after !== 'undefined') {
+                    value = i.raws.after;
+                    if (value.indexOf('\n') !== -1) {
+                        value = value.replace(/[^\n]+$/, '');
+                    }
+                    return false;
                 }
             }
         });
+        if (value) value = value.replace(/[^\s]/g, '');
+        return value;
     };
 
-    MapGenerator.prototype.generate = function generate() {
-        this.clearAnnotation();
+    Stringifier.prototype.rawBeforeOpen = function rawBeforeOpen(root) {
+        var value = void 0;
+        root.walk(function (i) {
+            if (i.type !== 'decl') {
+                value = i.raws.between;
+                if (typeof value !== 'undefined') return false;
+            }
+        });
+        return value;
+    };
 
-        if (this.isMap()) {
-            return this.generateMap();
+    Stringifier.prototype.rawColon = function rawColon(root) {
+        var value = void 0;
+        root.walkDecls(function (i) {
+            if (typeof i.raws.between !== 'undefined') {
+                value = i.raws.between.replace(/[^\s:]/g, '');
+                return false;
+            }
+        });
+        return value;
+    };
+
+    Stringifier.prototype.beforeAfter = function beforeAfter(node, detect) {
+        var value = void 0;
+        if (node.type === 'decl') {
+            value = this.raw(node, null, 'beforeDecl');
+        } else if (node.type === 'comment') {
+            value = this.raw(node, null, 'beforeComment');
+        } else if (detect === 'before') {
+            value = this.raw(node, null, 'beforeRule');
         } else {
-            var result = '';
-            this.stringify(this.root, function (i) {
-                result += i;
-            });
-            return [result];
+            value = this.raw(node, null, 'beforeClose');
+        }
+
+        var buf = node.parent;
+        var depth = 0;
+        while (buf && buf.type !== 'root') {
+            depth += 1;
+            buf = buf.parent;
+        }
+
+        if (value.indexOf('\n') !== -1) {
+            var indent = this.raw(node, null, 'indent');
+            if (indent.length) {
+                for (var step = 0; step < depth; step++) {
+                    value += indent;
+                }
+            }
+        }
+
+        return value;
+    };
+
+    Stringifier.prototype.rawValue = function rawValue(node, prop) {
+        var value = node[prop];
+        var raw = node.raws[prop];
+        if (raw && raw.value === value) {
+            return raw.raw;
+        } else {
+            return value;
         }
     };
 
-    return MapGenerator;
+    return Stringifier;
 }();
 
-exports.default = MapGenerator;
+exports.default = Stringifier;
 module.exports = exports['default'];
 
-
-}).call(this,require(4).Buffer)}, {"4":4,"7":7,"447":447}];
+}, {}];

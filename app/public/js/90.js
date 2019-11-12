@@ -1,9 +1,26 @@
-window.modules["90"] = [function(require,module,exports){var data = require(59);
+window.modules["90"] = [function(require,module,exports){'use strict';
 
-module.exports = {
-    generic: true,
-    types: data.types,
-    properties: data.properties,
-    node: require(91)
+var List = require(53);
+
+module.exports = function clone(node) {
+    var result = {};
+
+    for (var key in node) {
+        var value = node[key];
+
+        if (value) {
+            if (Array.isArray(value)) {
+                value = value.slice(0);
+            } else if (value instanceof List) {
+                value = new List().fromArray(value.map(clone));
+            } else if (value.constructor === Object) {
+                value = clone(value);
+            }
+        }
+
+        result[key] = value;
+    }
+
+    return result;
 };
-}, {"59":59,"91":91}];
+}, {"53":53}];

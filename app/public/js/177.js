@@ -1,36 +1,21 @@
-window.modules["177"] = [function(require,module,exports){var isDate = require(185)
-
-/**
+window.modules["177"] = [function(require,module,exports){/**
  * @category Common Helpers
- * @summary Is the given date valid?
+ * @summary Is the given argument an instance of Date?
  *
  * @description
- * Returns false if argument is Invalid Date and true otherwise.
- * Invalid Date is a Date, whose time value is NaN.
+ * Is the given argument an instance of Date?
  *
- * Time value of Date: http://es5.github.io/#x15.9.1.1
- *
- * @param {Date} date - the date to check
- * @returns {Boolean} the date is valid
- * @throws {TypeError} argument must be an instance of Date
+ * @param {*} argument - the argument to check
+ * @returns {Boolean} the given argument is an instance of Date
  *
  * @example
- * // For the valid date:
- * var result = isValid(new Date(2014, 1, 31))
- * //=> true
- *
- * @example
- * // For the invalid date:
- * var result = isValid(new Date(''))
+ * // Is 'mayonnaise' a Date?
+ * var result = isDate('mayonnaise')
  * //=> false
  */
-function isValid (dirtyDate) {
-  if (isDate(dirtyDate)) {
-    return !isNaN(dirtyDate)
-  } else {
-    throw new TypeError(toString.call(dirtyDate) + ' is not an instance of Date')
-  }
+function isDate (argument) {
+  return argument instanceof Date
 }
 
-module.exports = isValid
-}, {"185":185}];
+module.exports = isDate
+}, {}];

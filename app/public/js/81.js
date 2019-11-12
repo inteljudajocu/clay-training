@@ -1,159 +1,101 @@
-window.modules["81"] = [function(require,module,exports){'use strict';
+window.modules["81"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
-var Tokenizer = require(82);
-var sequence = require(83);
-var noop = function() {};
+var WHITESPACE = TYPE.WhiteSpace;
+var COMMENT = TYPE.Comment;
+var IDENTIFIER = TYPE.Identifier;
+var FUNCTION = TYPE.Function;
+var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+var HYPHENMINUS = TYPE.HyphenMinus;
+var COLON = TYPE.Colon;
 
-function createParseContext(name) {
-    return function() {
-        return this[name]();
-    };
+function consumeRaw() {
+    return new List().appendData(
+        this.Raw(this.scanner.currentToken, 0, 0, false, false)
+    );
 }
 
-function processConfig(config) {
-    var parserConfig = {
-        context: {},
-        scope: {},
-        atrule: {},
-        pseudo: {}
-    };
+function parentheses() {
+    var index = 0;
 
-    if (config.parseContext) {
-        for (var name in config.parseContext) {
-            switch (typeof config.parseContext[name]) {
-                case 'function':
-                    parserConfig.context[name] = config.parseContext[name];
-                    break;
+    this.scanner.skipSC();
 
-                case 'string':
-                    parserConfig.context[name] = createParseContext(config.parseContext[name]);
-                    break;
-            }
-        }
+    // TODO: make it simplier
+    if (this.scanner.tokenType === IDENTIFIER) {
+        index = 1;
+    } else if (this.scanner.tokenType === HYPHENMINUS &&
+               this.scanner.lookupType(1) === IDENTIFIER) {
+        index = 2;
     }
 
-    if (config.scope) {
-        for (var name in config.scope) {
-            parserConfig.scope[name] = config.scope[name];
-        }
+    if (index !== 0 && this.scanner.lookupNonWSType(index) === COLON) {
+        return new List().appendData(
+            this.Declaration()
+        );
     }
 
-    if (config.atrule) {
-        for (var name in config.atrule) {
-            var atrule = config.atrule[name];
-
-            if (atrule.parse) {
-                parserConfig.atrule[name] = atrule.parse;
-            }
-        }
-    }
-
-    if (config.pseudo) {
-        for (var name in config.pseudo) {
-            var pseudo = config.pseudo[name];
-
-            if (pseudo.parse) {
-                parserConfig.pseudo[name] = pseudo.parse;
-            }
-        }
-    }
-
-    if (config.node) {
-        for (var name in config.node) {
-            parserConfig[name] = config.node[name].parse;
-        }
-    }
-
-    return parserConfig;
+    return readSequence.call(this);
 }
 
-module.exports = function createParser(config) {
-    var parser = {
-        scanner: new Tokenizer(),
-        filename: '<unknown>',
-        needPositions: false,
-        tolerant: false,
-        onParseError: noop,
-        parseAtrulePrelude: true,
-        parseRulePrelude: true,
-        parseValue: true,
-        parseCustomProperty: false,
+function readSequence() {
+    var children = new List();
+    var space = null;
+    var child;
 
-        readSequence: sequence,
+    this.scanner.skipSC();
 
-        tolerantParse: function(consumer, fallback) {
-            if (this.tolerant) {
-                var start = this.scanner.currentToken;
+    scan:
+    while (!this.scanner.eof) {
+        switch (this.scanner.tokenType) {
+            case WHITESPACE:
+                space = this.WhiteSpace();
+                continue;
 
-                try {
-                    return consumer.call(this);
-                } catch (e) {
-                    var fallbackNode = fallback.call(this, start);
-                    this.onParseError(e, fallbackNode);
-                    return fallbackNode;
-                }
-            } else {
-                return consumer.call(this);
-            }
-        },
+            case COMMENT:
+                this.scanner.next();
+                continue;
 
-        getLocation: function(start, end) {
-            if (this.needPositions) {
-                return this.scanner.getLocationRange(
-                    start,
-                    end,
-                    this.filename
-                );
-            }
+            case FUNCTION:
+                child = this.Function(consumeRaw, this.scope.AtrulePrelude);
+                break;
 
-            return null;
-        },
-        getLocationFromList: function(list) {
-            if (this.needPositions) {
-                return this.scanner.getLocationRange(
-                    list.head !== null ? list.first().loc.start.offset - this.scanner.startOffset : this.scanner.tokenStart,
-                    list.head !== null ? list.last().loc.end.offset - this.scanner.startOffset : this.scanner.tokenStart,
-                    this.filename
-                );
-            }
+            case IDENTIFIER:
+                child = this.Identifier();
+                break;
 
-            return null;
+            case LEFTPARENTHESIS:
+                child = this.Parentheses(parentheses, this.scope.AtrulePrelude);
+                break;
+
+            default:
+                break scan;
         }
-    };
 
-    config = processConfig(config || {});
-    for (var key in config) {
-        parser[key] = config[key];
+        if (space !== null) {
+            children.appendData(space);
+            space = null;
+        }
+
+        children.appendData(child);
     }
 
-    return function(source, options) {
-        options = options || {};
+    return children;
+}
 
-        var context = options.context || 'default';
-        var ast;
+module.exports = {
+    parse: {
+        prelude: function() {
+            var children = readSequence.call(this);
 
-        parser.scanner.setSource(source, options.offset, options.line, options.column);
-        parser.filename = options.filename || '<unknown>';
-        parser.needPositions = Boolean(options.positions);
-        parser.tolerant = Boolean(options.tolerant);
-        parser.onParseError = typeof options.onParseError === 'function' ? options.onParseError : noop;
-        parser.parseAtrulePrelude = 'parseAtrulePrelude' in options ? Boolean(options.parseAtrulePrelude) : true;
-        parser.parseRulePrelude = 'parseRulePrelude' in options ? Boolean(options.parseRulePrelude) : true;
-        parser.parseValue = 'parseValue' in options ? Boolean(options.parseValue) : true;
-        parser.parseCustomProperty = 'parseCustomProperty' in options ? Boolean(options.parseCustomProperty) : false;
+            if (children.isEmpty()) {
+                this.scanner.error('Condition is expected');
+            }
 
-        if (!parser.context.hasOwnProperty(context)) {
-            throw new Error('Unknown context `' + context + '`');
+            return children;
+        },
+        block: function() {
+            return this.Block(false);
         }
-
-        ast = parser.context[context].call(parser, options);
-
-        if (!parser.scanner.eof) {
-            parser.scanner.error();
-        }
-
-        // console.log(JSON.stringify(ast, null, 4));
-        return ast;
-    };
+    }
 };
-}, {"82":82,"83":83}];
+}, {"53":53,"75":75}];

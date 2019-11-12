@@ -1,20 +1,19 @@
-window.modules["246"] = [function(require,module,exports){var assocIndexOf = require(285);
+window.modules["246"] = [function(require,module,exports){var getMapData = require(354);
 
 /**
- * Gets the list cache value for `key`.
+ * Removes `key` and its value from the map.
  *
  * @private
- * @name get
- * @memberOf ListCache
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
+ * @name delete
+ * @memberOf MapCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
  */
-function listCacheGet(key) {
-  var data = this.__data__,
-      index = assocIndexOf(data, key);
-
-  return index < 0 ? undefined : data[index][1];
+function mapCacheDelete(key) {
+  var result = getMapData(this, key)['delete'](key);
+  this.size -= result ? 1 : 0;
+  return result;
 }
 
-module.exports = listCacheGet;
-}, {"285":285}];
+module.exports = mapCacheDelete;
+}, {"354":354}];

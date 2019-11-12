@@ -1,215 +1,152 @@
-window.modules["18"] = [function(require,module,exports){(function (process){
-'use strict';
+window.modules["18"] = [function(require,module,exports){'use strict'
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+exports.byteLength = byteLength
+exports.toByteArray = toByteArray
+exports.fromByteArray = fromByteArray
 
-var _isArray = require(273),
-    _isObject = require(25),
-    _isEmpty = require(26),
-    _isString = require(371),
-    _isNull = require(375),
-    _isUndefined = require(377),
-    _get = require(15),
-    _parse = require(644),
-    publishedVersionSuffix = '@published',
-    kilnUrlParam = '&currentUrl=';
-/**
- * determine if a field is empty
- * @param  {*}  val
- * @return {Boolean}
- */
+var lookup = []
+var revLookup = []
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
 
-
-function isFieldEmpty(val) {
-  if (_isArray(val) || _isObject(val)) {
-    return _isEmpty(val);
-  } else if (_isString(val)) {
-    return val.length === 0; // emptystring is empty
-  } else if (_isNull(val) || _isUndefined(val)) {
-    return true; // null and undefined are empty
-  } else {
-    // numbers, booleans, etc are never empty
-    return false;
-  }
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+for (var i = 0, len = code.length; i < len; ++i) {
+  lookup[i] = code[i]
+  revLookup[code.charCodeAt(i)] = i
 }
-/**
- * convenience function to determine if a field exists and has a value
- * @param  {*}  val
- * @return {Boolean}
- */
 
+// Support decoding URL-safe base64 strings, as Node.js does.
+// See: https://en.wikipedia.org/wiki/Base64#URL_applications
+revLookup['-'.charCodeAt(0)] = 62
+revLookup['_'.charCodeAt(0)] = 63
 
-function has(val) {
-  return !isFieldEmpty(val);
-}
-/**
- * replace version in uri
- * e.g. when fetching @published data, or previous component data
- * @param  {string} uri
- * @param  {string} [version] defaults to latest
- * @return {string}
- */
+function getLens (b64) {
+  var len = b64.length
 
-
-function replaceVersion(uri, version) {
-  if (!_isString(uri)) {
-    throw new TypeError('Uri must be a string, not ' + _typeof(uri));
+  if (len % 4 > 0) {
+    throw new Error('Invalid string. Length must be a multiple of 4')
   }
 
-  if (version) {
-    uri = uri.split('@')[0] + '@' + version;
-  } else {
-    // no version is still a kind of version
-    uri = uri.split('@')[0];
+  // Trim off extra bytes after placeholder bytes are found
+  // See: https://github.com/beatgammit/base64-js/issues/42
+  var validLen = b64.indexOf('=')
+  if (validLen === -1) validLen = len
+
+  var placeHoldersLen = validLen === len
+    ? 0
+    : 4 - (validLen % 4)
+
+  return [validLen, placeHoldersLen]
+}
+
+// base64 is 4/3 + up to two characters of the original data
+function byteLength (b64) {
+  var lens = getLens(b64)
+  var validLen = lens[0]
+  var placeHoldersLen = lens[1]
+  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+}
+
+function _byteLength (b64, validLen, placeHoldersLen) {
+  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+}
+
+function toByteArray (b64) {
+  var tmp
+  var lens = getLens(b64)
+  var validLen = lens[0]
+  var placeHoldersLen = lens[1]
+
+  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen))
+
+  var curByte = 0
+
+  // if there are placeholders, only get up to the last complete 4 chars
+  var len = placeHoldersLen > 0
+    ? validLen - 4
+    : validLen
+
+  for (var i = 0; i < len; i += 4) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 18) |
+      (revLookup[b64.charCodeAt(i + 1)] << 12) |
+      (revLookup[b64.charCodeAt(i + 2)] << 6) |
+      revLookup[b64.charCodeAt(i + 3)]
+    arr[curByte++] = (tmp >> 16) & 0xFF
+    arr[curByte++] = (tmp >> 8) & 0xFF
+    arr[curByte++] = tmp & 0xFF
   }
 
-  return uri;
-}
-/**
- * generate a url from a uri (and some site data)
- * @param  {string} uri
- * @param  {object} locals
- * @return {string}
- */
-
-
-function uriToUrl(uri, locals) {
-  var protocol = _get(locals, 'site.protocol') || 'http',
-      port = _get(locals, 'site.port'),
-      parsed = _parse("".concat(protocol, "://").concat(uri));
-
-  if (port !== 80) {
-    parsed.set('port', port);
+  if (placeHoldersLen === 2) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 2) |
+      (revLookup[b64.charCodeAt(i + 1)] >> 4)
+    arr[curByte++] = tmp & 0xFF
   }
 
-  return parsed.href;
-}
-/**
- * generate a uri from a url
- * @param  {string} url
- * @return {string}
- */
-
-
-function urlToUri(url) {
-  var parsed = _parse(url);
-
-  return "".concat(parsed.hostname).concat(parsed.pathname);
-}
-/**
- * Make sure start is defined and within a justifiable range
- *
- * @param {int} n
- * @returns {int}
- */
-
-
-function formatStart(n) {
-  var min = 0,
-      max = 100000000;
-
-  if (typeof n === 'undefined' || Number.isNaN(n) || n < min || n > max) {
-    return 0;
-  } else {
-    return n;
+  if (placeHoldersLen === 1) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 10) |
+      (revLookup[b64.charCodeAt(i + 1)] << 4) |
+      (revLookup[b64.charCodeAt(i + 2)] >> 2)
+    arr[curByte++] = (tmp >> 8) & 0xFF
+    arr[curByte++] = tmp & 0xFF
   }
-}
-/*
- *
- * @param {object} locals
- * @param {string} [locals.site.protocol]
- * @param {string} locals.site.host
- * @param {string} [locals.site.port]
- * @param {string} [locals.site.path]
- * @returns {string} e.g. `http://localhost/somesite`
- */
 
-
-function getSiteBaseUrl(locals) {
-  var site = locals.site || {},
-      protocol = site.protocol || 'http',
-      host = site.host,
-      port = (site.port || '80').toString(),
-      path = site.path || '';
-  return "".concat(protocol, "://").concat(host).concat(port === '80' ? '' : ':' + port).concat(path);
-}
-/**
- *
- * @param {string} uri
- * @returns {boolean}
- */
-
-
-function isPublishedVersion(uri) {
-  return uri.indexOf(publishedVersionSuffix) === uri.length - 10;
-}
-/**
- * takes a uri and always returns the published version of that uri
- * @param {string} uri
- * @returns {string}
- */
-
-
-function ensurePublishedVersion(uri) {
-  return isPublishedVersion(uri) ? uri : uri.split('@')[0] + publishedVersionSuffix;
-}
-/**
- * checks if uri is an instance of a component
- * @param {string} uri
- * @returns {boolean}
- */
-
-
-function isInstance(uri) {
-  return uri.indexOf('/instances/') > -1;
-}
-/**
- * kiln sometimes stores the url in a query param
- * @param {string} url
- * @returns {string}
- */
-
-
-function kilnUrlToPageUrl(url) {
-  return url.indexOf(kilnUrlParam) > -1 ? decodeURIComponent(url.split(kilnUrlParam).pop()) : url;
-}
-/**
- * removes query params and hashes
- * e.g. `http://canonicalurl?utm-source=facebook#heading` becomes `http://canonicalurl`
- * @param {string} url
- * @returns {string}
- */
-
-
-function urlToCanonicalUrl(url) {
-  return kilnUrlToPageUrl(url).split('?')[0].split('#')[0];
-}
-/**
- * prefixes a given elastic index depending on the current environment
- * e.g. `published-articles` becomes `local_published-articles`
- * @param {string} indexString
- * @returns {string}
- */
-
-
-function prefixElasticIndex(indexString) {
-  var prefix = window.process.env.ELASTIC_PREFIX;
-  return prefix ? indexString.split(',').map(function (index) {
-    return "".concat(prefix, "_").concat(index).trim();
-  }).join(',') : indexString;
+  return arr
 }
 
-module.exports.isFieldEmpty = isFieldEmpty;
-module.exports.has = has;
-module.exports.replaceVersion = replaceVersion;
-module.exports.uriToUrl = uriToUrl;
-module.exports.urlToUri = urlToUri;
-module.exports.formatStart = formatStart;
-module.exports.getSiteBaseUrl = getSiteBaseUrl;
-module.exports.isPublishedVersion = isPublishedVersion;
-module.exports.ensurePublishedVersion = ensurePublishedVersion;
-module.exports.isInstance = isInstance;
-module.exports.urlToCanonicalUrl = urlToCanonicalUrl;
-module.exports.prefixElasticIndex = prefixElasticIndex;
+function tripletToBase64 (num) {
+  return lookup[num >> 18 & 0x3F] +
+    lookup[num >> 12 & 0x3F] +
+    lookup[num >> 6 & 0x3F] +
+    lookup[num & 0x3F]
+}
 
-}).call(this,require(8))}, {"8":8,"15":15,"25":25,"26":26,"273":273,"371":371,"375":375,"377":377,"644":644}];
+function encodeChunk (uint8, start, end) {
+  var tmp
+  var output = []
+  for (var i = start; i < end; i += 3) {
+    tmp =
+      ((uint8[i] << 16) & 0xFF0000) +
+      ((uint8[i + 1] << 8) & 0xFF00) +
+      (uint8[i + 2] & 0xFF)
+    output.push(tripletToBase64(tmp))
+  }
+  return output.join('')
+}
+
+function fromByteArray (uint8) {
+  var tmp
+  var len = uint8.length
+  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
+  var parts = []
+  var maxChunkLength = 16383 // must be multiple of 3
+
+  // go through the array every three bytes, we'll deal with trailing stuff later
+  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+    parts.push(encodeChunk(
+      uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
+    ))
+  }
+
+  // pad the end with zeros, but make sure to not forget the extra bytes
+  if (extraBytes === 1) {
+    tmp = uint8[len - 1]
+    parts.push(
+      lookup[tmp >> 2] +
+      lookup[(tmp << 4) & 0x3F] +
+      '=='
+    )
+  } else if (extraBytes === 2) {
+    tmp = (uint8[len - 2] << 8) + uint8[len - 1]
+    parts.push(
+      lookup[tmp >> 10] +
+      lookup[(tmp >> 4) & 0x3F] +
+      lookup[(tmp << 2) & 0x3F] +
+      '='
+    )
+  }
+
+  return parts.join('')
+}
+}, {}];

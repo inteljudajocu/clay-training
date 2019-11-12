@@ -1,6 +1,6 @@
-window.modules["72"] = [function(require,module,exports){'use strict';
+window.modules["69"] = [function(require,module,exports){'use strict';
 
-var SyntaxParseError = require(79).SyntaxParseError;
+var SyntaxParseError = require(71).SyntaxParseError;
 
 var TAB = 9;
 var N = 10;
@@ -501,10 +501,10 @@ function parse(str) {
 parse('[a&&<b>#|<\'c\'>*||e(){2,} f{2} /,(% g#{1,2})]!');
 
 module.exports = parse;
-}, {"79":79}];
-window.modules["76"] = [function(require,module,exports){'use strict';
+}, {"71":71}];
+window.modules["65"] = [function(require,module,exports){'use strict';
 
-var names = require(68);
+var names = require(60);
 var MULTIPLIER_DEFAULT = {
     comma: false,
     min: 1,
@@ -1017,8 +1017,8 @@ function matchSyntax(lexer, syntaxNode, node) {
 };
 
 module.exports = matchSyntax;
-}, {"68":68}];
-window.modules["88"] = [function(require,module,exports){var List = require(61);
+}, {"60":60}];
+window.modules["79"] = [function(require,module,exports){var List = require(53);
 
 module.exports = {
     parse: {
@@ -1032,8 +1032,8 @@ module.exports = {
         }
     }
 };
-}, {"61":61}];
-window.modules["87"] = [function(require,module,exports){var List = require(61);
+}, {"53":53}];
+window.modules["80"] = [function(require,module,exports){var List = require(53);
 
 module.exports = {
     parse: {
@@ -1047,8 +1047,8 @@ module.exports = {
         }
     }
 };
-}, {"61":61}];
-window.modules["92"] = [function(require,module,exports){var hasOwnProperty = Object.prototype.hasOwnProperty;
+}, {"53":53}];
+window.modules["84"] = [function(require,module,exports){var hasOwnProperty = Object.prototype.hasOwnProperty;
 var shape = {
     generic: true,
     types: {},
@@ -1143,7 +1143,7 @@ module.exports = function(dest, src) {
     return mix(dest, src, shape);
 };
 }, {}];
-window.modules["93"] = [function(require,module,exports){module.exports = {
+window.modules["85"] = [function(require,module,exports){module.exports = {
     parseContext: {
         default: 'StyleSheet',
         stylesheet: 'StyleSheet',
@@ -1165,13 +1165,13 @@ window.modules["93"] = [function(require,module,exports){module.exports = {
             return this.Value(options.property ? String(options.property) : null);
         }
     },
-    scope: require(94),
-    atrule: require(86),
-    pseudo: require(95),
-    node: require(91)
+    scope: require(87),
+    atrule: require(78),
+    pseudo: require(86),
+    node: require(83)
 };
-}, {"86":86,"91":91,"94":94,"95":95}];
-window.modules["121"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+}, {"78":78,"83":83,"86":86,"87":87}];
+window.modules["113"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var NUMBER = TYPE.Number;
@@ -1244,9 +1244,9 @@ module.exports = {
         processChunk(')');
     }
 };
-}, {"82":82}];
-window.modules["122"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["114"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
 var WHITESPACE = TYPE.WhiteSpace;
 var COMMENT = TYPE.Comment;
@@ -1310,9 +1310,9 @@ module.exports = {
         this.each(processChunk, node);
     }
 };
-}, {"61":61,"82":82}];
-window.modules["123"] = [function(require,module,exports){var List = require(61);
-var COMMA = require(82).TYPE.Comma;
+}, {"53":53,"75":75}];
+window.modules["115"] = [function(require,module,exports){var List = require(53);
+var COMMA = require(75).TYPE.Comma;
 
 module.exports = {
     name: 'MediaQueryList',
@@ -1344,8 +1344,8 @@ module.exports = {
         this.eachComma(processChunk, node);
     }
 };
-}, {"61":61,"82":82}];
-window.modules["124"] = [function(require,module,exports){// https://drafts.csswg.org/css-syntax-3/#the-anb-type
+}, {"53":53,"75":75}];
+window.modules["116"] = [function(require,module,exports){// https://drafts.csswg.org/css-syntax-3/#the-anb-type
 module.exports = {
     name: 'Nth',
     structure: {
@@ -1398,7 +1398,7 @@ module.exports = {
     }
 };
 }, {}];
-window.modules["125"] = [function(require,module,exports){var NUMBER = require(82).TYPE.Number;
+window.modules["117"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
 
 module.exports = {
     name: 'Number',
@@ -1416,8 +1416,8 @@ module.exports = {
         processChunk(node.value);
     }
 };
-}, {"82":82}];
-window.modules["126"] = [function(require,module,exports){// '/' | '*' | ',' | ':' | '+' | '-'
+}, {"75":75}];
+window.modules["118"] = [function(require,module,exports){// '/' | '*' | ',' | ':' | '+' | '-'
 module.exports = {
     name: 'Operator',
     structure: {
@@ -1439,7 +1439,7 @@ module.exports = {
     }
 };
 }, {}];
-window.modules["127"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+window.modules["119"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 var LEFTPARENTHESIS = TYPE.LeftParenthesis;
 var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 
@@ -1468,8 +1468,8 @@ module.exports = {
         processChunk(')');
     }
 };
-}, {"82":82}];
-window.modules["128"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["120"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var NUMBER = TYPE.Number;
 var PERCENTSIGN = TYPE.PercentSign;
@@ -1496,9 +1496,9 @@ module.exports = {
         processChunk('%');
     }
 };
-}, {"82":82}];
-window.modules["129"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["121"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var FUNCTION = TYPE.Function;
@@ -1558,9 +1558,9 @@ module.exports = {
     },
     walkContext: 'function'
 };
-}, {"61":61,"82":82}];
-window.modules["130"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
+}, {"53":53,"75":75}];
+window.modules["122"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var FUNCTION = TYPE.Function;
@@ -1621,8 +1621,8 @@ module.exports = {
     },
     walkContext: 'function'
 };
-}, {"61":61,"82":82}];
-window.modules["143"] = [function(require,module,exports){var List = require(61);
+}, {"53":53,"75":75}];
+window.modules["135"] = [function(require,module,exports){var List = require(53);
 var DISALLOW_OF_CLAUSE = false;
 
 module.exports = {
@@ -1632,8 +1632,8 @@ module.exports = {
         );
     }
 };
-}, {"61":61}];
-window.modules["144"] = [function(require,module,exports){var List = require(61);
+}, {"53":53}];
+window.modules["136"] = [function(require,module,exports){var List = require(53);
 var ALLOW_OF_CLAUSE = true;
 
 module.exports = {
@@ -1643,20 +1643,20 @@ module.exports = {
         );
     }
 };
-}, {"61":61}];
-window.modules["151"] = [function(require,module,exports){module.exports = require(145);
-}, {"145":145}];
-window.modules["154"] = [function(require,module,exports){module.exports = require(145);
-}, {"145":145}];
-window.modules["155"] = [function(require,module,exports){module.exports = require(144);
-}, {"144":144}];
-window.modules["152"] = [function(require,module,exports){module.exports = require(144);
-}, {"144":144}];
-window.modules["153"] = [function(require,module,exports){module.exports = require(143);
-}, {"143":143}];
-window.modules["150"] = [function(require,module,exports){module.exports = require(143);
-}, {"143":143}];
-window.modules["68"] = [function(require,module,exports){'use strict';
+}, {"53":53}];
+window.modules["147"] = [function(require,module,exports){module.exports = require(137);
+}, {"137":137}];
+window.modules["144"] = [function(require,module,exports){module.exports = require(137);
+}, {"137":137}];
+window.modules["145"] = [function(require,module,exports){module.exports = require(136);
+}, {"136":136}];
+window.modules["143"] = [function(require,module,exports){module.exports = require(136);
+}, {"136":136}];
+window.modules["142"] = [function(require,module,exports){module.exports = require(135);
+}, {"135":135}];
+window.modules["146"] = [function(require,module,exports){module.exports = require(135);
+}, {"135":135}];
+window.modules["60"] = [function(require,module,exports){'use strict';
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var keywords = Object.create(null);
@@ -1745,14 +1745,14 @@ module.exports = {
     property: getPropertyInfo
 };
 }, {}];
-window.modules["169"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+window.modules["161"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = require(165);
+var util = require(157);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -1824,8 +1824,8 @@ MappingList.prototype.toArray = function MappingList_toArray() {
 };
 
 exports.MappingList = MappingList;
-}, {"165":165}];
-window.modules["194"] = [function(require,module,exports){// This object will be used as the prototype for Nodes when creating a
+}, {"157":157}];
+window.modules["186"] = [function(require,module,exports){// This object will be used as the prototype for Nodes when creating a
 // DOM-Level-1-compliant structure.
 var NodePrototype = module.exports = {
 	get firstChild() {
@@ -1870,7 +1870,7 @@ Object.keys(domLvl1).forEach(function(key) {
 	});
 });
 }, {}];
-window.modules["201"] = [function(require,module,exports){exports.removeElement = function(elem){
+window.modules["190"] = [function(require,module,exports){exports.removeElement = function(elem){
 	if(elem.prev) elem.prev.next = elem.next;
 	if(elem.next) elem.next.prev = elem.prev;
 
@@ -1948,7 +1948,7 @@ exports.prepend = function(elem, prev){
 
 
 }, {}];
-window.modules["228"] = [function(require,module,exports){var Tokenizer = require(229);
+window.modules["222"] = [function(require,module,exports){var Tokenizer = require(223);
 
 /*
 	Options:
@@ -2080,7 +2080,7 @@ function Parser(cbs, options) {
     if (this._cbs.onparserinit) this._cbs.onparserinit(this);
 }
 
-require(227)(Parser, require(6).EventEmitter);
+require(221)(Parser, require(204).EventEmitter);
 
 Parser.prototype._updatePosition = function(initialOffset) {
     if (this.endIndex === null) {
@@ -2330,14 +2330,14 @@ Parser.prototype.parseChunk = Parser.prototype.write;
 Parser.prototype.done = Parser.prototype.end;
 
 module.exports = Parser;
-}, {"6":6,"227":227,"229":229}];
-window.modules["230"] = [function(require,module,exports){module.exports = ProxyHandler;
+}, {"204":204,"221":221,"223":223}];
+window.modules["224"] = [function(require,module,exports){module.exports = ProxyHandler;
 
 function ProxyHandler(cbs) {
     this._cbs = cbs || {};
 }
 
-var EVENTS = require(221).EVENTS;
+var EVENTS = require(215).EVENTS;
 Object.keys(EVENTS).forEach(function(name) {
     if (EVENTS[name] === 0) {
         name = "on" + name;
@@ -2358,11 +2358,11 @@ Object.keys(EVENTS).forEach(function(name) {
         throw Error("wrong number of arguments");
     }
 });
-}, {"221":221}];
-window.modules["30"] = [function(require,module,exports){var arrayMap = require(279),
-    baseIteratee = require(320),
-    baseMap = require(328),
-    isArray = require(273);
+}, {"215":215}];
+window.modules["17"] = [function(require,module,exports){var arrayMap = require(274),
+    baseIteratee = require(315),
+    baseMap = require(323),
+    isArray = require(272);
 
 /**
  * Creates an array of values by running each element in `collection` thru
@@ -2412,10 +2412,10 @@ function map(collection, iteratee) {
 }
 
 module.exports = map;
-}, {"273":273,"279":279,"320":320,"328":328}];
-window.modules["379"] = [function(require,module,exports){var baseAssignValue = require(283),
-    baseForOwn = require(288),
-    baseIteratee = require(320);
+}, {"272":272,"274":274,"315":315,"323":323}];
+window.modules["374"] = [function(require,module,exports){var baseAssignValue = require(279),
+    baseForOwn = require(283),
+    baseIteratee = require(315);
 
 /**
  * Creates an object with the same keys as `object` and values generated
@@ -2456,8 +2456,8 @@ function mapValues(object, iteratee) {
 }
 
 module.exports = mapValues;
-}, {"283":283,"288":288,"320":320}];
-window.modules["368"] = [function(require,module,exports){var MapCache = require(250);
+}, {"279":279,"283":283,"315":315}];
+window.modules["363"] = [function(require,module,exports){var MapCache = require(245);
 
 /** Error message constants. */
 var FUNC_ERROR_TEXT = 'Expected a function';
@@ -2530,11 +2530,11 @@ function memoize(func, resolver) {
 memoize.Cache = MapCache;
 
 module.exports = memoize;
-}, {"250":250}];
-window.modules["322"] = [function(require,module,exports){var baseProperty = require(335),
-    basePropertyDeep = require(336),
-    isKey = require(332),
-    toKey = require(295);
+}, {"245":245}];
+window.modules["317"] = [function(require,module,exports){var baseProperty = require(330),
+    basePropertyDeep = require(331),
+    isKey = require(327),
+    toKey = require(290);
 
 /**
  * Creates a function that returns the value at `path` of a given object.
@@ -2563,8 +2563,8 @@ function property(path) {
 }
 
 module.exports = property;
-}, {"295":295,"332":332,"335":335,"336":336}];
-window.modules["385"] = [function(require,module,exports){//! moment.js
+}, {"290":290,"327":327,"330":330,"331":331}];
+window.modules["380"] = [function(require,module,exports){//! moment.js
 
 ;(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
@@ -7167,7 +7167,7 @@ window.modules["385"] = [function(require,module,exports){//! moment.js
 
 })));
 }, {}];
-window.modules["390"] = [function(require,module,exports){var parse = require(388).syntax.parse;
+window.modules["387"] = [function(require,module,exports){var parse = require(384).syntax.parse;
 
 function getInfo(postcssNode) {
     return {
@@ -7254,8 +7254,8 @@ function postcssToCsso(node) {
 }
 
 module.exports = postcssToCsso;
-}, {"388":388}];
-window.modules["394"] = [function(require,module,exports){// remove white spaces around operators when safe
+}, {"384":384}];
+window.modules["391"] = [function(require,module,exports){// remove white spaces around operators when safe
 module.exports = function cleanWhitespace(node, item, list) {
     if (node.value === '+' || node.value === '-') {
         return;
@@ -7270,7 +7270,7 @@ module.exports = function cleanWhitespace(node, item, list) {
     }
 };
 }, {}];
-window.modules["408"] = [function(require,module,exports){var OMIT_PLUSSIGN = /^(?:\+|(-))?0*(\d*)(?:\.0*|(\.\d*?)0*)?$/;
+window.modules["405"] = [function(require,module,exports){var OMIT_PLUSSIGN = /^(?:\+|(-))?0*(\d*)(?:\.0*|(\.\d*?)0*)?$/;
 var KEEP_PLUSSIGN = /^([\+\-])?0*(\d*)(?:\.0*|(\.\d*?)0*)?$/;
 var unsafeToRemovePlusSignAfter = {
     Dimension: true,
@@ -7310,8 +7310,8 @@ module.exports = function(node, item) {
 };
 module.exports.pack = packNumber;
 }, {}];
-window.modules["427"] = [function(require,module,exports){var translate = require(65).translate;
-var specificity = require(428);
+window.modules["424"] = [function(require,module,exports){var translate = require(57).translate;
+var specificity = require(425);
 
 var nonFreezePseudoElements = {
     'first-letter': true,
@@ -7404,8 +7404,8 @@ module.exports = function freeze(node, usageData) {
     // add property to all rule nodes to avoid multiple hidden class
     node.pseudoSignature = hasPseudo && Object.keys(pseudos).sort().join(',');
 };
-}, {"65":65,"428":428}];
-window.modules["403"] = [function(require,module,exports){module.exports={
+}, {"57":57,"425":425}];
+window.modules["400"] = [function(require,module,exports){module.exports={
   "_args": [
     [
       "csso@3.3.1",
@@ -7523,16 +7523,16 @@ window.modules["403"] = [function(require,module,exports){module.exports={
   "version": "3.3.1"
 }
 }, {}];
-window.modules["445"] = [function(require,module,exports){(function (Buffer){
+window.modules["442"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
 exports.__esModule = true;
 
-var _sourceMap = require(447);
+var _sourceMap = require(444);
 
 var _sourceMap2 = _interopRequireDefault(_sourceMap);
 
-var _path = require(7);
+var _path = require(381);
 
 var _path2 = _interopRequireDefault(_path);
 
@@ -7848,26 +7848,26 @@ exports.default = MapGenerator;
 module.exports = exports['default'];
 
 
-}).call(this,require(4).Buffer)}, {"4":4,"7":7,"447":447}];
-window.modules["432"] = [function(require,module,exports){'use strict';
+}).call(this,require(21).Buffer)}, {"21":21,"381":381,"444":444}];
+window.modules["429"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _cssSyntaxError = require(437);
+var _cssSyntaxError = require(434);
 
 var _cssSyntaxError2 = _interopRequireDefault(_cssSyntaxError);
 
-var _stringifier = require(448);
+var _stringifier = require(445);
 
 var _stringifier2 = _interopRequireDefault(_stringifier);
 
-var _stringify = require(442);
+var _stringify = require(439);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _warnOnce = require(443);
+var _warnOnce = require(440);
 
 var _warnOnce2 = _interopRequireDefault(_warnOnce);
 
@@ -8474,17 +8474,17 @@ exports.default = Node;
 
 module.exports = exports['default'];
 
-}, {"437":437,"442":442,"443":443,"448":448}];
-window.modules["434"] = [function(require,module,exports){'use strict';
+}, {"434":434,"439":439,"440":440,"445":445}];
+window.modules["432"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 exports.default = parse;
 
-var _parser = require(449);
+var _parser = require(446);
 
 var _parser2 = _interopRequireDefault(_parser);
 
-var _input = require(439);
+var _input = require(436);
 
 var _input2 = _interopRequireDefault(_input);
 
@@ -8516,32 +8516,32 @@ function parse(css, opts) {
 }
 module.exports = exports['default'];
 
-}, {"439":439,"449":449}];
-window.modules["449"] = [function(require,module,exports){'use strict';
+}, {"436":436,"446":446}];
+window.modules["446"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(433);
+var _declaration = require(430);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
-var _tokenize = require(450);
+var _tokenize = require(447);
 
 var _tokenize2 = _interopRequireDefault(_tokenize);
 
-var _comment = require(431);
+var _comment = require(428);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _atRule = require(429);
+var _atRule = require(426);
 
 var _atRule2 = _interopRequireDefault(_atRule);
 
-var _root = require(435);
+var _root = require(433);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _rule = require(436);
+var _rule = require(431);
 
 var _rule2 = _interopRequireDefault(_rule);
 
@@ -9069,48 +9069,48 @@ var Parser = function () {
 exports.default = Parser;
 module.exports = exports['default'];
 
-}, {"429":429,"431":431,"433":433,"435":435,"436":436,"450":450}];
-window.modules["387"] = [function(require,module,exports){'use strict';
+}, {"426":426,"428":428,"430":430,"431":431,"433":433,"447":447}];
+window.modules["386"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(433);
+var _declaration = require(430);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
-var _processor = require(452);
+var _processor = require(449);
 
 var _processor2 = _interopRequireDefault(_processor);
 
-var _stringify = require(442);
+var _stringify = require(439);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _comment = require(431);
+var _comment = require(428);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _atRule = require(429);
+var _atRule = require(426);
 
 var _atRule2 = _interopRequireDefault(_atRule);
 
-var _vendor = require(451);
+var _vendor = require(448);
 
 var _vendor2 = _interopRequireDefault(_vendor);
 
-var _parse = require(434);
+var _parse = require(432);
 
 var _parse2 = _interopRequireDefault(_parse);
 
-var _list = require(446);
+var _list = require(443);
 
 var _list2 = _interopRequireDefault(_list);
 
-var _rule = require(436);
+var _rule = require(431);
 
 var _rule2 = _interopRequireDefault(_rule);
 
-var _root = require(435);
+var _root = require(433);
 
 var _root2 = _interopRequireDefault(_root);
 
@@ -9362,23 +9362,23 @@ postcss.root = function (defaults) {
 exports.default = postcss;
 module.exports = exports['default'];
 
-}, {"429":429,"431":431,"433":433,"434":434,"435":435,"436":436,"442":442,"446":446,"451":451,"452":452}];
-window.modules["440"] = [function(require,module,exports){(function (Buffer){
+}, {"426":426,"428":428,"430":430,"431":431,"432":432,"433":433,"439":439,"443":443,"448":448,"449":449}];
+window.modules["437"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
 exports.__esModule = true;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _sourceMap = require(447);
+var _sourceMap = require(444);
 
 var _sourceMap2 = _interopRequireDefault(_sourceMap);
 
-var _path = require(7);
+var _path = require(381);
 
 var _path2 = _interopRequireDefault(_path);
 
-var _fs = require(2);
+var _fs = require(19);
 
 var _fs2 = _interopRequireDefault(_fs);
 
@@ -9535,14 +9535,14 @@ exports.default = PreviousMap;
 module.exports = exports['default'];
 
 
-}).call(this,require(4).Buffer)}, {"2":2,"4":4,"7":7,"447":447}];
-window.modules["452"] = [function(require,module,exports){'use strict';
+}).call(this,require(21).Buffer)}, {"19":19,"21":21,"381":381,"444":444}];
+window.modules["449"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _lazyResult = require(441);
+var _lazyResult = require(438);
 
 var _lazyResult2 = _interopRequireDefault(_lazyResult);
 
@@ -9776,62 +9776,62 @@ exports.default = Processor;
 
 module.exports = exports['default'];
 
-}, {"441":441}];
-window.modules["459"] = [function(require,module,exports){'use strict';
+}, {"438":438}];
+window.modules["456"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _dotProp = require(203);
+var _dotProp = require(195);
 
 var _dotProp2 = _interopRequireDefault(_dotProp);
 
-var _indexesOf = require(233);
+var _indexesOf = require(228);
 
 var _indexesOf2 = _interopRequireDefault(_indexesOf);
 
-var _uniq = require(476);
+var _uniq = require(473);
 
 var _uniq2 = _interopRequireDefault(_uniq);
 
-var _root = require(473);
+var _root = require(471);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _selector = require(471);
+var _selector = require(469);
 
 var _selector2 = _interopRequireDefault(_selector);
 
-var _className = require(472);
+var _className = require(470);
 
 var _className2 = _interopRequireDefault(_className);
 
-var _comment = require(467);
+var _comment = require(468);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _id = require(474);
+var _id = require(461);
 
 var _id2 = _interopRequireDefault(_id);
 
-var _tag = require(469);
+var _tag = require(472);
 
 var _tag2 = _interopRequireDefault(_tag);
 
-var _string = require(464);
+var _string = require(463);
 
 var _string2 = _interopRequireDefault(_string);
 
-var _pseudo = require(475);
+var _pseudo = require(462);
 
 var _pseudo2 = _interopRequireDefault(_pseudo);
 
-var _attribute = require(470);
+var _attribute = require(467);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
-var _universal = require(468);
+var _universal = require(464);
 
 var _universal2 = _interopRequireDefault(_universal);
 
@@ -9843,19 +9843,19 @@ var _nesting = require(466);
 
 var _nesting2 = _interopRequireDefault(_nesting);
 
-var _sortAscending = require(461);
+var _sortAscending = require(457);
 
 var _sortAscending2 = _interopRequireDefault(_sortAscending);
 
-var _tokenize = require(462);
+var _tokenize = require(459);
 
 var _tokenize2 = _interopRequireDefault(_tokenize);
 
-var _tokenTypes = require(460);
+var _tokenTypes = require(458);
 
 var tokens = _interopRequireWildcard(_tokenTypes);
 
-var _types = require(463);
+var _types = require(460);
 
 var types = _interopRequireWildcard(_types);
 
@@ -10543,12 +10543,12 @@ var Parser = function () {
 }();
 
 exports.default = Parser;
-module.exports = exports['default'];}, {"203":203,"233":233,"460":460,"461":461,"462":462,"463":463,"464":464,"465":465,"466":466,"467":467,"468":468,"469":469,"470":470,"471":471,"472":472,"473":473,"474":474,"475":475,"476":476}];
-window.modules["458"] = [function(require,module,exports){"use strict";
+module.exports = exports['default'];}, {"195":195,"228":228,"457":457,"458":458,"459":459,"460":460,"461":461,"462":462,"463":463,"464":464,"465":465,"466":466,"467":467,"468":468,"469":469,"470":470,"471":471,"472":472,"473":473}];
+window.modules["455"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
 
-var _parser = require(459);
+var _parser = require(456);
 
 var _parser2 = _interopRequireDefault(_parser);
 
@@ -10728,14 +10728,14 @@ var Processor = function () {
 }();
 
 exports.default = Processor;
-module.exports = exports["default"];}, {"459":459}];
-window.modules["477"] = [function(require,module,exports){'use strict';
+module.exports = exports["default"];}, {"456":456}];
+window.modules["474"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _node = require(478);
+var _node = require(475);
 
 var _node2 = _interopRequireDefault(_node);
 
@@ -10811,16 +10811,16 @@ var Namespace = function (_Node) {
 
 exports.default = Namespace;
 ;
-module.exports = exports['default'];}, {"478":478}];
+module.exports = exports['default'];}, {"475":475}];
 window.modules["466"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(478);
+var _node = require(475);
 
 var _node2 = _interopRequireDefault(_node);
 
-var _types = require(463);
+var _types = require(460);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -10847,8 +10847,8 @@ var Nesting = function (_Node) {
 }(_node2.default);
 
 exports.default = Nesting;
-module.exports = exports['default'];}, {"463":463,"478":478}];
-window.modules["478"] = [function(require,module,exports){'use strict';
+module.exports = exports['default'];}, {"460":460,"475":475}];
+window.modules["475"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -10943,15 +10943,15 @@ var _class = function () {
 
 exports.default = _class;
 module.exports = exports['default'];}, {}];
-window.modules["475"] = [function(require,module,exports){'use strict';
+window.modules["462"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _container = require(480);
+var _container = require(477);
 
 var _container2 = _interopRequireDefault(_container);
 
-var _types = require(463);
+var _types = require(460);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -10982,17 +10982,17 @@ var Pseudo = function (_Container) {
 }(_container2.default);
 
 exports.default = Pseudo;
-module.exports = exports['default'];}, {"463":463,"480":480}];
-window.modules["498"] = [function(require,module,exports){(function (Buffer){
+module.exports = exports['default'];}, {"460":460,"477":477}];
+window.modules["495"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
 exports.__esModule = true;
 
-var _sourceMap = require(447);
+var _sourceMap = require(444);
 
 var _sourceMap2 = _interopRequireDefault(_sourceMap);
 
-var _path = require(7);
+var _path = require(381);
 
 var _path2 = _interopRequireDefault(_path);
 
@@ -11308,26 +11308,26 @@ exports.default = MapGenerator;
 module.exports = exports['default'];
 
 
-}).call(this,require(4).Buffer)}, {"4":4,"7":7,"447":447}];
-window.modules["485"] = [function(require,module,exports){'use strict';
+}).call(this,require(21).Buffer)}, {"21":21,"381":381,"444":444}];
+window.modules["482"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _cssSyntaxError = require(490);
+var _cssSyntaxError = require(487);
 
 var _cssSyntaxError2 = _interopRequireDefault(_cssSyntaxError);
 
-var _stringifier = require(500);
+var _stringifier = require(497);
 
 var _stringifier2 = _interopRequireDefault(_stringifier);
 
-var _stringify = require(495);
+var _stringify = require(492);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _warnOnce = require(496);
+var _warnOnce = require(493);
 
 var _warnOnce2 = _interopRequireDefault(_warnOnce);
 
@@ -11934,17 +11934,17 @@ exports.default = Node;
 
 module.exports = exports['default'];
 
-}, {"490":490,"495":495,"496":496,"500":500}];
-window.modules["487"] = [function(require,module,exports){'use strict';
+}, {"487":487,"492":492,"493":493,"497":497}];
+window.modules["484"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 exports.default = parse;
 
-var _parser = require(501);
+var _parser = require(498);
 
 var _parser2 = _interopRequireDefault(_parser);
 
-var _input = require(492);
+var _input = require(489);
 
 var _input2 = _interopRequireDefault(_input);
 
@@ -11976,1033 +11976,1033 @@ function parse(css, opts) {
 }
 module.exports = exports['default'];
 
-}, {"492":492,"501":501}];
+}, {"489":489,"498":498}];
+window.modules["498"] = [function(require,module,exports){'use strict';
+
+exports.__esModule = true;
+
+var _declaration = require(483);
+
+var _declaration2 = _interopRequireDefault(_declaration);
+
+var _tokenize = require(499);
+
+var _tokenize2 = _interopRequireDefault(_tokenize);
+
+var _comment = require(481);
+
+var _comment2 = _interopRequireDefault(_comment);
+
+var _atRule = require(479);
+
+var _atRule2 = _interopRequireDefault(_atRule);
+
+var _root = require(486);
+
+var _root2 = _interopRequireDefault(_root);
+
+var _rule = require(485);
+
+var _rule2 = _interopRequireDefault(_rule);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Parser = function () {
+    function Parser(input) {
+        _classCallCheck(this, Parser);
+
+        this.input = input;
+
+        this.root = new _root2.default();
+        this.current = this.root;
+        this.spaces = '';
+        this.semicolon = false;
+
+        this.createTokenizer();
+        this.root.source = { input: input, start: { line: 1, column: 1 } };
+    }
+
+    Parser.prototype.createTokenizer = function createTokenizer() {
+        this.tokenizer = (0, _tokenize2.default)(this.input);
+    };
+
+    Parser.prototype.parse = function parse() {
+        var token = void 0;
+        while (!this.tokenizer.endOfFile()) {
+            token = this.tokenizer.nextToken();
+
+            switch (token[0]) {
+
+                case 'space':
+                    this.spaces += token[1];
+                    break;
+
+                case ';':
+                    this.freeSemicolon(token);
+                    break;
+
+                case '}':
+                    this.end(token);
+                    break;
+
+                case 'comment':
+                    this.comment(token);
+                    break;
+
+                case 'at-word':
+                    this.atrule(token);
+                    break;
+
+                case '{':
+                    this.emptyRule(token);
+                    break;
+
+                default:
+                    this.other(token);
+                    break;
+            }
+        }
+        this.endFile();
+    };
+
+    Parser.prototype.comment = function comment(token) {
+        var node = new _comment2.default();
+        this.init(node, token[2], token[3]);
+        node.source.end = { line: token[4], column: token[5] };
+
+        var text = token[1].slice(2, -2);
+        if (/^\s*$/.test(text)) {
+            node.text = '';
+            node.raws.left = text;
+            node.raws.right = '';
+        } else {
+            var match = text.match(/^(\s*)([^]*[^\s])(\s*)$/);
+            node.text = match[2];
+            node.raws.left = match[1];
+            node.raws.right = match[3];
+        }
+    };
+
+    Parser.prototype.emptyRule = function emptyRule(token) {
+        var node = new _rule2.default();
+        this.init(node, token[2], token[3]);
+        node.selector = '';
+        node.raws.between = '';
+        this.current = node;
+    };
+
+    Parser.prototype.other = function other(start) {
+        var end = false;
+        var type = null;
+        var colon = false;
+        var bracket = null;
+        var brackets = [];
+
+        var tokens = [];
+        var token = start;
+        while (token) {
+            type = token[0];
+            tokens.push(token);
+
+            if (type === '(' || type === '[') {
+                if (!bracket) bracket = token;
+                brackets.push(type === '(' ? ')' : ']');
+            } else if (brackets.length === 0) {
+                if (type === ';') {
+                    if (colon) {
+                        this.decl(tokens);
+                        return;
+                    } else {
+                        break;
+                    }
+                } else if (type === '{') {
+                    this.rule(tokens);
+                    return;
+                } else if (type === '}') {
+                    this.tokenizer.back(tokens.pop());
+                    end = true;
+                    break;
+                } else if (type === ':') {
+                    colon = true;
+                }
+            } else if (type === brackets[brackets.length - 1]) {
+                brackets.pop();
+                if (brackets.length === 0) bracket = null;
+            }
+
+            token = this.tokenizer.nextToken();
+        }
+
+        if (this.tokenizer.endOfFile()) end = true;
+        if (brackets.length > 0) this.unclosedBracket(bracket);
+
+        if (end && colon) {
+            while (tokens.length) {
+                token = tokens[tokens.length - 1][0];
+                if (token !== 'space' && token !== 'comment') break;
+                this.tokenizer.back(tokens.pop());
+            }
+            this.decl(tokens);
+            return;
+        } else {
+            this.unknownWord(tokens);
+        }
+    };
+
+    Parser.prototype.rule = function rule(tokens) {
+        tokens.pop();
+
+        var node = new _rule2.default();
+        this.init(node, tokens[0][2], tokens[0][3]);
+
+        node.raws.between = this.spacesAndCommentsFromEnd(tokens);
+        this.raw(node, 'selector', tokens);
+        this.current = node;
+    };
+
+    Parser.prototype.decl = function decl(tokens) {
+        var node = new _declaration2.default();
+        this.init(node);
+
+        var last = tokens[tokens.length - 1];
+        if (last[0] === ';') {
+            this.semicolon = true;
+            tokens.pop();
+        }
+        if (last[4]) {
+            node.source.end = { line: last[4], column: last[5] };
+        } else {
+            node.source.end = { line: last[2], column: last[3] };
+        }
+
+        while (tokens[0][0] !== 'word') {
+            if (tokens.length === 1) this.unknownWord(tokens);
+            node.raws.before += tokens.shift()[1];
+        }
+        node.source.start = { line: tokens[0][2], column: tokens[0][3] };
+
+        node.prop = '';
+        while (tokens.length) {
+            var type = tokens[0][0];
+            if (type === ':' || type === 'space' || type === 'comment') {
+                break;
+            }
+            node.prop += tokens.shift()[1];
+        }
+
+        node.raws.between = '';
+
+        var token = void 0;
+        while (tokens.length) {
+            token = tokens.shift();
+
+            if (token[0] === ':') {
+                node.raws.between += token[1];
+                break;
+            } else {
+                node.raws.between += token[1];
+            }
+        }
+
+        if (node.prop[0] === '_' || node.prop[0] === '*') {
+            node.raws.before += node.prop[0];
+            node.prop = node.prop.slice(1);
+        }
+        node.raws.between += this.spacesAndCommentsFromStart(tokens);
+        this.precheckMissedSemicolon(tokens);
+
+        for (var i = tokens.length - 1; i > 0; i--) {
+            token = tokens[i];
+            if (token[1].toLowerCase() === '!important') {
+                node.important = true;
+                var string = this.stringFrom(tokens, i);
+                string = this.spacesFromEnd(tokens) + string;
+                if (string !== ' !important') node.raws.important = string;
+                break;
+            } else if (token[1].toLowerCase() === 'important') {
+                var cache = tokens.slice(0);
+                var str = '';
+                for (var j = i; j > 0; j--) {
+                    var _type = cache[j][0];
+                    if (str.trim().indexOf('!') === 0 && _type !== 'space') {
+                        break;
+                    }
+                    str = cache.pop()[1] + str;
+                }
+                if (str.trim().indexOf('!') === 0) {
+                    node.important = true;
+                    node.raws.important = str;
+                    tokens = cache;
+                }
+            }
+
+            if (token[0] !== 'space' && token[0] !== 'comment') {
+                break;
+            }
+        }
+
+        this.raw(node, 'value', tokens);
+
+        if (node.value.indexOf(':') !== -1) this.checkMissedSemicolon(tokens);
+    };
+
+    Parser.prototype.atrule = function atrule(token) {
+        var node = new _atRule2.default();
+        node.name = token[1].slice(1);
+        if (node.name === '') {
+            this.unnamedAtrule(node, token);
+        }
+        this.init(node, token[2], token[3]);
+
+        var prev = void 0;
+        var shift = void 0;
+        var last = false;
+        var open = false;
+        var params = [];
+
+        while (!this.tokenizer.endOfFile()) {
+            token = this.tokenizer.nextToken();
+
+            if (token[0] === ';') {
+                node.source.end = { line: token[2], column: token[3] };
+                this.semicolon = true;
+                break;
+            } else if (token[0] === '{') {
+                open = true;
+                break;
+            } else if (token[0] === '}') {
+                if (params.length > 0) {
+                    shift = params.length - 1;
+                    prev = params[shift];
+                    while (prev && prev[0] === 'space') {
+                        prev = params[--shift];
+                    }
+                    if (prev) {
+                        node.source.end = { line: prev[4], column: prev[5] };
+                    }
+                }
+                this.end(token);
+                break;
+            } else {
+                params.push(token);
+            }
+
+            if (this.tokenizer.endOfFile()) {
+                last = true;
+                break;
+            }
+        }
+
+        node.raws.between = this.spacesAndCommentsFromEnd(params);
+        if (params.length) {
+            node.raws.afterName = this.spacesAndCommentsFromStart(params);
+            this.raw(node, 'params', params);
+            if (last) {
+                token = params[params.length - 1];
+                node.source.end = { line: token[4], column: token[5] };
+                this.spaces = node.raws.between;
+                node.raws.between = '';
+            }
+        } else {
+            node.raws.afterName = '';
+            node.params = '';
+        }
+
+        if (open) {
+            node.nodes = [];
+            this.current = node;
+        }
+    };
+
+    Parser.prototype.end = function end(token) {
+        if (this.current.nodes && this.current.nodes.length) {
+            this.current.raws.semicolon = this.semicolon;
+        }
+        this.semicolon = false;
+
+        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
+        this.spaces = '';
+
+        if (this.current.parent) {
+            this.current.source.end = { line: token[2], column: token[3] };
+            this.current = this.current.parent;
+        } else {
+            this.unexpectedClose(token);
+        }
+    };
+
+    Parser.prototype.endFile = function endFile() {
+        if (this.current.parent) this.unclosedBlock();
+        if (this.current.nodes && this.current.nodes.length) {
+            this.current.raws.semicolon = this.semicolon;
+        }
+        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
+    };
+
+    Parser.prototype.freeSemicolon = function freeSemicolon(token) {
+        this.spaces += token[1];
+        if (this.current.nodes) {
+            var prev = this.current.nodes[this.current.nodes.length - 1];
+            if (prev && prev.type === 'rule' && !prev.raws.ownSemicolon) {
+                prev.raws.ownSemicolon = this.spaces;
+                this.spaces = '';
+            }
+        }
+    };
+
+    // Helpers
+
+    Parser.prototype.init = function init(node, line, column) {
+        this.current.push(node);
+
+        node.source = { start: { line: line, column: column }, input: this.input };
+        node.raws.before = this.spaces;
+        this.spaces = '';
+        if (node.type !== 'comment') this.semicolon = false;
+    };
+
+    Parser.prototype.raw = function raw(node, prop, tokens) {
+        var token = void 0,
+            type = void 0;
+        var length = tokens.length;
+        var value = '';
+        var clean = true;
+        var next = void 0,
+            prev = void 0;
+        var pattern = /^([.|#])?([\w])+/i;
+
+        for (var i = 0; i < length; i += 1) {
+            token = tokens[i];
+            type = token[0];
+
+            if (type === 'comment' && node.type === 'rule') {
+                prev = tokens[i - 1];
+                next = tokens[i + 1];
+
+                if (prev[0] !== 'space' && next[0] !== 'space' && pattern.test(prev[1]) && pattern.test(next[1])) {
+                    value += token[1];
+                } else {
+                    clean = false;
+                }
+
+                continue;
+            }
+
+            if (type === 'comment' || type === 'space' && i === length - 1) {
+                clean = false;
+            } else {
+                value += token[1];
+            }
+        }
+        if (!clean) {
+            var raw = tokens.reduce(function (all, i) {
+                return all + i[1];
+            }, '');
+            node.raws[prop] = { value: value, raw: raw };
+        }
+        node[prop] = value;
+    };
+
+    Parser.prototype.spacesAndCommentsFromEnd = function spacesAndCommentsFromEnd(tokens) {
+        var lastTokenType = void 0;
+        var spaces = '';
+        while (tokens.length) {
+            lastTokenType = tokens[tokens.length - 1][0];
+            if (lastTokenType !== 'space' && lastTokenType !== 'comment') break;
+            spaces = tokens.pop()[1] + spaces;
+        }
+        return spaces;
+    };
+
+    Parser.prototype.spacesAndCommentsFromStart = function spacesAndCommentsFromStart(tokens) {
+        var next = void 0;
+        var spaces = '';
+        while (tokens.length) {
+            next = tokens[0][0];
+            if (next !== 'space' && next !== 'comment') break;
+            spaces += tokens.shift()[1];
+        }
+        return spaces;
+    };
+
+    Parser.prototype.spacesFromEnd = function spacesFromEnd(tokens) {
+        var lastTokenType = void 0;
+        var spaces = '';
+        while (tokens.length) {
+            lastTokenType = tokens[tokens.length - 1][0];
+            if (lastTokenType !== 'space') break;
+            spaces = tokens.pop()[1] + spaces;
+        }
+        return spaces;
+    };
+
+    Parser.prototype.stringFrom = function stringFrom(tokens, from) {
+        var result = '';
+        for (var i = from; i < tokens.length; i++) {
+            result += tokens[i][1];
+        }
+        tokens.splice(from, tokens.length - from);
+        return result;
+    };
+
+    Parser.prototype.colon = function colon(tokens) {
+        var brackets = 0;
+        var token = void 0,
+            type = void 0,
+            prev = void 0;
+        for (var i = 0; i < tokens.length; i++) {
+            token = tokens[i];
+            type = token[0];
+
+            if (type === '(') {
+                brackets += 1;
+            } else if (type === ')') {
+                brackets -= 1;
+            } else if (brackets === 0 && type === ':') {
+                if (!prev) {
+                    this.doubleColon(token);
+                } else if (prev[0] === 'word' && prev[1] === 'progid') {
+                    continue;
+                } else {
+                    return i;
+                }
+            }
+
+            prev = token;
+        }
+        return false;
+    };
+
+    // Errors
+
+    Parser.prototype.unclosedBracket = function unclosedBracket(bracket) {
+        throw this.input.error('Unclosed bracket', bracket[2], bracket[3]);
+    };
+
+    Parser.prototype.unknownWord = function unknownWord(tokens) {
+        throw this.input.error('Unknown word', tokens[0][2], tokens[0][3]);
+    };
+
+    Parser.prototype.unexpectedClose = function unexpectedClose(token) {
+        throw this.input.error('Unexpected }', token[2], token[3]);
+    };
+
+    Parser.prototype.unclosedBlock = function unclosedBlock() {
+        var pos = this.current.source.start;
+        throw this.input.error('Unclosed block', pos.line, pos.column);
+    };
+
+    Parser.prototype.doubleColon = function doubleColon(token) {
+        throw this.input.error('Double colon', token[2], token[3]);
+    };
+
+    Parser.prototype.unnamedAtrule = function unnamedAtrule(node, token) {
+        throw this.input.error('At-rule without name', token[2], token[3]);
+    };
+
+    Parser.prototype.precheckMissedSemicolon = function precheckMissedSemicolon(tokens) {
+        // Hook for Safe Parser
+        tokens;
+    };
+
+    Parser.prototype.checkMissedSemicolon = function checkMissedSemicolon(tokens) {
+        var colon = this.colon(tokens);
+        if (colon === false) return;
+
+        var founded = 0;
+        var token = void 0;
+        for (var j = colon - 1; j >= 0; j--) {
+            token = tokens[j];
+            if (token[0] !== 'space') {
+                founded += 1;
+                if (founded === 2) break;
+            }
+        }
+        throw this.input.error('Missed semicolon', token[2], token[3]);
+    };
+
+    return Parser;
+}();
+
+exports.default = Parser;
+module.exports = exports['default'];
+
+}, {"479":479,"481":481,"483":483,"485":485,"486":486,"499":499}];
+window.modules["452"] = [function(require,module,exports){'use strict';
+
+exports.__esModule = true;
+
+var _declaration = require(483);
+
+var _declaration2 = _interopRequireDefault(_declaration);
+
+var _processor = require(501);
+
+var _processor2 = _interopRequireDefault(_processor);
+
+var _stringify = require(492);
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _comment = require(481);
+
+var _comment2 = _interopRequireDefault(_comment);
+
+var _atRule = require(479);
+
+var _atRule2 = _interopRequireDefault(_atRule);
+
+var _vendor = require(500);
+
+var _vendor2 = _interopRequireDefault(_vendor);
+
+var _parse = require(484);
+
+var _parse2 = _interopRequireDefault(_parse);
+
+var _list = require(496);
+
+var _list2 = _interopRequireDefault(_list);
+
+var _rule = require(485);
+
+var _rule2 = _interopRequireDefault(_rule);
+
+var _root = require(486);
+
+var _root2 = _interopRequireDefault(_root);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Create a new {@link Processor} instance that will apply `plugins`
+ * as CSS processors.
+ *
+ * @param {Array.<Plugin|pluginFunction>|Processor} plugins - PostCSS
+ *        plugins. See {@link Processor#use} for plugin format.
+ *
+ * @return {Processor} Processor to process multiple CSS
+ *
+ * @example
+ * import postcss from 'postcss';
+ *
+ * postcss(plugins).process(css, { from, to }).then(result => {
+ *   console.log(result.css);
+ * });
+ *
+ * @namespace postcss
+ */
+function postcss() {
+  for (var _len = arguments.length, plugins = Array(_len), _key = 0; _key < _len; _key++) {
+    plugins[_key] = arguments[_key];
+  }
+
+  if (plugins.length === 1 && Array.isArray(plugins[0])) {
+    plugins = plugins[0];
+  }
+  return new _processor2.default(plugins);
+}
+
+/**
+ * Creates a PostCSS plugin with a standard API.
+ *
+ * The newly-wrapped function will provide both the name and PostCSS
+ * version of the plugin.
+ *
+ * ```js
+ *  const processor = postcss([replace]);
+ *  processor.plugins[0].postcssPlugin  //=> 'postcss-replace'
+ *  processor.plugins[0].postcssVersion //=> '5.1.0'
+ * ```
+ *
+ * The plugin function receives 2 arguments: {@link Root}
+ * and {@link Result} instance. The function should mutate the provided
+ * `Root` node. Alternatively, you can create a new `Root` node
+ * and override the `result.root` property.
+ *
+ * ```js
+ * const cleaner = postcss.plugin('postcss-cleaner', () => {
+ *   return (root, result) => {
+ *     result.root = postcss.root();
+ *   };
+ * });
+ * ```
+ *
+ * As a convenience, plugins also expose a `process` method so that you can use
+ * them as standalone tools.
+ *
+ * ```js
+ * cleaner.process(css, processOpts, pluginOpts);
+ * // This is equivalent to:
+ * postcss([ cleaner(pluginOpts) ]).process(css, processOpts);
+ * ```
+ *
+ * Asynchronous plugins should return a `Promise` instance.
+ *
+ * ```js
+ * postcss.plugin('postcss-import', () => {
+ *   return (root, result) => {
+ *     return new Promise( (resolve, reject) => {
+ *       fs.readFile('base.css', (base) => {
+ *         root.prepend(base);
+ *         resolve();
+ *       });
+ *     });
+ *   };
+ * });
+ * ```
+ *
+ * Add warnings using the {@link Node#warn} method.
+ * Send data to other plugins using the {@link Result#messages} array.
+ *
+ * ```js
+ * postcss.plugin('postcss-caniuse-test', () => {
+ *   return (root, result) => {
+ *     root.walkDecls(decl => {
+ *       if ( !caniuse.support(decl.prop) ) {
+ *         decl.warn(result, 'Some browsers do not support ' + decl.prop);
+ *       }
+ *     });
+ *   };
+ * });
+ * ```
+ *
+ * @param {string} name          - PostCSS plugin name. Same as in `name`
+ *                                 property in `package.json`. It will be saved
+ *                                 in `plugin.postcssPlugin` property.
+ * @param {function} initializer - will receive plugin options
+ *                                 and should return {@link pluginFunction}
+ *
+ * @return {Plugin} PostCSS plugin
+ */
+postcss.plugin = function plugin(name, initializer) {
+  var creator = function creator() {
+    var transformer = initializer.apply(undefined, arguments);
+    transformer.postcssPlugin = name;
+    transformer.postcssVersion = new _processor2.default().version;
+    return transformer;
+  };
+
+  var cache = void 0;
+  Object.defineProperty(creator, 'postcss', {
+    get: function get() {
+      if (!cache) cache = creator();
+      return cache;
+    }
+  });
+
+  creator.process = function (css, processOpts, pluginOpts) {
+    return postcss([creator(pluginOpts)]).process(css, processOpts);
+  };
+
+  return creator;
+};
+
+/**
+ * Default function to convert a node tree into a CSS string.
+ *
+ * @param {Node} node       - start node for stringifing. Usually {@link Root}.
+ * @param {builder} builder - function to concatenate CSS from node’s parts
+ *                            or generate string and source map
+ *
+ * @return {void}
+ *
+ * @function
+ */
+postcss.stringify = _stringify2.default;
+
+/**
+ * Parses source css and returns a new {@link Root} node,
+ * which contains the source CSS nodes.
+ *
+ * @param {string|toString} css   - string with input CSS or any object
+ *                                  with toString() method, like a Buffer
+ * @param {processOptions} [opts] - options with only `from` and `map` keys
+ *
+ * @return {Root} PostCSS AST
+ *
+ * @example
+ * // Simple CSS concatenation with source map support
+ * const root1 = postcss.parse(css1, { from: file1 });
+ * const root2 = postcss.parse(css2, { from: file2 });
+ * root1.append(root2).toResult().css;
+ *
+ * @function
+ */
+postcss.parse = _parse2.default;
+
+/**
+ * @member {vendor} - Contains the {@link vendor} module.
+ *
+ * @example
+ * postcss.vendor.unprefixed('-moz-tab') //=> ['tab']
+ */
+postcss.vendor = _vendor2.default;
+
+/**
+ * @member {list} - Contains the {@link list} module.
+ *
+ * @example
+ * postcss.list.space('5px calc(10% + 5px)') //=> ['5px', 'calc(10% + 5px)']
+ */
+postcss.list = _list2.default;
+
+/**
+ * Creates a new {@link Comment} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Comment} new Comment node
+ *
+ * @example
+ * postcss.comment({ text: 'test' })
+ */
+postcss.comment = function (defaults) {
+  return new _comment2.default(defaults);
+};
+
+/**
+ * Creates a new {@link AtRule} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {AtRule} new AtRule node
+ *
+ * @example
+ * postcss.atRule({ name: 'charset' }).toString() //=> "@charset"
+ */
+postcss.atRule = function (defaults) {
+  return new _atRule2.default(defaults);
+};
+
+/**
+ * Creates a new {@link Declaration} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Declaration} new Declaration node
+ *
+ * @example
+ * postcss.decl({ prop: 'color', value: 'red' }).toString() //=> "color: red"
+ */
+postcss.decl = function (defaults) {
+  return new _declaration2.default(defaults);
+};
+
+/**
+ * Creates a new {@link Rule} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Rule} new Rule node
+ *
+ * @example
+ * postcss.rule({ selector: 'a' }).toString() //=> "a {\n}"
+ */
+postcss.rule = function (defaults) {
+  return new _rule2.default(defaults);
+};
+
+/**
+ * Creates a new {@link Root} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Root} new Root node
+ *
+ * @example
+ * postcss.root({ after: '\n' }).toString() //=> "\n"
+ */
+postcss.root = function (defaults) {
+  return new _root2.default(defaults);
+};
+
+exports.default = postcss;
+module.exports = exports['default'];
+
+}, {"479":479,"481":481,"483":483,"484":484,"485":485,"486":486,"492":492,"496":496,"500":500,"501":501}];
+window.modules["490"] = [function(require,module,exports){(function (Buffer){
+'use strict';
+
+exports.__esModule = true;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _sourceMap = require(444);
+
+var _sourceMap2 = _interopRequireDefault(_sourceMap);
+
+var _path = require(381);
+
+var _path2 = _interopRequireDefault(_path);
+
+var _fs = require(19);
+
+var _fs2 = _interopRequireDefault(_fs);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function fromBase64(str) {
+    if (Buffer) {
+        if (Buffer.from && Buffer.from !== Uint8Array.from) {
+            return Buffer.from(str, 'base64').toString();
+        } else {
+            return new Buffer(str, 'base64').toString();
+        }
+    } else {
+        return window.atob(str);
+    }
+}
+
+/**
+ * Source map information from input CSS.
+ * For example, source map after Sass compiler.
+ *
+ * This class will automatically find source map in input CSS or in file system
+ * near input file (according `from` option).
+ *
+ * @example
+ * const root = postcss.parse(css, { from: 'a.sass.css' });
+ * root.input.map //=> PreviousMap
+ */
+
+var PreviousMap = function () {
+
+    /**
+     * @param {string}         css    - input CSS source
+     * @param {processOptions} [opts] - {@link Processor#process} options
+     */
+    function PreviousMap(css, opts) {
+        _classCallCheck(this, PreviousMap);
+
+        this.loadAnnotation(css);
+        /**
+         * @member {boolean} - Was source map inlined by data-uri to input CSS.
+         */
+        this.inline = this.startWith(this.annotation, 'data:');
+
+        var prev = opts.map ? opts.map.prev : undefined;
+        var text = this.loadMap(opts.from, prev);
+        if (text) this.text = text;
+    }
+
+    /**
+     * Create a instance of `SourceMapGenerator` class
+     * from the `source-map` library to work with source map information.
+     *
+     * It is lazy method, so it will create object only on first call
+     * and then it will use cache.
+     *
+     * @return {SourceMapGenerator} object with source map information
+     */
+
+
+    PreviousMap.prototype.consumer = function consumer() {
+        if (!this.consumerCache) {
+            this.consumerCache = new _sourceMap2.default.SourceMapConsumer(this.text);
+        }
+        return this.consumerCache;
+    };
+
+    /**
+     * Does source map contains `sourcesContent` with input source text.
+     *
+     * @return {boolean} Is `sourcesContent` present
+     */
+
+
+    PreviousMap.prototype.withContent = function withContent() {
+        return !!(this.consumer().sourcesContent && this.consumer().sourcesContent.length > 0);
+    };
+
+    PreviousMap.prototype.startWith = function startWith(string, start) {
+        if (!string) return false;
+        return string.substr(0, start.length) === start;
+    };
+
+    PreviousMap.prototype.loadAnnotation = function loadAnnotation(css) {
+        var match = css.match(/\/\*\s*# sourceMappingURL=(.*)\s*\*\//);
+        if (match) this.annotation = match[1].trim();
+    };
+
+    PreviousMap.prototype.decodeInline = function decodeInline(text) {
+        // data:application/json;charset=utf-8;base64,
+        // data:application/json;charset=utf8;base64,
+        // data:application/json;base64,
+        var baseUri = /^data:application\/json;(?:charset=utf-?8;)?base64,/;
+        var uri = 'data:application/json,';
+
+        if (this.startWith(text, uri)) {
+            return decodeURIComponent(text.substr(uri.length));
+        } else if (baseUri.test(text)) {
+            return fromBase64(text.substr(RegExp.lastMatch.length));
+        } else {
+            var encoding = text.match(/data:application\/json;([^,]+),/)[1];
+            throw new Error('Unsupported source map encoding ' + encoding);
+        }
+    };
+
+    PreviousMap.prototype.loadMap = function loadMap(file, prev) {
+        if (prev === false) return false;
+
+        if (prev) {
+            if (typeof prev === 'string') {
+                return prev;
+            } else if (typeof prev === 'function') {
+                var prevPath = prev(file);
+                if (prevPath && _fs2.default.existsSync && _fs2.default.existsSync(prevPath)) {
+                    return _fs2.default.readFileSync(prevPath, 'utf-8').toString().trim();
+                } else {
+                    throw new Error('Unable to load previous source map: ' + prevPath.toString());
+                }
+            } else if (prev instanceof _sourceMap2.default.SourceMapConsumer) {
+                return _sourceMap2.default.SourceMapGenerator.fromSourceMap(prev).toString();
+            } else if (prev instanceof _sourceMap2.default.SourceMapGenerator) {
+                return prev.toString();
+            } else if (this.isMap(prev)) {
+                return JSON.stringify(prev);
+            } else {
+                throw new Error('Unsupported previous source map format: ' + prev.toString());
+            }
+        } else if (this.inline) {
+            return this.decodeInline(this.annotation);
+        } else if (this.annotation) {
+            var map = this.annotation;
+            if (file) map = _path2.default.join(_path2.default.dirname(file), map);
+
+            this.root = _path2.default.dirname(map);
+            if (_fs2.default.existsSync && _fs2.default.existsSync(map)) {
+                return _fs2.default.readFileSync(map, 'utf-8').toString().trim();
+            } else {
+                return false;
+            }
+        }
+    };
+
+    PreviousMap.prototype.isMap = function isMap(map) {
+        if ((typeof map === 'undefined' ? 'undefined' : _typeof(map)) !== 'object') return false;
+        return typeof map.mappings === 'string' || typeof map._mappings === 'string';
+    };
+
+    return PreviousMap;
+}();
+
+exports.default = PreviousMap;
+module.exports = exports['default'];
+
+
+}).call(this,require(21).Buffer)}, {"19":19,"21":21,"381":381,"444":444}];
 window.modules["501"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(486);
-
-var _declaration2 = _interopRequireDefault(_declaration);
-
-var _tokenize = require(502);
-
-var _tokenize2 = _interopRequireDefault(_tokenize);
-
-var _comment = require(484);
-
-var _comment2 = _interopRequireDefault(_comment);
-
-var _atRule = require(482);
-
-var _atRule2 = _interopRequireDefault(_atRule);
-
-var _root = require(489);
-
-var _root2 = _interopRequireDefault(_root);
-
-var _rule = require(488);
-
-var _rule2 = _interopRequireDefault(_rule);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Parser = function () {
-    function Parser(input) {
-        _classCallCheck(this, Parser);
-
-        this.input = input;
-
-        this.root = new _root2.default();
-        this.current = this.root;
-        this.spaces = '';
-        this.semicolon = false;
-
-        this.createTokenizer();
-        this.root.source = { input: input, start: { line: 1, column: 1 } };
-    }
-
-    Parser.prototype.createTokenizer = function createTokenizer() {
-        this.tokenizer = (0, _tokenize2.default)(this.input);
-    };
-
-    Parser.prototype.parse = function parse() {
-        var token = void 0;
-        while (!this.tokenizer.endOfFile()) {
-            token = this.tokenizer.nextToken();
-
-            switch (token[0]) {
-
-                case 'space':
-                    this.spaces += token[1];
-                    break;
-
-                case ';':
-                    this.freeSemicolon(token);
-                    break;
-
-                case '}':
-                    this.end(token);
-                    break;
-
-                case 'comment':
-                    this.comment(token);
-                    break;
-
-                case 'at-word':
-                    this.atrule(token);
-                    break;
-
-                case '{':
-                    this.emptyRule(token);
-                    break;
-
-                default:
-                    this.other(token);
-                    break;
-            }
-        }
-        this.endFile();
-    };
-
-    Parser.prototype.comment = function comment(token) {
-        var node = new _comment2.default();
-        this.init(node, token[2], token[3]);
-        node.source.end = { line: token[4], column: token[5] };
-
-        var text = token[1].slice(2, -2);
-        if (/^\s*$/.test(text)) {
-            node.text = '';
-            node.raws.left = text;
-            node.raws.right = '';
-        } else {
-            var match = text.match(/^(\s*)([^]*[^\s])(\s*)$/);
-            node.text = match[2];
-            node.raws.left = match[1];
-            node.raws.right = match[3];
-        }
-    };
-
-    Parser.prototype.emptyRule = function emptyRule(token) {
-        var node = new _rule2.default();
-        this.init(node, token[2], token[3]);
-        node.selector = '';
-        node.raws.between = '';
-        this.current = node;
-    };
-
-    Parser.prototype.other = function other(start) {
-        var end = false;
-        var type = null;
-        var colon = false;
-        var bracket = null;
-        var brackets = [];
-
-        var tokens = [];
-        var token = start;
-        while (token) {
-            type = token[0];
-            tokens.push(token);
-
-            if (type === '(' || type === '[') {
-                if (!bracket) bracket = token;
-                brackets.push(type === '(' ? ')' : ']');
-            } else if (brackets.length === 0) {
-                if (type === ';') {
-                    if (colon) {
-                        this.decl(tokens);
-                        return;
-                    } else {
-                        break;
-                    }
-                } else if (type === '{') {
-                    this.rule(tokens);
-                    return;
-                } else if (type === '}') {
-                    this.tokenizer.back(tokens.pop());
-                    end = true;
-                    break;
-                } else if (type === ':') {
-                    colon = true;
-                }
-            } else if (type === brackets[brackets.length - 1]) {
-                brackets.pop();
-                if (brackets.length === 0) bracket = null;
-            }
-
-            token = this.tokenizer.nextToken();
-        }
-
-        if (this.tokenizer.endOfFile()) end = true;
-        if (brackets.length > 0) this.unclosedBracket(bracket);
-
-        if (end && colon) {
-            while (tokens.length) {
-                token = tokens[tokens.length - 1][0];
-                if (token !== 'space' && token !== 'comment') break;
-                this.tokenizer.back(tokens.pop());
-            }
-            this.decl(tokens);
-            return;
-        } else {
-            this.unknownWord(tokens);
-        }
-    };
-
-    Parser.prototype.rule = function rule(tokens) {
-        tokens.pop();
-
-        var node = new _rule2.default();
-        this.init(node, tokens[0][2], tokens[0][3]);
-
-        node.raws.between = this.spacesAndCommentsFromEnd(tokens);
-        this.raw(node, 'selector', tokens);
-        this.current = node;
-    };
-
-    Parser.prototype.decl = function decl(tokens) {
-        var node = new _declaration2.default();
-        this.init(node);
-
-        var last = tokens[tokens.length - 1];
-        if (last[0] === ';') {
-            this.semicolon = true;
-            tokens.pop();
-        }
-        if (last[4]) {
-            node.source.end = { line: last[4], column: last[5] };
-        } else {
-            node.source.end = { line: last[2], column: last[3] };
-        }
-
-        while (tokens[0][0] !== 'word') {
-            if (tokens.length === 1) this.unknownWord(tokens);
-            node.raws.before += tokens.shift()[1];
-        }
-        node.source.start = { line: tokens[0][2], column: tokens[0][3] };
-
-        node.prop = '';
-        while (tokens.length) {
-            var type = tokens[0][0];
-            if (type === ':' || type === 'space' || type === 'comment') {
-                break;
-            }
-            node.prop += tokens.shift()[1];
-        }
-
-        node.raws.between = '';
-
-        var token = void 0;
-        while (tokens.length) {
-            token = tokens.shift();
-
-            if (token[0] === ':') {
-                node.raws.between += token[1];
-                break;
-            } else {
-                node.raws.between += token[1];
-            }
-        }
-
-        if (node.prop[0] === '_' || node.prop[0] === '*') {
-            node.raws.before += node.prop[0];
-            node.prop = node.prop.slice(1);
-        }
-        node.raws.between += this.spacesAndCommentsFromStart(tokens);
-        this.precheckMissedSemicolon(tokens);
-
-        for (var i = tokens.length - 1; i > 0; i--) {
-            token = tokens[i];
-            if (token[1].toLowerCase() === '!important') {
-                node.important = true;
-                var string = this.stringFrom(tokens, i);
-                string = this.spacesFromEnd(tokens) + string;
-                if (string !== ' !important') node.raws.important = string;
-                break;
-            } else if (token[1].toLowerCase() === 'important') {
-                var cache = tokens.slice(0);
-                var str = '';
-                for (var j = i; j > 0; j--) {
-                    var _type = cache[j][0];
-                    if (str.trim().indexOf('!') === 0 && _type !== 'space') {
-                        break;
-                    }
-                    str = cache.pop()[1] + str;
-                }
-                if (str.trim().indexOf('!') === 0) {
-                    node.important = true;
-                    node.raws.important = str;
-                    tokens = cache;
-                }
-            }
-
-            if (token[0] !== 'space' && token[0] !== 'comment') {
-                break;
-            }
-        }
-
-        this.raw(node, 'value', tokens);
-
-        if (node.value.indexOf(':') !== -1) this.checkMissedSemicolon(tokens);
-    };
-
-    Parser.prototype.atrule = function atrule(token) {
-        var node = new _atRule2.default();
-        node.name = token[1].slice(1);
-        if (node.name === '') {
-            this.unnamedAtrule(node, token);
-        }
-        this.init(node, token[2], token[3]);
-
-        var prev = void 0;
-        var shift = void 0;
-        var last = false;
-        var open = false;
-        var params = [];
-
-        while (!this.tokenizer.endOfFile()) {
-            token = this.tokenizer.nextToken();
-
-            if (token[0] === ';') {
-                node.source.end = { line: token[2], column: token[3] };
-                this.semicolon = true;
-                break;
-            } else if (token[0] === '{') {
-                open = true;
-                break;
-            } else if (token[0] === '}') {
-                if (params.length > 0) {
-                    shift = params.length - 1;
-                    prev = params[shift];
-                    while (prev && prev[0] === 'space') {
-                        prev = params[--shift];
-                    }
-                    if (prev) {
-                        node.source.end = { line: prev[4], column: prev[5] };
-                    }
-                }
-                this.end(token);
-                break;
-            } else {
-                params.push(token);
-            }
-
-            if (this.tokenizer.endOfFile()) {
-                last = true;
-                break;
-            }
-        }
-
-        node.raws.between = this.spacesAndCommentsFromEnd(params);
-        if (params.length) {
-            node.raws.afterName = this.spacesAndCommentsFromStart(params);
-            this.raw(node, 'params', params);
-            if (last) {
-                token = params[params.length - 1];
-                node.source.end = { line: token[4], column: token[5] };
-                this.spaces = node.raws.between;
-                node.raws.between = '';
-            }
-        } else {
-            node.raws.afterName = '';
-            node.params = '';
-        }
-
-        if (open) {
-            node.nodes = [];
-            this.current = node;
-        }
-    };
-
-    Parser.prototype.end = function end(token) {
-        if (this.current.nodes && this.current.nodes.length) {
-            this.current.raws.semicolon = this.semicolon;
-        }
-        this.semicolon = false;
-
-        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
-        this.spaces = '';
-
-        if (this.current.parent) {
-            this.current.source.end = { line: token[2], column: token[3] };
-            this.current = this.current.parent;
-        } else {
-            this.unexpectedClose(token);
-        }
-    };
-
-    Parser.prototype.endFile = function endFile() {
-        if (this.current.parent) this.unclosedBlock();
-        if (this.current.nodes && this.current.nodes.length) {
-            this.current.raws.semicolon = this.semicolon;
-        }
-        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
-    };
-
-    Parser.prototype.freeSemicolon = function freeSemicolon(token) {
-        this.spaces += token[1];
-        if (this.current.nodes) {
-            var prev = this.current.nodes[this.current.nodes.length - 1];
-            if (prev && prev.type === 'rule' && !prev.raws.ownSemicolon) {
-                prev.raws.ownSemicolon = this.spaces;
-                this.spaces = '';
-            }
-        }
-    };
-
-    // Helpers
-
-    Parser.prototype.init = function init(node, line, column) {
-        this.current.push(node);
-
-        node.source = { start: { line: line, column: column }, input: this.input };
-        node.raws.before = this.spaces;
-        this.spaces = '';
-        if (node.type !== 'comment') this.semicolon = false;
-    };
-
-    Parser.prototype.raw = function raw(node, prop, tokens) {
-        var token = void 0,
-            type = void 0;
-        var length = tokens.length;
-        var value = '';
-        var clean = true;
-        var next = void 0,
-            prev = void 0;
-        var pattern = /^([.|#])?([\w])+/i;
-
-        for (var i = 0; i < length; i += 1) {
-            token = tokens[i];
-            type = token[0];
-
-            if (type === 'comment' && node.type === 'rule') {
-                prev = tokens[i - 1];
-                next = tokens[i + 1];
-
-                if (prev[0] !== 'space' && next[0] !== 'space' && pattern.test(prev[1]) && pattern.test(next[1])) {
-                    value += token[1];
-                } else {
-                    clean = false;
-                }
-
-                continue;
-            }
-
-            if (type === 'comment' || type === 'space' && i === length - 1) {
-                clean = false;
-            } else {
-                value += token[1];
-            }
-        }
-        if (!clean) {
-            var raw = tokens.reduce(function (all, i) {
-                return all + i[1];
-            }, '');
-            node.raws[prop] = { value: value, raw: raw };
-        }
-        node[prop] = value;
-    };
-
-    Parser.prototype.spacesAndCommentsFromEnd = function spacesAndCommentsFromEnd(tokens) {
-        var lastTokenType = void 0;
-        var spaces = '';
-        while (tokens.length) {
-            lastTokenType = tokens[tokens.length - 1][0];
-            if (lastTokenType !== 'space' && lastTokenType !== 'comment') break;
-            spaces = tokens.pop()[1] + spaces;
-        }
-        return spaces;
-    };
-
-    Parser.prototype.spacesAndCommentsFromStart = function spacesAndCommentsFromStart(tokens) {
-        var next = void 0;
-        var spaces = '';
-        while (tokens.length) {
-            next = tokens[0][0];
-            if (next !== 'space' && next !== 'comment') break;
-            spaces += tokens.shift()[1];
-        }
-        return spaces;
-    };
-
-    Parser.prototype.spacesFromEnd = function spacesFromEnd(tokens) {
-        var lastTokenType = void 0;
-        var spaces = '';
-        while (tokens.length) {
-            lastTokenType = tokens[tokens.length - 1][0];
-            if (lastTokenType !== 'space') break;
-            spaces = tokens.pop()[1] + spaces;
-        }
-        return spaces;
-    };
-
-    Parser.prototype.stringFrom = function stringFrom(tokens, from) {
-        var result = '';
-        for (var i = from; i < tokens.length; i++) {
-            result += tokens[i][1];
-        }
-        tokens.splice(from, tokens.length - from);
-        return result;
-    };
-
-    Parser.prototype.colon = function colon(tokens) {
-        var brackets = 0;
-        var token = void 0,
-            type = void 0,
-            prev = void 0;
-        for (var i = 0; i < tokens.length; i++) {
-            token = tokens[i];
-            type = token[0];
-
-            if (type === '(') {
-                brackets += 1;
-            } else if (type === ')') {
-                brackets -= 1;
-            } else if (brackets === 0 && type === ':') {
-                if (!prev) {
-                    this.doubleColon(token);
-                } else if (prev[0] === 'word' && prev[1] === 'progid') {
-                    continue;
-                } else {
-                    return i;
-                }
-            }
-
-            prev = token;
-        }
-        return false;
-    };
-
-    // Errors
-
-    Parser.prototype.unclosedBracket = function unclosedBracket(bracket) {
-        throw this.input.error('Unclosed bracket', bracket[2], bracket[3]);
-    };
-
-    Parser.prototype.unknownWord = function unknownWord(tokens) {
-        throw this.input.error('Unknown word', tokens[0][2], tokens[0][3]);
-    };
-
-    Parser.prototype.unexpectedClose = function unexpectedClose(token) {
-        throw this.input.error('Unexpected }', token[2], token[3]);
-    };
-
-    Parser.prototype.unclosedBlock = function unclosedBlock() {
-        var pos = this.current.source.start;
-        throw this.input.error('Unclosed block', pos.line, pos.column);
-    };
-
-    Parser.prototype.doubleColon = function doubleColon(token) {
-        throw this.input.error('Double colon', token[2], token[3]);
-    };
-
-    Parser.prototype.unnamedAtrule = function unnamedAtrule(node, token) {
-        throw this.input.error('At-rule without name', token[2], token[3]);
-    };
-
-    Parser.prototype.precheckMissedSemicolon = function precheckMissedSemicolon(tokens) {
-        // Hook for Safe Parser
-        tokens;
-    };
-
-    Parser.prototype.checkMissedSemicolon = function checkMissedSemicolon(tokens) {
-        var colon = this.colon(tokens);
-        if (colon === false) return;
-
-        var founded = 0;
-        var token = void 0;
-        for (var j = colon - 1; j >= 0; j--) {
-            token = tokens[j];
-            if (token[0] !== 'space') {
-                founded += 1;
-                if (founded === 2) break;
-            }
-        }
-        throw this.input.error('Missed semicolon', token[2], token[3]);
-    };
-
-    return Parser;
-}();
-
-exports.default = Parser;
-module.exports = exports['default'];
-
-}, {"482":482,"484":484,"486":486,"488":488,"489":489,"502":502}];
-window.modules["455"] = [function(require,module,exports){'use strict';
-
-exports.__esModule = true;
-
-var _declaration = require(486);
-
-var _declaration2 = _interopRequireDefault(_declaration);
-
-var _processor = require(504);
-
-var _processor2 = _interopRequireDefault(_processor);
-
-var _stringify = require(495);
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-var _comment = require(484);
-
-var _comment2 = _interopRequireDefault(_comment);
-
-var _atRule = require(482);
-
-var _atRule2 = _interopRequireDefault(_atRule);
-
-var _vendor = require(503);
-
-var _vendor2 = _interopRequireDefault(_vendor);
-
-var _parse = require(487);
-
-var _parse2 = _interopRequireDefault(_parse);
-
-var _list = require(499);
-
-var _list2 = _interopRequireDefault(_list);
-
-var _rule = require(488);
-
-var _rule2 = _interopRequireDefault(_rule);
-
-var _root = require(489);
-
-var _root2 = _interopRequireDefault(_root);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Create a new {@link Processor} instance that will apply `plugins`
- * as CSS processors.
- *
- * @param {Array.<Plugin|pluginFunction>|Processor} plugins - PostCSS
- *        plugins. See {@link Processor#use} for plugin format.
- *
- * @return {Processor} Processor to process multiple CSS
- *
- * @example
- * import postcss from 'postcss';
- *
- * postcss(plugins).process(css, { from, to }).then(result => {
- *   console.log(result.css);
- * });
- *
- * @namespace postcss
- */
-function postcss() {
-  for (var _len = arguments.length, plugins = Array(_len), _key = 0; _key < _len; _key++) {
-    plugins[_key] = arguments[_key];
-  }
-
-  if (plugins.length === 1 && Array.isArray(plugins[0])) {
-    plugins = plugins[0];
-  }
-  return new _processor2.default(plugins);
-}
-
-/**
- * Creates a PostCSS plugin with a standard API.
- *
- * The newly-wrapped function will provide both the name and PostCSS
- * version of the plugin.
- *
- * ```js
- *  const processor = postcss([replace]);
- *  processor.plugins[0].postcssPlugin  //=> 'postcss-replace'
- *  processor.plugins[0].postcssVersion //=> '5.1.0'
- * ```
- *
- * The plugin function receives 2 arguments: {@link Root}
- * and {@link Result} instance. The function should mutate the provided
- * `Root` node. Alternatively, you can create a new `Root` node
- * and override the `result.root` property.
- *
- * ```js
- * const cleaner = postcss.plugin('postcss-cleaner', () => {
- *   return (root, result) => {
- *     result.root = postcss.root();
- *   };
- * });
- * ```
- *
- * As a convenience, plugins also expose a `process` method so that you can use
- * them as standalone tools.
- *
- * ```js
- * cleaner.process(css, processOpts, pluginOpts);
- * // This is equivalent to:
- * postcss([ cleaner(pluginOpts) ]).process(css, processOpts);
- * ```
- *
- * Asynchronous plugins should return a `Promise` instance.
- *
- * ```js
- * postcss.plugin('postcss-import', () => {
- *   return (root, result) => {
- *     return new Promise( (resolve, reject) => {
- *       fs.readFile('base.css', (base) => {
- *         root.prepend(base);
- *         resolve();
- *       });
- *     });
- *   };
- * });
- * ```
- *
- * Add warnings using the {@link Node#warn} method.
- * Send data to other plugins using the {@link Result#messages} array.
- *
- * ```js
- * postcss.plugin('postcss-caniuse-test', () => {
- *   return (root, result) => {
- *     root.walkDecls(decl => {
- *       if ( !caniuse.support(decl.prop) ) {
- *         decl.warn(result, 'Some browsers do not support ' + decl.prop);
- *       }
- *     });
- *   };
- * });
- * ```
- *
- * @param {string} name          - PostCSS plugin name. Same as in `name`
- *                                 property in `package.json`. It will be saved
- *                                 in `plugin.postcssPlugin` property.
- * @param {function} initializer - will receive plugin options
- *                                 and should return {@link pluginFunction}
- *
- * @return {Plugin} PostCSS plugin
- */
-postcss.plugin = function plugin(name, initializer) {
-  var creator = function creator() {
-    var transformer = initializer.apply(undefined, arguments);
-    transformer.postcssPlugin = name;
-    transformer.postcssVersion = new _processor2.default().version;
-    return transformer;
-  };
-
-  var cache = void 0;
-  Object.defineProperty(creator, 'postcss', {
-    get: function get() {
-      if (!cache) cache = creator();
-      return cache;
-    }
-  });
-
-  creator.process = function (css, processOpts, pluginOpts) {
-    return postcss([creator(pluginOpts)]).process(css, processOpts);
-  };
-
-  return creator;
-};
-
-/**
- * Default function to convert a node tree into a CSS string.
- *
- * @param {Node} node       - start node for stringifing. Usually {@link Root}.
- * @param {builder} builder - function to concatenate CSS from node’s parts
- *                            or generate string and source map
- *
- * @return {void}
- *
- * @function
- */
-postcss.stringify = _stringify2.default;
-
-/**
- * Parses source css and returns a new {@link Root} node,
- * which contains the source CSS nodes.
- *
- * @param {string|toString} css   - string with input CSS or any object
- *                                  with toString() method, like a Buffer
- * @param {processOptions} [opts] - options with only `from` and `map` keys
- *
- * @return {Root} PostCSS AST
- *
- * @example
- * // Simple CSS concatenation with source map support
- * const root1 = postcss.parse(css1, { from: file1 });
- * const root2 = postcss.parse(css2, { from: file2 });
- * root1.append(root2).toResult().css;
- *
- * @function
- */
-postcss.parse = _parse2.default;
-
-/**
- * @member {vendor} - Contains the {@link vendor} module.
- *
- * @example
- * postcss.vendor.unprefixed('-moz-tab') //=> ['tab']
- */
-postcss.vendor = _vendor2.default;
-
-/**
- * @member {list} - Contains the {@link list} module.
- *
- * @example
- * postcss.list.space('5px calc(10% + 5px)') //=> ['5px', 'calc(10% + 5px)']
- */
-postcss.list = _list2.default;
-
-/**
- * Creates a new {@link Comment} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {Comment} new Comment node
- *
- * @example
- * postcss.comment({ text: 'test' })
- */
-postcss.comment = function (defaults) {
-  return new _comment2.default(defaults);
-};
-
-/**
- * Creates a new {@link AtRule} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {AtRule} new AtRule node
- *
- * @example
- * postcss.atRule({ name: 'charset' }).toString() //=> "@charset"
- */
-postcss.atRule = function (defaults) {
-  return new _atRule2.default(defaults);
-};
-
-/**
- * Creates a new {@link Declaration} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {Declaration} new Declaration node
- *
- * @example
- * postcss.decl({ prop: 'color', value: 'red' }).toString() //=> "color: red"
- */
-postcss.decl = function (defaults) {
-  return new _declaration2.default(defaults);
-};
-
-/**
- * Creates a new {@link Rule} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {Rule} new Rule node
- *
- * @example
- * postcss.rule({ selector: 'a' }).toString() //=> "a {\n}"
- */
-postcss.rule = function (defaults) {
-  return new _rule2.default(defaults);
-};
-
-/**
- * Creates a new {@link Root} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {Root} new Root node
- *
- * @example
- * postcss.root({ after: '\n' }).toString() //=> "\n"
- */
-postcss.root = function (defaults) {
-  return new _root2.default(defaults);
-};
-
-exports.default = postcss;
-module.exports = exports['default'];
-
-}, {"482":482,"484":484,"486":486,"487":487,"488":488,"489":489,"495":495,"499":499,"503":503,"504":504}];
-window.modules["493"] = [function(require,module,exports){(function (Buffer){
-'use strict';
-
-exports.__esModule = true;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _sourceMap = require(447);
-
-var _sourceMap2 = _interopRequireDefault(_sourceMap);
-
-var _path = require(7);
-
-var _path2 = _interopRequireDefault(_path);
-
-var _fs = require(2);
-
-var _fs2 = _interopRequireDefault(_fs);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function fromBase64(str) {
-    if (Buffer) {
-        if (Buffer.from && Buffer.from !== Uint8Array.from) {
-            return Buffer.from(str, 'base64').toString();
-        } else {
-            return new Buffer(str, 'base64').toString();
-        }
-    } else {
-        return window.atob(str);
-    }
-}
-
-/**
- * Source map information from input CSS.
- * For example, source map after Sass compiler.
- *
- * This class will automatically find source map in input CSS or in file system
- * near input file (according `from` option).
- *
- * @example
- * const root = postcss.parse(css, { from: 'a.sass.css' });
- * root.input.map //=> PreviousMap
- */
-
-var PreviousMap = function () {
-
-    /**
-     * @param {string}         css    - input CSS source
-     * @param {processOptions} [opts] - {@link Processor#process} options
-     */
-    function PreviousMap(css, opts) {
-        _classCallCheck(this, PreviousMap);
-
-        this.loadAnnotation(css);
-        /**
-         * @member {boolean} - Was source map inlined by data-uri to input CSS.
-         */
-        this.inline = this.startWith(this.annotation, 'data:');
-
-        var prev = opts.map ? opts.map.prev : undefined;
-        var text = this.loadMap(opts.from, prev);
-        if (text) this.text = text;
-    }
-
-    /**
-     * Create a instance of `SourceMapGenerator` class
-     * from the `source-map` library to work with source map information.
-     *
-     * It is lazy method, so it will create object only on first call
-     * and then it will use cache.
-     *
-     * @return {SourceMapGenerator} object with source map information
-     */
-
-
-    PreviousMap.prototype.consumer = function consumer() {
-        if (!this.consumerCache) {
-            this.consumerCache = new _sourceMap2.default.SourceMapConsumer(this.text);
-        }
-        return this.consumerCache;
-    };
-
-    /**
-     * Does source map contains `sourcesContent` with input source text.
-     *
-     * @return {boolean} Is `sourcesContent` present
-     */
-
-
-    PreviousMap.prototype.withContent = function withContent() {
-        return !!(this.consumer().sourcesContent && this.consumer().sourcesContent.length > 0);
-    };
-
-    PreviousMap.prototype.startWith = function startWith(string, start) {
-        if (!string) return false;
-        return string.substr(0, start.length) === start;
-    };
-
-    PreviousMap.prototype.loadAnnotation = function loadAnnotation(css) {
-        var match = css.match(/\/\*\s*# sourceMappingURL=(.*)\s*\*\//);
-        if (match) this.annotation = match[1].trim();
-    };
-
-    PreviousMap.prototype.decodeInline = function decodeInline(text) {
-        // data:application/json;charset=utf-8;base64,
-        // data:application/json;charset=utf8;base64,
-        // data:application/json;base64,
-        var baseUri = /^data:application\/json;(?:charset=utf-?8;)?base64,/;
-        var uri = 'data:application/json,';
-
-        if (this.startWith(text, uri)) {
-            return decodeURIComponent(text.substr(uri.length));
-        } else if (baseUri.test(text)) {
-            return fromBase64(text.substr(RegExp.lastMatch.length));
-        } else {
-            var encoding = text.match(/data:application\/json;([^,]+),/)[1];
-            throw new Error('Unsupported source map encoding ' + encoding);
-        }
-    };
-
-    PreviousMap.prototype.loadMap = function loadMap(file, prev) {
-        if (prev === false) return false;
-
-        if (prev) {
-            if (typeof prev === 'string') {
-                return prev;
-            } else if (typeof prev === 'function') {
-                var prevPath = prev(file);
-                if (prevPath && _fs2.default.existsSync && _fs2.default.existsSync(prevPath)) {
-                    return _fs2.default.readFileSync(prevPath, 'utf-8').toString().trim();
-                } else {
-                    throw new Error('Unable to load previous source map: ' + prevPath.toString());
-                }
-            } else if (prev instanceof _sourceMap2.default.SourceMapConsumer) {
-                return _sourceMap2.default.SourceMapGenerator.fromSourceMap(prev).toString();
-            } else if (prev instanceof _sourceMap2.default.SourceMapGenerator) {
-                return prev.toString();
-            } else if (this.isMap(prev)) {
-                return JSON.stringify(prev);
-            } else {
-                throw new Error('Unsupported previous source map format: ' + prev.toString());
-            }
-        } else if (this.inline) {
-            return this.decodeInline(this.annotation);
-        } else if (this.annotation) {
-            var map = this.annotation;
-            if (file) map = _path2.default.join(_path2.default.dirname(file), map);
-
-            this.root = _path2.default.dirname(map);
-            if (_fs2.default.existsSync && _fs2.default.existsSync(map)) {
-                return _fs2.default.readFileSync(map, 'utf-8').toString().trim();
-            } else {
-                return false;
-            }
-        }
-    };
-
-    PreviousMap.prototype.isMap = function isMap(map) {
-        if ((typeof map === 'undefined' ? 'undefined' : _typeof(map)) !== 'object') return false;
-        return typeof map.mappings === 'string' || typeof map._mappings === 'string';
-    };
-
-    return PreviousMap;
-}();
-
-exports.default = PreviousMap;
-module.exports = exports['default'];
-
-
-}).call(this,require(4).Buffer)}, {"2":2,"4":4,"7":7,"447":447}];
-window.modules["504"] = [function(require,module,exports){'use strict';
-
-exports.__esModule = true;
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _lazyResult = require(494);
+var _lazyResult = require(491);
 
 var _lazyResult2 = _interopRequireDefault(_lazyResult);
 
@@ -13236,17 +13236,17 @@ exports.default = Processor;
 
 module.exports = exports['default'];
 
-}, {"494":494}];
-window.modules["530"] = [function(require,module,exports){(function (Buffer){
+}, {"491":491}];
+window.modules["527"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
 exports.__esModule = true;
 
-var _sourceMap = require(447);
+var _sourceMap = require(444);
 
 var _sourceMap2 = _interopRequireDefault(_sourceMap);
 
-var _path = require(7);
+var _path = require(381);
 
 var _path2 = _interopRequireDefault(_path);
 
@@ -13562,26 +13562,26 @@ exports.default = MapGenerator;
 module.exports = exports['default'];
 
 
-}).call(this,require(4).Buffer)}, {"4":4,"7":7,"447":447}];
-window.modules["517"] = [function(require,module,exports){'use strict';
+}).call(this,require(21).Buffer)}, {"21":21,"381":381,"444":444}];
+window.modules["514"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _cssSyntaxError = require(522);
+var _cssSyntaxError = require(519);
 
 var _cssSyntaxError2 = _interopRequireDefault(_cssSyntaxError);
 
-var _stringifier = require(532);
+var _stringifier = require(529);
 
 var _stringifier2 = _interopRequireDefault(_stringifier);
 
-var _stringify = require(527);
+var _stringify = require(524);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _warnOnce = require(528);
+var _warnOnce = require(525);
 
 var _warnOnce2 = _interopRequireDefault(_warnOnce);
 
@@ -14188,17 +14188,17 @@ exports.default = Node;
 
 module.exports = exports['default'];
 
-}, {"522":522,"527":527,"528":528,"532":532}];
-window.modules["520"] = [function(require,module,exports){'use strict';
+}, {"519":519,"524":524,"525":525,"529":529}];
+window.modules["517"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 exports.default = parse;
 
-var _parser = require(533);
+var _parser = require(530);
 
 var _parser2 = _interopRequireDefault(_parser);
 
-var _input = require(524);
+var _input = require(521);
 
 var _input2 = _interopRequireDefault(_input);
 
@@ -14230,32 +14230,32 @@ function parse(css, opts) {
 }
 module.exports = exports['default'];
 
-}, {"524":524,"533":533}];
-window.modules["533"] = [function(require,module,exports){'use strict';
+}, {"521":521,"530":530}];
+window.modules["530"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(518);
+var _declaration = require(516);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
-var _tokenize = require(534);
+var _tokenize = require(531);
 
 var _tokenize2 = _interopRequireDefault(_tokenize);
 
-var _comment = require(516);
+var _comment = require(513);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _atRule = require(514);
+var _atRule = require(511);
 
 var _atRule2 = _interopRequireDefault(_atRule);
 
-var _root = require(521);
+var _root = require(518);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _rule = require(519);
+var _rule = require(515);
 
 var _rule2 = _interopRequireDefault(_rule);
 
@@ -14783,48 +14783,48 @@ var Parser = function () {
 exports.default = Parser;
 module.exports = exports['default'];
 
-}, {"514":514,"516":516,"518":518,"519":519,"521":521,"534":534}];
-window.modules["513"] = [function(require,module,exports){'use strict';
+}, {"511":511,"513":513,"515":515,"516":516,"518":518,"531":531}];
+window.modules["510"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(518);
+var _declaration = require(516);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
-var _processor = require(536);
+var _processor = require(533);
 
 var _processor2 = _interopRequireDefault(_processor);
 
-var _stringify = require(527);
+var _stringify = require(524);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _comment = require(516);
+var _comment = require(513);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _atRule = require(514);
+var _atRule = require(511);
 
 var _atRule2 = _interopRequireDefault(_atRule);
 
-var _vendor = require(535);
+var _vendor = require(532);
 
 var _vendor2 = _interopRequireDefault(_vendor);
 
-var _parse = require(520);
+var _parse = require(517);
 
 var _parse2 = _interopRequireDefault(_parse);
 
-var _list = require(531);
+var _list = require(528);
 
 var _list2 = _interopRequireDefault(_list);
 
-var _rule = require(519);
+var _rule = require(515);
 
 var _rule2 = _interopRequireDefault(_rule);
 
-var _root = require(521);
+var _root = require(518);
 
 var _root2 = _interopRequireDefault(_root);
 
@@ -15076,23 +15076,23 @@ postcss.root = function (defaults) {
 exports.default = postcss;
 module.exports = exports['default'];
 
-}, {"514":514,"516":516,"518":518,"519":519,"520":520,"521":521,"527":527,"531":531,"535":535,"536":536}];
-window.modules["525"] = [function(require,module,exports){(function (Buffer){
+}, {"511":511,"513":513,"515":515,"516":516,"517":517,"518":518,"524":524,"528":528,"532":532,"533":533}];
+window.modules["522"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
 exports.__esModule = true;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _sourceMap = require(447);
+var _sourceMap = require(444);
 
 var _sourceMap2 = _interopRequireDefault(_sourceMap);
 
-var _path = require(7);
+var _path = require(381);
 
 var _path2 = _interopRequireDefault(_path);
 
-var _fs = require(2);
+var _fs = require(19);
 
 var _fs2 = _interopRequireDefault(_fs);
 
@@ -15249,14 +15249,14 @@ exports.default = PreviousMap;
 module.exports = exports['default'];
 
 
-}).call(this,require(4).Buffer)}, {"2":2,"4":4,"7":7,"447":447}];
-window.modules["536"] = [function(require,module,exports){'use strict';
+}).call(this,require(21).Buffer)}, {"19":19,"21":21,"381":381,"444":444}];
+window.modules["533"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _lazyResult = require(526);
+var _lazyResult = require(523);
 
 var _lazyResult2 = _interopRequireDefault(_lazyResult);
 
@@ -15490,16 +15490,16 @@ exports.default = Processor;
 
 module.exports = exports['default'];
 
-}, {"526":526}];
-window.modules["550"] = [function(require,module,exports){(function (Buffer){
+}, {"523":523}];
+window.modules["547"] = [function(require,module,exports){(function (Buffer){
 "use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _sourceMap = _interopRequireDefault(require(447));
+var _sourceMap = _interopRequireDefault(require(444));
 
-var _path = _interopRequireDefault(require(7));
+var _path = _interopRequireDefault(require(381));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15847,18 +15847,18 @@ exports.default = _default;
 module.exports = exports.default;
 
 
-}).call(this,require(4).Buffer)}, {"4":4,"7":7,"447":447}];
-window.modules["540"] = [function(require,module,exports){(function (process){
+}).call(this,require(21).Buffer)}, {"21":21,"381":381,"444":444}];
+window.modules["537"] = [function(require,module,exports){(function (process){
 "use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _cssSyntaxError = _interopRequireDefault(require(544));
+var _cssSyntaxError = _interopRequireDefault(require(541));
 
-var _stringifier = _interopRequireDefault(require(552));
+var _stringifier = _interopRequireDefault(require(549));
 
-var _stringify = _interopRequireDefault(require(547));
+var _stringify = _interopRequireDefault(require(544));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -16458,16 +16458,16 @@ exports.default = _default;
 module.exports = exports.default;
 
 
-}).call(this,require(8))}, {"8":8,"544":544,"547":547,"552":552}];
-window.modules["541"] = [function(require,module,exports){(function (process){
+}).call(this,require(382))}, {"382":382,"541":541,"544":544,"549":549}];
+window.modules["539"] = [function(require,module,exports){(function (process){
 "use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _parser = _interopRequireDefault(require(511));
+var _parser = _interopRequireDefault(require(508));
 
-var _input = _interopRequireDefault(require(507));
+var _input = _interopRequireDefault(require(504));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -16501,23 +16501,23 @@ exports.default = _default;
 module.exports = exports.default;
 
 
-}).call(this,require(8))}, {"8":8,"507":507,"511":511}];
-window.modules["511"] = [function(require,module,exports){"use strict";
+}).call(this,require(382))}, {"382":382,"504":504,"508":508}];
+window.modules["508"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _declaration = _interopRequireDefault(require(543));
+var _declaration = _interopRequireDefault(require(538));
 
-var _tokenize = _interopRequireDefault(require(509));
+var _tokenize = _interopRequireDefault(require(506));
 
-var _comment = _interopRequireDefault(require(510));
+var _comment = _interopRequireDefault(require(507));
 
-var _atRule = _interopRequireDefault(require(538));
+var _atRule = _interopRequireDefault(require(535));
 
-var _root = _interopRequireDefault(require(553));
+var _root = _interopRequireDefault(require(550));
 
-var _rule = _interopRequireDefault(require(542));
+var _rule = _interopRequireDefault(require(540));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17113,31 +17113,31 @@ function () {
 exports.default = Parser;
 module.exports = exports.default;
 
-}, {"509":509,"510":510,"538":538,"542":542,"543":543,"553":553}];
-window.modules["554"] = [function(require,module,exports){"use strict";
+}, {"506":506,"507":507,"535":535,"538":538,"540":540,"550":550}];
+window.modules["551"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _declaration = _interopRequireDefault(require(543));
+var _declaration = _interopRequireDefault(require(538));
 
-var _processor = _interopRequireDefault(require(556));
+var _processor = _interopRequireDefault(require(553));
 
-var _stringify = _interopRequireDefault(require(547));
+var _stringify = _interopRequireDefault(require(544));
 
-var _comment = _interopRequireDefault(require(510));
+var _comment = _interopRequireDefault(require(507));
 
-var _atRule = _interopRequireDefault(require(538));
+var _atRule = _interopRequireDefault(require(535));
 
-var _vendor = _interopRequireDefault(require(555));
+var _vendor = _interopRequireDefault(require(552));
 
-var _parse = _interopRequireDefault(require(541));
+var _parse = _interopRequireDefault(require(539));
 
-var _list = _interopRequireDefault(require(551));
+var _list = _interopRequireDefault(require(548));
 
-var _rule = _interopRequireDefault(require(542));
+var _rule = _interopRequireDefault(require(540));
 
-var _root = _interopRequireDefault(require(553));
+var _root = _interopRequireDefault(require(550));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17399,18 +17399,18 @@ var _default = postcss;
 exports.default = _default;
 module.exports = exports.default;
 
-}, {"510":510,"538":538,"541":541,"542":542,"543":543,"547":547,"551":551,"553":553,"555":555,"556":556}];
-window.modules["545"] = [function(require,module,exports){(function (Buffer){
+}, {"507":507,"535":535,"538":538,"539":539,"540":540,"544":544,"548":548,"550":550,"552":552,"553":553}];
+window.modules["542"] = [function(require,module,exports){(function (Buffer){
 "use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _sourceMap = _interopRequireDefault(require(447));
+var _sourceMap = _interopRequireDefault(require(444));
 
-var _path = _interopRequireDefault(require(7));
+var _path = _interopRequireDefault(require(381));
 
-var _fs = _interopRequireDefault(require(2));
+var _fs = _interopRequireDefault(require(19));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17563,14 +17563,14 @@ exports.default = _default;
 module.exports = exports.default;
 
 
-}).call(this,require(4).Buffer)}, {"2":2,"4":4,"7":7,"447":447}];
-window.modules["556"] = [function(require,module,exports){(function (process){
+}).call(this,require(21).Buffer)}, {"19":19,"21":21,"381":381,"444":444}];
+window.modules["553"] = [function(require,module,exports){(function (process){
 "use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _lazyResult = _interopRequireDefault(require(546));
+var _lazyResult = _interopRequireDefault(require(543));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17829,8 +17829,8 @@ exports.default = _default;
 module.exports = exports.default;
 
 
-}).call(this,require(8))}, {"8":8,"546":546}];
-window.modules["20"] = [function(require,module,exports){Prism.languages.yaml = {
+}).call(this,require(382))}, {"382":382,"543":543}];
+window.modules["7"] = [function(require,module,exports){Prism.languages.yaml = {
 	'scalar': {
 		pattern: /([\-:]\s*(?:![^\s]+)?[ \t]*[|>])[ \t]*(?:((?:\r?\n|\r)[ \t]+)[^\r\n]+(?:\2[^\r\n]+)*)/,
 		lookbehind: true,
@@ -17877,7 +17877,7 @@ window.modules["20"] = [function(require,module,exports){Prism.languages.yaml = 
 };
 
 Prism.languages.yml = Prism.languages.yaml;}, {}];
-window.modules["21"] = [function(require,module,exports){(function (global){
+window.modules["8"] = [function(require,module,exports){(function (global){
 
 /* **********************************************
      Begin prism-core.js
@@ -18840,14 +18840,14 @@ Prism.languages.js = Prism.languages.javascript;
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})}, {}];
-window.modules["565"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+window.modules["563"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = require(561);
+var util = require(559);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -18919,8 +18919,8 @@ MappingList.prototype.toArray = function MappingList_toArray() {
 };
 
 exports.MappingList = MappingList;
-}, {"561":561}];
-window.modules["578"] = [function(require,module,exports){/**
+}, {"559":559}];
+window.modules["576"] = [function(require,module,exports){/**
  * Ensure some object is a coerced to a string
  **/
 module.exports = function makeString(object) {
@@ -18928,7 +18928,7 @@ module.exports = function makeString(object) {
   return '' + object;
 };
 }, {}];
-window.modules["634"] = [function(require,module,exports){var makeString = require(578);
+window.modules["630"] = [function(require,module,exports){var makeString = require(576);
 
 module.exports = function(str, callback) {
   str = makeString(str);
@@ -18937,8 +18937,8 @@ module.exports = function(str, callback) {
 
   return str.replace(/./g, callback);
 };
-}, {"578":578}];
-window.modules["604"] = [function(require,module,exports){module.exports = function naturalCmp(str1, str2) {
+}, {"576":576}];
+window.modules["603"] = [function(require,module,exports){module.exports = function naturalCmp(str1, str2) {
   if (str1 == str2) return 0;
   if (!str1) return -1;
   if (!str2) return 1;
@@ -18968,7 +18968,7 @@ window.modules["604"] = [function(require,module,exports){module.exports = funct
   return str1 < str2 ? -1 : 1;
 };
 }, {}];
-window.modules["602"] = [function(require,module,exports){module.exports = function numberFormat(number, dec, dsep, tsep) {
+window.modules["599"] = [function(require,module,exports){module.exports = function numberFormat(number, dec, dsep, tsep) {
   if (isNaN(number) || number == null) return '';
 
   number = number.toFixed(~~dec);
@@ -18981,8 +18981,8 @@ window.modules["602"] = [function(require,module,exports){module.exports = funct
   return fnums.replace(/(\d)(?=(?:\d{3})+$)/g, '$1' + tsep) + decimals;
 };
 }, {}];
-window.modules["636"] = [function(require,module,exports){var makeString = require(578);
-var strRepeat = require(596);
+window.modules["635"] = [function(require,module,exports){var makeString = require(576);
+var strRepeat = require(594);
 
 module.exports = function pad(str, length, padStr, type) {
   str = makeString(str);
@@ -19007,20 +19007,20 @@ module.exports = function pad(str, length, padStr, type) {
     return strRepeat(padStr, padlen) + str;
   }
 };
-}, {"578":578,"596":596}];
-window.modules["640"] = [function(require,module,exports){var adjacent = require(592);
+}, {"576":576,"594":594}];
+window.modules["636"] = [function(require,module,exports){var adjacent = require(590);
 
 module.exports = function succ(str) {
   return adjacent(str, -1);
 };
-}, {"592":592}];
-window.modules["626"] = [function(require,module,exports){/**
+}, {"590":590}];
+window.modules["623"] = [function(require,module,exports){/**
  * _s.prune: a more elegant version of truncate
  * prune extra chars, never leaving a half-chopped word.
  * @author github.com/rwz
  */
-var makeString = require(578);
-var rtrim = require(639);
+var makeString = require(576);
+var rtrim = require(621);
 
 module.exports = function prune(str, length, pruneStr) {
   str = makeString(str);
@@ -19041,8 +19041,8 @@ module.exports = function prune(str, length, pruneStr) {
 
   return (template + pruneStr).length > str.length ? str : str.slice(0, template.length) + pruneStr;
 };
-}, {"578":578,"639":639}];
-window.modules["645"] = [function(require,module,exports){'use strict';
+}, {"576":576,"621":621}];
+window.modules["644"] = [function(require,module,exports){'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 

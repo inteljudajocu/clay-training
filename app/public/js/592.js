@@ -1,10 +1,6 @@
-window.modules["592"] = [function(require,module,exports){var makeString = require(578);
+window.modules["592"] = [function(require,module,exports){var makeString = require(576);
 
-module.exports = function adjacent(str, direction) {
-  str = makeString(str);
-  if (str.length === 0) {
-    return '';
-  }
-  return str.slice(0, -1) + String.fromCharCode(str.charCodeAt(str.length - 1) + direction);
+module.exports = function escapeRegExp(str) {
+  return makeString(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
 };
-}, {"578":578}];
+}, {"576":576}];

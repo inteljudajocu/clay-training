@@ -1,17 +1,23 @@
-window.modules["336"] = [function(require,module,exports){var baseGet = require(294);
+window.modules["336"] = [function(require,module,exports){var constant = require(337),
+    defineProperty = require(281),
+    identity = require(316);
 
 /**
- * A specialized version of `baseProperty` which supports deep paths.
+ * The base implementation of `setToString` without support for hot loop shorting.
  *
  * @private
- * @param {Array|string} path The path of the property to get.
- * @returns {Function} Returns the new accessor function.
+ * @param {Function} func The function to modify.
+ * @param {Function} string The `toString` result.
+ * @returns {Function} Returns `func`.
  */
-function basePropertyDeep(path) {
-  return function(object) {
-    return baseGet(object, path);
-  };
-}
+var baseSetToString = !defineProperty ? identity : function(func, string) {
+  return defineProperty(func, 'toString', {
+    'configurable': true,
+    'enumerable': false,
+    'value': constant(string),
+    'writable': true
+  });
+};
 
-module.exports = basePropertyDeep;
-}, {"294":294}];
+module.exports = baseSetToString;
+}, {"281":281,"316":316,"337":337}];

@@ -1,33 +1,25 @@
-window.modules["289"] = [function(require,module,exports){var isArrayLike = require(329);
+window.modules["289"] = [function(require,module,exports){var castPath = require(291),
+    toKey = require(290);
 
 /**
- * Creates a `baseEach` or `baseEachRight` function.
+ * The base implementation of `_.get` without support for default values.
  *
  * @private
- * @param {Function} eachFunc The function to iterate over a collection.
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {Function} Returns the new base function.
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path of the property to get.
+ * @returns {*} Returns the resolved value.
  */
-function createBaseEach(eachFunc, fromRight) {
-  return function(collection, iteratee) {
-    if (collection == null) {
-      return collection;
-    }
-    if (!isArrayLike(collection)) {
-      return eachFunc(collection, iteratee);
-    }
-    var length = collection.length,
-        index = fromRight ? length : -1,
-        iterable = Object(collection);
+function baseGet(object, path) {
+  path = castPath(path, object);
 
-    while ((fromRight ? index-- : ++index < length)) {
-      if (iteratee(iterable[index], index, iterable) === false) {
-        break;
-      }
-    }
-    return collection;
-  };
+  var index = 0,
+      length = path.length;
+
+  while (object != null && index < length) {
+    object = object[toKey(path[index++])];
+  }
+  return (index && index == length) ? object : undefined;
 }
 
-module.exports = createBaseEach;
-}, {"329":329}];
+module.exports = baseGet;
+}, {"290":290,"291":291}];

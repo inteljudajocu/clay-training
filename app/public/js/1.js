@@ -1,153 +1,154 @@
-window.modules["1"] = [function(require,module,exports){'use strict'
+window.modules["1"] = [function(require,module,exports){'use strict';
 
-exports.byteLength = byteLength
-exports.toByteArray = toByteArray
-exports.fromByteArray = fromByteArray
+var speakingurl = require(568),
+    he = require(206),
+    typogr = require(571),
+    headQuotes = require(207),
+    striptags = require(3),
+    _isString = require(366),
+    _isPlainObject = require(371),
+    _isArray = require(272),
+    _mapValues = require(374),
+    _toLower = require(377),
+    _require = require(205),
+    fold = _require.fold,
+    NON_ALPHANUMERIC_RE = /[_\W]/g;
+/**
+ * smarten headlines, curling quotes and replacing dashes and ellipses
+ * @param {string} text
+ * @returns {string}
+ */
 
-var lookup = []
-var revLookup = []
-var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
 
-var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-for (var i = 0, len = code.length; i < len; ++i) {
-  lookup[i] = code[i]
-  revLookup[code.charCodeAt(i)] = i
+function toSmartHeadline(text) {
+  return headQuotes(he.decode(text)).replace('---', '—') // em-dash first
+  .replace('--', '–').replace('...', '…');
 }
+/**
+ * run typogr's smartypants on text, curling quotes and replacing dashes and ellipses
+ * note: this is used for body text and teasers, NOT headlines
+ * note: we have to decode quotes, then curl them, then decode them again
+ * @param {string} text
+ * @returns {string}
+ */
 
-// Support decoding URL-safe base64 strings, as Node.js does.
-// See: https://en.wikipedia.org/wiki/Base64#URL_applications
-revLookup['-'.charCodeAt(0)] = 62
-revLookup['_'.charCodeAt(0)] = 63
 
-function getLens (b64) {
-  var len = b64.length
+function toSmartText(text) {
+  return he.decode(typogr(he.decode(text)).chain().smartypants().value());
+}
+/**
+ * Removes all unicode from string
+ * @param {string} str
+ * @returns {string}
+ */
 
-  if (len % 4 > 0) {
-    throw new Error('Invalid string. Length must be a multiple of 4')
+
+function stripUnicode(str) {
+  return str.replace(/[^A-Za-z 0-9\.,\?!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]~]*/g, '');
+}
+/**
+ * remove all html stuff from a string
+ * @param {string} str
+ * @returns {string}
+ */
+
+
+function toPlainText(str) {
+  // coerce all text into a string. Undefined stuff is just an empty string
+  if (!_isString(str)) {
+    return '';
   }
 
-  // Trim off extra bytes after placeholder bytes are found
-  // See: https://github.com/beatgammit/base64-js/issues/42
-  var validLen = b64.indexOf('=')
-  if (validLen === -1) validLen = len
-
-  var placeHoldersLen = validLen === len
-    ? 0
-    : 4 - (validLen % 4)
-
-  return [validLen, placeHoldersLen]
+  return he.decode(striptags(str.replace(/&nbsp;/g, ' ')));
 }
+/**
+ * remove EVERYTHING from the slug, then run it through speakingurl
+ * @param {string} str
+ * @returns {string}
+ */
 
-// base64 is 4/3 + up to two characters of the original data
-function byteLength (b64) {
-  var lens = getLens(b64)
-  var validLen = lens[0]
-  var placeHoldersLen = lens[1]
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+
+function cleanSlug(str) {
+  return speakingurl(toPlainText(stripUnicode(str)), {
+    custom: {
+      _: '-' // convert underscores to hyphens
+
+    }
+  });
 }
+/**
+ * remove empty tags and rando whitespace
+ * used when saving wysiwyg content
+ * @param {string} str
+ * @returns {string}
+ */
 
-function _byteLength (b64, validLen, placeHoldersLen) {
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+
+function validateTagContent(str) {
+  var noTags = striptags(str); // if a string ONLY contains tags, return emptystring.
+  // this fixes some issues where browsers insert tags into empty
+  // contenteditable elements, as well as some unrecoverable states where
+  // users added rich text and then deleted it in a specific way that
+  // preserved the tag, e.g. '<strong> </strong>'
+
+  if (noTags === '' || noTags.match(/^\s+$/)) {
+    return '';
+  } else {
+    return str; // otherwise return the string with all tags and everything
+  }
 }
+/**
+ * Strip paragraph and line seperators from component data
+ * @param {object|array|string} data
+ * @returns {object|array|string} sanitized data
+ */
 
-function toByteArray (b64) {
-  var tmp
-  var lens = getLens(b64)
-  var validLen = lens[0]
-  var placeHoldersLen = lens[1]
 
-  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen))
-
-  var curByte = 0
-
-  // if there are placeholders, only get up to the last complete 4 chars
-  var len = placeHoldersLen > 0
-    ? validLen - 4
-    : validLen
-
-  var i
-  for (i = 0; i < len; i += 4) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 18) |
-      (revLookup[b64.charCodeAt(i + 1)] << 12) |
-      (revLookup[b64.charCodeAt(i + 2)] << 6) |
-      revLookup[b64.charCodeAt(i + 3)]
-    arr[curByte++] = (tmp >> 16) & 0xFF
-    arr[curByte++] = (tmp >> 8) & 0xFF
-    arr[curByte++] = tmp & 0xFF
+function recursivelyStripSeperators(data) {
+  if (_isPlainObject(data)) {
+    return _mapValues(data, recursivelyStripSeperators);
+  } else if (_isArray(data)) {
+    return data.map(recursivelyStripSeperators);
+  } else if (_isString(data)) {
+    return data.replace(/(\u2028|\u2029)/g, '');
   }
 
-  if (placeHoldersLen === 2) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 2) |
-      (revLookup[b64.charCodeAt(i + 1)] >> 4)
-    arr[curByte++] = tmp & 0xFF
-  }
+  return data;
+}
+/**
+ * Removes all non alphanumeric characters from a string
+ * @param   {string} str
+ * @returns {string}
+ */
 
-  if (placeHoldersLen === 1) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 10) |
-      (revLookup[b64.charCodeAt(i + 1)] << 4) |
-      (revLookup[b64.charCodeAt(i + 2)] >> 2)
-    arr[curByte++] = (tmp >> 8) & 0xFF
-    arr[curByte++] = tmp & 0xFF
-  }
 
-  return arr
+function removeNonAlphanumericCharacters() {
+  var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+  return str.replace(NON_ALPHANUMERIC_RE, '');
+}
+/**
+ * normalizeName
+ *
+ * lowercases and converts alphabetic, numeric, and symbolic Unicode characters
+ * which are not in the first 127 ASCII characters (the "Basic Latin" Unicode block)
+ * into their ASCII equivalents
+ *
+ * @param {String} name a string to normalize
+ * @returns {String}
+ */
+
+
+function normalizeName(name) {
+  return fold(_toLower(name.trim()));
 }
 
-function tripletToBase64 (num) {
-  return lookup[num >> 18 & 0x3F] +
-    lookup[num >> 12 & 0x3F] +
-    lookup[num >> 6 & 0x3F] +
-    lookup[num & 0x3F]
-}
-
-function encodeChunk (uint8, start, end) {
-  var tmp
-  var output = []
-  for (var i = start; i < end; i += 3) {
-    tmp =
-      ((uint8[i] << 16) & 0xFF0000) +
-      ((uint8[i + 1] << 8) & 0xFF00) +
-      (uint8[i + 2] & 0xFF)
-    output.push(tripletToBase64(tmp))
-  }
-  return output.join('')
-}
-
-function fromByteArray (uint8) {
-  var tmp
-  var len = uint8.length
-  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
-  var parts = []
-  var maxChunkLength = 16383 // must be multiple of 3
-
-  // go through the array every three bytes, we'll deal with trailing stuff later
-  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-    parts.push(encodeChunk(
-      uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
-    ))
-  }
-
-  // pad the end with zeros, but make sure to not forget the extra bytes
-  if (extraBytes === 1) {
-    tmp = uint8[len - 1]
-    parts.push(
-      lookup[tmp >> 2] +
-      lookup[(tmp << 4) & 0x3F] +
-      '=='
-    )
-  } else if (extraBytes === 2) {
-    tmp = (uint8[len - 2] << 8) + uint8[len - 1]
-    parts.push(
-      lookup[tmp >> 10] +
-      lookup[(tmp >> 4) & 0x3F] +
-      lookup[(tmp << 2) & 0x3F] +
-      '='
-    )
-  }
-
-  return parts.join('')
-}
-}, {}];
+module.exports.toSmartHeadline = toSmartHeadline;
+module.exports.toSmartText = toSmartText;
+module.exports.stripUnicode = stripUnicode;
+module.exports.toPlainText = toPlainText;
+module.exports.cleanSlug = cleanSlug;
+module.exports.validateTagContent = validateTagContent;
+module.exports.recursivelyStripSeperators = recursivelyStripSeperators;
+module.exports.removeNonAlphanumericCharacters = removeNonAlphanumericCharacters;
+module.exports.normalizeName = normalizeName;
+}, {"3":3,"205":205,"206":206,"207":207,"272":272,"366":366,"371":371,"374":374,"377":377,"568":568,"571":571}];

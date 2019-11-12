@@ -1,23 +1,21 @@
 window.modules["39"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(58);
+const isUriStringCheck = require(50);
 
 /**
- * Remove the url-patterned prefix for the site's slug.
- *
- * @param  {String} uri
- * @param  {Object} site
- * @return {String}
+ * replace version in uri
+ * @param  {string} uri
+ * @param  {string} [version] defaults to latest
+ * @return {string}
  */
-module.exports = function (uri, site) {
-  var { host, path, slug, prefix } = site,
-    hasSlash = uri.indexOf('/_') !== -1;
-
-  if (!prefix) {
-    prefix = path && path.length > 1 ? `${host}${path}` : host;
-  }
-
+module.exports = function (uri, version) {
   isUriStringCheck.strCheck(uri);
-  return uri.replace(`${prefix}${hasSlash ? '/' : ''}`, `${slug}${hasSlash ? '/' : ''}`);
+
+  if (version) {
+    return uri.split('@')[0] + '@' + version;
+  } else {
+    // no version is still a kind of version
+    return uri.split('@')[0];
+  }
 };
-}, {"58":58}];
+}, {"50":50}];

@@ -11,7 +11,7 @@ author:
   _has:
     input: text
 
-recipeD:
+recipeDescription:
   _label: Recipe description
   _has:
     input: text
@@ -30,7 +30,7 @@ photos:
     min: 0
     max: 10000
 
-madeit:
+madeIt:
   _label: quantity of people that have made it
   _has:
     input: range
@@ -45,27 +45,16 @@ imageUrl:
     validate:
       required: true
     help: Must be an image URL
-# clickUrl:
-#   _label: Click URL
-#   _has:
-#     input: text
-#     type: url
-#     help: If the image should be hyperlinked, add that URL here
-# imageAlt:
-#   _label: Alt Text
-#   _has:
-#     input: text
-#     help: Alternative text for screen readers
 
 _groups:
   settings:
     fields:
       - title
       - author
-      - recipeD
+      - recipeDescription
       - reviews
       - photos
-      - madeit
+      - madeIt
       - imageUrl (Image)
     _placeholder:
       text: New Recipe

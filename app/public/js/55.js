@@ -1,18 +1,79 @@
 window.modules["55"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(58);
-
-/**
- * First test if argument passed in is a String. If true, get component instance
- * from uri without the component version. Otherwise, throw an error.
- * @example /_components/text/instances/0@published returns 0
- * @param  {string} uri
- * @return {string|null}
- */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
-  const result = /\/_components\/.+?\/instances\/([^\.@]+)/.exec(uri);
-
-  return result && result[1];
+var SourceMapGenerator = require(56).SourceMapGenerator;
+var trackNodes = {
+    Atrule: true,
+    Selector: true,
+    Declaration: true
 };
-}, {"58":58}];
+
+module.exports = function generateSourceMap(generator, ast) {
+    var map = new SourceMapGenerator();
+    var generated = {
+        line: 1,
+        column: 0
+    };
+    var original = {
+        line: 0, // should be zero to add first mapping
+        column: 0
+    };
+    var sourceMappingActive = false;
+    var activatedGenerated = {
+        line: 1,
+        column: 0
+    };
+    var activatedMapping = {
+        generated: activatedGenerated
+    };
+
+    var css = generator(ast, function(node, buffer, line, column) {
+        if (!node.loc ||
+            !node.loc.start ||
+            !trackNodes.hasOwnProperty(node.type)) {
+            return;
+        }
+
+        var nodeLine = node.loc.start.line;
+        var nodeColumn = node.loc.start.column - 1;
+
+        if (original.line !== nodeLine ||
+            original.column !== nodeColumn) {
+            original.line = nodeLine;
+            original.column = nodeColumn;
+
+            generated.line = line;
+            generated.column = column;
+
+            if (sourceMappingActive) {
+                sourceMappingActive = false;
+                if (generated.line !== activatedGenerated.line ||
+                    generated.column !== activatedGenerated.column) {
+                    map.addMapping(activatedMapping);
+                }
+            }
+
+            sourceMappingActive = true;
+            map.addMapping({
+                source: node.loc.source,
+                original: original,
+                generated: generated
+            });
+        }
+
+    }, function(node, buffer, line, column) {
+        if (sourceMappingActive && trackNodes.hasOwnProperty(node.type)) {
+            activatedGenerated.line = line;
+            activatedGenerated.column = column;
+        }
+    });
+
+    if (sourceMappingActive) {
+        map.addMapping(activatedMapping);
+    }
+
+    return {
+        css: css,
+        map: map
+    };
+};
+}, {"56":56}];

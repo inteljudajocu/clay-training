@@ -1,7 +1,6 @@
-window.modules["580"] = [function(require,module,exports){module.exports = function chop(str, step) {
-  if (str == null) return [];
-  str = String(str);
-  step = ~~step;
-  return step > 0 ? str.match(new RegExp('.{1,' + step + '}', 'g')) : [str];
+window.modules["580"] = [function(require,module,exports){var trim = require(573);
+
+module.exports = function clean(str) {
+  return trim(str).replace(/\s\s+/g, ' ');
 };
-}, {}];
+}, {"573":573}];

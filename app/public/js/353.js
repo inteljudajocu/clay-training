@@ -1,31 +1,31 @@
-window.modules["353"] = [function(require,module,exports){var eq = require(284),
-    isArrayLike = require(329),
-    isIndex = require(276),
-    isObject = require(25);
+window.modules["353"] = [function(require,module,exports){var arrayFilter = require(266),
+    stubArray = require(359);
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Built-in value references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeGetSymbols = Object.getOwnPropertySymbols;
 
 /**
- * Checks if the given arguments are from an iteratee call.
+ * Creates an array of the own enumerable symbols of `object`.
  *
  * @private
- * @param {*} value The potential iteratee value argument.
- * @param {*} index The potential iteratee index or key argument.
- * @param {*} object The potential iteratee object argument.
- * @returns {boolean} Returns `true` if the arguments are from an iteratee call,
- *  else `false`.
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of symbols.
  */
-function isIterateeCall(value, index, object) {
-  if (!isObject(object)) {
-    return false;
+var getSymbols = !nativeGetSymbols ? stubArray : function(object) {
+  if (object == null) {
+    return [];
   }
-  var type = typeof index;
-  if (type == 'number'
-        ? (isArrayLike(object) && isIndex(index, object.length))
-        : (type == 'string' && index in object)
-      ) {
-    return eq(object[index], value);
-  }
-  return false;
-}
+  object = Object(object);
+  return arrayFilter(nativeGetSymbols(object), function(symbol) {
+    return propertyIsEnumerable.call(object, symbol);
+  });
+};
 
-module.exports = isIterateeCall;
-}, {"25":25,"276":276,"284":284,"329":329}];
+module.exports = getSymbols;
+}, {"266":266,"359":359}];

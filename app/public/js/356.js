@@ -1,17 +1,14 @@
-window.modules["356"] = [function(require,module,exports){var baseGetAllKeys = require(297),
-    getSymbols = require(358),
-    keys = require(293);
-
-/**
- * Creates an array of own enumerable property names and symbols of `object`.
+window.modules["356"] = [function(require,module,exports){/**
+ * Gets the value at `key` of `object`.
  *
  * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names and symbols.
+ * @param {Object} [object] The object to query.
+ * @param {string} key The key of the property to get.
+ * @returns {*} Returns the property value.
  */
-function getAllKeys(object) {
-  return baseGetAllKeys(object, keys, getSymbols);
+function getValue(object, key) {
+  return object == null ? undefined : object[key];
 }
 
-module.exports = getAllKeys;
-}, {"293":293,"297":297,"358":358}];
+module.exports = getValue;
+}, {}];

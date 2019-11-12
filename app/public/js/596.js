@@ -1,10 +1,6 @@
-window.modules["596"] = [function(require,module,exports){module.exports = function strRepeat(str, qty){
-  if (qty < 1) return '';
-  var result = '';
-  while (qty > 0) {
-    if (qty & 1) result += str;
-    qty >>= 1, str += str;
-  }
-  return result;
+window.modules["596"] = [function(require,module,exports){var trim = require(573);
+
+module.exports = function underscored(str) {
+  return trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[-\s]+/g, '_').toLowerCase();
 };
-}, {}];
+}, {"573":573}];

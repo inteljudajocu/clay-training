@@ -1,21 +1,33 @@
-window.modules["317"] = [function(require,module,exports){var coreJsData = require(351);
-
-/** Used to detect methods masquerading as native. */
-var maskSrcKey = (function() {
-  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-  return uid ? ('Symbol(src)_1.' + uid) : '';
-}());
+window.modules["317"] = [function(require,module,exports){var baseProperty = require(330),
+    basePropertyDeep = require(331),
+    isKey = require(327),
+    toKey = require(290);
 
 /**
- * Checks if `func` has its source masked.
+ * Creates a function that returns the value at `path` of a given object.
  *
- * @private
- * @param {Function} func The function to check.
- * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Util
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ * @example
+ *
+ * var objects = [
+ *   { 'a': { 'b': 2 } },
+ *   { 'a': { 'b': 1 } }
+ * ];
+ *
+ * _.map(objects, _.property('a.b'));
+ * // => [2, 1]
+ *
+ * _.map(_.sortBy(objects, _.property(['a', 'b'])), 'a.b');
+ * // => [1, 2]
  */
-function isMasked(func) {
-  return !!maskSrcKey && (maskSrcKey in func);
+function property(path) {
+  return isKey(path) ? baseProperty(toKey(path)) : basePropertyDeep(path);
 }
 
-module.exports = isMasked;
-}, {"351":351}];
+module.exports = property;
+}, {"290":290,"327":327,"330":330,"331":331}];

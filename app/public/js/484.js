@@ -1,62 +1,42 @@
 window.modules["484"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
+exports.default = parse;
 
-var _node = require(485);
+var _parser = require(498);
 
-var _node2 = _interopRequireDefault(_node);
+var _parser2 = _interopRequireDefault(_parser);
+
+var _input = require(489);
+
+var _input2 = _interopRequireDefault(_input);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function parse(css, opts) {
+    if (opts && opts.safe) {
+        throw new Error('Option safe was removed. ' + 'Use parser: require("postcss-safe-parser")');
+    }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+    var input = new _input2.default(css, opts);
+    var parser = new _parser2.default(input);
+    try {
+        parser.parse();
+    } catch (e) {
+        if (e.name === 'CssSyntaxError' && opts && opts.from) {
+            if (/\.scss$/i.test(opts.from)) {
+                e.message += '\nYou tried to parse SCSS with ' + 'the standard CSS parser; ' + 'try again with the postcss-scss parser';
+            } else if (/\.sass/i.test(opts.from)) {
+                e.message += '\nYou tried to parse Sass with ' + 'the standard CSS parser; ' + 'try again with the postcss-sass parser';
+            } else if (/\.less$/i.test(opts.from)) {
+                e.message += '\nYou tried to parse Less with ' + 'the standard CSS parser; ' + 'try again with the postcss-less parser';
+            }
+        }
+        throw e;
+    }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/**
- * Represents a comment between declarations or statements (rule and at-rules).
- *
- * Comments inside selectors, at-rule parameters, or declaration values
- * will be stored in the `raws` properties explained above.
- *
- * @extends Node
- */
-var Comment = function (_Node) {
-  _inherits(Comment, _Node);
-
-  function Comment(defaults) {
-    _classCallCheck(this, Comment);
-
-    var _this = _possibleConstructorReturn(this, _Node.call(this, defaults));
-
-    _this.type = 'comment';
-    return _this;
-  }
-
-  /**
-   * @memberof Comment#
-   * @member {string} text - the comment’s text
-   */
-
-  /**
-   * @memberof Comment#
-   * @member {object} raws - Information to generate byte-to-byte equal
-   *                         node string as it was in the origin input.
-   *
-   * Every parser saves its own properties,
-   * but the default CSS parser uses:
-   *
-   * * `before`: the space symbols before the node.
-   * * `left`: the space symbols between `/*` and the comment’s text.
-   * * `right`: the space symbols between the comment’s text.
-   */
-
-
-  return Comment;
-}(_node2.default);
-
-exports.default = Comment;
+    return parser.root;
+}
 module.exports = exports['default'];
 
-}, {"485":485}];
+}, {"489":489,"498":498}];

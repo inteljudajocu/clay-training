@@ -2,129 +2,204 @@ window.modules["489"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _container = require(483);
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _container2 = _interopRequireDefault(_container);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _cssSyntaxError = require(487);
+
+var _cssSyntaxError2 = _interopRequireDefault(_cssSyntaxError);
+
+var _previousMap = require(490);
+
+var _previousMap2 = _interopRequireDefault(_previousMap);
+
+var _path = require(381);
+
+var _path2 = _interopRequireDefault(_path);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+var sequence = 0;
 
 /**
- * Represents a CSS file and contains all its parsed nodes.
- *
- * @extends Container
+ * Represents the source CSS.
  *
  * @example
- * const root = postcss.parse('a{color:black} b{z-index:2}');
- * root.type         //=> 'root'
- * root.nodes.length //=> 2
+ * const root  = postcss.parse(css, { from: file });
+ * const input = root.source.input;
  */
-var Root = function (_Container) {
-    _inherits(Root, _Container);
 
-    function Root(defaults) {
-        _classCallCheck(this, Root);
+var Input = function () {
 
-        var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
+    /**
+     * @param {string} css    - input CSS source
+     * @param {object} [opts] - {@link Processor#process} options
+     */
+    function Input(css) {
+        var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        _this.type = 'root';
-        if (!_this.nodes) _this.nodes = [];
-        return _this;
-    }
+        _classCallCheck(this, Input);
 
-    Root.prototype.removeChild = function removeChild(child, ignore) {
-        var index = this.index(child);
-
-        if (!ignore && index === 0 && this.nodes.length > 1) {
-            this.nodes[1].raws.before = this.nodes[index].raws.before;
+        if (css === null || (typeof css === 'undefined' ? 'undefined' : _typeof(css)) === 'object' && !css.toString) {
+            throw new Error('PostCSS received ' + css + ' instead of CSS string');
         }
 
-        return _Container.prototype.removeChild.call(this, child);
-    };
+        /**
+         * @member {string} - input CSS source
+         *
+         * @example
+         * const input = postcss.parse('a{}', { from: file }).input;
+         * input.css //=> "a{}";
+         */
+        this.css = css.toString();
 
-    Root.prototype.normalize = function normalize(child, sample, type) {
-        var nodes = _Container.prototype.normalize.call(this, child);
+        if (this.css[0] === '\uFEFF' || this.css[0] === '\uFFFE') {
+            this.css = this.css.slice(1);
+        }
 
-        if (sample) {
-            if (type === 'prepend') {
-                if (this.nodes.length > 1) {
-                    sample.raws.before = this.nodes[1].raws.before;
-                } else {
-                    delete sample.raws.before;
-                }
-            } else if (this.first !== sample) {
-                for (var _iterator = nodes, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-                    var _ref;
-
-                    if (_isArray) {
-                        if (_i >= _iterator.length) break;
-                        _ref = _iterator[_i++];
-                    } else {
-                        _i = _iterator.next();
-                        if (_i.done) break;
-                        _ref = _i.value;
-                    }
-
-                    var node = _ref;
-
-                    node.raws.before = sample.raws.before;
-                }
+        if (opts.from) {
+            if (/^\w+:\/\//.test(opts.from)) {
+                /**
+                 * @member {string} - The absolute path to the CSS source file
+                 *                    defined with the `from` option.
+                 *
+                 * @example
+                 * const root = postcss.parse(css, { from: 'a.css' });
+                 * root.source.input.file //=> '/home/ai/a.css'
+                 */
+                this.file = opts.from;
+            } else {
+                this.file = _path2.default.resolve(opts.from);
             }
         }
 
-        return nodes;
+        var map = new _previousMap2.default(this.css, opts);
+        if (map.text) {
+            /**
+             * @member {PreviousMap} - The input source map passed from
+             *                         a compilation step before PostCSS
+             *                         (for example, from Sass compiler).
+             *
+             * @example
+             * root.source.input.map.consumer().sources //=> ['a.sass']
+             */
+            this.map = map;
+            var file = map.consumer().file;
+            if (!this.file && file) this.file = this.mapResolve(file);
+        }
+
+        if (!this.file) {
+            sequence += 1;
+            /**
+             * @member {string} - The unique ID of the CSS source. It will be
+             *                    created if `from` option is not provided
+             *                    (because PostCSS does not know the file path).
+             *
+             * @example
+             * const root = postcss.parse(css);
+             * root.source.input.file //=> undefined
+             * root.source.input.id   //=> "<input css 1>"
+             */
+            this.id = '<input css ' + sequence + '>';
+        }
+        if (this.map) this.map.file = this.from;
+    }
+
+    Input.prototype.error = function error(message, line, column) {
+        var opts = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+
+        var result = void 0;
+        var origin = this.origin(line, column);
+        if (origin) {
+            result = new _cssSyntaxError2.default(message, origin.line, origin.column, origin.source, origin.file, opts.plugin);
+        } else {
+            result = new _cssSyntaxError2.default(message, line, column, this.css, this.file, opts.plugin);
+        }
+
+        result.input = { line: line, column: column, source: this.css };
+        if (this.file) result.input.file = this.file;
+
+        return result;
     };
 
     /**
-     * Returns a {@link Result} instance representing the root’s CSS.
+     * Reads the input source map and returns a symbol position
+     * in the input source (e.g., in a Sass file that was compiled
+     * to CSS before being passed to PostCSS).
      *
-     * @param {processOptions} [opts] - options with only `to` and `map` keys
+     * @param {number} line   - line in input CSS
+     * @param {number} column - column in input CSS
      *
-     * @return {Result} result with current root’s CSS
+     * @return {filePosition} position in input source
      *
      * @example
-     * const root1 = postcss.parse(css1, { from: 'a.css' });
-     * const root2 = postcss.parse(css2, { from: 'b.css' });
-     * root1.append(root2);
-     * const result = root1.toResult({ to: 'all.css', map: true });
+     * root.source.input.origin(1, 1) //=> { file: 'a.css', line: 3, column: 1 }
      */
 
 
-    Root.prototype.toResult = function toResult() {
-        var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    Input.prototype.origin = function origin(line, column) {
+        if (!this.map) return false;
+        var consumer = this.map.consumer();
 
-        var LazyResult = require(494);
-        var Processor = require(504);
+        var from = consumer.originalPositionFor({ line: line, column: column });
+        if (!from.source) return false;
 
-        var lazy = new LazyResult(new Processor(), this, opts);
-        return lazy.stringify();
+        var result = {
+            file: this.mapResolve(from.source),
+            line: from.line,
+            column: from.column
+        };
+
+        var source = consumer.sourceContentFor(from.source);
+        if (source) result.source = source;
+
+        return result;
+    };
+
+    Input.prototype.mapResolve = function mapResolve(file) {
+        if (/^\w+:\/\//.test(file)) {
+            return file;
+        } else {
+            return _path2.default.resolve(this.map.consumer().sourceRoot || '.', file);
+        }
     };
 
     /**
-     * @memberof Root#
-     * @member {object} raws - Information to generate byte-to-byte equal
-     *                         node string as it was in the origin input.
-     *
-     * Every parser saves its own properties,
-     * but the default CSS parser uses:
-     *
-     * * `after`: the space symbols after the last child to the end of file.
-     * * `semicolon`: is the last child has an (optional) semicolon.
+     * The CSS source identifier. Contains {@link Input#file} if the user
+     * set the `from` option, or {@link Input#id} if they did not.
+     * @type {string}
      *
      * @example
-     * postcss.parse('a {}\n').raws //=> { after: '\n' }
-     * postcss.parse('a {}').raws   //=> { after: '' }
+     * const root = postcss.parse(css, { from: 'a.css' });
+     * root.source.input.from //=> "/home/ai/a.css"
+     *
+     * const root = postcss.parse(css);
+     * root.source.input.from //=> "<input css 1>"
      */
 
-    return Root;
-}(_container2.default);
 
-exports.default = Root;
+    _createClass(Input, [{
+        key: 'from',
+        get: function get() {
+            return this.file || this.id;
+        }
+    }]);
+
+    return Input;
+}();
+
+exports.default = Input;
+
+/**
+ * @typedef  {object} filePosition
+ * @property {string} file   - path to file
+ * @property {number} line   - source line in file
+ * @property {number} column - source column in file
+ */
+
 module.exports = exports['default'];
 
-}, {"483":483,"494":494,"504":504}];
+}, {"381":381,"487":487,"490":490}];

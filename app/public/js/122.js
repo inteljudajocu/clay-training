@@ -1,66 +1,63 @@
-window.modules["122"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
+window.modules["122"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
-var WHITESPACE = TYPE.WhiteSpace;
-var COMMENT = TYPE.Comment;
 var IDENTIFIER = TYPE.Identifier;
-var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+var FUNCTION = TYPE.Function;
+var COLON = TYPE.Colon;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 
+// :: ident [ '(' .. ')' ]?
 module.exports = {
-    name: 'MediaQuery',
+    name: 'PseudoElementSelector',
     structure: {
-        children: [['Identifier', 'MediaFeature', 'WhiteSpace']]
+        name: String,
+        children: [['Raw'], null]
     },
     parse: function() {
-        this.scanner.skipSC();
+        var start = this.scanner.tokenStart;
+        var children = null;
+        var name;
+        var nameLowerCase;
 
-        var children = new List();
-        var child = null;
-        var space = null;
+        this.scanner.eat(COLON);
+        this.scanner.eat(COLON);
 
-        scan:
-        while (!this.scanner.eof) {
-            switch (this.scanner.tokenType) {
-                case COMMENT:
-                    this.scanner.next();
-                    continue;
+        if (this.scanner.tokenType === FUNCTION) {
+            name = this.scanner.consumeFunctionName();
+            nameLowerCase = name.toLowerCase();
 
-                case WHITESPACE:
-                    space = this.WhiteSpace();
-                    continue;
-
-                case IDENTIFIER:
-                    child = this.Identifier();
-                    break;
-
-                case LEFTPARENTHESIS:
-                    child = this.MediaFeature();
-                    break;
-
-                default:
-                    break scan;
+            if (this.pseudo.hasOwnProperty(nameLowerCase)) {
+                this.scanner.skipSC();
+                children = this.pseudo[nameLowerCase].call(this);
+                this.scanner.skipSC();
+            } else {
+                children = new List().appendData(
+                    this.Raw(this.scanner.currentToken, 0, 0, false, false)
+                );
             }
 
-            if (space !== null) {
-                children.appendData(space);
-                space = null;
-            }
-
-            children.appendData(child);
-        }
-
-        if (child === null) {
-            this.scanner.error('Identifier or parenthesis is expected');
+            this.scanner.eat(RIGHTPARENTHESIS);
+        } else {
+            name = this.scanner.consume(IDENTIFIER);
         }
 
         return {
-            type: 'MediaQuery',
-            loc: this.getLocationFromList(children),
+            type: 'PseudoElementSelector',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            name: name,
             children: children
         };
     },
     generate: function(processChunk, node) {
-        this.each(processChunk, node);
-    }
+        processChunk('::');
+        processChunk(node.name);
+
+        if (node.children !== null) {
+            processChunk('(');
+            this.each(processChunk, node);
+            processChunk(')');
+        }
+    },
+    walkContext: 'function'
 };
-}, {"61":61,"82":82}];
+}, {"53":53,"75":75}];

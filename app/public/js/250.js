@@ -1,33 +1,22 @@
-window.modules["250"] = [function(require,module,exports){var mapCacheClear = require(255),
-    mapCacheDelete = require(253),
-    mapCacheGet = require(252),
-    mapCacheHas = require(254),
-    mapCacheSet = require(251);
+window.modules["250"] = [function(require,module,exports){var Hash = require(232),
+    ListCache = require(238),
+    Map = require(244);
 
 /**
- * Creates a map cache object to store key-value pairs.
+ * Removes all key-value entries from the map.
  *
  * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
+ * @name clear
+ * @memberOf MapCache
  */
-function MapCache(entries) {
-  var index = -1,
-      length = entries == null ? 0 : entries.length;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
+function mapCacheClear() {
+  this.size = 0;
+  this.__data__ = {
+    'hash': new Hash,
+    'map': new (Map || ListCache),
+    'string': new Hash
+  };
 }
 
-// Add methods to `MapCache`.
-MapCache.prototype.clear = mapCacheClear;
-MapCache.prototype['delete'] = mapCacheDelete;
-MapCache.prototype.get = mapCacheGet;
-MapCache.prototype.has = mapCacheHas;
-MapCache.prototype.set = mapCacheSet;
-
-module.exports = MapCache;
-}, {"251":251,"252":252,"253":253,"254":254,"255":255}];
+module.exports = mapCacheClear;
+}, {"232":232,"238":238,"244":244}];

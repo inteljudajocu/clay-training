@@ -1,42 +1,84 @@
 window.modules["520"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.default = parse;
 
-var _parser = require(533);
+var _chalk = require(19);
 
-var _parser2 = _interopRequireDefault(_parser);
+var _chalk2 = _interopRequireDefault(_chalk);
 
-var _input = require(524);
+var _tokenize = require(531);
+
+var _tokenize2 = _interopRequireDefault(_tokenize);
+
+var _input = require(521);
 
 var _input2 = _interopRequireDefault(_input);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function parse(css, opts) {
-    if (opts && opts.safe) {
-        throw new Error('Option safe was removed. ' + 'Use parser: require("postcss-safe-parser")');
-    }
+var HIGHLIGHT_THEME = {
+    'brackets': _chalk2.default.cyan,
+    'at-word': _chalk2.default.cyan,
+    'call': _chalk2.default.cyan,
+    'comment': _chalk2.default.gray,
+    'string': _chalk2.default.green,
+    'class': _chalk2.default.yellow,
+    'hash': _chalk2.default.magenta,
+    '(': _chalk2.default.cyan,
+    ')': _chalk2.default.cyan,
+    '{': _chalk2.default.yellow,
+    '}': _chalk2.default.yellow,
+    '[': _chalk2.default.yellow,
+    ']': _chalk2.default.yellow,
+    ':': _chalk2.default.yellow,
+    ';': _chalk2.default.yellow
+};
 
-    var input = new _input2.default(css, opts);
-    var parser = new _parser2.default(input);
-    try {
-        parser.parse();
-    } catch (e) {
-        if (e.name === 'CssSyntaxError' && opts && opts.from) {
-            if (/\.scss$/i.test(opts.from)) {
-                e.message += '\nYou tried to parse SCSS with ' + 'the standard CSS parser; ' + 'try again with the postcss-scss parser';
-            } else if (/\.sass/i.test(opts.from)) {
-                e.message += '\nYou tried to parse Sass with ' + 'the standard CSS parser; ' + 'try again with the postcss-sass parser';
-            } else if (/\.less$/i.test(opts.from)) {
-                e.message += '\nYou tried to parse Less with ' + 'the standard CSS parser; ' + 'try again with the postcss-less parser';
-            }
+function getTokenType(_ref, processor) {
+    var type = _ref[0],
+        value = _ref[1];
+
+    if (type === 'word') {
+        if (value[0] === '.') {
+            return 'class';
         }
-        throw e;
+        if (value[0] === '#') {
+            return 'hash';
+        }
     }
 
-    return parser.root;
+    if (!processor.endOfFile()) {
+        var next = processor.nextToken();
+        processor.back(next);
+        if (next[0] === 'brackets' || next[0] === '(') return 'call';
+    }
+
+    return type;
 }
+
+function terminalHighlight(css) {
+    var processor = (0, _tokenize2.default)(new _input2.default(css), { ignoreErrors: true });
+    var result = '';
+
+    var _loop = function _loop() {
+        var token = processor.nextToken();
+        var color = HIGHLIGHT_THEME[getTokenType(token, processor)];
+        if (color) {
+            result += token[1].split(/\r?\n/).map(function (i) {
+                return color(i);
+            }).join('\n');
+        } else {
+            result += token[1];
+        }
+    };
+
+    while (!processor.endOfFile()) {
+        _loop();
+    }
+    return result;
+}
+
+exports.default = terminalHighlight;
 module.exports = exports['default'];
 
-}, {"524":524,"533":533}];
+}, {"19":19,"521":521,"531":531}];

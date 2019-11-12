@@ -1,27 +1,33 @@
-window.modules["245"] = [function(require,module,exports){var assocIndexOf = require(285);
+window.modules["245"] = [function(require,module,exports){var mapCacheClear = require(250),
+    mapCacheDelete = require(246),
+    mapCacheGet = require(248),
+    mapCacheHas = require(249),
+    mapCacheSet = require(247);
 
 /**
- * Sets the list cache `key` to `value`.
+ * Creates a map cache object to store key-value pairs.
  *
  * @private
- * @name set
- * @memberOf ListCache
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the list cache instance.
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
  */
-function listCacheSet(key, value) {
-  var data = this.__data__,
-      index = assocIndexOf(data, key);
+function MapCache(entries) {
+  var index = -1,
+      length = entries == null ? 0 : entries.length;
 
-  if (index < 0) {
-    ++this.size;
-    data.push([key, value]);
-  } else {
-    data[index][1] = value;
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
   }
-  return this;
 }
 
-module.exports = listCacheSet;
-}, {"285":285}];
+// Add methods to `MapCache`.
+MapCache.prototype.clear = mapCacheClear;
+MapCache.prototype['delete'] = mapCacheDelete;
+MapCache.prototype.get = mapCacheGet;
+MapCache.prototype.has = mapCacheHas;
+MapCache.prototype.set = mapCacheSet;
+
+module.exports = MapCache;
+}, {"246":246,"247":247,"248":248,"249":249,"250":250}];

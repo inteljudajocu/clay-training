@@ -1,18 +1,17 @@
-window.modules["383"] = [function(require,module,exports){/*!
- * match-words <https://github.com/jonschlinkert/match-words>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
+window.modules["383"] = [function(require,module,exports){var postcss = require(386);
+var compress = require(384).compress;
+var postcssToCsso = require(387);
+var cssoToPostcss = require(385);
 
-'use strict';
+var postcssCsso = postcss.plugin('postcss-csso', function postcssCsso(options) {
+    return function(root, result) {
+        result.root = cssoToPostcss(compress(postcssToCsso(root), options).ast);
+    };
+});
 
-var regex = require(384);
-
-module.exports = function(str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('expected a string');
-  }
-  return str.match(regex());
+postcssCsso.process = function(css, options) {
+    return postcss([postcssCsso(options)]).process(css);
 };
-}, {"384":384}];
+
+module.exports = postcssCsso;
+}, {"384":384,"385":385,"386":386,"387":387}];

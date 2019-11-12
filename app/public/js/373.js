@@ -1,37 +1,27 @@
-window.modules["373"] = [function(require,module,exports){var toFinite = require(380);
+window.modules["373"] = [function(require,module,exports){/** Used for built-in method references. */
+var arrayProto = Array.prototype;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeJoin = arrayProto.join;
 
 /**
- * Converts `value` to an integer.
- *
- * **Note:** This method is loosely based on
- * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+ * Converts all elements in `array` into a string separated by `separator`.
  *
  * @static
  * @memberOf _
  * @since 4.0.0
- * @category Lang
- * @param {*} value The value to convert.
- * @returns {number} Returns the converted integer.
+ * @category Array
+ * @param {Array} array The array to convert.
+ * @param {string} [separator=','] The element separator.
+ * @returns {string} Returns the joined string.
  * @example
  *
- * _.toInteger(3.2);
- * // => 3
- *
- * _.toInteger(Number.MIN_VALUE);
- * // => 0
- *
- * _.toInteger(Infinity);
- * // => 1.7976931348623157e+308
- *
- * _.toInteger('3.2');
- * // => 3
+ * _.join(['a', 'b', 'c'], '~');
+ * // => 'a~b~c'
  */
-function toInteger(value) {
-  var result = toFinite(value),
-      remainder = result % 1;
-
-  return result === result ? (remainder ? result - remainder : result) : 0;
+function join(array, separator) {
+  return array == null ? '' : nativeJoin.call(array, separator);
 }
 
-module.exports = toInteger;
-}, {"380":380}];
+module.exports = join;
+}, {}];

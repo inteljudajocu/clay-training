@@ -1,222 +1,159 @@
 window.modules["73"] = [function(require,module,exports){'use strict';
 
-var names = require(68);
+var Tokenizer = require(75);
+var sequence = require(74);
+var noop = function() {};
 
-// https://www.w3.org/TR/css-values-3/#lengths
-var LENGTH = {
-    // absolute length units
-    'px': true,
-    'mm': true,
-    'cm': true,
-    'in': true,
-    'pt': true,
-    'pc': true,
-    'q': true,
-
-    // relative length units
-    'em': true,
-    'ex': true,
-    'ch': true,
-    'rem': true,
-
-    // viewport-percentage lengths
-    'vh': true,
-    'vw': true,
-    'vmin': true,
-    'vmax': true,
-    'vm': true
-};
-
-var ANGLE = {
-    'deg': true,
-    'grad': true,
-    'rad': true,
-    'turn': true
-};
-
-var TIME = {
-    's': true,
-    'ms': true
-};
-
-var FREQUENCY = {
-    'hz': true,
-    'khz': true
-};
-
-// https://www.w3.org/TR/css-values-3/#resolution (https://drafts.csswg.org/css-values/#resolution)
-var RESOLUTION = {
-    'dpi': true,
-    'dpcm': true,
-    'dppx': true,
-    'x': true      // https://github.com/w3c/csswg-drafts/issues/461
-};
-
-// https://drafts.csswg.org/css-grid/#fr-unit
-var FLEX = {
-    'fr': true
-};
-
-// https://www.w3.org/TR/css3-speech/#mixing-props-voice-volume
-var DECIBEL = {
-    'db': true
-};
-
-// https://www.w3.org/TR/css3-speech/#voice-props-voice-pitch
-var SEMITONES = {
-    'st': true
-};
-
-// can be used wherever <length>, <frequency>, <angle>, <time>, <percentage>, <number>, or <integer> values are allowed
-// https://drafts.csswg.org/css-values/#calc-notation
-function isCalc(node) {
-    if (node.data.type !== 'Function') {
-        return false;
-    }
-
-    var keyword = names.keyword(node.data.name);
-
-    if (keyword.name !== 'calc') {
-        return false;
-    }
-
-    // there were some prefixed implementations
-    return keyword.vendor === '' ||
-           keyword.vendor === '-moz-' ||
-           keyword.vendor === '-webkit-';
-}
-
-function astNode(type) {
-    return function(node) {
-        return node.data.type === type;
+function createParseContext(name) {
+    return function() {
+        return this[name]();
     };
 }
 
-function dimension(type) {
-    return function(node) {
-        return isCalc(node) ||
-               (node.data.type === 'Dimension' && type.hasOwnProperty(node.data.unit.toLowerCase()));
+function processConfig(config) {
+    var parserConfig = {
+        context: {},
+        scope: {},
+        atrule: {},
+        pseudo: {}
     };
+
+    if (config.parseContext) {
+        for (var name in config.parseContext) {
+            switch (typeof config.parseContext[name]) {
+                case 'function':
+                    parserConfig.context[name] = config.parseContext[name];
+                    break;
+
+                case 'string':
+                    parserConfig.context[name] = createParseContext(config.parseContext[name]);
+                    break;
+            }
+        }
+    }
+
+    if (config.scope) {
+        for (var name in config.scope) {
+            parserConfig.scope[name] = config.scope[name];
+        }
+    }
+
+    if (config.atrule) {
+        for (var name in config.atrule) {
+            var atrule = config.atrule[name];
+
+            if (atrule.parse) {
+                parserConfig.atrule[name] = atrule.parse;
+            }
+        }
+    }
+
+    if (config.pseudo) {
+        for (var name in config.pseudo) {
+            var pseudo = config.pseudo[name];
+
+            if (pseudo.parse) {
+                parserConfig.pseudo[name] = pseudo.parse;
+            }
+        }
+    }
+
+    if (config.node) {
+        for (var name in config.node) {
+            parserConfig[name] = config.node[name].parse;
+        }
+    }
+
+    return parserConfig;
 }
 
-function zeroUnitlessDimension(type) {
-    return function(node) {
-        return isCalc(node) ||
-               (node.data.type === 'Dimension' && type.hasOwnProperty(node.data.unit.toLowerCase())) ||
-               (node.data.type === 'Number' && Number(node.data.value) === 0);
+module.exports = function createParser(config) {
+    var parser = {
+        scanner: new Tokenizer(),
+        filename: '<unknown>',
+        needPositions: false,
+        tolerant: false,
+        onParseError: noop,
+        parseAtrulePrelude: true,
+        parseRulePrelude: true,
+        parseValue: true,
+        parseCustomProperty: false,
+
+        readSequence: sequence,
+
+        tolerantParse: function(consumer, fallback) {
+            if (this.tolerant) {
+                var start = this.scanner.currentToken;
+
+                try {
+                    return consumer.call(this);
+                } catch (e) {
+                    var fallbackNode = fallback.call(this, start);
+                    this.onParseError(e, fallbackNode);
+                    return fallbackNode;
+                }
+            } else {
+                return consumer.call(this);
+            }
+        },
+
+        getLocation: function(start, end) {
+            if (this.needPositions) {
+                return this.scanner.getLocationRange(
+                    start,
+                    end,
+                    this.filename
+                );
+            }
+
+            return null;
+        },
+        getLocationFromList: function(list) {
+            if (this.needPositions) {
+                return this.scanner.getLocationRange(
+                    list.head !== null ? list.first().loc.start.offset - this.scanner.startOffset : this.scanner.tokenStart,
+                    list.head !== null ? list.last().loc.end.offset - this.scanner.startOffset : this.scanner.tokenStart,
+                    this.filename
+                );
+            }
+
+            return null;
+        }
     };
-}
 
-function attr(node) {
-    return node.data.type === 'Function' && node.data.name.toLowerCase() === 'attr';
-}
-
-function number(node) {
-    return isCalc(node) || node.data.type === 'Number';
-}
-
-function numberZeroOne(node) {
-    if (isCalc(node) || node.data.type === 'Number') {
-        var value = Number(node.data.value);
-
-        return value >= 0 && value <= 1;
+    config = processConfig(config || {});
+    for (var key in config) {
+        parser[key] = config[key];
     }
 
-    return false;
-}
+    return function(source, options) {
+        options = options || {};
 
-function numberOneOrGreater(node) {
-    if (isCalc(node) || node.data.type === 'Number') {
-        return Number(node.data.value) >= 1;
-    }
+        var context = options.context || 'default';
+        var ast;
 
-    return false;
-}
+        parser.scanner.setSource(source, options.offset, options.line, options.column);
+        parser.filename = options.filename || '<unknown>';
+        parser.needPositions = Boolean(options.positions);
+        parser.tolerant = Boolean(options.tolerant);
+        parser.onParseError = typeof options.onParseError === 'function' ? options.onParseError : noop;
+        parser.parseAtrulePrelude = 'parseAtrulePrelude' in options ? Boolean(options.parseAtrulePrelude) : true;
+        parser.parseRulePrelude = 'parseRulePrelude' in options ? Boolean(options.parseRulePrelude) : true;
+        parser.parseValue = 'parseValue' in options ? Boolean(options.parseValue) : true;
+        parser.parseCustomProperty = 'parseCustomProperty' in options ? Boolean(options.parseCustomProperty) : false;
 
-// TODO: fail on 10e-2
-function integer(node) {
-    return isCalc(node) ||
-           (node.data.type === 'Number' && node.data.value.indexOf('.') === -1);
-}
+        if (!parser.context.hasOwnProperty(context)) {
+            throw new Error('Unknown context `' + context + '`');
+        }
 
-// TODO: fail on 10e-2
-function positiveInteger(node) {
-    return isCalc(node) ||
-           (node.data.type === 'Number' && node.data.value.indexOf('.') === -1 && node.data.value.charAt(0) !== '-');
-}
+        ast = parser.context[context].call(parser, options);
 
-function percentage(node) {
-    return isCalc(node) ||
-           node.data.type === 'Percentage';
-}
+        if (!parser.scanner.eof) {
+            parser.scanner.error();
+        }
 
-function hexColor(node) {
-    if (node.data.type !== 'HexColor') {
-        return false;
-    }
-
-    var hex = node.data.value;
-
-    return /^[0-9a-fA-F]{3,8}$/.test(hex) &&
-           (hex.length === 3 || hex.length === 4 || hex.length === 6 || hex.length === 8);
-}
-
-function expression(node) {
-    return node.data.type === 'Function' && node.data.name.toLowerCase() === 'expression';
-}
-
-// https://developer.mozilla.org/en-US/docs/Web/CSS/custom-ident
-// https://drafts.csswg.org/css-values-4/#identifier-value
-function customIdent(node) {
-    if (node.data.type !== 'Identifier') {
-        return false;
-    }
-
-    var name = node.data.name.toLowerCase();
-
-    // § 3.2. Author-defined Identifiers: the <custom-ident> type
-    // The CSS-wide keywords are not valid <custom-ident>s
-    if (name === 'unset' || name === 'initial' || name === 'inherit') {
-        return false;
-    }
-
-    // The default keyword is reserved and is also not a valid <custom-ident>
-    if (name === 'default') {
-        return false;
-    }
-
-    // TODO: ignore property specific keywords (as described https://developer.mozilla.org/en-US/docs/Web/CSS/custom-ident)
-
-    return true;
-}
-
-module.exports = {
-    'angle': zeroUnitlessDimension(ANGLE),
-    'attr()': attr,
-    'custom-ident': customIdent,
-    'decibel': dimension(DECIBEL),
-    'dimension': astNode('Dimension'),
-    'frequency': dimension(FREQUENCY),
-    'flex': dimension(FLEX),
-    'hex-color': hexColor,
-    'id-selector': astNode('IdSelector'), // element( <id-selector> )
-    'ident': astNode('Identifier'),
-    'integer': integer,
-    'length': zeroUnitlessDimension(LENGTH),
-    'number': number,
-    'number-zero-one': numberZeroOne,
-    'number-one-or-greater': numberOneOrGreater,
-    'percentage': percentage,
-    'positive-integer': positiveInteger,
-    'resolution': dimension(RESOLUTION),
-    'semitones': dimension(SEMITONES),
-    'string': astNode('String'),
-    'time': dimension(TIME),
-    'unicode-range': astNode('UnicodeRange'),
-    'url': astNode('Url'),
-
-    // old IE stuff
-    'progid': astNode('Raw'),
-    'expression': expression
+        // console.log(JSON.stringify(ast, null, 4));
+        return ast;
+    };
 };
-}, {"68":68}];
+}, {"74":74,"75":75}];

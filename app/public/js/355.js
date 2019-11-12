@@ -1,19 +1,16 @@
 window.modules["355"] = [function(require,module,exports){/**
- * Converts `set` to an array of its values.
+ * Checks if `value` is suitable for use as unique object key.
  *
  * @private
- * @param {Object} set The set to convert.
- * @returns {Array} Returns the values.
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
  */
-function setToArray(set) {
-  var index = -1,
-      result = Array(set.size);
-
-  set.forEach(function(value) {
-    result[++index] = value;
-  });
-  return result;
+function isKeyable(value) {
+  var type = typeof value;
+  return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
+    ? (value !== '__proto__')
+    : (value === null);
 }
 
-module.exports = setToArray;
+module.exports = isKeyable;
 }, {}];

@@ -1,19 +1,24 @@
-window.modules["359"] = [function(require,module,exports){var isKeyable = require(360);
-
-/**
- * Gets the data for `map`.
+window.modules["359"] = [function(require,module,exports){/**
+ * This method returns a new empty array.
  *
- * @private
- * @param {Object} map The map to query.
- * @param {string} key The reference key.
- * @returns {*} Returns the map data.
+ * @static
+ * @memberOf _
+ * @since 4.13.0
+ * @category Util
+ * @returns {Array} Returns the new empty array.
+ * @example
+ *
+ * var arrays = _.times(2, _.stubArray);
+ *
+ * console.log(arrays);
+ * // => [[], []]
+ *
+ * console.log(arrays[0] === arrays[1]);
+ * // => false
  */
-function getMapData(map, key) {
-  var data = map.__data__;
-  return isKeyable(key)
-    ? data[typeof key == 'string' ? 'string' : 'hash']
-    : data.map;
+function stubArray() {
+  return [];
 }
 
-module.exports = getMapData;
-}, {"360":360}];
+module.exports = stubArray;
+}, {}];

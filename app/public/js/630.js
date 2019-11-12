@@ -1,9 +1,10 @@
-window.modules["630"] = [function(require,module,exports){var makeString = require(578);
+window.modules["630"] = [function(require,module,exports){var makeString = require(576);
 
-module.exports = function strLeftBack(str, sep) {
+module.exports = function(str, callback) {
   str = makeString(str);
-  sep = makeString(sep);
-  var pos = str.lastIndexOf(sep);
-  return~ pos ? str.slice(0, pos) : str;
+
+  if (str.length === 0 || typeof callback !== 'function') return str;
+
+  return str.replace(/./g, callback);
 };
-}, {"578":578}];
+}, {"576":576}];

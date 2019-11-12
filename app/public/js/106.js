@@ -1,163 +1,128 @@
-window.modules["106"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+window.modules["106"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
-var STRING = TYPE.String;
-var DOLLARSIGN = TYPE.DollarSign;
-var ASTERISK = TYPE.Asterisk;
 var COLON = TYPE.Colon;
-var EQUALSSIGN = TYPE.EqualsSign;
-var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
-var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
-var CIRCUMFLEXACCENT = TYPE.CircumflexAccent;
-var VERTICALLINE = TYPE.VerticalLine;
-var TILDE = TYPE.Tilde;
+var EXCLAMATIONMARK = TYPE.ExclamationMark;
+var SOLIDUS = TYPE.Solidus;
+var ASTERISK = TYPE.Asterisk;
+var DOLLARSIGN = TYPE.DollarSign;
+var HYPHENMINUS = TYPE.HyphenMinus;
+var SEMICOLON = TYPE.Semicolon;
+var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+var PLUSSIGN = TYPE.PlusSign;
+var NUMBERSIGN = TYPE.NumberSign;
 
-function getAttributeName() {
-    if (this.scanner.eof) {
-        this.scanner.error('Unexpected end of input');
-    }
+module.exports = {
+    name: 'Declaration',
+    structure: {
+        important: [Boolean, String],
+        property: String,
+        value: ['Value', 'Raw']
+    },
+    parse: function() {
+        var start = this.scanner.tokenStart;
+        var property = readProperty.call(this);
+        var important = false;
+        var value;
 
-    var start = this.scanner.tokenStart;
-    var expectIdentifier = false;
-    var checkColon = true;
+        this.scanner.skipSC();
+        this.scanner.eat(COLON);
 
-    if (this.scanner.tokenType === ASTERISK) {
-        expectIdentifier = true;
-        checkColon = false;
-        this.scanner.next();
-    } else if (this.scanner.tokenType !== VERTICALLINE) {
-        this.scanner.eat(IDENTIFIER);
-    }
-
-    if (this.scanner.tokenType === VERTICALLINE) {
-        if (this.scanner.lookupType(1) !== EQUALSSIGN) {
-            this.scanner.next();
-            this.scanner.eat(IDENTIFIER);
-        } else if (expectIdentifier) {
-            this.scanner.error('Identifier is expected', this.scanner.tokenEnd);
+        if (isCustomProperty(property) ? this.parseCustomProperty : this.parseValue) {
+            value = this.Value(property);
+        } else {
+            value = this.Raw(this.scanner.currentToken, EXCLAMATIONMARK, SEMICOLON, false, false);
         }
-    } else if (expectIdentifier) {
-        this.scanner.error('Vertical line is expected');
-    }
 
-    if (checkColon && this.scanner.tokenType === COLON) {
-        this.scanner.next();
-        this.scanner.eat(IDENTIFIER);
-    }
+        if (this.scanner.tokenType === EXCLAMATIONMARK) {
+            important = getImportant(this.scanner);
+            this.scanner.skipSC();
+        }
 
-    return {
-        type: 'Identifier',
-        loc: this.getLocation(start, this.scanner.tokenStart),
-        name: this.scanner.substrToCursor(start)
-    };
+        // TODO: include or not to include semicolon to range?
+        // if (this.scanner.tokenType === SEMICOLON) {
+        //     this.scanner.next();
+        // }
+
+        if (!this.scanner.eof &&
+            this.scanner.tokenType !== SEMICOLON &&
+            this.scanner.tokenType !== RIGHTPARENTHESIS &&
+            this.scanner.tokenType !== RIGHTCURLYBRACKET) {
+            this.scanner.error();
+        }
+
+        return {
+            type: 'Declaration',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            important: important,
+            property: property,
+            value: value
+        };
+    },
+    generate: function(processChunk, node, item) {
+        processChunk(node.property);
+        processChunk(':');
+        this.generate(processChunk, node.value);
+
+        if (node.important) {
+            processChunk(node.important === true ? '!important' : '!' + node.important);
+        }
+
+        if (item && item.next) {
+            processChunk(';');
+        }
+    },
+    walkContext: 'declaration'
+};
+
+function isCustomProperty(name) {
+    return name.length >= 2 &&
+           name.charCodeAt(0) === HYPHENMINUS &&
+           name.charCodeAt(1) === HYPHENMINUS;
 }
 
-function getOperator() {
+function readProperty() {
     var start = this.scanner.tokenStart;
-    var tokenType = this.scanner.tokenType;
+    var prefix = 0;
 
-    if (tokenType !== EQUALSSIGN &&        // =
-        tokenType !== TILDE &&             // ~=
-        tokenType !== CIRCUMFLEXACCENT &&  // ^=
-        tokenType !== DOLLARSIGN &&        // $=
-        tokenType !== ASTERISK &&          // *=
-        tokenType !== VERTICALLINE         // |=
-    ) {
-        this.scanner.error('Attribute selector (=, ~=, ^=, $=, *=, |=) is expected');
+    // hacks
+    switch (this.scanner.tokenType) {
+        case ASTERISK:
+        case DOLLARSIGN:
+        case PLUSSIGN:
+        case NUMBERSIGN:
+            prefix = 1;
+            break;
+
+        // TODO: not sure we should support this hack
+        case SOLIDUS:
+            prefix = this.scanner.lookupType(1) === SOLIDUS ? 2 : 1;
+            break;
     }
 
-    if (tokenType === EQUALSSIGN) {
-        this.scanner.next();
-    } else {
-        this.scanner.next();
-        this.scanner.eat(EQUALSSIGN);
+    if (this.scanner.lookupType(prefix) === HYPHENMINUS) {
+        prefix++;
     }
+
+    if (prefix) {
+        this.scanner.skip(prefix);
+    }
+
+    this.scanner.eat(IDENTIFIER);
 
     return this.scanner.substrToCursor(start);
 }
 
-// '[' S* attrib_name ']'
-// '[' S* attrib_name S* attrib_matcher S* [ IDENT | STRING ] S* attrib_flags? S* ']'
-module.exports = {
-    name: 'AttributeSelector',
-    structure: {
-        name: 'Identifier',
-        matcher: [String, null],
-        value: ['String', 'Identifier', null],
-        flags: [String, null]
-    },
-    parse: function() {
-        var start = this.scanner.tokenStart;
-        var name;
-        var matcher = null;
-        var value = null;
-        var flags = null;
+// ! ws* important
+function getImportant(scanner) {
+    scanner.eat(EXCLAMATIONMARK);
+    scanner.skipSC();
 
-        this.scanner.eat(LEFTSQUAREBRACKET);
-        this.scanner.skipSC();
+    var important = scanner.consume(IDENTIFIER);
 
-        name = getAttributeName.call(this);
-        this.scanner.skipSC();
-
-        if (this.scanner.tokenType !== RIGHTSQUAREBRACKET) {
-            // avoid case `[name i]`
-            if (this.scanner.tokenType !== IDENTIFIER) {
-                matcher = getOperator.call(this);
-
-                this.scanner.skipSC();
-
-                value = this.scanner.tokenType === STRING
-                    ? this.String()
-                    : this.Identifier();
-
-                this.scanner.skipSC();
-            }
-
-            // attribute flags
-            if (this.scanner.tokenType === IDENTIFIER) {
-                flags = this.scanner.getTokenValue();
-                this.scanner.next();
-
-                this.scanner.skipSC();
-            }
-        }
-
-        this.scanner.eat(RIGHTSQUAREBRACKET);
-
-        return {
-            type: 'AttributeSelector',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            name: name,
-            matcher: matcher,
-            value: value,
-            flags: flags
-        };
-    },
-    generate: function(processChunk, node) {
-        var flagsPrefix = ' ';
-
-        processChunk('[');
-        this.generate(processChunk, node.name);
-
-        if (node.matcher !== null) {
-            processChunk(node.matcher);
-
-            if (node.value !== null) {
-                this.generate(processChunk, node.value);
-
-                // space between string and flags is not required
-                if (node.value.type === 'String') {
-                    flagsPrefix = '';
-                }
-            }
-        }
-
-        if (node.flags !== null) {
-            processChunk(flagsPrefix);
-            processChunk(node.flags);
-        }
-
-        processChunk(']');
-    }
-};
-}, {"82":82}];
+    // store original value in case it differ from `important`
+    // for better original source restoring and hacks like `!ie` support
+    return important === 'important' ? true : important;
+}
+}, {"75":75}];

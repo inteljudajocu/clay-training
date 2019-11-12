@@ -1,128 +1,66 @@
-window.modules["114"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+window.modules["114"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
+var WHITESPACE = TYPE.WhiteSpace;
+var COMMENT = TYPE.Comment;
 var IDENTIFIER = TYPE.Identifier;
-var COLON = TYPE.Colon;
-var EXCLAMATIONMARK = TYPE.ExclamationMark;
-var SOLIDUS = TYPE.Solidus;
-var ASTERISK = TYPE.Asterisk;
-var DOLLARSIGN = TYPE.DollarSign;
-var HYPHENMINUS = TYPE.HyphenMinus;
-var SEMICOLON = TYPE.Semicolon;
-var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
-var RIGHTPARENTHESIS = TYPE.RightParenthesis;
-var PLUSSIGN = TYPE.PlusSign;
-var NUMBERSIGN = TYPE.NumberSign;
+var LEFTPARENTHESIS = TYPE.LeftParenthesis;
 
 module.exports = {
-    name: 'Declaration',
+    name: 'MediaQuery',
     structure: {
-        important: [Boolean, String],
-        property: String,
-        value: ['Value', 'Raw']
+        children: [['Identifier', 'MediaFeature', 'WhiteSpace']]
     },
     parse: function() {
-        var start = this.scanner.tokenStart;
-        var property = readProperty.call(this);
-        var important = false;
-        var value;
-
         this.scanner.skipSC();
-        this.scanner.eat(COLON);
 
-        if (isCustomProperty(property) ? this.parseCustomProperty : this.parseValue) {
-            value = this.Value(property);
-        } else {
-            value = this.Raw(this.scanner.currentToken, EXCLAMATIONMARK, SEMICOLON, false, false);
+        var children = new List();
+        var child = null;
+        var space = null;
+
+        scan:
+        while (!this.scanner.eof) {
+            switch (this.scanner.tokenType) {
+                case COMMENT:
+                    this.scanner.next();
+                    continue;
+
+                case WHITESPACE:
+                    space = this.WhiteSpace();
+                    continue;
+
+                case IDENTIFIER:
+                    child = this.Identifier();
+                    break;
+
+                case LEFTPARENTHESIS:
+                    child = this.MediaFeature();
+                    break;
+
+                default:
+                    break scan;
+            }
+
+            if (space !== null) {
+                children.appendData(space);
+                space = null;
+            }
+
+            children.appendData(child);
         }
 
-        if (this.scanner.tokenType === EXCLAMATIONMARK) {
-            important = getImportant(this.scanner);
-            this.scanner.skipSC();
-        }
-
-        // TODO: include or not to include semicolon to range?
-        // if (this.scanner.tokenType === SEMICOLON) {
-        //     this.scanner.next();
-        // }
-
-        if (!this.scanner.eof &&
-            this.scanner.tokenType !== SEMICOLON &&
-            this.scanner.tokenType !== RIGHTPARENTHESIS &&
-            this.scanner.tokenType !== RIGHTCURLYBRACKET) {
-            this.scanner.error();
+        if (child === null) {
+            this.scanner.error('Identifier or parenthesis is expected');
         }
 
         return {
-            type: 'Declaration',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            important: important,
-            property: property,
-            value: value
+            type: 'MediaQuery',
+            loc: this.getLocationFromList(children),
+            children: children
         };
     },
-    generate: function(processChunk, node, item) {
-        processChunk(node.property);
-        processChunk(':');
-        this.generate(processChunk, node.value);
-
-        if (node.important) {
-            processChunk(node.important === true ? '!important' : '!' + node.important);
-        }
-
-        if (item && item.next) {
-            processChunk(';');
-        }
-    },
-    walkContext: 'declaration'
+    generate: function(processChunk, node) {
+        this.each(processChunk, node);
+    }
 };
-
-function isCustomProperty(name) {
-    return name.length >= 2 &&
-           name.charCodeAt(0) === HYPHENMINUS &&
-           name.charCodeAt(1) === HYPHENMINUS;
-}
-
-function readProperty() {
-    var start = this.scanner.tokenStart;
-    var prefix = 0;
-
-    // hacks
-    switch (this.scanner.tokenType) {
-        case ASTERISK:
-        case DOLLARSIGN:
-        case PLUSSIGN:
-        case NUMBERSIGN:
-            prefix = 1;
-            break;
-
-        // TODO: not sure we should support this hack
-        case SOLIDUS:
-            prefix = this.scanner.lookupType(1) === SOLIDUS ? 2 : 1;
-            break;
-    }
-
-    if (this.scanner.lookupType(prefix) === HYPHENMINUS) {
-        prefix++;
-    }
-
-    if (prefix) {
-        this.scanner.skip(prefix);
-    }
-
-    this.scanner.eat(IDENTIFIER);
-
-    return this.scanner.substrToCursor(start);
-}
-
-// ! ws* important
-function getImportant(scanner) {
-    scanner.eat(EXCLAMATIONMARK);
-    scanner.skipSC();
-
-    var important = scanner.consume(IDENTIFIER);
-
-    // store original value in case it differ from `important`
-    // for better original source restoring and hacks like `!ie` support
-    return important === 'important' ? true : important;
-}
-}, {"82":82}];
+}, {"53":53,"75":75}];

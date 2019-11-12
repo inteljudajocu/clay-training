@@ -1,95 +1,54 @@
-window.modules["478"] = [function(require,module,exports){'use strict';
+window.modules["478"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
+exports.isUniversal = exports.isTag = exports.isString = exports.isSelector = exports.isRoot = exports.isPseudo = exports.isNesting = exports.isIdentifier = exports.isComment = exports.isCombinator = exports.isClassName = exports.isAttribute = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _IS_TYPE;
 
-var cloneNode = function cloneNode(obj, parent) {
-    if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object') {
-        return obj;
-    }
+exports.isNode = isNode;
+exports.isPseudoElement = isPseudoElement;
+exports.isPseudoClass = isPseudoClass;
+exports.isContainer = isContainer;
+exports.isNamespace = isNamespace;
 
-    var cloned = new obj.constructor();
+var _types = require(460);
 
-    for (var i in obj) {
-        if (!obj.hasOwnProperty(i)) {
-            continue;
-        }
-        var value = obj[i];
-        var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+var IS_TYPE = (_IS_TYPE = {}, _IS_TYPE[_types.ATTRIBUTE] = true, _IS_TYPE[_types.CLASS] = true, _IS_TYPE[_types.COMBINATOR] = true, _IS_TYPE[_types.COMMENT] = true, _IS_TYPE[_types.ID] = true, _IS_TYPE[_types.NESTING] = true, _IS_TYPE[_types.PSEUDO] = true, _IS_TYPE[_types.ROOT] = true, _IS_TYPE[_types.SELECTOR] = true, _IS_TYPE[_types.STRING] = true, _IS_TYPE[_types.TAG] = true, _IS_TYPE[_types.UNIVERSAL] = true, _IS_TYPE);
 
-        if (i === 'parent' && type === 'object') {
-            if (parent) {
-                cloned[i] = parent;
-            }
-        } else if (value instanceof Array) {
-            cloned[i] = value.map(function (j) {
-                return cloneNode(j, cloned);
-            });
-        } else {
-            cloned[i] = cloneNode(value, cloned);
-        }
-    }
+function isNode(node) {
+    return (typeof node === "undefined" ? "undefined" : _typeof(node)) === "object" && IS_TYPE[node.type];
+}
 
-    return cloned;
-};
+function isNodeType(type, node) {
+    return isNode(node) && node.type === type;
+}
 
-var _class = function () {
-    function _class() {
-        var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+var isAttribute = exports.isAttribute = isNodeType.bind(null, _types.ATTRIBUTE);
+var isClassName = exports.isClassName = isNodeType.bind(null, _types.CLASS);
+var isCombinator = exports.isCombinator = isNodeType.bind(null, _types.COMBINATOR);
+var isComment = exports.isComment = isNodeType.bind(null, _types.COMMENT);
+var isIdentifier = exports.isIdentifier = isNodeType.bind(null, _types.ID);
+var isNesting = exports.isNesting = isNodeType.bind(null, _types.NESTING);
+var isPseudo = exports.isPseudo = isNodeType.bind(null, _types.PSEUDO);
+var isRoot = exports.isRoot = isNodeType.bind(null, _types.ROOT);
+var isSelector = exports.isSelector = isNodeType.bind(null, _types.SELECTOR);
+var isString = exports.isString = isNodeType.bind(null, _types.STRING);
+var isTag = exports.isTag = isNodeType.bind(null, _types.TAG);
+var isUniversal = exports.isUniversal = isNodeType.bind(null, _types.UNIVERSAL);
 
-        _classCallCheck(this, _class);
+function isPseudoElement(node) {
+    return isPseudo(node) && node.value && (node.value.startsWith("::") || node.value === ":before" || node.value === ":after");
+}
+function isPseudoClass(node) {
+    return isPseudo(node) && !isPseudoElement(node);
+}
 
-        Object.assign(this, opts);
-        this.spaces = this.spaces || {};
-        this.spaces.before = this.spaces.before || '';
-        this.spaces.after = this.spaces.after || '';
-    }
+function isContainer(node) {
+    return !!(isNode(node) && node.walk);
+}
 
-    _class.prototype.remove = function remove() {
-        if (this.parent) {
-            this.parent.removeChild(this);
-        }
-        this.parent = undefined;
-        return this;
-    };
-
-    _class.prototype.replaceWith = function replaceWith() {
-        if (this.parent) {
-            for (var index in arguments) {
-                this.parent.insertBefore(this, arguments[index]);
-            }
-            this.remove();
-        }
-        return this;
-    };
-
-    _class.prototype.next = function next() {
-        return this.parent.at(this.parent.index(this) + 1);
-    };
-
-    _class.prototype.prev = function prev() {
-        return this.parent.at(this.parent.index(this) - 1);
-    };
-
-    _class.prototype.clone = function clone() {
-        var overrides = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        var cloned = cloneNode(this);
-        for (var name in overrides) {
-            cloned[name] = overrides[name];
-        }
-        return cloned;
-    };
-
-    _class.prototype.toString = function toString() {
-        return [this.spaces.before, String(this.value), this.spaces.after].join('');
-    };
-
-    return _class;
-}();
-
-exports.default = _class;
-module.exports = exports['default'];}, {}];
+function isNamespace(node) {
+    return isClassName(node) || isAttribute(node) || isTag(node);
+}}, {"460":460}];

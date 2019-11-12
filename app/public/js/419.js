@@ -1,140 +1,297 @@
-window.modules["419"] = [function(require,module,exports){var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-function isEqualSelectors(a, b) {
-    var cursor1 = a.head;
-    var cursor2 = b.head;
-
-    while (cursor1 !== null && cursor2 !== null && cursor1.data.id === cursor2.data.id) {
-        cursor1 = cursor1.next;
-        cursor2 = cursor2.next;
-    }
-
-    return cursor1 === null && cursor2 === null;
-}
-
-function isEqualDeclarations(a, b) {
-    var cursor1 = a.head;
-    var cursor2 = b.head;
-
-    while (cursor1 !== null && cursor2 !== null && cursor1.data.id === cursor2.data.id) {
-        cursor1 = cursor1.next;
-        cursor2 = cursor2.next;
-    }
-
-    return cursor1 === null && cursor2 === null;
-}
-
-function compareDeclarations(declarations1, declarations2) {
-    var result = {
-        eq: [],
-        ne1: [],
-        ne2: [],
-        ne2overrided: []
-    };
-
-    var fingerprints = Object.create(null);
-    var declarations2hash = Object.create(null);
-
-    for (var cursor = declarations2.head; cursor; cursor = cursor.next)  {
-        declarations2hash[cursor.data.id] = true;
-    }
-
-    for (var cursor = declarations1.head; cursor; cursor = cursor.next)  {
-        var data = cursor.data;
-
-        if (data.fingerprint) {
-            fingerprints[data.fingerprint] = data.important;
-        }
-
-        if (declarations2hash[data.id]) {
-            declarations2hash[data.id] = false;
-            result.eq.push(data);
-        } else {
-            result.ne1.push(data);
-        }
-    }
-
-    for (var cursor = declarations2.head; cursor; cursor = cursor.next)  {
-        var data = cursor.data;
-
-        if (declarations2hash[data.id]) {
-            // if declarations1 has overriding declaration, this is not a difference
-            // but take in account !important - prev should be equal or greater than follow
-            if (hasOwnProperty.call(fingerprints, data.fingerprint) &&
-                Number(fingerprints[data.fingerprint]) >= Number(data.important)) {
-                result.ne2overrided.push(data);
-            } else {
-                result.ne2.push(data);
-            }
-        }
-    }
-
-    return result;
-}
-
-function addSelectors(dest, source) {
-    source.each(function(sourceData) {
-        var newStr = sourceData.id;
-        var cursor = dest.head;
-
-        while (cursor) {
-            var nextStr = cursor.data.id;
-
-            if (nextStr === newStr) {
-                return;
-            }
-
-            if (nextStr > newStr) {
-                break;
-            }
-
-            cursor = cursor.next;
-        }
-
-        dest.insert(dest.createItem(sourceData), cursor);
-    });
-
-    return dest;
-}
-
-// check if simpleselectors has no equal specificity and element selector
-function hasSimilarSelectors(selectors1, selectors2) {
-    return selectors1.some(function(a) {
-        return selectors2.some(function(b) {
-            return a.compareMarker === b.compareMarker;
-        });
-    });
-}
-
-// test node can't to be skipped
-function unsafeToSkipNode(node) {
-    switch (node.type) {
-        case 'Rule':
-            // unsafe skip ruleset with selector similarities
-            return hasSimilarSelectors(node.prelude.children, this);
-
-        case 'Atrule':
-            // can skip at-rules with blocks
-            if (node.block) {
-                // unsafe skip at-rule if block contains something unsafe to skip
-                return node.block.children.some(unsafeToSkipNode, this);
-            }
-            break;
-
-        case 'Declaration':
-            return false;
-    }
-
-    // unsafe by default
-    return true;
-}
-
-module.exports = {
-    isEqualSelectors: isEqualSelectors,
-    isEqualDeclarations: isEqualDeclarations,
-    compareDeclarations: compareDeclarations,
-    addSelectors: addSelectors,
-    hasSimilarSelectors: hasSimilarSelectors,
-    unsafeToSkipNode: unsafeToSkipNode
+window.modules["419"] = [function(require,module,exports){var resolveProperty = require(57).property;
+var resolveKeyword = require(57).keyword;
+var walkRulesRight = require(57).walkRulesRight;
+var translate = require(57).translate;
+var fingerprintId = 1;
+var dontRestructure = {
+    'src': 1 // https://github.com/afelix/csso/issues/50
 };
-}, {}];
+
+var DONT_MIX_VALUE = {
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/display#Browser_compatibility
+    'display': /table|ruby|flex|-(flex)?box$|grid|contents|run-in/i,
+    // https://developer.mozilla.org/en/docs/Web/CSS/text-align
+    'text-align': /^(start|end|match-parent|justify-all)$/i
+};
+
+var CURSOR_SAFE_VALUE = [
+    'auto', 'crosshair', 'default', 'move', 'text', 'wait', 'help',
+    'n-resize', 'e-resize', 's-resize', 'w-resize',
+    'ne-resize', 'nw-resize', 'se-resize', 'sw-resize',
+    'pointer', 'progress', 'not-allowed', 'no-drop', 'vertical-text', 'all-scroll',
+    'col-resize', 'row-resize'
+];
+
+var POSITION_SAFE_VALUE = [
+    'static', 'relative', 'absolute', 'fixed'
+];
+
+var NEEDLESS_TABLE = {
+    'border-width': ['border'],
+    'border-style': ['border'],
+    'border-color': ['border'],
+    'border-top': ['border'],
+    'border-right': ['border'],
+    'border-bottom': ['border'],
+    'border-left': ['border'],
+    'border-top-width': ['border-top', 'border-width', 'border'],
+    'border-right-width': ['border-right', 'border-width', 'border'],
+    'border-bottom-width': ['border-bottom', 'border-width', 'border'],
+    'border-left-width': ['border-left', 'border-width', 'border'],
+    'border-top-style': ['border-top', 'border-style', 'border'],
+    'border-right-style': ['border-right', 'border-style', 'border'],
+    'border-bottom-style': ['border-bottom', 'border-style', 'border'],
+    'border-left-style': ['border-left', 'border-style', 'border'],
+    'border-top-color': ['border-top', 'border-color', 'border'],
+    'border-right-color': ['border-right', 'border-color', 'border'],
+    'border-bottom-color': ['border-bottom', 'border-color', 'border'],
+    'border-left-color': ['border-left', 'border-color', 'border'],
+    'margin-top': ['margin'],
+    'margin-right': ['margin'],
+    'margin-bottom': ['margin'],
+    'margin-left': ['margin'],
+    'padding-top': ['padding'],
+    'padding-right': ['padding'],
+    'padding-bottom': ['padding'],
+    'padding-left': ['padding'],
+    'font-style': ['font'],
+    'font-variant': ['font'],
+    'font-weight': ['font'],
+    'font-size': ['font'],
+    'font-family': ['font'],
+    'list-style-type': ['list-style'],
+    'list-style-position': ['list-style'],
+    'list-style-image': ['list-style']
+};
+
+function getPropertyFingerprint(propertyName, declaration, fingerprints) {
+    var realName = resolveProperty(propertyName).name;
+
+    if (realName === 'background') {
+        return propertyName + ':' + translate(declaration.value);
+    }
+
+    var declarationId = declaration.id;
+    var fingerprint = fingerprints[declarationId];
+
+    if (!fingerprint) {
+        switch (declaration.value.type) {
+            case 'Value':
+                var vendorId = '';
+                var iehack = '';
+                var special = {};
+                var raw = false;
+
+                declaration.value.children.each(function walk(node) {
+                    switch (node.type) {
+                        case 'Value':
+                        case 'Brackets':
+                        case 'Parentheses':
+                            node.children.each(walk);
+                            break;
+
+                        case 'Raw':
+                            raw = true;
+                            break;
+
+                        case 'Identifier':
+                            var name = node.name;
+
+                            if (!vendorId) {
+                                vendorId = resolveKeyword(name).vendor;
+                            }
+
+                            if (/\\[09]/.test(name)) {
+                                iehack = RegExp.lastMatch;
+                            }
+
+                            if (realName === 'cursor') {
+                                if (CURSOR_SAFE_VALUE.indexOf(name) === -1) {
+                                    special[name] = true;
+                                }
+                            } else if (realName === 'position') {
+                                if (POSITION_SAFE_VALUE.indexOf(name) === -1) {
+                                    special[name] = true;
+                                }
+                            } else if (DONT_MIX_VALUE.hasOwnProperty(realName)) {
+                                if (DONT_MIX_VALUE[realName].test(name)) {
+                                    special[name] = true;
+                                }
+                            }
+
+                            break;
+
+                        case 'Function':
+                            var name = node.name;
+
+                            if (!vendorId) {
+                                vendorId = resolveKeyword(name).vendor;
+                            }
+
+                            if (name === 'rect') {
+                                // there are 2 forms of rect:
+                                //   rect(<top>, <right>, <bottom>, <left>) - standart
+                                //   rect(<top> <right> <bottom> <left>) – backwards compatible syntax
+                                // only the same form values can be merged
+                                var hasComma = node.children.some(function(node) {
+                                    return node.type === 'Operator' && node.value === ',';
+                                });
+                                if (!hasComma) {
+                                    name = 'rect-backward';
+                                }
+                            }
+
+                            special[name + '()'] = true;
+
+                            // check nested tokens too
+                            node.children.each(walk);
+
+                            break;
+
+                        case 'Dimension':
+                            var unit = node.unit;
+
+                            switch (unit) {
+                                // is not supported until IE11
+                                case 'rem':
+
+                                // v* units is too buggy across browsers and better
+                                // don't merge values with those units
+                                case 'vw':
+                                case 'vh':
+                                case 'vmin':
+                                case 'vmax':
+                                case 'vm': // IE9 supporting "vm" instead of "vmin".
+                                    special[unit] = true;
+                                    break;
+                            }
+                            break;
+                    }
+                });
+
+                fingerprint = raw
+                    ? '!' + fingerprintId++
+                    : '!' + Object.keys(special).sort() + '|' + iehack + vendorId;
+                break;
+
+            case 'Raw':
+                fingerprint = '!' + declaration.value.value;
+                break;
+
+            default:
+                fingerprint = translate(declaration.value);
+        }
+
+        fingerprints[declarationId] = fingerprint;
+    }
+
+    return propertyName + fingerprint;
+}
+
+function needless(props, declaration, fingerprints) {
+    var property = resolveProperty(declaration.property);
+
+    if (NEEDLESS_TABLE.hasOwnProperty(property.name)) {
+        var table = NEEDLESS_TABLE[property.name];
+
+        for (var i = 0; i < table.length; i++) {
+            var ppre = getPropertyFingerprint(property.prefix + table[i], declaration, fingerprints);
+            var prev = props.hasOwnProperty(ppre) ? props[ppre] : null;
+
+            if (prev && (!declaration.important || prev.item.data.important)) {
+                return prev;
+            }
+        }
+    }
+}
+
+function processRule(rule, item, list, props, fingerprints) {
+    var declarations = rule.block.children;
+
+    declarations.eachRight(function(declaration, declarationItem) {
+        var property = declaration.property;
+        var fingerprint = getPropertyFingerprint(property, declaration, fingerprints);
+        var prev = props[fingerprint];
+
+        if (prev && !dontRestructure.hasOwnProperty(property)) {
+            if (declaration.important && !prev.item.data.important) {
+                props[fingerprint] = {
+                    block: declarations,
+                    item: declarationItem
+                };
+
+                prev.block.remove(prev.item);
+
+                // TODO: use it when we can refer to several points in source
+                // declaration.loc = {
+                //     primary: declaration.loc,
+                //     merged: prev.item.data.loc
+                // };
+            } else {
+                declarations.remove(declarationItem);
+
+                // TODO: use it when we can refer to several points in source
+                // prev.item.data.loc = {
+                //     primary: prev.item.data.loc,
+                //     merged: declaration.loc
+                // };
+            }
+        } else {
+            var prev = needless(props, declaration, fingerprints);
+
+            if (prev) {
+                declarations.remove(declarationItem);
+
+                // TODO: use it when we can refer to several points in source
+                // prev.item.data.loc = {
+                //     primary: prev.item.data.loc,
+                //     merged: declaration.loc
+                // };
+            } else {
+                declaration.fingerprint = fingerprint;
+
+                props[fingerprint] = {
+                    block: declarations,
+                    item: declarationItem
+                };
+            }
+        }
+    });
+
+    if (declarations.isEmpty()) {
+        list.remove(item);
+    }
+}
+
+module.exports = function restructBlock(ast) {
+    var stylesheetMap = {};
+    var fingerprints = Object.create(null);
+
+    walkRulesRight(ast, function(node, item, list) {
+        if (node.type !== 'Rule') {
+            return;
+        }
+
+        var stylesheet = this.block || this.stylesheet;
+        var ruleId = (node.pseudoSignature || '') + '|' + node.prelude.children.first().id;
+        var ruleMap;
+        var props;
+
+        if (!stylesheetMap.hasOwnProperty(stylesheet.id)) {
+            ruleMap = {};
+            stylesheetMap[stylesheet.id] = ruleMap;
+        } else {
+            ruleMap = stylesheetMap[stylesheet.id];
+        }
+
+        if (ruleMap.hasOwnProperty(ruleId)) {
+            props = ruleMap[ruleId];
+        } else {
+            props = {};
+            ruleMap[ruleId] = props;
+        }
+
+        processRule.call(this, node, item, list, props, fingerprints);
+    });
+};
+}, {"57":57}];

@@ -1,44 +1,34 @@
-window.modules["115"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
-
-var WHITESPACE = TYPE.WhiteSpace;
-var COMMENT = TYPE.Comment;
-var SEMICOLON = TYPE.Semicolon;
-
-function consumeRaw(startToken) {
-    return this.Raw(startToken, 0, SEMICOLON, true, true);
-}
+window.modules["115"] = [function(require,module,exports){var List = require(53);
+var COMMA = require(75).TYPE.Comma;
 
 module.exports = {
-    name: 'DeclarationList',
+    name: 'MediaQueryList',
     structure: {
-        children: [['Declaration']]
+        children: [['MediaQuery']]
     },
-    parse: function() {
+    parse: function(relative) {
         var children = new List();
 
-        scan:
-        while (!this.scanner.eof) {
-            switch (this.scanner.tokenType) {
-                case WHITESPACE:
-                case COMMENT:
-                case SEMICOLON:
-                    this.scanner.next();
-                    break;
+        this.scanner.skipSC();
 
-                default:
-                    children.appendData(this.tolerantParse(this.Declaration, consumeRaw));
+        while (!this.scanner.eof) {
+            children.appendData(this.MediaQuery(relative));
+
+            if (this.scanner.tokenType !== COMMA) {
+                break;
             }
+
+            this.scanner.next();
         }
 
         return {
-            type: 'DeclarationList',
+            type: 'MediaQueryList',
             loc: this.getLocationFromList(children),
             children: children
         };
     },
     generate: function(processChunk, node) {
-        this.each(processChunk, node);
+        this.eachComma(processChunk, node);
     }
 };
-}, {"61":61,"82":82}];
+}, {"53":53,"75":75}];

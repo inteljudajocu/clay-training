@@ -2,10 +2,10 @@ _components:
   recipe:
     title: ''
     author: ''
-    recipeD: ''
+    recipeDescription: ''
     reviews: ''
     photos: ''
-    madeit: ''
+    madeIt: ''
     imageUrl: ''
     imageCaption: ''
     imageAlt: ''

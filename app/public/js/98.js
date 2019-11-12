@@ -1,289 +1,163 @@
-window.modules["98"] = [function(require,module,exports){'use strict';
+window.modules["98"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
-var hasOwnProperty = Object.prototype.hasOwnProperty;
+var IDENTIFIER = TYPE.Identifier;
+var STRING = TYPE.String;
+var DOLLARSIGN = TYPE.DollarSign;
+var ASTERISK = TYPE.Asterisk;
+var COLON = TYPE.Colon;
+var EQUALSSIGN = TYPE.EqualsSign;
+var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
+var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
+var CIRCUMFLEXACCENT = TYPE.CircumflexAccent;
+var VERTICALLINE = TYPE.VerticalLine;
+var TILDE = TYPE.Tilde;
 
-function walkRules(node, item, list) {
-    switch (node.type) {
-        case 'StyleSheet':
-            var oldStylesheet = this.stylesheet;
-            this.stylesheet = node;
-
-            node.children.each(walkRules, this);
-
-            this.stylesheet = oldStylesheet;
-            break;
-
-        case 'Atrule':
-            if (node.block !== null) {
-                var oldAtrule = this.atrule;
-                this.atrule = node;
-
-                walkRules.call(this, node.block);
-
-                this.atrule = oldAtrule;
-            }
-
-            this.fn(node, item, list);
-            break;
-
-        case 'Rule':
-            this.fn(node, item, list);
-
-            var oldRule = this.rule;
-            this.rule = node;
-
-            walkRules.call(this, node.block);
-
-            this.rule = oldRule;
-            break;
-
-        case 'Block':
-            var oldBlock = this.block;
-            this.block = node;
-
-            node.children.each(walkRules, this);
-
-            this.block = oldBlock;
-            break;
-    }
-}
-
-function walkRulesRight(node, item, list) {
-    switch (node.type) {
-        case 'StyleSheet':
-            var oldStylesheet = this.stylesheet;
-            this.stylesheet = node;
-
-            node.children.eachRight(walkRulesRight, this);
-
-            this.stylesheet = oldStylesheet;
-            break;
-
-        case 'Atrule':
-            if (node.block !== null) {
-                var oldAtrule = this.atrule;
-                this.atrule = node;
-
-                walkRulesRight.call(this, node.block);
-
-                this.atrule = oldAtrule;
-            }
-
-            this.fn(node, item, list);
-            break;
-
-        case 'Rule':
-            var oldRule = this.rule;
-            this.rule = node;
-
-            walkRulesRight.call(this, node.block);
-
-            this.rule = oldRule;
-
-            this.fn(node, item, list);
-            break;
-
-        case 'Block':
-            var oldBlock = this.block;
-            this.block = node;
-
-            node.children.eachRight(walkRulesRight, this);
-
-            this.block = oldBlock;
-            break;
-    }
-}
-
-function walkDeclarations(node) {
-    switch (node.type) {
-        case 'StyleSheet':
-            var oldStylesheet = this.stylesheet;
-            this.stylesheet = node;
-
-            node.children.each(walkDeclarations, this);
-
-            this.stylesheet = oldStylesheet;
-            break;
-
-        case 'Atrule':
-            if (node.block !== null) {
-                var oldAtrule = this.atrule;
-                this.atrule = node;
-
-                walkDeclarations.call(this, node.block);
-
-                this.atrule = oldAtrule;
-            }
-            break;
-
-        case 'Rule':
-            var oldRule = this.rule;
-            this.rule = node;
-
-            if (node.block !== null) {
-                walkDeclarations.call(this, node.block);
-            }
-
-            this.rule = oldRule;
-            break;
-
-        case 'Block':
-            node.children.each(function(node, item, list) {
-                if (node.type === 'Declaration') {
-                    this.fn(node, item, list);
-                } else {
-                    walkDeclarations.call(this, node);
-                }
-            }, this);
-            break;
-    }
-}
-
-function getWalkersFromStructure(name, nodeType) {
-    var structure = nodeType.structure;
-    var walkers = [];
-
-    for (var key in structure) {
-        if (hasOwnProperty.call(structure, key) === false) {
-            continue;
-        }
-
-        var fieldTypes = structure[key];
-        var walker = {
-            name: key,
-            type: false,
-            nullable: false
-        };
-
-        if (!Array.isArray(structure[key])) {
-            fieldTypes = [structure[key]];
-        }
-
-        for (var i = 0; i < fieldTypes.length; i++) {
-            var fieldType = fieldTypes[i];
-            if (fieldType === null) {
-                walker.nullable = true;
-            } else if (typeof fieldType === 'string') {
-                walker.type = 'node';
-            } else if (Array.isArray(fieldType)) {
-                walker.type = 'list';
-            }
-        }
-
-        if (walker.type) {
-            walkers.push(walker);
-        }
+function getAttributeName() {
+    if (this.scanner.eof) {
+        this.scanner.error('Unexpected end of input');
     }
 
-    if (walkers.length) {
-        return {
-            context: nodeType.walkContext,
-            fields: walkers
-        };
+    var start = this.scanner.tokenStart;
+    var expectIdentifier = false;
+    var checkColon = true;
+
+    if (this.scanner.tokenType === ASTERISK) {
+        expectIdentifier = true;
+        checkColon = false;
+        this.scanner.next();
+    } else if (this.scanner.tokenType !== VERTICALLINE) {
+        this.scanner.eat(IDENTIFIER);
     }
 
-    return null;
-}
-
-function getTypesFromConfig(config) {
-    var types = {};
-
-    if (config.node) {
-        for (var name in config.node) {
-            if (hasOwnProperty.call(config.node, name)) {
-                var nodeType = config.node[name];
-
-                if (nodeType.structure) {
-                    var walkers = getWalkersFromStructure(name, nodeType);
-                    if (walkers !== null) {
-                        types[name] = walkers;
-                    }
-                } else {
-                    throw new Error('Missed `structure` field in `' + name + '` node type definition');
-                }
-            }
+    if (this.scanner.tokenType === VERTICALLINE) {
+        if (this.scanner.lookupType(1) !== EQUALSSIGN) {
+            this.scanner.next();
+            this.scanner.eat(IDENTIFIER);
+        } else if (expectIdentifier) {
+            this.scanner.error('Identifier is expected', this.scanner.tokenEnd);
         }
+    } else if (expectIdentifier) {
+        this.scanner.error('Vertical line is expected');
     }
 
-    return types;
-}
-
-function createContext(root, fn) {
-    var context = {
-        fn: fn,
-        root: root,
-        stylesheet: null,
-        atrule: null,
-        atrulePrelude: null,
-        rule: null,
-        selector: null,
-        block: null,
-        declaration: null,
-        function: null
-    };
-
-    return context;
-}
-
-module.exports = function createWalker(config) {
-    var types = getTypesFromConfig(config);
-    var walkers = {};
-
-    for (var name in types) {
-        if (hasOwnProperty.call(types, name)) {
-            var config = types[name];
-            walkers[name] = Function('node', 'context', 'walk',
-                (config.context ? 'var old = context.' + config.context + ';\ncontext.' + config.context + ' = node;\n' : '') +
-                config.fields.map(function(field) {
-                    var line = field.type === 'list'
-                        ? 'node.' + field.name + '.each(walk);'
-                        : 'walk(node.' + field.name + ');';
-
-                    if (field.nullable) {
-                        line = 'if (node.' + field.name + ') {\n    ' + line + '}';
-                    }
-
-                    return line;
-                }).join('\n') +
-                (config.context ? '\ncontext.' + config.context + ' = old;' : '')
-            );
-        }
+    if (checkColon && this.scanner.tokenType === COLON) {
+        this.scanner.next();
+        this.scanner.eat(IDENTIFIER);
     }
 
     return {
-        walk: function(root, fn) {
-            function walk(node, item, list) {
-                fn.call(context, node, item, list);
-                if (walkers.hasOwnProperty(node.type)) {
-                    walkers[node.type](node, context, walk);
-                }
-            }
-
-            var context = createContext(root, fn);
-
-            walk(root);
-        },
-        walkUp: function(root, fn) {
-            function walk(node, item, list) {
-                if (walkers.hasOwnProperty(node.type)) {
-                    walkers[node.type](node, context, walk);
-                }
-                fn.call(context, node, item, list);
-            }
-
-            var context = createContext(root, fn);
-
-            walk(root);
-        },
-        walkRules: function(root, fn) {
-            walkRules.call(createContext(root, fn), root);
-        },
-        walkRulesRight: function(root, fn) {
-            walkRulesRight.call(createContext(root, fn), root);
-        },
-        walkDeclarations: function(root, fn) {
-            walkDeclarations.call(createContext(root, fn), root);
-        }
+        type: 'Identifier',
+        loc: this.getLocation(start, this.scanner.tokenStart),
+        name: this.scanner.substrToCursor(start)
     };
+}
+
+function getOperator() {
+    var start = this.scanner.tokenStart;
+    var tokenType = this.scanner.tokenType;
+
+    if (tokenType !== EQUALSSIGN &&        // =
+        tokenType !== TILDE &&             // ~=
+        tokenType !== CIRCUMFLEXACCENT &&  // ^=
+        tokenType !== DOLLARSIGN &&        // $=
+        tokenType !== ASTERISK &&          // *=
+        tokenType !== VERTICALLINE         // |=
+    ) {
+        this.scanner.error('Attribute selector (=, ~=, ^=, $=, *=, |=) is expected');
+    }
+
+    if (tokenType === EQUALSSIGN) {
+        this.scanner.next();
+    } else {
+        this.scanner.next();
+        this.scanner.eat(EQUALSSIGN);
+    }
+
+    return this.scanner.substrToCursor(start);
+}
+
+// '[' S* attrib_name ']'
+// '[' S* attrib_name S* attrib_matcher S* [ IDENT | STRING ] S* attrib_flags? S* ']'
+module.exports = {
+    name: 'AttributeSelector',
+    structure: {
+        name: 'Identifier',
+        matcher: [String, null],
+        value: ['String', 'Identifier', null],
+        flags: [String, null]
+    },
+    parse: function() {
+        var start = this.scanner.tokenStart;
+        var name;
+        var matcher = null;
+        var value = null;
+        var flags = null;
+
+        this.scanner.eat(LEFTSQUAREBRACKET);
+        this.scanner.skipSC();
+
+        name = getAttributeName.call(this);
+        this.scanner.skipSC();
+
+        if (this.scanner.tokenType !== RIGHTSQUAREBRACKET) {
+            // avoid case `[name i]`
+            if (this.scanner.tokenType !== IDENTIFIER) {
+                matcher = getOperator.call(this);
+
+                this.scanner.skipSC();
+
+                value = this.scanner.tokenType === STRING
+                    ? this.String()
+                    : this.Identifier();
+
+                this.scanner.skipSC();
+            }
+
+            // attribute flags
+            if (this.scanner.tokenType === IDENTIFIER) {
+                flags = this.scanner.getTokenValue();
+                this.scanner.next();
+
+                this.scanner.skipSC();
+            }
+        }
+
+        this.scanner.eat(RIGHTSQUAREBRACKET);
+
+        return {
+            type: 'AttributeSelector',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            name: name,
+            matcher: matcher,
+            value: value,
+            flags: flags
+        };
+    },
+    generate: function(processChunk, node) {
+        var flagsPrefix = ' ';
+
+        processChunk('[');
+        this.generate(processChunk, node.name);
+
+        if (node.matcher !== null) {
+            processChunk(node.matcher);
+
+            if (node.value !== null) {
+                this.generate(processChunk, node.value);
+
+                // space between string and flags is not required
+                if (node.value.type === 'String') {
+                    flagsPrefix = '';
+                }
+            }
+        }
+
+        if (node.flags !== null) {
+            processChunk(flagsPrefix);
+            processChunk(node.flags);
+        }
+
+        processChunk(']');
+    }
 };
-}, {}];
+}, {"75":75}];

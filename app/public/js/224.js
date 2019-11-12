@@ -1,19 +1,28 @@
-window.modules["224"] = [function(require,module,exports){/*!
- * wordcount <https://github.com/jonschlinkert/wordcount>
- *
- * Copyright (c) 2014-2015 Jon Schlinkert.
- * Licensed under the MIT License
- */
+window.modules["224"] = [function(require,module,exports){module.exports = ProxyHandler;
 
-'use strict';
+function ProxyHandler(cbs) {
+    this._cbs = cbs || {};
+}
 
-var matches = require(383);
-
-module.exports = function wordcount(str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('expected a string');
-  }
-  var m = matches(str);
-  if (!m) return 0;
-  return m.length;
-};}, {"383":383}];
+var EVENTS = require(215).EVENTS;
+Object.keys(EVENTS).forEach(function(name) {
+    if (EVENTS[name] === 0) {
+        name = "on" + name;
+        ProxyHandler.prototype[name] = function() {
+            if (this._cbs[name]) this._cbs[name]();
+        };
+    } else if (EVENTS[name] === 1) {
+        name = "on" + name;
+        ProxyHandler.prototype[name] = function(a) {
+            if (this._cbs[name]) this._cbs[name](a);
+        };
+    } else if (EVENTS[name] === 2) {
+        name = "on" + name;
+        ProxyHandler.prototype[name] = function(a, b) {
+            if (this._cbs[name]) this._cbs[name](a, b);
+        };
+    } else {
+        throw Error("wrong number of arguments");
+    }
+});
+}, {"215":215}];

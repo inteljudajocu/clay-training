@@ -1,18 +1,8 @@
-window.modules["78"] = [function(require,module,exports){module.exports = function createCustomError(name, message) {
-    // use Object.create(), because some VMs prevent setting line/column otherwise
-    // (iOS Safari 10 even throws an exception)
-    var error = Object.create(SyntaxError.prototype);
-    var errorStack = new Error();
-
-    error.name = name;
-    error.message = message;
-
-    Object.defineProperty(error, 'stack', {
-        get: function() {
-            return (errorStack.stack || '').replace(/^(.+\n){1,3}/, name + ': ' + message + '\n');
-        }
-    });
-
-    return error;
+window.modules["78"] = [function(require,module,exports){module.exports = {
+    'font-face': require(76),
+    'import': require(77),
+    'media': require(79),
+    'page': require(80),
+    'supports': require(81)
 };
-}, {}];
+}, {"76":76,"77":77,"79":79,"80":80,"81":81}];

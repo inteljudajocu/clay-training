@@ -2,9 +2,9 @@ window.modules["433"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(432);
+var _container = require(427);
 
-var _node2 = _interopRequireDefault(_node);
+var _container2 = _interopRequireDefault(_container);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15,88 +15,116 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
- * Represents a CSS declaration.
+ * Represents a CSS file and contains all its parsed nodes.
  *
- * @extends Node
+ * @extends Container
  *
  * @example
- * const root = postcss.parse('a { color: black }');
- * const decl = root.first.first;
- * decl.type       //=> 'decl'
- * decl.toString() //=> ' color: black'
+ * const root = postcss.parse('a{color:black} b{z-index:2}');
+ * root.type         //=> 'root'
+ * root.nodes.length //=> 2
  */
-var Declaration = function (_Node) {
-  _inherits(Declaration, _Node);
+var Root = function (_Container) {
+    _inherits(Root, _Container);
 
-  function Declaration(defaults) {
-    _classCallCheck(this, Declaration);
+    function Root(defaults) {
+        _classCallCheck(this, Root);
 
-    var _this = _possibleConstructorReturn(this, _Node.call(this, defaults));
+        var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
 
-    _this.type = 'decl';
-    return _this;
-  }
+        _this.type = 'root';
+        if (!_this.nodes) _this.nodes = [];
+        return _this;
+    }
 
-  /**
-   * @memberof Declaration#
-   * @member {string} prop - the declaration’s property name
-   *
-   * @example
-   * const root = postcss.parse('a { color: black }');
-   * const decl = root.first.first;
-   * decl.prop //=> 'color'
-   */
+    Root.prototype.removeChild = function removeChild(child, ignore) {
+        var index = this.index(child);
 
-  /**
-   * @memberof Declaration#
-   * @member {string} value - the declaration’s value
-   *
-   * @example
-   * const root = postcss.parse('a { color: black }');
-   * const decl = root.first.first;
-   * decl.value //=> 'black'
-   */
+        if (!ignore && index === 0 && this.nodes.length > 1) {
+            this.nodes[1].raws.before = this.nodes[index].raws.before;
+        }
 
-  /**
-   * @memberof Declaration#
-   * @member {boolean} important - `true` if the declaration
-   *                               has an !important annotation.
-   *
-   * @example
-   * const root = postcss.parse('a { color: black !important; color: red }');
-   * root.first.first.important //=> true
-   * root.first.last.important  //=> undefined
-   */
+        return _Container.prototype.removeChild.call(this, child);
+    };
 
-  /**
-   * @memberof Declaration#
-   * @member {object} raws - Information to generate byte-to-byte equal
-   *                         node string as it was in the origin input.
-   *
-   * Every parser saves its own properties,
-   * but the default CSS parser uses:
-   *
-   * * `before`: the space symbols before the node. It also stores `*`
-   *   and `_` symbols before the declaration (IE hack).
-   * * `between`: the symbols between the property and value
-   *   for declarations.
-   * * `important`: the content of the important statement,
-   *   if it is not just `!important`.
-   *
-   * PostCSS cleans declaration from comments and extra spaces,
-   * but it stores origin content in raws properties.
-   * As such, if you don’t change a declaration’s value,
-   * PostCSS will use the raw value with comments.
-   *
-   * @example
-   * const root = postcss.parse('a {\n  color:black\n}')
-   * root.first.first.raws //=> { before: '\n  ', between: ':' }
-   */
+    Root.prototype.normalize = function normalize(child, sample, type) {
+        var nodes = _Container.prototype.normalize.call(this, child);
 
-  return Declaration;
-}(_node2.default);
+        if (sample) {
+            if (type === 'prepend') {
+                if (this.nodes.length > 1) {
+                    sample.raws.before = this.nodes[1].raws.before;
+                } else {
+                    delete sample.raws.before;
+                }
+            } else if (this.first !== sample) {
+                for (var _iterator = nodes, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+                    var _ref;
 
-exports.default = Declaration;
+                    if (_isArray) {
+                        if (_i >= _iterator.length) break;
+                        _ref = _iterator[_i++];
+                    } else {
+                        _i = _iterator.next();
+                        if (_i.done) break;
+                        _ref = _i.value;
+                    }
+
+                    var node = _ref;
+
+                    node.raws.before = sample.raws.before;
+                }
+            }
+        }
+
+        return nodes;
+    };
+
+    /**
+     * Returns a {@link Result} instance representing the root’s CSS.
+     *
+     * @param {processOptions} [opts] - options with only `to` and `map` keys
+     *
+     * @return {Result} result with current root’s CSS
+     *
+     * @example
+     * const root1 = postcss.parse(css1, { from: 'a.css' });
+     * const root2 = postcss.parse(css2, { from: 'b.css' });
+     * root1.append(root2);
+     * const result = root1.toResult({ to: 'all.css', map: true });
+     */
+
+
+    Root.prototype.toResult = function toResult() {
+        var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        var LazyResult = require(438);
+        var Processor = require(449);
+
+        var lazy = new LazyResult(new Processor(), this, opts);
+        return lazy.stringify();
+    };
+
+    /**
+     * @memberof Root#
+     * @member {object} raws - Information to generate byte-to-byte equal
+     *                         node string as it was in the origin input.
+     *
+     * Every parser saves its own properties,
+     * but the default CSS parser uses:
+     *
+     * * `after`: the space symbols after the last child to the end of file.
+     * * `semicolon`: is the last child has an (optional) semicolon.
+     *
+     * @example
+     * postcss.parse('a {}\n').raws //=> { after: '\n' }
+     * postcss.parse('a {}').raws   //=> { after: '' }
+     */
+
+    return Root;
+}(_container2.default);
+
+exports.default = Root;
 module.exports = exports['default'];
 
-}, {"432":432}];
+}, {"427":427,"438":438,"449":449}];

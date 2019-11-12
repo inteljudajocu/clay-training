@@ -1,8 +1,7 @@
-window.modules["578"] = [function(require,module,exports){/**
- * Ensure some object is a coerced to a string
- **/
-module.exports = function makeString(object) {
-  if (object == null) return '';
-  return '' + object;
+window.modules["578"] = [function(require,module,exports){module.exports = function chop(str, step) {
+  if (str == null) return [];
+  str = String(str);
+  step = ~~step;
+  return step > 0 ? str.match(new RegExp('.{1,' + step + '}', 'g')) : [str];
 };
 }, {}];

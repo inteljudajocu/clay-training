@@ -1,8 +1,9 @@
-window.modules["625"] = [function(require,module,exports){var makeString = require(578);
+window.modules["625"] = [function(require,module,exports){var makeString = require(576);
 
-module.exports = function titleize(str) {
-  return makeString(str).toLowerCase().replace(/(?:^|\s|-)\S/g, function(c) {
-    return c.toUpperCase();
-  });
+module.exports = function strRightBack(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.lastIndexOf(sep);
+  return~ pos ? str.slice(pos + sep.length, str.length) : str;
 };
-}, {"578":578}];
+}, {"576":576}];

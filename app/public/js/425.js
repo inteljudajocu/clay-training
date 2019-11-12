@@ -1,46 +1,58 @@
-window.modules["425"] = [function(require,module,exports){var resolveKeyword = require(65).keyword;
-var walkRules = require(65).walkRules;
-var translate = require(65).translate;
-var createDeclarationIndexer = require(426);
-var processSelector = require(427);
+window.modules["425"] = [function(require,module,exports){module.exports = function specificity(simpleSelector) {
+    var A = 0;
+    var B = 0;
+    var C = 0;
 
-function walk(node, markDeclaration, options) {
-    switch (node.type) {
-        case 'Rule':
-            node.block.children.each(markDeclaration);
-            processSelector(node, options.usage);
-            break;
+    simpleSelector.children.each(function walk(node) {
+        switch (node.type) {
+            case 'SelectorList':
+            case 'Selector':
+                node.children.each(walk);
+                break;
 
-        case 'Atrule':
-            if (node.prelude) {
-                node.prelude.id = null; // pre-init property to avoid multiple hidden class for translate
-                node.prelude.id = translate(node.prelude);
-            }
+            case 'IdSelector':
+                A++;
+                break;
 
-            // compare keyframe selectors by its values
-            // NOTE: still no clarification about problems with keyframes selector grouping (issue #197)
-            if (resolveKeyword(node.name).name === 'keyframes') {
-                node.block.avoidRulesMerge = true;  /* probably we don't need to prevent those merges for @keyframes
-                                                       TODO: need to be checked */
-                node.block.children.each(function(rule) {
-                    rule.prelude.children.each(function(simpleselector) {
-                        simpleselector.compareMarker = simpleselector.id;
-                    });
-                });
-            }
-            break;
-    }
-}
+            case 'ClassSelector':
+            case 'AttributeSelector':
+                B++;
+                break;
 
-module.exports = function prepare(ast, options) {
-    var markDeclaration = createDeclarationIndexer();
+            case 'PseudoClassSelector':
+                switch (node.name.toLowerCase()) {
+                    case 'not':
+                        node.children.each(walk);
+                        break;
 
-    walkRules(ast, function(node) {
-        walk(node, markDeclaration, options);
+                    case 'before':
+                    case 'after':
+                    case 'first-line':
+                    case 'first-letter':
+                        C++;
+                        break;
+
+                    // TODO: support for :nth-*(.. of <SelectorList>), :matches(), :has()
+
+                    default:
+                        B++;
+                }
+                break;
+
+            case 'PseudoElementSelector':
+                C++;
+                break;
+
+            case 'TypeSelector':
+                // ignore universal selector
+                if (node.name.charAt(node.name.length - 1) !== '*') {
+                    C++;
+                }
+                break;
+
+        }
     });
 
-    return {
-        declaration: markDeclaration
-    };
+    return [A, B, C];
 };
-}, {"65":65,"426":426,"427":427}];
+}, {}];

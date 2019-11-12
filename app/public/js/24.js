@@ -1,24 +1,20 @@
-window.modules["24"] = [function(require,module,exports){/**
- * Gets the first element of `array`.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @alias first
- * @category Array
- * @param {Array} array The array to query.
- * @returns {*} Returns the first element of `array`.
- * @example
- *
- * _.head([1, 2, 3]);
- * // => 1
- *
- * _.head([]);
- * // => undefined
- */
-function head(array) {
-  return (array && array.length) ? array[0] : undefined;
-}
+window.modules["24"] = [function(require,module,exports){'use strict';
 
-module.exports = head;
-}, {}];
+const isUriStringCheck = require(50);
+
+/**
+ * First test if argument passed in is a String. If true, get component name
+ * from uri. Otherwise throw an error.
+ * @example /_components/base  returns base
+ * @example /_components/text/instances/0  returns text
+ * @example /_components/image.html  returns image
+ * @param  {string} uri
+ * @return {string|null}
+ */
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  const result = /_components\/(.+?)[\/\.]/.exec(uri) || /_components\/(.*)/.exec(uri);
+
+  return result && result[1];
+};
+}, {"50":50}];

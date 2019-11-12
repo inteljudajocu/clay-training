@@ -1,15 +1,30 @@
-window.modules["339"] = [function(require,module,exports){var baseSetToString = require(341),
-    shortOut = require(370);
+window.modules["339"] = [function(require,module,exports){var baseGetTag = require(293),
+    isObjectLike = require(301);
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
 
 /**
- * Sets the `toString` method of `func` to return `string`.
+ * Checks if `value` is classified as a `Symbol` primitive or object.
  *
- * @private
- * @param {Function} func The function to modify.
- * @param {Function} string The `toString` result.
- * @returns {Function} Returns `func`.
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
  */
-var setToString = shortOut(baseSetToString);
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && baseGetTag(value) == symbolTag);
+}
 
-module.exports = setToString;
-}, {"341":341,"370":370}];
+module.exports = isSymbol;
+}, {"293":293,"301":301}];

@@ -1,35 +1,23 @@
-window.modules["372"] = [function(require,module,exports){var baseValues = require(346),
-    keys = require(293);
-
-/**
- * Creates an array of the own enumerable string keyed property values of `object`.
- *
- * **Note:** Non-object values are coerced to objects.
+window.modules["372"] = [function(require,module,exports){/**
+ * Checks if `value` is `undefined`.
  *
  * @static
  * @since 0.1.0
  * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property values.
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is `undefined`, else `false`.
  * @example
  *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
+ * _.isUndefined(void 0);
+ * // => true
  *
- * Foo.prototype.c = 3;
- *
- * _.values(new Foo);
- * // => [1, 2] (iteration order is not guaranteed)
- *
- * _.values('hi');
- * // => ['h', 'i']
+ * _.isUndefined(null);
+ * // => false
  */
-function values(object) {
-  return object == null ? [] : baseValues(object, keys(object));
+function isUndefined(value) {
+  return value === undefined;
 }
 
-module.exports = values;
-}, {"293":293,"346":346}];
+module.exports = isUndefined;
+}, {}];

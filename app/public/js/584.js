@@ -1,11 +1,29 @@
-window.modules["584"] = [function(require,module,exports){var makeString = require(578);
+window.modules["584"] = [function(require,module,exports){var makeString = require(576);
 
-module.exports = function(str, substr) {
-  str = makeString(str);
-  substr = makeString(substr);
-
-  if (str.length === 0 || substr.length === 0) return 0;
+function getIndent(str) {
+  var matches = str.match(/^[\s\\t]*/gm);
+  var indent = matches[0].length;
   
-  return str.split(substr).length - 1;
+  for (var i = 1; i < matches.length; i++) {
+    indent = Math.min(matches[i].length, indent);
+  }
+
+  return indent;
+}
+
+module.exports = function dedent(str, pattern) {
+  str = makeString(str);
+  var indent = getIndent(str);
+  var reg;
+
+  if (indent === 0) return str;
+
+  if (typeof pattern === 'string') {
+    reg = new RegExp('^' + pattern, 'gm');
+  } else {
+    reg = new RegExp('^[ \\t]{' + indent + '}', 'gm');
+  }
+
+  return str.replace(reg, '');
 };
-}, {"578":578}];
+}, {"576":576}];

@@ -1,43 +1,289 @@
-window.modules["91"] = [function(require,module,exports){module.exports = {
-    AnPlusB: require(103),
-    Atrule: require(104),
-    AtrulePrelude: require(105),
-    AttributeSelector: require(106),
-    Block: require(107),
-    Brackets: require(108),
-    CDC: require(109),
-    CDO: require(110),
-    ClassSelector: require(111),
-    Combinator: require(112),
-    Comment: require(113),
-    Declaration: require(114),
-    DeclarationList: require(115),
-    Dimension: require(116),
-    Function: require(117),
-    HexColor: require(118),
-    Identifier: require(120),
-    IdSelector: require(119),
-    MediaFeature: require(121),
-    MediaQuery: require(122),
-    MediaQueryList: require(123),
-    Nth: require(124),
-    Number: require(125),
-    Operator: require(126),
-    Parentheses: require(127),
-    Percentage: require(128),
-    PseudoClassSelector: require(129),
-    PseudoElementSelector: require(130),
-    Ratio: require(131),
-    Raw: require(132),
-    Rule: require(133),
-    Selector: require(134),
-    SelectorList: require(135),
-    String: require(136),
-    StyleSheet: require(137),
-    TypeSelector: require(138),
-    UnicodeRange: require(139),
-    Url: require(140),
-    Value: require(141),
-    WhiteSpace: require(142)
+window.modules["91"] = [function(require,module,exports){'use strict';
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+function walkRules(node, item, list) {
+    switch (node.type) {
+        case 'StyleSheet':
+            var oldStylesheet = this.stylesheet;
+            this.stylesheet = node;
+
+            node.children.each(walkRules, this);
+
+            this.stylesheet = oldStylesheet;
+            break;
+
+        case 'Atrule':
+            if (node.block !== null) {
+                var oldAtrule = this.atrule;
+                this.atrule = node;
+
+                walkRules.call(this, node.block);
+
+                this.atrule = oldAtrule;
+            }
+
+            this.fn(node, item, list);
+            break;
+
+        case 'Rule':
+            this.fn(node, item, list);
+
+            var oldRule = this.rule;
+            this.rule = node;
+
+            walkRules.call(this, node.block);
+
+            this.rule = oldRule;
+            break;
+
+        case 'Block':
+            var oldBlock = this.block;
+            this.block = node;
+
+            node.children.each(walkRules, this);
+
+            this.block = oldBlock;
+            break;
+    }
+}
+
+function walkRulesRight(node, item, list) {
+    switch (node.type) {
+        case 'StyleSheet':
+            var oldStylesheet = this.stylesheet;
+            this.stylesheet = node;
+
+            node.children.eachRight(walkRulesRight, this);
+
+            this.stylesheet = oldStylesheet;
+            break;
+
+        case 'Atrule':
+            if (node.block !== null) {
+                var oldAtrule = this.atrule;
+                this.atrule = node;
+
+                walkRulesRight.call(this, node.block);
+
+                this.atrule = oldAtrule;
+            }
+
+            this.fn(node, item, list);
+            break;
+
+        case 'Rule':
+            var oldRule = this.rule;
+            this.rule = node;
+
+            walkRulesRight.call(this, node.block);
+
+            this.rule = oldRule;
+
+            this.fn(node, item, list);
+            break;
+
+        case 'Block':
+            var oldBlock = this.block;
+            this.block = node;
+
+            node.children.eachRight(walkRulesRight, this);
+
+            this.block = oldBlock;
+            break;
+    }
+}
+
+function walkDeclarations(node) {
+    switch (node.type) {
+        case 'StyleSheet':
+            var oldStylesheet = this.stylesheet;
+            this.stylesheet = node;
+
+            node.children.each(walkDeclarations, this);
+
+            this.stylesheet = oldStylesheet;
+            break;
+
+        case 'Atrule':
+            if (node.block !== null) {
+                var oldAtrule = this.atrule;
+                this.atrule = node;
+
+                walkDeclarations.call(this, node.block);
+
+                this.atrule = oldAtrule;
+            }
+            break;
+
+        case 'Rule':
+            var oldRule = this.rule;
+            this.rule = node;
+
+            if (node.block !== null) {
+                walkDeclarations.call(this, node.block);
+            }
+
+            this.rule = oldRule;
+            break;
+
+        case 'Block':
+            node.children.each(function(node, item, list) {
+                if (node.type === 'Declaration') {
+                    this.fn(node, item, list);
+                } else {
+                    walkDeclarations.call(this, node);
+                }
+            }, this);
+            break;
+    }
+}
+
+function getWalkersFromStructure(name, nodeType) {
+    var structure = nodeType.structure;
+    var walkers = [];
+
+    for (var key in structure) {
+        if (hasOwnProperty.call(structure, key) === false) {
+            continue;
+        }
+
+        var fieldTypes = structure[key];
+        var walker = {
+            name: key,
+            type: false,
+            nullable: false
+        };
+
+        if (!Array.isArray(structure[key])) {
+            fieldTypes = [structure[key]];
+        }
+
+        for (var i = 0; i < fieldTypes.length; i++) {
+            var fieldType = fieldTypes[i];
+            if (fieldType === null) {
+                walker.nullable = true;
+            } else if (typeof fieldType === 'string') {
+                walker.type = 'node';
+            } else if (Array.isArray(fieldType)) {
+                walker.type = 'list';
+            }
+        }
+
+        if (walker.type) {
+            walkers.push(walker);
+        }
+    }
+
+    if (walkers.length) {
+        return {
+            context: nodeType.walkContext,
+            fields: walkers
+        };
+    }
+
+    return null;
+}
+
+function getTypesFromConfig(config) {
+    var types = {};
+
+    if (config.node) {
+        for (var name in config.node) {
+            if (hasOwnProperty.call(config.node, name)) {
+                var nodeType = config.node[name];
+
+                if (nodeType.structure) {
+                    var walkers = getWalkersFromStructure(name, nodeType);
+                    if (walkers !== null) {
+                        types[name] = walkers;
+                    }
+                } else {
+                    throw new Error('Missed `structure` field in `' + name + '` node type definition');
+                }
+            }
+        }
+    }
+
+    return types;
+}
+
+function createContext(root, fn) {
+    var context = {
+        fn: fn,
+        root: root,
+        stylesheet: null,
+        atrule: null,
+        atrulePrelude: null,
+        rule: null,
+        selector: null,
+        block: null,
+        declaration: null,
+        function: null
+    };
+
+    return context;
+}
+
+module.exports = function createWalker(config) {
+    var types = getTypesFromConfig(config);
+    var walkers = {};
+
+    for (var name in types) {
+        if (hasOwnProperty.call(types, name)) {
+            var config = types[name];
+            walkers[name] = Function('node', 'context', 'walk',
+                (config.context ? 'var old = context.' + config.context + ';\ncontext.' + config.context + ' = node;\n' : '') +
+                config.fields.map(function(field) {
+                    var line = field.type === 'list'
+                        ? 'node.' + field.name + '.each(walk);'
+                        : 'walk(node.' + field.name + ');';
+
+                    if (field.nullable) {
+                        line = 'if (node.' + field.name + ') {\n    ' + line + '}';
+                    }
+
+                    return line;
+                }).join('\n') +
+                (config.context ? '\ncontext.' + config.context + ' = old;' : '')
+            );
+        }
+    }
+
+    return {
+        walk: function(root, fn) {
+            function walk(node, item, list) {
+                fn.call(context, node, item, list);
+                if (walkers.hasOwnProperty(node.type)) {
+                    walkers[node.type](node, context, walk);
+                }
+            }
+
+            var context = createContext(root, fn);
+
+            walk(root);
+        },
+        walkUp: function(root, fn) {
+            function walk(node, item, list) {
+                if (walkers.hasOwnProperty(node.type)) {
+                    walkers[node.type](node, context, walk);
+                }
+                fn.call(context, node, item, list);
+            }
+
+            var context = createContext(root, fn);
+
+            walk(root);
+        },
+        walkRules: function(root, fn) {
+            walkRules.call(createContext(root, fn), root);
+        },
+        walkRulesRight: function(root, fn) {
+            walkRulesRight.call(createContext(root, fn), root);
+        },
+        walkDeclarations: function(root, fn) {
+            walkDeclarations.call(createContext(root, fn), root);
+        }
+    };
 };
-}, {"103":103,"104":104,"105":105,"106":106,"107":107,"108":108,"109":109,"110":110,"111":111,"112":112,"113":113,"114":114,"115":115,"116":116,"117":117,"118":118,"119":119,"120":120,"121":121,"122":122,"123":123,"124":124,"125":125,"126":126,"127":127,"128":128,"129":129,"130":130,"131":131,"132":132,"133":133,"134":134,"135":135,"136":136,"137":137,"138":138,"139":139,"140":140,"141":141,"142":142}];
+}, {}];

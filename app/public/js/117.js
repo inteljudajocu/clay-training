@@ -1,38 +1,19 @@
-window.modules["117"] = [function(require,module,exports){var TYPE = require(82).TYPE;
-var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+window.modules["117"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
 
-// <function-token> <sequence> ')'
 module.exports = {
-    name: 'Function',
+    name: 'Number',
     structure: {
-        name: String,
-        children: [[]]
+        value: String
     },
-    parse: function(readSequence, recognizer) {
-        var start = this.scanner.tokenStart;
-        var name = this.scanner.consumeFunctionName();
-        var nameLowerCase = name.toLowerCase();
-        var children;
-
-        children = recognizer.hasOwnProperty(nameLowerCase)
-            ? recognizer[nameLowerCase].call(this, recognizer)
-            : readSequence.call(this, recognizer);
-
-        this.scanner.eat(RIGHTPARENTHESIS);
-
+    parse: function() {
         return {
-            type: 'Function',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            name: name,
-            children: children
+            type: 'Number',
+            loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+            value: this.scanner.consume(NUMBER)
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.name);
-        processChunk('(');
-        this.each(processChunk, node);
-        processChunk(')');
-    },
-    walkContext: 'function'
+        processChunk(node.value);
+    }
 };
-}, {"82":82}];
+}, {"75":75}];

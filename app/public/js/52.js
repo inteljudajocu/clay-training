@@ -1,16 +1,28 @@
-window.modules["52"] = [function(require,module,exports){'use strict';
+window.modules["52"] = [function(require,module,exports){var List = require(53);
 
-const isUriStringCheck = require(58);
+module.exports = function createConvertors(walker) {
+    var walk = walker.walk;
+    var walkUp = walker.walkUp;
 
-/**
- * First test if argument is a String. If true, test if '/_lists/' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
- */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
+    return {
+        fromPlainObject: function(ast) {
+            walk(ast, function(node) {
+                if (node.children && node.children instanceof List === false) {
+                    node.children = new List().fromArray(node.children);
+                }
+            });
 
-  return uri.toLowerCase().indexOf('/_lists/') > -1;
+            return ast;
+        },
+        toPlainObject: function(ast) {
+            walkUp(ast, function(node) {
+                if (node.children && node.children instanceof List) {
+                    node.children = node.children.toArray();
+                }
+            });
+
+            return ast;
+        }
+    };
 };
-}, {"58":58}];
+}, {"53":53}];

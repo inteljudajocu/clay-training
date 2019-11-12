@@ -1,6 +1,6 @@
-window.modules["608"] = [function(require,module,exports){var chars = require(579);
+window.modules["608"] = [function(require,module,exports){var pad = require(635);
 
-module.exports = function reverse(str) {
-  return chars(str).reverse().join('');
+module.exports = function lpad(str, length, padStr) {
+  return pad(str, length, padStr);
 };
-}, {"579":579}];
+}, {"635":635}];

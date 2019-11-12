@@ -1,35 +1,50 @@
-window.modules["132"] = [function(require,module,exports){module.exports = {
-    name: 'Raw',
+window.modules["132"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+
+var STRING = TYPE.String;
+var URL = TYPE.Url;
+var RAW = TYPE.Raw;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+
+// url '(' S* (string | raw) S* ')'
+module.exports = {
+    name: 'Url',
     structure: {
-        value: String
+        value: ['String', 'Raw']
     },
-    parse: function(startToken, endTokenType1, endTokenType2, includeTokenType2, excludeWhiteSpace) {
-        var startOffset = this.scanner.getTokenStart(startToken);
-        var endOffset;
+    parse: function() {
+        var start = this.scanner.tokenStart;
+        var value;
 
-        this.scanner.skip(
-            this.scanner.getRawLength(
-                startToken,
-                endTokenType1,
-                endTokenType2,
-                includeTokenType2
-            )
-        );
+        this.scanner.eat(URL);
+        this.scanner.skipSC();
 
-        if (excludeWhiteSpace && this.scanner.tokenStart > startOffset) {
-            endOffset = this.scanner.getOffsetExcludeWS();
-        } else {
-            endOffset = this.scanner.tokenStart;
+        switch (this.scanner.tokenType) {
+            case STRING:
+                value = this.String();
+                break;
+
+            case RAW:
+                value = this.Raw(this.scanner.currentToken, 0, RAW, true, false);
+                break;
+
+            default:
+                this.scanner.error('String or Raw is expected');
         }
 
+        this.scanner.skipSC();
+        this.scanner.eat(RIGHTPARENTHESIS);
+
         return {
-            type: 'Raw',
-            loc: this.getLocation(startOffset, endOffset),
-            value: this.scanner.source.substring(startOffset, endOffset)
+            type: 'Url',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            value: value
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.value);
+        processChunk('url');
+        processChunk('(');
+        this.generate(processChunk, node.value);
+        processChunk(')');
     }
 };
-}, {}];
+}, {"75":75}];

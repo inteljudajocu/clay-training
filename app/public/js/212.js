@@ -1,1310 +1,1695 @@
-window.modules["212"] = [function(require,module,exports){/**
- * ascii-folder.js
- * https://github.com/mplatt/fold-to-ascii-js
- *
- * This is a JavaScript port of the Apache Lucene ASCII Folding Filter.
- *
- * The Apache Lucene ASCII Folding Filter is licensed to the Apache Software
- * Foundation (ASF) under one or more contributor license agreements. See the
- * NOTICE file distributed with this work for additional information regarding
- * copyright ownership. The ASF licenses this file to You under the Apache
- * License, Version 2.0 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-class ASCIIFolder {
-    /**
-     * Sanitize strings by converting alphabetic, numeric, and symbolic Unicode characters which are not contained in
-     * the first 127 ASCII characters (the "Basic Latin" Unicode block) into a ASCII equivalents.
-     *
-     * @param str The string to be sanitized
-     * @param replacement The character an unmapped character should be replaced with or null should the original
-     * character be retained
-     * @returns {string} The sanitized string
-     */
-    static fold(str = '', replacement = '') {
-        let foldedStr = '';
+window.modules["212"] = [function(require,module,exports){(function (global){
+//     Underscore.js 1.9.1
+//     http://underscorejs.org
+//     (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     Underscore may be freely distributed under the MIT license.
 
-        if (str === null)
-            return '';
-        if (typeof str === 'number')
-            return '' + str;
-        if (typeof str !== 'string')
-            throw new Error('Invalid input data type');
-        for (let character of str) {
-            if (character.charCodeAt(0) < 128) {
-                foldedStr = foldedStr.concat(character);
-            }
-            else {
-                foldedStr = foldedStr.concat(ASCIIFolder.replaceChar(character, replacement));
-            }
+(function() {
+
+  // Baseline setup
+  // --------------
+
+  // Establish the root object, `window` (`self`) in the browser, `global`
+  // on the server, or `this` in some virtual machines. We use `self`
+  // instead of `window` for `WebWorker` support.
+  var root = typeof self == 'object' && self.self === self && self ||
+            typeof global == 'object' && global.global === global && global ||
+            this ||
+            {};
+
+  // Save the previous value of the `_` variable.
+  var previousUnderscore = root._;
+
+  // Save bytes in the minified (but not gzipped) version:
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype;
+  var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
+
+  // Create quick reference variables for speed access to core prototypes.
+  var push = ArrayProto.push,
+      slice = ArrayProto.slice,
+      toString = ObjProto.toString,
+      hasOwnProperty = ObjProto.hasOwnProperty;
+
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
+  var nativeIsArray = Array.isArray,
+      nativeKeys = Object.keys,
+      nativeCreate = Object.create;
+
+  // Naked function reference for surrogate-prototype-swapping.
+  var Ctor = function(){};
+
+  // Create a safe reference to the Underscore object for use below.
+  var _ = function(obj) {
+    if (obj instanceof _) return obj;
+    if (!(this instanceof _)) return new _(obj);
+    this._wrapped = obj;
+  };
+
+  // Export the Underscore object for **Node.js**, with
+  // backwards-compatibility for their old module API. If we're in
+  // the browser, add `_` as a global object.
+  // (`nodeType` is checked to ensure that `module`
+  // and `exports` are not HTML elements.)
+  if (typeof exports != 'undefined' && !exports.nodeType) {
+    if (typeof module != 'undefined' && !module.nodeType && module.exports) {
+      exports = module.exports = _;
+    }
+    exports._ = _;
+  } else {
+    root._ = _;
+  }
+
+  // Current version.
+  _.VERSION = '1.9.1';
+
+  // Internal function that returns an efficient (for current engines) version
+  // of the passed-in callback, to be repeatedly applied in other Underscore
+  // functions.
+  var optimizeCb = function(func, context, argCount) {
+    if (context === void 0) return func;
+    switch (argCount == null ? 3 : argCount) {
+      case 1: return function(value) {
+        return func.call(context, value);
+      };
+      // The 2-argument case is omitted because we’re not using it.
+      case 3: return function(value, index, collection) {
+        return func.call(context, value, index, collection);
+      };
+      case 4: return function(accumulator, value, index, collection) {
+        return func.call(context, accumulator, value, index, collection);
+      };
+    }
+    return function() {
+      return func.apply(context, arguments);
+    };
+  };
+
+  var builtinIteratee;
+
+  // An internal function to generate callbacks that can be applied to each
+  // element in a collection, returning the desired result — either `identity`,
+  // an arbitrary callback, a property matcher, or a property accessor.
+  var cb = function(value, context, argCount) {
+    if (_.iteratee !== builtinIteratee) return _.iteratee(value, context);
+    if (value == null) return _.identity;
+    if (_.isFunction(value)) return optimizeCb(value, context, argCount);
+    if (_.isObject(value) && !_.isArray(value)) return _.matcher(value);
+    return _.property(value);
+  };
+
+  // External wrapper for our callback generator. Users may customize
+  // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
+  // This abstraction hides the internal-only argCount argument.
+  _.iteratee = builtinIteratee = function(value, context) {
+    return cb(value, context, Infinity);
+  };
+
+  // Some functions take a variable number of arguments, or a few expected
+  // arguments at the beginning and then a variable number of values to operate
+  // on. This helper accumulates all remaining arguments past the function’s
+  // argument length (or an explicit `startIndex`), into an array that becomes
+  // the last argument. Similar to ES6’s "rest parameter".
+  var restArguments = function(func, startIndex) {
+    startIndex = startIndex == null ? func.length - 1 : +startIndex;
+    return function() {
+      var length = Math.max(arguments.length - startIndex, 0),
+          rest = Array(length),
+          index = 0;
+      for (; index < length; index++) {
+        rest[index] = arguments[index + startIndex];
+      }
+      switch (startIndex) {
+        case 0: return func.call(this, rest);
+        case 1: return func.call(this, arguments[0], rest);
+        case 2: return func.call(this, arguments[0], arguments[1], rest);
+      }
+      var args = Array(startIndex + 1);
+      for (index = 0; index < startIndex; index++) {
+        args[index] = arguments[index];
+      }
+      args[startIndex] = rest;
+      return func.apply(this, args);
+    };
+  };
+
+  // An internal function for creating a new object that inherits from another.
+  var baseCreate = function(prototype) {
+    if (!_.isObject(prototype)) return {};
+    if (nativeCreate) return nativeCreate(prototype);
+    Ctor.prototype = prototype;
+    var result = new Ctor;
+    Ctor.prototype = null;
+    return result;
+  };
+
+  var shallowProperty = function(key) {
+    return function(obj) {
+      return obj == null ? void 0 : obj[key];
+    };
+  };
+
+  var has = function(obj, path) {
+    return obj != null && hasOwnProperty.call(obj, path);
+  }
+
+  var deepGet = function(obj, path) {
+    var length = path.length;
+    for (var i = 0; i < length; i++) {
+      if (obj == null) return void 0;
+      obj = obj[path[i]];
+    }
+    return length ? obj : void 0;
+  };
+
+  // Helper for collection methods to determine whether a collection
+  // should be iterated as an array or as an object.
+  // Related: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
+  // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
+  var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
+  var getLength = shallowProperty('length');
+  var isArrayLike = function(collection) {
+    var length = getLength(collection);
+    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
+  };
+
+  // Collection Functions
+  // --------------------
+
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles raw objects in addition to array-likes. Treats all
+  // sparse array-likes as if they were dense.
+  _.each = _.forEach = function(obj, iteratee, context) {
+    iteratee = optimizeCb(iteratee, context);
+    var i, length;
+    if (isArrayLike(obj)) {
+      for (i = 0, length = obj.length; i < length; i++) {
+        iteratee(obj[i], i, obj);
+      }
+    } else {
+      var keys = _.keys(obj);
+      for (i = 0, length = keys.length; i < length; i++) {
+        iteratee(obj[keys[i]], keys[i], obj);
+      }
+    }
+    return obj;
+  };
+
+  // Return the results of applying the iteratee to each element.
+  _.map = _.collect = function(obj, iteratee, context) {
+    iteratee = cb(iteratee, context);
+    var keys = !isArrayLike(obj) && _.keys(obj),
+        length = (keys || obj).length,
+        results = Array(length);
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
+      results[index] = iteratee(obj[currentKey], currentKey, obj);
+    }
+    return results;
+  };
+
+  // Create a reducing function iterating left or right.
+  var createReduce = function(dir) {
+    // Wrap code that reassigns argument variables in a separate function than
+    // the one that accesses `arguments.length` to avoid a perf hit. (#1991)
+    var reducer = function(obj, iteratee, memo, initial) {
+      var keys = !isArrayLike(obj) && _.keys(obj),
+          length = (keys || obj).length,
+          index = dir > 0 ? 0 : length - 1;
+      if (!initial) {
+        memo = obj[keys ? keys[index] : index];
+        index += dir;
+      }
+      for (; index >= 0 && index < length; index += dir) {
+        var currentKey = keys ? keys[index] : index;
+        memo = iteratee(memo, obj[currentKey], currentKey, obj);
+      }
+      return memo;
+    };
+
+    return function(obj, iteratee, memo, context) {
+      var initial = arguments.length >= 3;
+      return reducer(obj, optimizeCb(iteratee, context, 4), memo, initial);
+    };
+  };
+
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`.
+  _.reduce = _.foldl = _.inject = createReduce(1);
+
+  // The right-associative version of reduce, also known as `foldr`.
+  _.reduceRight = _.foldr = createReduce(-1);
+
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, predicate, context) {
+    var keyFinder = isArrayLike(obj) ? _.findIndex : _.findKey;
+    var key = keyFinder(obj, predicate, context);
+    if (key !== void 0 && key !== -1) return obj[key];
+  };
+
+  // Return all the elements that pass a truth test.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, predicate, context) {
+    var results = [];
+    predicate = cb(predicate, context);
+    _.each(obj, function(value, index, list) {
+      if (predicate(value, index, list)) results.push(value);
+    });
+    return results;
+  };
+
+  // Return all the elements for which a truth test fails.
+  _.reject = function(obj, predicate, context) {
+    return _.filter(obj, _.negate(cb(predicate)), context);
+  };
+
+  // Determine whether all of the elements match a truth test.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, predicate, context) {
+    predicate = cb(predicate, context);
+    var keys = !isArrayLike(obj) && _.keys(obj),
+        length = (keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
+      if (!predicate(obj[currentKey], currentKey, obj)) return false;
+    }
+    return true;
+  };
+
+  // Determine if at least one element in the object matches a truth test.
+  // Aliased as `any`.
+  _.some = _.any = function(obj, predicate, context) {
+    predicate = cb(predicate, context);
+    var keys = !isArrayLike(obj) && _.keys(obj),
+        length = (keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
+      if (predicate(obj[currentKey], currentKey, obj)) return true;
+    }
+    return false;
+  };
+
+  // Determine if the array or object contains a given item (using `===`).
+  // Aliased as `includes` and `include`.
+  _.contains = _.includes = _.include = function(obj, item, fromIndex, guard) {
+    if (!isArrayLike(obj)) obj = _.values(obj);
+    if (typeof fromIndex != 'number' || guard) fromIndex = 0;
+    return _.indexOf(obj, item, fromIndex) >= 0;
+  };
+
+  // Invoke a method (with arguments) on every item in a collection.
+  _.invoke = restArguments(function(obj, path, args) {
+    var contextPath, func;
+    if (_.isFunction(path)) {
+      func = path;
+    } else if (_.isArray(path)) {
+      contextPath = path.slice(0, -1);
+      path = path[path.length - 1];
+    }
+    return _.map(obj, function(context) {
+      var method = func;
+      if (!method) {
+        if (contextPath && contextPath.length) {
+          context = deepGet(context, contextPath);
         }
-        return foldedStr;
-    }
-    /**
-     * Replaces a single character
-     *
-     * @param char The character to replace
-     * @param replacement What string unmapped characters should be replaced with
-     * @returns {string} A string representing the replacement of the character
-     */
-    static replaceChar(char, replacement) {
-        let ascii = ASCIIFolder.mapping.get(char.charCodeAt(0));
-        return ascii ? ascii : replacement;
-    }
-}
+        if (context == null) return void 0;
+        method = context[path];
+      }
+      return method == null ? method : method.apply(context, args);
+    });
+  });
 
-ASCIIFolder.mapping = new Map([
-    [0xC0, 'A'],
-    [0xC1, 'A'],
-    [0xC2, 'A'],
-    [0xC3, 'A'],
-    [0xC4, 'A'],
-    [0xC5, 'A'],
-    [0x100, 'A'],
-    [0x102, 'A'],
-    [0x104, 'A'],
-    [0x18F, 'A'],
-    [0x1CD, 'A'],
-    [0x1DE, 'A'],
-    [0x1E0, 'A'],
-    [0x1FA, 'A'],
-    [0x200, 'A'],
-    [0x202, 'A'],
-    [0x226, 'A'],
-    [0x23A, 'A'],
-    [0x1D00, 'A'],
-    [0x1E00, 'A'],
-    [0x1EA0, 'A'],
-    [0x1EA2, 'A'],
-    [0x1EA4, 'A'],
-    [0x1EA6, 'A'],
-    [0x1EA8, 'A'],
-    [0x1EAA, 'A'],
-    [0x1EAC, 'A'],
-    [0x1EAE, 'A'],
-    [0x1EB0, 'A'],
-    [0x1EB2, 'A'],
-    [0x1EB4, 'A'],
-    [0x1EB6, 'A'],
-    [0x24B6, 'A'],
-    [0xFF21, 'A'],
-    [0xE0, 'a'],
-    [0xE1, 'a'],
-    [0xE2, 'a'],
-    [0xE3, 'a'],
-    [0xE4, 'a'],
-    [0xE5, 'a'],
-    [0x101, 'a'],
-    [0x103, 'a'],
-    [0x105, 'a'],
-    [0x1CE, 'a'],
-    [0x1DF, 'a'],
-    [0x1E1, 'a'],
-    [0x1FB, 'a'],
-    [0x201, 'a'],
-    [0x203, 'a'],
-    [0x227, 'a'],
-    [0x250, 'a'],
-    [0x259, 'a'],
-    [0x25A, 'a'],
-    [0x1D8F, 'a'],
-    [0x1D95, 'a'],
-    [0x1E01, 'a'],
-    [0x1E9A, 'a'],
-    [0x1EA1, 'a'],
-    [0x1EA3, 'a'],
-    [0x1EA5, 'a'],
-    [0x1EA7, 'a'],
-    [0x1EA9, 'a'],
-    [0x1EAB, 'a'],
-    [0x1EAD, 'a'],
-    [0x1EAF, 'a'],
-    [0x1EB1, 'a'],
-    [0x1EB3, 'a'],
-    [0x1EB5, 'a'],
-    [0x1EB7, 'a'],
-    [0x2090, 'a'],
-    [0x2094, 'a'],
-    [0x24D0, 'a'],
-    [0x2C65, 'a'],
-    [0x2C6F, 'a'],
-    [0xFF41, 'a'],
-    [0xA732, 'AA'],
-    [0xC6, 'AE'],
-    [0x1E2, 'AE'],
-    [0x1FC, 'AE'],
-    [0x1D01, 'AE'],
-    [0xA734, 'AO'],
-    [0xA736, 'AU'],
-    [0xA738, 'AV'],
-    [0xA73A, 'AV'],
-    [0xA73C, 'AY'],
-    [0x249C, '(a)'],
-    [0xA733, 'aa'],
-    [0xE6, 'ae'],
-    [0x1E3, 'ae'],
-    [0x1FD, 'ae'],
-    [0x1D02, 'ae'],
-    [0xA735, 'ao'],
-    [0xA737, 'au'],
-    [0xA739, 'av'],
-    [0xA73B, 'av'],
-    [0xA73D, 'ay'],
-    [0x181, 'B'],
-    [0x182, 'B'],
-    [0x243, 'B'],
-    [0x299, 'B'],
-    [0x1D03, 'B'],
-    [0x1E02, 'B'],
-    [0x1E04, 'B'],
-    [0x1E06, 'B'],
-    [0x24B7, 'B'],
-    [0xFF22, 'B'],
-    [0x180, 'b'],
-    [0x183, 'b'],
-    [0x253, 'b'],
-    [0x1D6C, 'b'],
-    [0x1D80, 'b'],
-    [0x1E03, 'b'],
-    [0x1E05, 'b'],
-    [0x1E07, 'b'],
-    [0x24D1, 'b'],
-    [0xFF42, 'b'],
-    [0x249D, '(b)'],
-    [0xC7, 'C'],
-    [0x106, 'C'],
-    [0x108, 'C'],
-    [0x10A, 'C'],
-    [0x10C, 'C'],
-    [0x187, 'C'],
-    [0x23B, 'C'],
-    [0x297, 'C'],
-    [0x1D04, 'C'],
-    [0x1E08, 'C'],
-    [0x24B8, 'C'],
-    [0xFF23, 'C'],
-    [0xE7, 'c'],
-    [0x107, 'c'],
-    [0x109, 'c'],
-    [0x10B, 'c'],
-    [0x10D, 'c'],
-    [0x188, 'c'],
-    [0x23C, 'c'],
-    [0x255, 'c'],
-    [0x1E09, 'c'],
-    [0x2184, 'c'],
-    [0x24D2, 'c'],
-    [0xA73E, 'c'],
-    [0xA73F, 'c'],
-    [0xFF43, 'c'],
-    [0x249E, '(c)'],
-    [0xD0, 'D'],
-    [0x10E, 'D'],
-    [0x110, 'D'],
-    [0x189, 'D'],
-    [0x18A, 'D'],
-    [0x18B, 'D'],
-    [0x1D05, 'D'],
-    [0x1D06, 'D'],
-    [0x1E0A, 'D'],
-    [0x1E0C, 'D'],
-    [0x1E0E, 'D'],
-    [0x1E10, 'D'],
-    [0x1E12, 'D'],
-    [0x24B9, 'D'],
-    [0xA779, 'D'],
-    [0xFF24, 'D'],
-    [0xF0, 'd'],
-    [0x10F, 'd'],
-    [0x111, 'd'],
-    [0x18C, 'd'],
-    [0x221, 'd'],
-    [0x256, 'd'],
-    [0x257, 'd'],
-    [0x1D6D, 'd'],
-    [0x1D81, 'd'],
-    [0x1D91, 'd'],
-    [0x1E0B, 'd'],
-    [0x1E0D, 'd'],
-    [0x1E0F, 'd'],
-    [0x1E11, 'd'],
-    [0x1E13, 'd'],
-    [0x24D3, 'd'],
-    [0xA77A, 'd'],
-    [0xFF44, 'd'],
-    [0x1C4, 'DZ'],
-    [0x1F1, 'DZ'],
-    [0x1C5, 'Dz'],
-    [0x1F2, 'Dz'],
-    [0x249F, '(d)'],
-    [0x238, 'db'],
-    [0x1C6, 'dz'],
-    [0x1F3, 'dz'],
-    [0x2A3, 'dz'],
-    [0x2A5, 'dz'],
-    [0xC8, 'E'],
-    [0xC9, 'E'],
-    [0xCA, 'E'],
-    [0xCB, 'E'],
-    [0x112, 'E'],
-    [0x114, 'E'],
-    [0x116, 'E'],
-    [0x118, 'E'],
-    [0x11A, 'E'],
-    [0x18E, 'E'],
-    [0x190, 'E'],
-    [0x204, 'E'],
-    [0x206, 'E'],
-    [0x228, 'E'],
-    [0x246, 'E'],
-    [0x1D07, 'E'],
-    [0x1E14, 'E'],
-    [0x1E16, 'E'],
-    [0x1E18, 'E'],
-    [0x1E1A, 'E'],
-    [0x1E1C, 'E'],
-    [0x1EB8, 'E'],
-    [0x1EBA, 'E'],
-    [0x1EBC, 'E'],
-    [0x1EBE, 'E'],
-    [0x1EC0, 'E'],
-    [0x1EC2, 'E'],
-    [0x1EC4, 'E'],
-    [0x1EC6, 'E'],
-    [0x24BA, 'E'],
-    [0x2C7B, 'E'],
-    [0xFF25, 'E'],
-    [0xE8, 'e'],
-    [0xE9, 'e'],
-    [0xEA, 'e'],
-    [0xEB, 'e'],
-    [0x113, 'e'],
-    [0x115, 'e'],
-    [0x117, 'e'],
-    [0x119, 'e'],
-    [0x11B, 'e'],
-    [0x1DD, 'e'],
-    [0x205, 'e'],
-    [0x207, 'e'],
-    [0x229, 'e'],
-    [0x247, 'e'],
-    [0x258, 'e'],
-    [0x25B, 'e'],
-    [0x25C, 'e'],
-    [0x25D, 'e'],
-    [0x25E, 'e'],
-    [0x29A, 'e'],
-    [0x1D08, 'e'],
-    [0x1D92, 'e'],
-    [0x1D93, 'e'],
-    [0x1D94, 'e'],
-    [0x1E15, 'e'],
-    [0x1E17, 'e'],
-    [0x1E19, 'e'],
-    [0x1E1B, 'e'],
-    [0x1E1D, 'e'],
-    [0x1EB9, 'e'],
-    [0x1EBB, 'e'],
-    [0x1EBD, 'e'],
-    [0x1EBF, 'e'],
-    [0x1EC1, 'e'],
-    [0x1EC3, 'e'],
-    [0x1EC5, 'e'],
-    [0x1EC7, 'e'],
-    [0x2091, 'e'],
-    [0x24D4, 'e'],
-    [0x2C78, 'e'],
-    [0xFF45, 'e'],
-    [0x24A0, '(e)'],
-    [0x191, 'F'],
-    [0x1E1E, 'F'],
-    [0x24BB, 'F'],
-    [0xA730, 'F'],
-    [0xA77B, 'F'],
-    [0xA7FB, 'F'],
-    [0xFF26, 'F'],
-    [0x192, 'f'],
-    [0x1D6E, 'f'],
-    [0x1D82, 'f'],
-    [0x1E1F, 'f'],
-    [0x1E9B, 'f'],
-    [0x24D5, 'f'],
-    [0xA77C, 'f'],
-    [0xFF46, 'f'],
-    [0x24A1, '(f)'],
-    [0xFB00, 'ff'],
-    [0xFB03, 'ffi'],
-    [0xFB04, 'ffl'],
-    [0xFB01, 'fi'],
-    [0xFB02, 'fl'],
-    [0x11C, 'G'],
-    [0x11E, 'G'],
-    [0x120, 'G'],
-    [0x122, 'G'],
-    [0x193, 'G'],
-    [0x1E4, 'G'],
-    [0x1E5, 'G'],
-    [0x1E6, 'G'],
-    [0x1E7, 'G'],
-    [0x1F4, 'G'],
-    [0x262, 'G'],
-    [0x29B, 'G'],
-    [0x1E20, 'G'],
-    [0x24BC, 'G'],
-    [0xA77D, 'G'],
-    [0xA77E, 'G'],
-    [0xFF27, 'G'],
-    [0x11D, 'g'],
-    [0x11F, 'g'],
-    [0x121, 'g'],
-    [0x123, 'g'],
-    [0x1F5, 'g'],
-    [0x260, 'g'],
-    [0x261, 'g'],
-    [0x1D77, 'g'],
-    [0x1D79, 'g'],
-    [0x1D83, 'g'],
-    [0x1E21, 'g'],
-    [0x24D6, 'g'],
-    [0xA77F, 'g'],
-    [0xFF47, 'g'],
-    [0x24A2, '(g)'],
-    [0x124, 'H'],
-    [0x126, 'H'],
-    [0x21E, 'H'],
-    [0x29C, 'H'],
-    [0x1E22, 'H'],
-    [0x1E24, 'H'],
-    [0x1E26, 'H'],
-    [0x1E28, 'H'],
-    [0x1E2A, 'H'],
-    [0x24BD, 'H'],
-    [0x2C67, 'H'],
-    [0x2C75, 'H'],
-    [0xFF28, 'H'],
-    [0x125, 'h'],
-    [0x127, 'h'],
-    [0x21F, 'h'],
-    [0x265, 'h'],
-    [0x266, 'h'],
-    [0x2AE, 'h'],
-    [0x2AF, 'h'],
-    [0x1E23, 'h'],
-    [0x1E25, 'h'],
-    [0x1E27, 'h'],
-    [0x1E29, 'h'],
-    [0x1E2B, 'h'],
-    [0x1E96, 'h'],
-    [0x24D7, 'h'],
-    [0x2C68, 'h'],
-    [0x2C76, 'h'],
-    [0xFF48, 'h'],
-    [0x1F6, 'HV'],
-    [0x24A3, '(h)'],
-    [0x195, 'hv'],
-    [0xCC, 'I'],
-    [0xCD, 'I'],
-    [0xCE, 'I'],
-    [0xCF, 'I'],
-    [0x128, 'I'],
-    [0x12A, 'I'],
-    [0x12C, 'I'],
-    [0x12E, 'I'],
-    [0x130, 'I'],
-    [0x196, 'I'],
-    [0x197, 'I'],
-    [0x1CF, 'I'],
-    [0x208, 'I'],
-    [0x20A, 'I'],
-    [0x26A, 'I'],
-    [0x1D7B, 'I'],
-    [0x1E2C, 'I'],
-    [0x1E2E, 'I'],
-    [0x1EC8, 'I'],
-    [0x1ECA, 'I'],
-    [0x24BE, 'I'],
-    [0xA7FE, 'I'],
-    [0xFF29, 'I'],
-    [0xEC, 'i'],
-    [0xED, 'i'],
-    [0xEE, 'i'],
-    [0xEF, 'i'],
-    [0x129, 'i'],
-    [0x12B, 'i'],
-    [0x12D, 'i'],
-    [0x12F, 'i'],
-    [0x131, 'i'],
-    [0x1D0, 'i'],
-    [0x209, 'i'],
-    [0x20B, 'i'],
-    [0x268, 'i'],
-    [0x1D09, 'i'],
-    [0x1D62, 'i'],
-    [0x1D7C, 'i'],
-    [0x1D96, 'i'],
-    [0x1E2D, 'i'],
-    [0x1E2F, 'i'],
-    [0x1EC9, 'i'],
-    [0x1ECB, 'i'],
-    [0x2071, 'i'],
-    [0x24D8, 'i'],
-    [0xFF49, 'i'],
-    [0x132, 'IJ'],
-    [0x24A4, '(i)'],
-    [0x133, 'ij'],
-    [0x134, 'J'],
-    [0x248, 'J'],
-    [0x1D0A, 'J'],
-    [0x24BF, 'J'],
-    [0xFF2A, 'J'],
-    [0x135, 'j'],
-    [0x1F0, 'j'],
-    [0x237, 'j'],
-    [0x249, 'j'],
-    [0x25F, 'j'],
-    [0x284, 'j'],
-    [0x29D, 'j'],
-    [0x24D9, 'j'],
-    [0x2C7C, 'j'],
-    [0xFF4A, 'j'],
-    [0x24A5, '(j)'],
-    [0x136, 'K'],
-    [0x198, 'K'],
-    [0x1E8, 'K'],
-    [0x1D0B, 'K'],
-    [0x1E30, 'K'],
-    [0x1E32, 'K'],
-    [0x1E34, 'K'],
-    [0x24C0, 'K'],
-    [0x2C69, 'K'],
-    [0xA740, 'K'],
-    [0xA742, 'K'],
-    [0xA744, 'K'],
-    [0xFF2B, 'K'],
-    [0x137, 'k'],
-    [0x199, 'k'],
-    [0x1E9, 'k'],
-    [0x29E, 'k'],
-    [0x1D84, 'k'],
-    [0x1E31, 'k'],
-    [0x1E33, 'k'],
-    [0x1E35, 'k'],
-    [0x24DA, 'k'],
-    [0x2C6A, 'k'],
-    [0xA741, 'k'],
-    [0xA743, 'k'],
-    [0xA745, 'k'],
-    [0xFF4B, 'k'],
-    [0x24A6, '(k)'],
-    [0x139, 'L'],
-    [0x13B, 'L'],
-    [0x13D, 'L'],
-    [0x13F, 'L'],
-    [0x141, 'L'],
-    [0x23D, 'L'],
-    [0x29F, 'L'],
-    [0x1D0C, 'L'],
-    [0x1E36, 'L'],
-    [0x1E38, 'L'],
-    [0x1E3A, 'L'],
-    [0x1E3C, 'L'],
-    [0x24C1, 'L'],
-    [0x2C60, 'L'],
-    [0x2C62, 'L'],
-    [0xA746, 'L'],
-    [0xA748, 'L'],
-    [0xA780, 'L'],
-    [0xFF2C, 'L'],
-    [0x13A, 'l'],
-    [0x13C, 'l'],
-    [0x13E, 'l'],
-    [0x140, 'l'],
-    [0x142, 'l'],
-    [0x19A, 'l'],
-    [0x234, 'l'],
-    [0x26B, 'l'],
-    [0x26C, 'l'],
-    [0x26D, 'l'],
-    [0x1D85, 'l'],
-    [0x1E37, 'l'],
-    [0x1E39, 'l'],
-    [0x1E3B, 'l'],
-    [0x1E3D, 'l'],
-    [0x24DB, 'l'],
-    [0x2C61, 'l'],
-    [0xA747, 'l'],
-    [0xA749, 'l'],
-    [0xA781, 'l'],
-    [0xFF4C, 'l'],
-    [0x1C7, 'LJ'],
-    [0x1EFA, 'LL'],
-    [0x1C8, 'Lj'],
-    [0x24A7, '(l)'],
-    [0x1C9, 'lj'],
-    [0x1EFB, 'll'],
-    [0x2AA, 'ls'],
-    [0x2AB, 'lz'],
-    [0x19C, 'M'],
-    [0x1D0D, 'M'],
-    [0x1E3E, 'M'],
-    [0x1E40, 'M'],
-    [0x1E42, 'M'],
-    [0x24C2, 'M'],
-    [0x2C6E, 'M'],
-    [0xA7FD, 'M'],
-    [0xA7FF, 'M'],
-    [0xFF2D, 'M'],
-    [0x26F, 'm'],
-    [0x270, 'm'],
-    [0x271, 'm'],
-    [0x1D6F, 'm'],
-    [0x1D86, 'm'],
-    [0x1E3F, 'm'],
-    [0x1E41, 'm'],
-    [0x1E43, 'm'],
-    [0x24DC, 'm'],
-    [0xFF4D, 'm'],
-    [0x24A8, '(m)'],
-    [0xD1, 'N'],
-    [0x143, 'N'],
-    [0x145, 'N'],
-    [0x147, 'N'],
-    [0x14A, 'N'],
-    [0x19D, 'N'],
-    [0x1F8, 'N'],
-    [0x220, 'N'],
-    [0x274, 'N'],
-    [0x1D0E, 'N'],
-    [0x1E44, 'N'],
-    [0x1E46, 'N'],
-    [0x1E48, 'N'],
-    [0x1E4A, 'N'],
-    [0x24C3, 'N'],
-    [0xFF2E, 'N'],
-    [0xF1, 'n'],
-    [0x144, 'n'],
-    [0x146, 'n'],
-    [0x148, 'n'],
-    [0x149, 'n'],
-    [0x14B, 'n'],
-    [0x19E, 'n'],
-    [0x1F9, 'n'],
-    [0x235, 'n'],
-    [0x272, 'n'],
-    [0x273, 'n'],
-    [0x1D70, 'n'],
-    [0x1D87, 'n'],
-    [0x1E45, 'n'],
-    [0x1E47, 'n'],
-    [0x1E49, 'n'],
-    [0x1E4B, 'n'],
-    [0x207F, 'n'],
-    [0x24DD, 'n'],
-    [0xFF4E, 'n'],
-    [0x1CA, 'NJ'],
-    [0x1CB, 'Nj'],
-    [0x24A9, '(n)'],
-    [0x1CC, 'nj'],
-    [0xD2, 'O'],
-    [0xD3, 'O'],
-    [0xD4, 'O'],
-    [0xD5, 'O'],
-    [0xD6, 'O'],
-    [0xD8, 'O'],
-    [0x14C, 'O'],
-    [0x14E, 'O'],
-    [0x150, 'O'],
-    [0x186, 'O'],
-    [0x19F, 'O'],
-    [0x1A0, 'O'],
-    [0x1D1, 'O'],
-    [0x1EA, 'O'],
-    [0x1EC, 'O'],
-    [0x1FE, 'O'],
-    [0x20C, 'O'],
-    [0x20E, 'O'],
-    [0x22A, 'O'],
-    [0x22C, 'O'],
-    [0x22E, 'O'],
-    [0x230, 'O'],
-    [0x1D0F, 'O'],
-    [0x1D10, 'O'],
-    [0x1E4C, 'O'],
-    [0x1E4E, 'O'],
-    [0x1E50, 'O'],
-    [0x1E52, 'O'],
-    [0x1ECC, 'O'],
-    [0x1ECE, 'O'],
-    [0x1ED0, 'O'],
-    [0x1ED2, 'O'],
-    [0x1ED4, 'O'],
-    [0x1ED6, 'O'],
-    [0x1ED8, 'O'],
-    [0x1EDA, 'O'],
-    [0x1EDC, 'O'],
-    [0x1EDE, 'O'],
-    [0x1EE0, 'O'],
-    [0x1EE2, 'O'],
-    [0x24C4, 'O'],
-    [0xA74A, 'O'],
-    [0xA74C, 'O'],
-    [0xFF2F, 'O'],
-    [0xF2, 'o'],
-    [0xF3, 'o'],
-    [0xF4, 'o'],
-    [0xF5, 'o'],
-    [0xF6, 'o'],
-    [0xF8, 'o'],
-    [0x14D, 'o'],
-    [0x14F, 'o'],
-    [0x151, 'o'],
-    [0x1A1, 'o'],
-    [0x1D2, 'o'],
-    [0x1EB, 'o'],
-    [0x1ED, 'o'],
-    [0x1FF, 'o'],
-    [0x20D, 'o'],
-    [0x20F, 'o'],
-    [0x22B, 'o'],
-    [0x22D, 'o'],
-    [0x22F, 'o'],
-    [0x231, 'o'],
-    [0x254, 'o'],
-    [0x275, 'o'],
-    [0x1D16, 'o'],
-    [0x1D17, 'o'],
-    [0x1D97, 'o'],
-    [0x1E4D, 'o'],
-    [0x1E4F, 'o'],
-    [0x1E51, 'o'],
-    [0x1E53, 'o'],
-    [0x1ECD, 'o'],
-    [0x1ECF, 'o'],
-    [0x1ED1, 'o'],
-    [0x1ED3, 'o'],
-    [0x1ED5, 'o'],
-    [0x1ED7, 'o'],
-    [0x1ED9, 'o'],
-    [0x1EDB, 'o'],
-    [0x1EDD, 'o'],
-    [0x1EDF, 'o'],
-    [0x1EE1, 'o'],
-    [0x1EE3, 'o'],
-    [0x2092, 'o'],
-    [0x24DE, 'o'],
-    [0x2C7A, 'o'],
-    [0xA74B, 'o'],
-    [0xA74D, 'o'],
-    [0xFF4F, 'o'],
-    [0x152, 'OE'],
-    [0x276, 'OE'],
-    [0xA74E, 'OO'],
-    [0x222, 'OU'],
-    [0x1D15, 'OU'],
-    [0x24AA, '(o)'],
-    [0x153, 'oe'],
-    [0x1D14, 'oe'],
-    [0xA74F, 'oo'],
-    [0x223, 'ou'],
-    [0x1A4, 'P'],
-    [0x1D18, 'P'],
-    [0x1E54, 'P'],
-    [0x1E56, 'P'],
-    [0x24C5, 'P'],
-    [0x2C63, 'P'],
-    [0xA750, 'P'],
-    [0xA752, 'P'],
-    [0xA754, 'P'],
-    [0xFF30, 'P'],
-    [0x1A5, 'p'],
-    [0x1D71, 'p'],
-    [0x1D7D, 'p'],
-    [0x1D88, 'p'],
-    [0x1E55, 'p'],
-    [0x1E57, 'p'],
-    [0x24DF, 'p'],
-    [0xA751, 'p'],
-    [0xA753, 'p'],
-    [0xA755, 'p'],
-    [0xA7FC, 'p'],
-    [0xFF50, 'p'],
-    [0x24AB, '(p)'],
-    [0x24A, 'Q'],
-    [0x24C6, 'Q'],
-    [0xA756, 'Q'],
-    [0xA758, 'Q'],
-    [0xFF31, 'Q'],
-    [0x138, 'q'],
-    [0x24B, 'q'],
-    [0x2A0, 'q'],
-    [0x24E0, 'q'],
-    [0xA757, 'q'],
-    [0xA759, 'q'],
-    [0xFF51, 'q'],
-    [0x24AC, '(q)'],
-    [0x239, 'qp'],
-    [0x154, 'R'],
-    [0x156, 'R'],
-    [0x158, 'R'],
-    [0x210, 'R'],
-    [0x212, 'R'],
-    [0x24C, 'R'],
-    [0x280, 'R'],
-    [0x281, 'R'],
-    [0x1D19, 'R'],
-    [0x1D1A, 'R'],
-    [0x1E58, 'R'],
-    [0x1E5A, 'R'],
-    [0x1E5C, 'R'],
-    [0x1E5E, 'R'],
-    [0x24C7, 'R'],
-    [0x2C64, 'R'],
-    [0xA75A, 'R'],
-    [0xA782, 'R'],
-    [0xFF32, 'R'],
-    [0x155, 'r'],
-    [0x157, 'r'],
-    [0x159, 'r'],
-    [0x211, 'r'],
-    [0x213, 'r'],
-    [0x24D, 'r'],
-    [0x27C, 'r'],
-    [0x27D, 'r'],
-    [0x27E, 'r'],
-    [0x27F, 'r'],
-    [0x1D63, 'r'],
-    [0x1D72, 'r'],
-    [0x1D73, 'r'],
-    [0x1D89, 'r'],
-    [0x1E59, 'r'],
-    [0x1E5B, 'r'],
-    [0x1E5D, 'r'],
-    [0x1E5F, 'r'],
-    [0x24E1, 'r'],
-    [0xA75B, 'r'],
-    [0xA783, 'r'],
-    [0xFF52, 'r'],
-    [0x24AD, '(r)'],
-    [0x15A, 'S'],
-    [0x15C, 'S'],
-    [0x15E, 'S'],
-    [0x160, 'S'],
-    [0x218, 'S'],
-    [0x1E60, 'S'],
-    [0x1E62, 'S'],
-    [0x1E64, 'S'],
-    [0x1E66, 'S'],
-    [0x1E68, 'S'],
-    [0x24C8, 'S'],
-    [0xA731, 'S'],
-    [0xA785, 'S'],
-    [0xFF33, 'S'],
-    [0x15B, 's'],
-    [0x15D, 's'],
-    [0x15F, 's'],
-    [0x161, 's'],
-    [0x17F, 's'],
-    [0x219, 's'],
-    [0x23F, 's'],
-    [0x282, 's'],
-    [0x1D74, 's'],
-    [0x1D8A, 's'],
-    [0x1E61, 's'],
-    [0x1E63, 's'],
-    [0x1E65, 's'],
-    [0x1E67, 's'],
-    [0x1E69, 's'],
-    [0x1E9C, 's'],
-    [0x1E9D, 's'],
-    [0x24E2, 's'],
-    [0xA784, 's'],
-    [0xFF53, 's'],
-    [0x1E9E, 'SS'],
-    [0x24AE, '(s)'],
-    [0xDF, 'ss'],
-    [0xFB06, 'st'],
-    [0x162, 'T'],
-    [0x164, 'T'],
-    [0x166, 'T'],
-    [0x1AC, 'T'],
-    [0x1AE, 'T'],
-    [0x21A, 'T'],
-    [0x23E, 'T'],
-    [0x1D1B, 'T'],
-    [0x1E6A, 'T'],
-    [0x1E6C, 'T'],
-    [0x1E6E, 'T'],
-    [0x1E70, 'T'],
-    [0x24C9, 'T'],
-    [0xA786, 'T'],
-    [0xFF34, 'T'],
-    [0x163, 't'],
-    [0x165, 't'],
-    [0x167, 't'],
-    [0x1AB, 't'],
-    [0x1AD, 't'],
-    [0x21B, 't'],
-    [0x236, 't'],
-    [0x287, 't'],
-    [0x288, 't'],
-    [0x1D75, 't'],
-    [0x1E6B, 't'],
-    [0x1E6D, 't'],
-    [0x1E6F, 't'],
-    [0x1E71, 't'],
-    [0x1E97, 't'],
-    [0x24E3, 't'],
-    [0x2C66, 't'],
-    [0xFF54, 't'],
-    [0xDE, 'TH'],
-    [0xA766, 'TH'],
-    [0xA728, 'TZ'],
-    [0x24AF, '(t)'],
-    [0x2A8, 'tc'],
-    [0xFE, 'th'],
-    [0x1D7A, 'th'],
-    [0xA767, 'th'],
-    [0x2A6, 'ts'],
-    [0xA729, 'tz'],
-    [0xD9, 'U'],
-    [0xDA, 'U'],
-    [0xDB, 'U'],
-    [0xDC, 'U'],
-    [0x168, 'U'],
-    [0x16A, 'U'],
-    [0x16C, 'U'],
-    [0x16E, 'U'],
-    [0x170, 'U'],
-    [0x172, 'U'],
-    [0x1AF, 'U'],
-    [0x1D3, 'U'],
-    [0x1D5, 'U'],
-    [0x1D7, 'U'],
-    [0x1D9, 'U'],
-    [0x1DB, 'U'],
-    [0x214, 'U'],
-    [0x216, 'U'],
-    [0x244, 'U'],
-    [0x1D1C, 'U'],
-    [0x1D7E, 'U'],
-    [0x1E72, 'U'],
-    [0x1E74, 'U'],
-    [0x1E76, 'U'],
-    [0x1E78, 'U'],
-    [0x1E7A, 'U'],
-    [0x1EE4, 'U'],
-    [0x1EE6, 'U'],
-    [0x1EE8, 'U'],
-    [0x1EEA, 'U'],
-    [0x1EEC, 'U'],
-    [0x1EEE, 'U'],
-    [0x1EF0, 'U'],
-    [0x24CA, 'U'],
-    [0xFF35, 'U'],
-    [0xF9, 'u'],
-    [0xFA, 'u'],
-    [0xFB, 'u'],
-    [0xFC, 'u'],
-    [0x169, 'u'],
-    [0x16B, 'u'],
-    [0x16D, 'u'],
-    [0x16F, 'u'],
-    [0x171, 'u'],
-    [0x173, 'u'],
-    [0x1B0, 'u'],
-    [0x1D4, 'u'],
-    [0x1D6, 'u'],
-    [0x1D8, 'u'],
-    [0x1DA, 'u'],
-    [0x1DC, 'u'],
-    [0x215, 'u'],
-    [0x217, 'u'],
-    [0x289, 'u'],
-    [0x1D64, 'u'],
-    [0x1D99, 'u'],
-    [0x1E73, 'u'],
-    [0x1E75, 'u'],
-    [0x1E77, 'u'],
-    [0x1E79, 'u'],
-    [0x1E7B, 'u'],
-    [0x1EE5, 'u'],
-    [0x1EE7, 'u'],
-    [0x1EE9, 'u'],
-    [0x1EEB, 'u'],
-    [0x1EED, 'u'],
-    [0x1EEF, 'u'],
-    [0x1EF1, 'u'],
-    [0x24E4, 'u'],
-    [0xFF55, 'u'],
-    [0x24B0, '(u)'],
-    [0x1D6B, 'ue'],
-    [0x1B2, 'V'],
-    [0x245, 'V'],
-    [0x1D20, 'V'],
-    [0x1E7C, 'V'],
-    [0x1E7E, 'V'],
-    [0x1EFC, 'V'],
-    [0x24CB, 'V'],
-    [0xA75E, 'V'],
-    [0xA768, 'V'],
-    [0xFF36, 'V'],
-    [0x28B, 'v'],
-    [0x28C, 'v'],
-    [0x1D65, 'v'],
-    [0x1D8C, 'v'],
-    [0x1E7D, 'v'],
-    [0x1E7F, 'v'],
-    [0x24E5, 'v'],
-    [0x2C71, 'v'],
-    [0x2C74, 'v'],
-    [0xA75F, 'v'],
-    [0xFF56, 'v'],
-    [0xA760, 'VY'],
-    [0x24B1, '(v)'],
-    [0xA761, 'vy'],
-    [0x174, 'W'],
-    [0x1F7, 'W'],
-    [0x1D21, 'W'],
-    [0x1E80, 'W'],
-    [0x1E82, 'W'],
-    [0x1E84, 'W'],
-    [0x1E86, 'W'],
-    [0x1E88, 'W'],
-    [0x24CC, 'W'],
-    [0x2C72, 'W'],
-    [0xFF37, 'W'],
-    [0x175, 'w'],
-    [0x1BF, 'w'],
-    [0x28D, 'w'],
-    [0x1E81, 'w'],
-    [0x1E83, 'w'],
-    [0x1E85, 'w'],
-    [0x1E87, 'w'],
-    [0x1E89, 'w'],
-    [0x1E98, 'w'],
-    [0x24E6, 'w'],
-    [0x2C73, 'w'],
-    [0xFF57, 'w'],
-    [0x24B2, '(w)'],
-    [0x1E8A, 'X'],
-    [0x1E8C, 'X'],
-    [0x24CD, 'X'],
-    [0xFF38, 'X'],
-    [0x1D8D, 'x'],
-    [0x1E8B, 'x'],
-    [0x1E8D, 'x'],
-    [0x2093, 'x'],
-    [0x24E7, 'x'],
-    [0xFF58, 'x'],
-    [0x24B3, '(x)'],
-    [0xDD, 'Y'],
-    [0x176, 'Y'],
-    [0x178, 'Y'],
-    [0x1B3, 'Y'],
-    [0x232, 'Y'],
-    [0x24E, 'Y'],
-    [0x28F, 'Y'],
-    [0x1E8E, 'Y'],
-    [0x1EF2, 'Y'],
-    [0x1EF4, 'Y'],
-    [0x1EF6, 'Y'],
-    [0x1EF8, 'Y'],
-    [0x1EFE, 'Y'],
-    [0x24CE, 'Y'],
-    [0xFF39, 'Y'],
-    [0xFD, 'y'],
-    [0xFF, 'y'],
-    [0x177, 'y'],
-    [0x1B4, 'y'],
-    [0x233, 'y'],
-    [0x24F, 'y'],
-    [0x28E, 'y'],
-    [0x1E8F, 'y'],
-    [0x1E99, 'y'],
-    [0x1EF3, 'y'],
-    [0x1EF5, 'y'],
-    [0x1EF7, 'y'],
-    [0x1EF9, 'y'],
-    [0x1EFF, 'y'],
-    [0x24E8, 'y'],
-    [0xFF59, 'y'],
-    [0x24B4, '(y)'],
-    [0x179, 'Z'],
-    [0x17B, 'Z'],
-    [0x17D, 'Z'],
-    [0x1B5, 'Z'],
-    [0x21C, 'Z'],
-    [0x224, 'Z'],
-    [0x1D22, 'Z'],
-    [0x1E90, 'Z'],
-    [0x1E92, 'Z'],
-    [0x1E94, 'Z'],
-    [0x24CF, 'Z'],
-    [0x2C6B, 'Z'],
-    [0xA762, 'Z'],
-    [0xFF3A, 'Z'],
-    [0x17A, 'z'],
-    [0x17C, 'z'],
-    [0x17E, 'z'],
-    [0x1B6, 'z'],
-    [0x21D, 'z'],
-    [0x225, 'z'],
-    [0x240, 'z'],
-    [0x290, 'z'],
-    [0x291, 'z'],
-    [0x1D76, 'z'],
-    [0x1D8E, 'z'],
-    [0x1E91, 'z'],
-    [0x1E93, 'z'],
-    [0x1E95, 'z'],
-    [0x24E9, 'z'],
-    [0x2C6C, 'z'],
-    [0xA763, 'z'],
-    [0xFF5A, 'z'],
-    [0x24B5, '(z)'],
-    [0x2070, '0'],
-    [0x2080, '0'],
-    [0x24EA, '0'],
-    [0x24FF, '0'],
-    [0xFF10, '0'],
-    [0xB9, '1'],
-    [0x2081, '1'],
-    [0x2460, '1'],
-    [0x24F5, '1'],
-    [0x2776, '1'],
-    [0x2780, '1'],
-    [0x278A, '1'],
-    [0xFF11, '1'],
-    [0x2488, '1.'],
-    [0x2474, '(1)'],
-    [0xB2, '2'],
-    [0x2082, '2'],
-    [0x2461, '2'],
-    [0x24F6, '2'],
-    [0x2777, '2'],
-    [0x2781, '2'],
-    [0x278B, '2'],
-    [0xFF12, '2'],
-    [0x2489, '2.'],
-    [0x2475, '(2)'],
-    [0xB3, '3'],
-    [0x2083, '3'],
-    [0x2462, '3'],
-    [0x24F7, '3'],
-    [0x2778, '3'],
-    [0x2782, '3'],
-    [0x278C, '3'],
-    [0xFF13, '3'],
-    [0x248A, '3.'],
-    [0x2476, '(3)'],
-    [0x2074, '4'],
-    [0x2084, '4'],
-    [0x2463, '4'],
-    [0x24F8, '4'],
-    [0x2779, '4'],
-    [0x2783, '4'],
-    [0x278D, '4'],
-    [0xFF14, '4'],
-    [0x248B, '4.'],
-    [0x2477, '(4)'],
-    [0x2075, '5'],
-    [0x2085, '5'],
-    [0x2464, '5'],
-    [0x24F9, '5'],
-    [0x277A, '5'],
-    [0x2784, '5'],
-    [0x278E, '5'],
-    [0xFF15, '5'],
-    [0x248C, '5.'],
-    [0x2478, '(5)'],
-    [0x2076, '6'],
-    [0x2086, '6'],
-    [0x2465, '6'],
-    [0x24FA, '6'],
-    [0x277B, '6'],
-    [0x2785, '6'],
-    [0x278F, '6'],
-    [0xFF16, '6'],
-    [0x248D, '6.'],
-    [0x2479, '(6)'],
-    [0x2077, '7'],
-    [0x2087, '7'],
-    [0x2466, '7'],
-    [0x24FB, '7'],
-    [0x277C, '7'],
-    [0x2786, '7'],
-    [0x2790, '7'],
-    [0xFF17, '7'],
-    [0x248E, '7.'],
-    [0x247A, '(7)'],
-    [0x2078, '8'],
-    [0x2088, '8'],
-    [0x2467, '8'],
-    [0x24FC, '8'],
-    [0x277D, '8'],
-    [0x2787, '8'],
-    [0x2791, '8'],
-    [0xFF18, '8'],
-    [0x248F, '8.'],
-    [0x247B, '(8)'],
-    [0x2079, '9'],
-    [0x2089, '9'],
-    [0x2468, '9'],
-    [0x24FD, '9'],
-    [0x277E, '9'],
-    [0x2788, '9'],
-    [0x2792, '9'],
-    [0xFF19, '9'],
-    [0x2490, '9.'],
-    [0x247C, '(9)'],
-    [0x2469, '10'],
-    [0x24FE, '10'],
-    [0x277F, '10'],
-    [0x2789, '10'],
-    [0x2793, '10'],
-    [0x2491, '10.'],
-    [0x247D, '(10)'],
-    [0x246A, '11'],
-    [0x24EB, '11'],
-    [0x2492, '11.'],
-    [0x247E, '(11)'],
-    [0x246B, '12'],
-    [0x24EC, '12'],
-    [0x2493, '12.'],
-    [0x247F, '(12)'],
-    [0x246C, '13'],
-    [0x24ED, '13'],
-    [0x2494, '13.'],
-    [0x2480, '(13)'],
-    [0x246D, '14'],
-    [0x24EE, '14'],
-    [0x2495, '14.'],
-    [0x2481, '(14)'],
-    [0x246E, '15'],
-    [0x24EF, '15'],
-    [0x2496, '15.'],
-    [0x2482, '(15)'],
-    [0x246F, '16'],
-    [0x24F0, '16'],
-    [0x2497, '16.'],
-    [0x2483, '(16)'],
-    [0x2470, '17'],
-    [0x24F1, '17'],
-    [0x2498, '17.'],
-    [0x2484, '(17)'],
-    [0x2471, '18'],
-    [0x24F2, '18'],
-    [0x2499, '18.'],
-    [0x2485, '(18)'],
-    [0x2472, '19'],
-    [0x24F3, '19'],
-    [0x249A, '19.'],
-    [0x2486, '(19)'],
-    [0x2473, '20'],
-    [0x24F4, '20'],
-    [0x249B, '20.'],
-    [0x2487, '(20)'],
-    [0xAB, '"'],
-    [0xBB, '"'],
-    [0x201C, '"'],
-    [0x201D, '"'],
-    [0x201E, '"'],
-    [0x2033, '"'],
-    [0x2036, '"'],
-    [0x275D, '"'],
-    [0x275E, '"'],
-    [0x276E, '"'],
-    [0x276F, '"'],
-    [0xFF02, '"'],
-    [0x2018, '\''],
-    [0x2019, '\''],
-    [0x201A, '\''],
-    [0x201B, '\''],
-    [0x2032, '\''],
-    [0x2035, '\''],
-    [0x2039, '\''],
-    [0x203A, '\''],
-    [0x275B, '\''],
-    [0x275C, '\''],
-    [0xFF07, '\''],
-    [0x2010, '-'],
-    [0x2011, '-'],
-    [0x2012, '-'],
-    [0x2013, '-'],
-    [0x2014, '-'],
-    [0x207B, '-'],
-    [0x208B, '-'],
-    [0xFF0D, '-'],
-    [0x2045, '['],
-    [0x2772, '['],
-    [0xFF3B, '['],
-    [0x2046, ']'],
-    [0x2773, ']'],
-    [0xFF3D, ']'],
-    [0x207D, '('],
-    [0x208D, '('],
-    [0x2768, '('],
-    [0x276A, '('],
-    [0xFF08, '('],
-    [0x2E28, '(('],
-    [0x207E, ')'],
-    [0x208E, ')'],
-    [0x2769, ')'],
-    [0x276B, ')'],
-    [0xFF09, ')'],
-    [0x2E29, '))'],
-    [0x276C, '<'],
-    [0x2770, '<'],
-    [0xFF1C, '<'],
-    [0x276D, '>'],
-    [0x2771, '>'],
-    [0xFF1E, '>'],
-    [0x2774, '{'],
-    [0xFF5B, '{'],
-    [0x2775, '}'],
-    [0xFF5D, '}'],
-    [0x207A, '+'],
-    [0x208A, '+'],
-    [0xFF0B, '+'],
-    [0x207C, '='],
-    [0x208C, '='],
-    [0xFF1D, '='],
-    [0xFF01, '!'],
-    [0x203C, '!!'],
-    [0x2049, '!?'],
-    [0xFF03, '#'],
-    [0xFF04, '$'],
-    [0x2052, '%'],
-    [0xFF05, '%'],
-    [0xFF06, '&'],
-    [0x204E, '*'],
-    [0xFF0A, '*'],
-    [0xFF0C, ','],
-    [0xFF0E, '.'],
-    [0x2044, '/'],
-    [0xFF0F, '/'],
-    [0xFF1A, ':'],
-    [0x204F, ';'],
-    [0xFF1B, ';'],
-    [0xFF1F, '?'],
-    [0x2047, '??'],
-    [0x2048, '?!'],
-    [0xFF20, '@'],
-    [0xFF3C, '\\'],
-    [0x2038, '^'],
-    [0xFF3E, '^'],
-    [0xFF3F, '_'],
-    [0x2053, '~'],
-    [0xFF5E, '~']
-]);
+  // Convenience version of a common use case of `map`: fetching a property.
+  _.pluck = function(obj, key) {
+    return _.map(obj, _.property(key));
+  };
 
-module.exports = ASCIIFolder;
-}, {}];
+  // Convenience version of a common use case of `filter`: selecting only objects
+  // containing specific `key:value` pairs.
+  _.where = function(obj, attrs) {
+    return _.filter(obj, _.matcher(attrs));
+  };
+
+  // Convenience version of a common use case of `find`: getting the first object
+  // containing specific `key:value` pairs.
+  _.findWhere = function(obj, attrs) {
+    return _.find(obj, _.matcher(attrs));
+  };
+
+  // Return the maximum element (or element-based computation).
+  _.max = function(obj, iteratee, context) {
+    var result = -Infinity, lastComputed = -Infinity,
+        value, computed;
+    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
+      obj = isArrayLike(obj) ? obj : _.values(obj);
+      for (var i = 0, length = obj.length; i < length; i++) {
+        value = obj[i];
+        if (value != null && value > result) {
+          result = value;
+        }
+      }
+    } else {
+      iteratee = cb(iteratee, context);
+      _.each(obj, function(v, index, list) {
+        computed = iteratee(v, index, list);
+        if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
+          result = v;
+          lastComputed = computed;
+        }
+      });
+    }
+    return result;
+  };
+
+  // Return the minimum element (or element-based computation).
+  _.min = function(obj, iteratee, context) {
+    var result = Infinity, lastComputed = Infinity,
+        value, computed;
+    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
+      obj = isArrayLike(obj) ? obj : _.values(obj);
+      for (var i = 0, length = obj.length; i < length; i++) {
+        value = obj[i];
+        if (value != null && value < result) {
+          result = value;
+        }
+      }
+    } else {
+      iteratee = cb(iteratee, context);
+      _.each(obj, function(v, index, list) {
+        computed = iteratee(v, index, list);
+        if (computed < lastComputed || computed === Infinity && result === Infinity) {
+          result = v;
+          lastComputed = computed;
+        }
+      });
+    }
+    return result;
+  };
+
+  // Shuffle a collection.
+  _.shuffle = function(obj) {
+    return _.sample(obj, Infinity);
+  };
+
+  // Sample **n** random values from a collection using the modern version of the
+  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
+  // If **n** is not specified, returns a single random element.
+  // The internal `guard` argument allows it to work with `map`.
+  _.sample = function(obj, n, guard) {
+    if (n == null || guard) {
+      if (!isArrayLike(obj)) obj = _.values(obj);
+      return obj[_.random(obj.length - 1)];
+    }
+    var sample = isArrayLike(obj) ? _.clone(obj) : _.values(obj);
+    var length = getLength(sample);
+    n = Math.max(Math.min(n, length), 0);
+    var last = length - 1;
+    for (var index = 0; index < n; index++) {
+      var rand = _.random(index, last);
+      var temp = sample[index];
+      sample[index] = sample[rand];
+      sample[rand] = temp;
+    }
+    return sample.slice(0, n);
+  };
+
+  // Sort the object's values by a criterion produced by an iteratee.
+  _.sortBy = function(obj, iteratee, context) {
+    var index = 0;
+    iteratee = cb(iteratee, context);
+    return _.pluck(_.map(obj, function(value, key, list) {
+      return {
+        value: value,
+        index: index++,
+        criteria: iteratee(value, key, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria;
+      var b = right.criteria;
+      if (a !== b) {
+        if (a > b || a === void 0) return 1;
+        if (a < b || b === void 0) return -1;
+      }
+      return left.index - right.index;
+    }), 'value');
+  };
+
+  // An internal function used for aggregate "group by" operations.
+  var group = function(behavior, partition) {
+    return function(obj, iteratee, context) {
+      var result = partition ? [[], []] : {};
+      iteratee = cb(iteratee, context);
+      _.each(obj, function(value, index) {
+        var key = iteratee(value, index, obj);
+        behavior(result, value, key);
+      });
+      return result;
+    };
+  };
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  _.groupBy = group(function(result, value, key) {
+    if (has(result, key)) result[key].push(value); else result[key] = [value];
+  });
+
+  // Indexes the object's values by a criterion, similar to `groupBy`, but for
+  // when you know that your index values will be unique.
+  _.indexBy = group(function(result, value, key) {
+    result[key] = value;
+  });
+
+  // Counts instances of an object that group by a certain criterion. Pass
+  // either a string attribute to count by, or a function that returns the
+  // criterion.
+  _.countBy = group(function(result, value, key) {
+    if (has(result, key)) result[key]++; else result[key] = 1;
+  });
+
+  var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
+  // Safely create a real, live array from anything iterable.
+  _.toArray = function(obj) {
+    if (!obj) return [];
+    if (_.isArray(obj)) return slice.call(obj);
+    if (_.isString(obj)) {
+      // Keep surrogate pair characters together
+      return obj.match(reStrSymbol);
+    }
+    if (isArrayLike(obj)) return _.map(obj, _.identity);
+    return _.values(obj);
+  };
+
+  // Return the number of elements in an object.
+  _.size = function(obj) {
+    if (obj == null) return 0;
+    return isArrayLike(obj) ? obj.length : _.keys(obj).length;
+  };
+
+  // Split a collection into two arrays: one whose elements all satisfy the given
+  // predicate, and one whose elements all do not satisfy the predicate.
+  _.partition = group(function(result, value, pass) {
+    result[pass ? 0 : 1].push(value);
+  }, true);
+
+  // Array Functions
+  // ---------------
+
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head` and `take`. The **guard** check
+  // allows it to work with `_.map`.
+  _.first = _.head = _.take = function(array, n, guard) {
+    if (array == null || array.length < 1) return n == null ? void 0 : [];
+    if (n == null || guard) return array[0];
+    return _.initial(array, array.length - n);
+  };
+
+  // Returns everything but the last entry of the array. Especially useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N.
+  _.initial = function(array, n, guard) {
+    return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
+  };
+
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array.
+  _.last = function(array, n, guard) {
+    if (array == null || array.length < 1) return n == null ? void 0 : [];
+    if (n == null || guard) return array[array.length - 1];
+    return _.rest(array, Math.max(0, array.length - n));
+  };
+
+  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
+  // Especially useful on the arguments object. Passing an **n** will return
+  // the rest N values in the array.
+  _.rest = _.tail = _.drop = function(array, n, guard) {
+    return slice.call(array, n == null || guard ? 1 : n);
+  };
+
+  // Trim out all falsy values from an array.
+  _.compact = function(array) {
+    return _.filter(array, Boolean);
+  };
+
+  // Internal implementation of a recursive `flatten` function.
+  var flatten = function(input, shallow, strict, output) {
+    output = output || [];
+    var idx = output.length;
+    for (var i = 0, length = getLength(input); i < length; i++) {
+      var value = input[i];
+      if (isArrayLike(value) && (_.isArray(value) || _.isArguments(value))) {
+        // Flatten current level of array or arguments object.
+        if (shallow) {
+          var j = 0, len = value.length;
+          while (j < len) output[idx++] = value[j++];
+        } else {
+          flatten(value, shallow, strict, output);
+          idx = output.length;
+        }
+      } else if (!strict) {
+        output[idx++] = value;
+      }
+    }
+    return output;
+  };
+
+  // Flatten out an array, either recursively (by default), or just one level.
+  _.flatten = function(array, shallow) {
+    return flatten(array, shallow, false);
+  };
+
+  // Return a version of the array that does not contain the specified value(s).
+  _.without = restArguments(function(array, otherArrays) {
+    return _.difference(array, otherArrays);
+  });
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  // The faster algorithm will not work with an iteratee if the iteratee
+  // is not a one-to-one function, so providing an iteratee will disable
+  // the faster algorithm.
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted, iteratee, context) {
+    if (!_.isBoolean(isSorted)) {
+      context = iteratee;
+      iteratee = isSorted;
+      isSorted = false;
+    }
+    if (iteratee != null) iteratee = cb(iteratee, context);
+    var result = [];
+    var seen = [];
+    for (var i = 0, length = getLength(array); i < length; i++) {
+      var value = array[i],
+          computed = iteratee ? iteratee(value, i, array) : value;
+      if (isSorted && !iteratee) {
+        if (!i || seen !== computed) result.push(value);
+        seen = computed;
+      } else if (iteratee) {
+        if (!_.contains(seen, computed)) {
+          seen.push(computed);
+          result.push(value);
+        }
+      } else if (!_.contains(result, value)) {
+        result.push(value);
+      }
+    }
+    return result;
+  };
+
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  _.union = restArguments(function(arrays) {
+    return _.uniq(flatten(arrays, true, true));
+  });
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays.
+  _.intersection = function(array) {
+    var result = [];
+    var argsLength = arguments.length;
+    for (var i = 0, length = getLength(array); i < length; i++) {
+      var item = array[i];
+      if (_.contains(result, item)) continue;
+      var j;
+      for (j = 1; j < argsLength; j++) {
+        if (!_.contains(arguments[j], item)) break;
+      }
+      if (j === argsLength) result.push(item);
+    }
+    return result;
+  };
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  _.difference = restArguments(function(array, rest) {
+    rest = flatten(rest, true, true);
+    return _.filter(array, function(value){
+      return !_.contains(rest, value);
+    });
+  });
+
+  // Complement of _.zip. Unzip accepts an array of arrays and groups
+  // each array's elements on shared indices.
+  _.unzip = function(array) {
+    var length = array && _.max(array, getLength).length || 0;
+    var result = Array(length);
+
+    for (var index = 0; index < length; index++) {
+      result[index] = _.pluck(array, index);
+    }
+    return result;
+  };
+
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = restArguments(_.unzip);
+
+  // Converts lists into objects. Pass either a single array of `[key, value]`
+  // pairs, or two parallel arrays of the same length -- one of keys, and one of
+  // the corresponding values. Passing by pairs is the reverse of _.pairs.
+  _.object = function(list, values) {
+    var result = {};
+    for (var i = 0, length = getLength(list); i < length; i++) {
+      if (values) {
+        result[list[i]] = values[i];
+      } else {
+        result[list[i][0]] = list[i][1];
+      }
+    }
+    return result;
+  };
+
+  // Generator function to create the findIndex and findLastIndex functions.
+  var createPredicateIndexFinder = function(dir) {
+    return function(array, predicate, context) {
+      predicate = cb(predicate, context);
+      var length = getLength(array);
+      var index = dir > 0 ? 0 : length - 1;
+      for (; index >= 0 && index < length; index += dir) {
+        if (predicate(array[index], index, array)) return index;
+      }
+      return -1;
+    };
+  };
+
+  // Returns the first index on an array-like that passes a predicate test.
+  _.findIndex = createPredicateIndexFinder(1);
+  _.findLastIndex = createPredicateIndexFinder(-1);
+
+  // Use a comparator function to figure out the smallest index at which
+  // an object should be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iteratee, context) {
+    iteratee = cb(iteratee, context, 1);
+    var value = iteratee(obj);
+    var low = 0, high = getLength(array);
+    while (low < high) {
+      var mid = Math.floor((low + high) / 2);
+      if (iteratee(array[mid]) < value) low = mid + 1; else high = mid;
+    }
+    return low;
+  };
+
+  // Generator function to create the indexOf and lastIndexOf functions.
+  var createIndexFinder = function(dir, predicateFind, sortedIndex) {
+    return function(array, item, idx) {
+      var i = 0, length = getLength(array);
+      if (typeof idx == 'number') {
+        if (dir > 0) {
+          i = idx >= 0 ? idx : Math.max(idx + length, i);
+        } else {
+          length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
+        }
+      } else if (sortedIndex && idx && length) {
+        idx = sortedIndex(array, item);
+        return array[idx] === item ? idx : -1;
+      }
+      if (item !== item) {
+        idx = predicateFind(slice.call(array, i, length), _.isNaN);
+        return idx >= 0 ? idx + i : -1;
+      }
+      for (idx = dir > 0 ? i : length - 1; idx >= 0 && idx < length; idx += dir) {
+        if (array[idx] === item) return idx;
+      }
+      return -1;
+    };
+  };
+
+  // Return the position of the first occurrence of an item in an array,
+  // or -1 if the item is not included in the array.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  _.indexOf = createIndexFinder(1, _.findIndex, _.sortedIndex);
+  _.lastIndexOf = createIndexFinder(-1, _.findLastIndex);
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  _.range = function(start, stop, step) {
+    if (stop == null) {
+      stop = start || 0;
+      start = 0;
+    }
+    if (!step) {
+      step = stop < start ? -1 : 1;
+    }
+
+    var length = Math.max(Math.ceil((stop - start) / step), 0);
+    var range = Array(length);
+
+    for (var idx = 0; idx < length; idx++, start += step) {
+      range[idx] = start;
+    }
+
+    return range;
+  };
+
+  // Chunk a single array into multiple arrays, each containing `count` or fewer
+  // items.
+  _.chunk = function(array, count) {
+    if (count == null || count < 1) return [];
+    var result = [];
+    var i = 0, length = array.length;
+    while (i < length) {
+      result.push(slice.call(array, i, i += count));
+    }
+    return result;
+  };
+
+  // Function (ahem) Functions
+  // ------------------
+
+  // Determines whether to execute a function as a constructor
+  // or a normal function with the provided arguments.
+  var executeBound = function(sourceFunc, boundFunc, context, callingContext, args) {
+    if (!(callingContext instanceof boundFunc)) return sourceFunc.apply(context, args);
+    var self = baseCreate(sourceFunc.prototype);
+    var result = sourceFunc.apply(self, args);
+    if (_.isObject(result)) return result;
+    return self;
+  };
+
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
+  // available.
+  _.bind = restArguments(function(func, context, args) {
+    if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function');
+    var bound = restArguments(function(callArgs) {
+      return executeBound(func, bound, context, this, args.concat(callArgs));
+    });
+    return bound;
+  });
+
+  // Partially apply a function by creating a version that has had some of its
+  // arguments pre-filled, without changing its dynamic `this` context. _ acts
+  // as a placeholder by default, allowing any combination of arguments to be
+  // pre-filled. Set `_.partial.placeholder` for a custom placeholder argument.
+  _.partial = restArguments(function(func, boundArgs) {
+    var placeholder = _.partial.placeholder;
+    var bound = function() {
+      var position = 0, length = boundArgs.length;
+      var args = Array(length);
+      for (var i = 0; i < length; i++) {
+        args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i];
+      }
+      while (position < arguments.length) args.push(arguments[position++]);
+      return executeBound(func, bound, this, this, args);
+    };
+    return bound;
+  });
+
+  _.partial.placeholder = _;
+
+  // Bind a number of an object's methods to that object. Remaining arguments
+  // are the method names to be bound. Useful for ensuring that all callbacks
+  // defined on an object belong to it.
+  _.bindAll = restArguments(function(obj, keys) {
+    keys = flatten(keys, false, false);
+    var index = keys.length;
+    if (index < 1) throw new Error('bindAll must be passed function names');
+    while (index--) {
+      var key = keys[index];
+      obj[key] = _.bind(obj[key], obj);
+    }
+  });
+
+  // Memoize an expensive function by storing its results.
+  _.memoize = function(func, hasher) {
+    var memoize = function(key) {
+      var cache = memoize.cache;
+      var address = '' + (hasher ? hasher.apply(this, arguments) : key);
+      if (!has(cache, address)) cache[address] = func.apply(this, arguments);
+      return cache[address];
+    };
+    memoize.cache = {};
+    return memoize;
+  };
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  _.delay = restArguments(function(func, wait, args) {
+    return setTimeout(function() {
+      return func.apply(null, args);
+    }, wait);
+  });
+
+  // Defers a function, scheduling it to run after the current call stack has
+  // cleared.
+  _.defer = _.partial(_.delay, _, 1);
+
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time. Normally, the throttled function will run
+  // as much as it can, without ever going more than once per `wait` duration;
+  // but if you'd like to disable the execution on the leading edge, pass
+  // `{leading: false}`. To disable execution on the trailing edge, ditto.
+  _.throttle = function(func, wait, options) {
+    var timeout, context, args, result;
+    var previous = 0;
+    if (!options) options = {};
+
+    var later = function() {
+      previous = options.leading === false ? 0 : _.now();
+      timeout = null;
+      result = func.apply(context, args);
+      if (!timeout) context = args = null;
+    };
+
+    var throttled = function() {
+      var now = _.now();
+      if (!previous && options.leading === false) previous = now;
+      var remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0 || remaining > wait) {
+        if (timeout) {
+          clearTimeout(timeout);
+          timeout = null;
+        }
+        previous = now;
+        result = func.apply(context, args);
+        if (!timeout) context = args = null;
+      } else if (!timeout && options.trailing !== false) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
+    };
+
+    throttled.cancel = function() {
+      clearTimeout(timeout);
+      previous = 0;
+      timeout = context = args = null;
+    };
+
+    return throttled;
+  };
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  _.debounce = function(func, wait, immediate) {
+    var timeout, result;
+
+    var later = function(context, args) {
+      timeout = null;
+      if (args) result = func.apply(context, args);
+    };
+
+    var debounced = restArguments(function(args) {
+      if (timeout) clearTimeout(timeout);
+      if (immediate) {
+        var callNow = !timeout;
+        timeout = setTimeout(later, wait);
+        if (callNow) result = func.apply(this, args);
+      } else {
+        timeout = _.delay(later, wait, this, args);
+      }
+
+      return result;
+    });
+
+    debounced.cancel = function() {
+      clearTimeout(timeout);
+      timeout = null;
+    };
+
+    return debounced;
+  };
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  _.wrap = function(func, wrapper) {
+    return _.partial(wrapper, func);
+  };
+
+  // Returns a negated version of the passed-in predicate.
+  _.negate = function(predicate) {
+    return function() {
+      return !predicate.apply(this, arguments);
+    };
+  };
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var args = arguments;
+    var start = args.length - 1;
+    return function() {
+      var i = start;
+      var result = args[start].apply(this, arguments);
+      while (i--) result = args[i].call(this, result);
+      return result;
+    };
+  };
+
+  // Returns a function that will only be executed on and after the Nth call.
+  _.after = function(times, func) {
+    return function() {
+      if (--times < 1) {
+        return func.apply(this, arguments);
+      }
+    };
+  };
+
+  // Returns a function that will only be executed up to (but not including) the Nth call.
+  _.before = function(times, func) {
+    var memo;
+    return function() {
+      if (--times > 0) {
+        memo = func.apply(this, arguments);
+      }
+      if (times <= 1) func = null;
+      return memo;
+    };
+  };
+
+  // Returns a function that will be executed at most one time, no matter how
+  // often you call it. Useful for lazy initialization.
+  _.once = _.partial(_.before, 2);
+
+  _.restArguments = restArguments;
+
+  // Object Functions
+  // ----------------
+
+  // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
+  var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
+  var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
+    'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
+
+  var collectNonEnumProps = function(obj, keys) {
+    var nonEnumIdx = nonEnumerableProps.length;
+    var constructor = obj.constructor;
+    var proto = _.isFunction(constructor) && constructor.prototype || ObjProto;
+
+    // Constructor is a special case.
+    var prop = 'constructor';
+    if (has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
+
+    while (nonEnumIdx--) {
+      prop = nonEnumerableProps[nonEnumIdx];
+      if (prop in obj && obj[prop] !== proto[prop] && !_.contains(keys, prop)) {
+        keys.push(prop);
+      }
+    }
+  };
+
+  // Retrieve the names of an object's own properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`.
+  _.keys = function(obj) {
+    if (!_.isObject(obj)) return [];
+    if (nativeKeys) return nativeKeys(obj);
+    var keys = [];
+    for (var key in obj) if (has(obj, key)) keys.push(key);
+    // Ahem, IE < 9.
+    if (hasEnumBug) collectNonEnumProps(obj, keys);
+    return keys;
+  };
+
+  // Retrieve all the property names of an object.
+  _.allKeys = function(obj) {
+    if (!_.isObject(obj)) return [];
+    var keys = [];
+    for (var key in obj) keys.push(key);
+    // Ahem, IE < 9.
+    if (hasEnumBug) collectNonEnumProps(obj, keys);
+    return keys;
+  };
+
+  // Retrieve the values of an object's properties.
+  _.values = function(obj) {
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var values = Array(length);
+    for (var i = 0; i < length; i++) {
+      values[i] = obj[keys[i]];
+    }
+    return values;
+  };
+
+  // Returns the results of applying the iteratee to each element of the object.
+  // In contrast to _.map it returns an object.
+  _.mapObject = function(obj, iteratee, context) {
+    iteratee = cb(iteratee, context);
+    var keys = _.keys(obj),
+        length = keys.length,
+        results = {};
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys[index];
+      results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
+    }
+    return results;
+  };
+
+  // Convert an object into a list of `[key, value]` pairs.
+  // The opposite of _.object.
+  _.pairs = function(obj) {
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var pairs = Array(length);
+    for (var i = 0; i < length; i++) {
+      pairs[i] = [keys[i], obj[keys[i]]];
+    }
+    return pairs;
+  };
+
+  // Invert the keys and values of an object. The values must be serializable.
+  _.invert = function(obj) {
+    var result = {};
+    var keys = _.keys(obj);
+    for (var i = 0, length = keys.length; i < length; i++) {
+      result[obj[keys[i]]] = keys[i];
+    }
+    return result;
+  };
+
+  // Return a sorted list of the function names available on the object.
+  // Aliased as `methods`.
+  _.functions = _.methods = function(obj) {
+    var names = [];
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key);
+    }
+    return names.sort();
+  };
+
+  // An internal function for creating assigner functions.
+  var createAssigner = function(keysFunc, defaults) {
+    return function(obj) {
+      var length = arguments.length;
+      if (defaults) obj = Object(obj);
+      if (length < 2 || obj == null) return obj;
+      for (var index = 1; index < length; index++) {
+        var source = arguments[index],
+            keys = keysFunc(source),
+            l = keys.length;
+        for (var i = 0; i < l; i++) {
+          var key = keys[i];
+          if (!defaults || obj[key] === void 0) obj[key] = source[key];
+        }
+      }
+      return obj;
+    };
+  };
+
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = createAssigner(_.allKeys);
+
+  // Assigns a given object with all the own properties in the passed-in object(s).
+  // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
+  _.extendOwn = _.assign = createAssigner(_.keys);
+
+  // Returns the first key on an object that passes a predicate test.
+  _.findKey = function(obj, predicate, context) {
+    predicate = cb(predicate, context);
+    var keys = _.keys(obj), key;
+    for (var i = 0, length = keys.length; i < length; i++) {
+      key = keys[i];
+      if (predicate(obj[key], key, obj)) return key;
+    }
+  };
+
+  // Internal pick helper function to determine if `obj` has key `key`.
+  var keyInObj = function(value, key, obj) {
+    return key in obj;
+  };
+
+  // Return a copy of the object only containing the whitelisted properties.
+  _.pick = restArguments(function(obj, keys) {
+    var result = {}, iteratee = keys[0];
+    if (obj == null) return result;
+    if (_.isFunction(iteratee)) {
+      if (keys.length > 1) iteratee = optimizeCb(iteratee, keys[1]);
+      keys = _.allKeys(obj);
+    } else {
+      iteratee = keyInObj;
+      keys = flatten(keys, false, false);
+      obj = Object(obj);
+    }
+    for (var i = 0, length = keys.length; i < length; i++) {
+      var key = keys[i];
+      var value = obj[key];
+      if (iteratee(value, key, obj)) result[key] = value;
+    }
+    return result;
+  });
+
+  // Return a copy of the object without the blacklisted properties.
+  _.omit = restArguments(function(obj, keys) {
+    var iteratee = keys[0], context;
+    if (_.isFunction(iteratee)) {
+      iteratee = _.negate(iteratee);
+      if (keys.length > 1) context = keys[1];
+    } else {
+      keys = _.map(flatten(keys, false, false), String);
+      iteratee = function(value, key) {
+        return !_.contains(keys, key);
+      };
+    }
+    return _.pick(obj, iteratee, context);
+  });
+
+  // Fill in a given object with default properties.
+  _.defaults = createAssigner(_.allKeys, true);
+
+  // Creates an object that inherits from the given prototype object.
+  // If additional properties are provided then they will be added to the
+  // created object.
+  _.create = function(prototype, props) {
+    var result = baseCreate(prototype);
+    if (props) _.extendOwn(result, props);
+    return result;
+  };
+
+  // Create a (shallow-cloned) duplicate of an object.
+  _.clone = function(obj) {
+    if (!_.isObject(obj)) return obj;
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+  };
+
+  // Invokes interceptor with the obj, and then returns obj.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  _.tap = function(obj, interceptor) {
+    interceptor(obj);
+    return obj;
+  };
+
+  // Returns whether an object has a given set of `key:value` pairs.
+  _.isMatch = function(object, attrs) {
+    var keys = _.keys(attrs), length = keys.length;
+    if (object == null) return !length;
+    var obj = Object(object);
+    for (var i = 0; i < length; i++) {
+      var key = keys[i];
+      if (attrs[key] !== obj[key] || !(key in obj)) return false;
+    }
+    return true;
+  };
+
+
+  // Internal recursive comparison function for `isEqual`.
+  var eq, deepEq;
+  eq = function(a, b, aStack, bStack) {
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
+    if (a === b) return a !== 0 || 1 / a === 1 / b;
+    // `null` or `undefined` only equal to itself (strict comparison).
+    if (a == null || b == null) return false;
+    // `NaN`s are equivalent, but non-reflexive.
+    if (a !== a) return b !== b;
+    // Exhaust primitive checks
+    var type = typeof a;
+    if (type !== 'function' && type !== 'object' && typeof b != 'object') return false;
+    return deepEq(a, b, aStack, bStack);
+  };
+
+  // Internal recursive comparison function for `isEqual`.
+  deepEq = function(a, b, aStack, bStack) {
+    // Unwrap any wrapped objects.
+    if (a instanceof _) a = a._wrapped;
+    if (b instanceof _) b = b._wrapped;
+    // Compare `[[Class]]` names.
+    var className = toString.call(a);
+    if (className !== toString.call(b)) return false;
+    switch (className) {
+      // Strings, numbers, regular expressions, dates, and booleans are compared by value.
+      case '[object RegExp]':
+      // RegExps are coerced to strings for comparison (Note: '' + /a/i === '/a/i')
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return '' + a === '' + b;
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive.
+        // Object(NaN) is equivalent to NaN.
+        if (+a !== +a) return +b !== +b;
+        // An `egal` comparison is performed for other numeric values.
+        return +a === 0 ? 1 / +a === 1 / b : +a === +b;
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a === +b;
+      case '[object Symbol]':
+        return SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b);
+    }
+
+    var areArrays = className === '[object Array]';
+    if (!areArrays) {
+      if (typeof a != 'object' || typeof b != 'object') return false;
+
+      // Objects with different constructors are not equivalent, but `Object`s or `Array`s
+      // from different frames are.
+      var aCtor = a.constructor, bCtor = b.constructor;
+      if (aCtor !== bCtor && !(_.isFunction(aCtor) && aCtor instanceof aCtor &&
+                               _.isFunction(bCtor) && bCtor instanceof bCtor)
+                          && ('constructor' in a && 'constructor' in b)) {
+        return false;
+      }
+    }
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+
+    // Initializing stack of traversed objects.
+    // It's done here since we only need them for objects and arrays comparison.
+    aStack = aStack || [];
+    bStack = bStack || [];
+    var length = aStack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (aStack[length] === a) return bStack[length] === b;
+    }
+
+    // Add the first object to the stack of traversed objects.
+    aStack.push(a);
+    bStack.push(b);
+
+    // Recursively compare objects and arrays.
+    if (areArrays) {
+      // Compare array lengths to determine if a deep comparison is necessary.
+      length = a.length;
+      if (length !== b.length) return false;
+      // Deep compare the contents, ignoring non-numeric properties.
+      while (length--) {
+        if (!eq(a[length], b[length], aStack, bStack)) return false;
+      }
+    } else {
+      // Deep compare objects.
+      var keys = _.keys(a), key;
+      length = keys.length;
+      // Ensure that both objects contain the same number of properties before comparing deep equality.
+      if (_.keys(b).length !== length) return false;
+      while (length--) {
+        // Deep compare each member
+        key = keys[length];
+        if (!(has(b, key) && eq(a[key], b[key], aStack, bStack))) return false;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    aStack.pop();
+    bStack.pop();
+    return true;
+  };
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    return eq(a, b);
+  };
+
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
+  _.isEmpty = function(obj) {
+    if (obj == null) return true;
+    if (isArrayLike(obj) && (_.isArray(obj) || _.isString(obj) || _.isArguments(obj))) return obj.length === 0;
+    return _.keys(obj).length === 0;
+  };
+
+  // Is a given value a DOM element?
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType === 1);
+  };
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  _.isArray = nativeIsArray || function(obj) {
+    return toString.call(obj) === '[object Array]';
+  };
+
+  // Is a given variable an object?
+  _.isObject = function(obj) {
+    var type = typeof obj;
+    return type === 'function' || type === 'object' && !!obj;
+  };
+
+  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError, isMap, isWeakMap, isSet, isWeakSet.
+  _.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp', 'Error', 'Symbol', 'Map', 'WeakMap', 'Set', 'WeakSet'], function(name) {
+    _['is' + name] = function(obj) {
+      return toString.call(obj) === '[object ' + name + ']';
+    };
+  });
+
+  // Define a fallback version of the method in browsers (ahem, IE < 9), where
+  // there isn't any inspectable "Arguments" type.
+  if (!_.isArguments(arguments)) {
+    _.isArguments = function(obj) {
+      return has(obj, 'callee');
+    };
+  }
+
+  // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
+  // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
+  var nodelist = root.document && root.document.childNodes;
+  if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
+    _.isFunction = function(obj) {
+      return typeof obj == 'function' || false;
+    };
+  }
+
+  // Is a given object a finite number?
+  _.isFinite = function(obj) {
+    return !_.isSymbol(obj) && isFinite(obj) && !isNaN(parseFloat(obj));
+  };
+
+  // Is the given value `NaN`?
+  _.isNaN = function(obj) {
+    return _.isNumber(obj) && isNaN(obj);
+  };
+
+  // Is a given value a boolean?
+  _.isBoolean = function(obj) {
+    return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
+  };
+
+  // Is a given value equal to null?
+  _.isNull = function(obj) {
+    return obj === null;
+  };
+
+  // Is a given variable undefined?
+  _.isUndefined = function(obj) {
+    return obj === void 0;
+  };
+
+  // Shortcut function for checking if an object has a given property directly
+  // on itself (in other words, not on a prototype).
+  _.has = function(obj, path) {
+    if (!_.isArray(path)) {
+      return has(obj, path);
+    }
+    var length = path.length;
+    for (var i = 0; i < length; i++) {
+      var key = path[i];
+      if (obj == null || !hasOwnProperty.call(obj, key)) {
+        return false;
+      }
+      obj = obj[key];
+    }
+    return !!length;
+  };
+
+  // Utility Functions
+  // -----------------
+
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
+  // previous owner. Returns a reference to the Underscore object.
+  _.noConflict = function() {
+    root._ = previousUnderscore;
+    return this;
+  };
+
+  // Keep the identity function around for default iteratees.
+  _.identity = function(value) {
+    return value;
+  };
+
+  // Predicate-generating functions. Often useful outside of Underscore.
+  _.constant = function(value) {
+    return function() {
+      return value;
+    };
+  };
+
+  _.noop = function(){};
+
+  // Creates a function that, when passed an object, will traverse that object’s
+  // properties down the given `path`, specified as an array of keys or indexes.
+  _.property = function(path) {
+    if (!_.isArray(path)) {
+      return shallowProperty(path);
+    }
+    return function(obj) {
+      return deepGet(obj, path);
+    };
+  };
+
+  // Generates a function for a given object that returns a given property.
+  _.propertyOf = function(obj) {
+    if (obj == null) {
+      return function(){};
+    }
+    return function(path) {
+      return !_.isArray(path) ? obj[path] : deepGet(obj, path);
+    };
+  };
+
+  // Returns a predicate for checking whether an object has a given set of
+  // `key:value` pairs.
+  _.matcher = _.matches = function(attrs) {
+    attrs = _.extendOwn({}, attrs);
+    return function(obj) {
+      return _.isMatch(obj, attrs);
+    };
+  };
+
+  // Run a function **n** times.
+  _.times = function(n, iteratee, context) {
+    var accum = Array(Math.max(0, n));
+    iteratee = optimizeCb(iteratee, context, 1);
+    for (var i = 0; i < n; i++) accum[i] = iteratee(i);
+    return accum;
+  };
+
+  // Return a random integer between min and max (inclusive).
+  _.random = function(min, max) {
+    if (max == null) {
+      max = min;
+      min = 0;
+    }
+    return min + Math.floor(Math.random() * (max - min + 1));
+  };
+
+  // A (possibly faster) way to get the current timestamp as an integer.
+  _.now = Date.now || function() {
+    return new Date().getTime();
+  };
+
+  // List of HTML entities for escaping.
+  var escapeMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    '`': '&#x60;'
+  };
+  var unescapeMap = _.invert(escapeMap);
+
+  // Functions for escaping and unescaping strings to/from HTML interpolation.
+  var createEscaper = function(map) {
+    var escaper = function(match) {
+      return map[match];
+    };
+    // Regexes for identifying a key that needs to be escaped.
+    var source = '(?:' + _.keys(map).join('|') + ')';
+    var testRegexp = RegExp(source);
+    var replaceRegexp = RegExp(source, 'g');
+    return function(string) {
+      string = string == null ? '' : '' + string;
+      return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
+    };
+  };
+  _.escape = createEscaper(escapeMap);
+  _.unescape = createEscaper(unescapeMap);
+
+  // Traverses the children of `obj` along `path`. If a child is a function, it
+  // is invoked with its parent as context. Returns the value of the final
+  // child, or `fallback` if any child is undefined.
+  _.result = function(obj, path, fallback) {
+    if (!_.isArray(path)) path = [path];
+    var length = path.length;
+    if (!length) {
+      return _.isFunction(fallback) ? fallback.call(obj) : fallback;
+    }
+    for (var i = 0; i < length; i++) {
+      var prop = obj == null ? void 0 : obj[path[i]];
+      if (prop === void 0) {
+        prop = fallback;
+        i = length; // Ensure we don't continue iterating.
+      }
+      obj = _.isFunction(prop) ? prop.call(obj) : prop;
+    }
+    return obj;
+  };
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  _.uniqueId = function(prefix) {
+    var id = ++idCounter + '';
+    return prefix ? prefix + id : id;
+  };
+
+  // By default, Underscore uses ERB-style template delimiters, change the
+  // following template settings to use alternative delimiters.
+  _.templateSettings = {
+    evaluate: /<%([\s\S]+?)%>/g,
+    interpolate: /<%=([\s\S]+?)%>/g,
+    escape: /<%-([\s\S]+?)%>/g
+  };
+
+  // When customizing `templateSettings`, if you don't want to define an
+  // interpolation, evaluation or escaping regex, we need one that is
+  // guaranteed not to match.
+  var noMatch = /(.)^/;
+
+  // Certain characters need to be escaped so that they can be put into a
+  // string literal.
+  var escapes = {
+    "'": "'",
+    '\\': '\\',
+    '\r': 'r',
+    '\n': 'n',
+    '\u2028': 'u2028',
+    '\u2029': 'u2029'
+  };
+
+  var escapeRegExp = /\\|'|\r|\n|\u2028|\u2029/g;
+
+  var escapeChar = function(match) {
+    return '\\' + escapes[match];
+  };
+
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  // NB: `oldSettings` only exists for backwards compatibility.
+  _.template = function(text, settings, oldSettings) {
+    if (!settings && oldSettings) settings = oldSettings;
+    settings = _.defaults({}, settings, _.templateSettings);
+
+    // Combine delimiters into one regular expression via alternation.
+    var matcher = RegExp([
+      (settings.escape || noMatch).source,
+      (settings.interpolate || noMatch).source,
+      (settings.evaluate || noMatch).source
+    ].join('|') + '|$', 'g');
+
+    // Compile the template source, escaping string literals appropriately.
+    var index = 0;
+    var source = "__p+='";
+    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
+      source += text.slice(index, offset).replace(escapeRegExp, escapeChar);
+      index = offset + match.length;
+
+      if (escape) {
+        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
+      } else if (interpolate) {
+        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
+      } else if (evaluate) {
+        source += "';\n" + evaluate + "\n__p+='";
+      }
+
+      // Adobe VMs need the match returned to produce the correct offset.
+      return match;
+    });
+    source += "';\n";
+
+    // If a variable is not specified, place data values in local scope.
+    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+
+    source = "var __t,__p='',__j=Array.prototype.join," +
+      "print=function(){__p+=__j.call(arguments,'');};\n" +
+      source + 'return __p;\n';
+
+    var render;
+    try {
+      render = new Function(settings.variable || 'obj', '_', source);
+    } catch (e) {
+      e.source = source;
+      throw e;
+    }
+
+    var template = function(data) {
+      return render.call(this, data, _);
+    };
+
+    // Provide the compiled source as a convenience for precompilation.
+    var argument = settings.variable || 'obj';
+    template.source = 'function(' + argument + '){\n' + source + '}';
+
+    return template;
+  };
+
+  // Add a "chain" function. Start chaining a wrapped Underscore object.
+  _.chain = function(obj) {
+    var instance = _(obj);
+    instance._chain = true;
+    return instance;
+  };
+
+  // OOP
+  // ---------------
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+
+  // Helper function to continue chaining intermediate results.
+  var chainResult = function(instance, obj) {
+    return instance._chain ? _(obj).chain() : obj;
+  };
+
+  // Add your own custom functions to the Underscore object.
+  _.mixin = function(obj) {
+    _.each(_.functions(obj), function(name) {
+      var func = _[name] = obj[name];
+      _.prototype[name] = function() {
+        var args = [this._wrapped];
+        push.apply(args, arguments);
+        return chainResult(this, func.apply(_, args));
+      };
+    });
+    return _;
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.mixin(_);
+
+  // Add all mutator Array functions to the wrapper.
+  _.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      var obj = this._wrapped;
+      method.apply(obj, arguments);
+      if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0];
+      return chainResult(this, obj);
+    };
+  });
+
+  // Add all accessor Array functions to the wrapper.
+  _.each(['concat', 'join', 'slice'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      return chainResult(this, method.apply(this._wrapped, arguments));
+    };
+  });
+
+  // Extracts the result from a wrapped and chained object.
+  _.prototype.value = function() {
+    return this._wrapped;
+  };
+
+  // Provide unwrapping proxy for some methods used in engine operations
+  // such as arithmetic and JSON stringification.
+  _.prototype.valueOf = _.prototype.toJSON = _.prototype.value;
+
+  _.prototype.toString = function() {
+    return String(this._wrapped);
+  };
+
+  // AMD registration happens at the end for compatibility with AMD loaders
+  // that may not enforce next-turn semantics on modules. Even though general
+  // practice for AMD registration is to be anonymous, underscore registers
+  // as a named module because, like jQuery, it is a base library that is
+  // popular enough to be bundled in a third party lib, but not be part of
+  // an AMD load request. Those cases could generate an error when an
+  // anonymous define() is called outside of a loader request.
+  if (typeof define == 'function' && define.amd) {
+    define('underscore', [], function() {
+      return _;
+    });
+  }
+}());
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})}, {}];

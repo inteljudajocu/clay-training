@@ -2,240 +2,292 @@ window.modules["452"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _declaration = require(483);
 
-var _lazyResult = require(441);
+var _declaration2 = _interopRequireDefault(_declaration);
 
-var _lazyResult2 = _interopRequireDefault(_lazyResult);
+var _processor = require(501);
+
+var _processor2 = _interopRequireDefault(_processor);
+
+var _stringify = require(492);
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _comment = require(481);
+
+var _comment2 = _interopRequireDefault(_comment);
+
+var _atRule = require(479);
+
+var _atRule2 = _interopRequireDefault(_atRule);
+
+var _vendor = require(500);
+
+var _vendor2 = _interopRequireDefault(_vendor);
+
+var _parse = require(484);
+
+var _parse2 = _interopRequireDefault(_parse);
+
+var _list = require(496);
+
+var _list2 = _interopRequireDefault(_list);
+
+var _rule = require(485);
+
+var _rule2 = _interopRequireDefault(_rule);
+
+var _root = require(486);
+
+var _root2 = _interopRequireDefault(_root);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 /**
- * Contains plugins to process CSS. Create one `Processor` instance,
- * initialize its plugins, and then use that instance on numerous CSS files.
+ * Create a new {@link Processor} instance that will apply `plugins`
+ * as CSS processors.
+ *
+ * @param {Array.<Plugin|pluginFunction>|Processor} plugins - PostCSS
+ *        plugins. See {@link Processor#use} for plugin format.
+ *
+ * @return {Processor} Processor to process multiple CSS
  *
  * @example
- * const processor = postcss([autoprefixer, precss]);
- * processor.process(css1).then(result => console.log(result.css));
- * processor.process(css2).then(result => console.log(result.css));
+ * import postcss from 'postcss';
+ *
+ * postcss(plugins).process(css, { from, to }).then(result => {
+ *   console.log(result.css);
+ * });
+ *
+ * @namespace postcss
  */
-var Processor = function () {
-
-  /**
-   * @param {Array.<Plugin|pluginFunction>|Processor} plugins - PostCSS
-   *        plugins. See {@link Processor#use} for plugin format.
-   */
-  function Processor() {
-    var plugins = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-
-    _classCallCheck(this, Processor);
-
-    /**
-     * @member {string} - Current PostCSS version.
-     *
-     * @example
-     * if ( result.processor.version.split('.')[0] !== '6' ) {
-     *   throw new Error('This plugin works only with PostCSS 6');
-     * }
-     */
-    this.version = '6.0.23';
-    /**
-     * @member {pluginFunction[]} - Plugins added to this processor.
-     *
-     * @example
-     * const processor = postcss([autoprefixer, precss]);
-     * processor.plugins.length //=> 2
-     */
-    this.plugins = this.normalize(plugins);
+function postcss() {
+  for (var _len = arguments.length, plugins = Array(_len), _key = 0; _key < _len; _key++) {
+    plugins[_key] = arguments[_key];
   }
 
-  /**
-   * Adds a plugin to be used as a CSS processor.
-   *
-   * PostCSS plugin can be in 4 formats:
-   * * A plugin created by {@link postcss.plugin} method.
-   * * A function. PostCSS will pass the function a @{link Root}
-   *   as the first argument and current {@link Result} instance
-   *   as the second.
-   * * An object with a `postcss` method. PostCSS will use that method
-   *   as described in #2.
-   * * Another {@link Processor} instance. PostCSS will copy plugins
-   *   from that instance into this one.
-   *
-   * Plugins can also be added by passing them as arguments when creating
-   * a `postcss` instance (see [`postcss(plugins)`]).
-   *
-   * Asynchronous plugins should return a `Promise` instance.
-   *
-   * @param {Plugin|pluginFunction|Processor} plugin - PostCSS plugin
-   *                                                   or {@link Processor}
-   *                                                   with plugins
-   *
-   * @example
-   * const processor = postcss()
-   *   .use(autoprefixer)
-   *   .use(precss);
-   *
-   * @return {Processes} current processor to make methods chain
-   */
+  if (plugins.length === 1 && Array.isArray(plugins[0])) {
+    plugins = plugins[0];
+  }
+  return new _processor2.default(plugins);
+}
 
-
-  Processor.prototype.use = function use(plugin) {
-    this.plugins = this.plugins.concat(this.normalize([plugin]));
-    return this;
+/**
+ * Creates a PostCSS plugin with a standard API.
+ *
+ * The newly-wrapped function will provide both the name and PostCSS
+ * version of the plugin.
+ *
+ * ```js
+ *  const processor = postcss([replace]);
+ *  processor.plugins[0].postcssPlugin  //=> 'postcss-replace'
+ *  processor.plugins[0].postcssVersion //=> '5.1.0'
+ * ```
+ *
+ * The plugin function receives 2 arguments: {@link Root}
+ * and {@link Result} instance. The function should mutate the provided
+ * `Root` node. Alternatively, you can create a new `Root` node
+ * and override the `result.root` property.
+ *
+ * ```js
+ * const cleaner = postcss.plugin('postcss-cleaner', () => {
+ *   return (root, result) => {
+ *     result.root = postcss.root();
+ *   };
+ * });
+ * ```
+ *
+ * As a convenience, plugins also expose a `process` method so that you can use
+ * them as standalone tools.
+ *
+ * ```js
+ * cleaner.process(css, processOpts, pluginOpts);
+ * // This is equivalent to:
+ * postcss([ cleaner(pluginOpts) ]).process(css, processOpts);
+ * ```
+ *
+ * Asynchronous plugins should return a `Promise` instance.
+ *
+ * ```js
+ * postcss.plugin('postcss-import', () => {
+ *   return (root, result) => {
+ *     return new Promise( (resolve, reject) => {
+ *       fs.readFile('base.css', (base) => {
+ *         root.prepend(base);
+ *         resolve();
+ *       });
+ *     });
+ *   };
+ * });
+ * ```
+ *
+ * Add warnings using the {@link Node#warn} method.
+ * Send data to other plugins using the {@link Result#messages} array.
+ *
+ * ```js
+ * postcss.plugin('postcss-caniuse-test', () => {
+ *   return (root, result) => {
+ *     root.walkDecls(decl => {
+ *       if ( !caniuse.support(decl.prop) ) {
+ *         decl.warn(result, 'Some browsers do not support ' + decl.prop);
+ *       }
+ *     });
+ *   };
+ * });
+ * ```
+ *
+ * @param {string} name          - PostCSS plugin name. Same as in `name`
+ *                                 property in `package.json`. It will be saved
+ *                                 in `plugin.postcssPlugin` property.
+ * @param {function} initializer - will receive plugin options
+ *                                 and should return {@link pluginFunction}
+ *
+ * @return {Plugin} PostCSS plugin
+ */
+postcss.plugin = function plugin(name, initializer) {
+  var creator = function creator() {
+    var transformer = initializer.apply(undefined, arguments);
+    transformer.postcssPlugin = name;
+    transformer.postcssVersion = new _processor2.default().version;
+    return transformer;
   };
 
-  /**
-   * Parses source CSS and returns a {@link LazyResult} Promise proxy.
-   * Because some plugins can be asynchronous it doesn’t make
-   * any transformations. Transformations will be applied
-   * in the {@link LazyResult} methods.
-   *
-   * @param {string|toString|Result} css - String with input CSS or
-   *                                       any object with a `toString()`
-   *                                       method, like a Buffer.
-   *                                       Optionally, send a {@link Result}
-   *                                       instance and the processor will
-   *                                       take the {@link Root} from it.
-   * @param {processOptions} [opts]      - options
-   *
-   * @return {LazyResult} Promise proxy
-   *
-   * @example
-   * processor.process(css, { from: 'a.css', to: 'a.out.css' })
-   *   .then(result => {
-   *      console.log(result.css);
-   *   });
-   */
-
-
-  Processor.prototype.process = function process(css) {
-    var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    return new _lazyResult2.default(this, css, opts);
-  };
-
-  Processor.prototype.normalize = function normalize(plugins) {
-    var normalized = [];
-    for (var _iterator = plugins, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-      var _ref;
-
-      if (_isArray) {
-        if (_i >= _iterator.length) break;
-        _ref = _iterator[_i++];
-      } else {
-        _i = _iterator.next();
-        if (_i.done) break;
-        _ref = _i.value;
-      }
-
-      var i = _ref;
-
-      if (i.postcss) i = i.postcss;
-
-      if ((typeof i === 'undefined' ? 'undefined' : _typeof(i)) === 'object' && Array.isArray(i.plugins)) {
-        normalized = normalized.concat(i.plugins);
-      } else if (typeof i === 'function') {
-        normalized.push(i);
-      } else if ((typeof i === 'undefined' ? 'undefined' : _typeof(i)) === 'object' && (i.parse || i.stringify)) {
-        throw new Error('PostCSS syntaxes cannot be used as plugins. ' + 'Instead, please use one of the ' + 'syntax/parser/stringifier options as ' + 'outlined in your PostCSS ' + 'runner documentation.');
-      } else {
-        throw new Error(i + ' is not a PostCSS plugin');
-      }
+  var cache = void 0;
+  Object.defineProperty(creator, 'postcss', {
+    get: function get() {
+      if (!cache) cache = creator();
+      return cache;
     }
-    return normalized;
+  });
+
+  creator.process = function (css, processOpts, pluginOpts) {
+    return postcss([creator(pluginOpts)]).process(css, processOpts);
   };
 
-  return Processor;
-}();
-
-exports.default = Processor;
+  return creator;
+};
 
 /**
- * @callback builder
- * @param {string} part          - part of generated CSS connected to this node
- * @param {Node}   node          - AST node
- * @param {"start"|"end"} [type] - node’s part type
- */
-
-/**
- * @callback parser
- *
- * @param {string|toString} css   - string with input CSS or any object
- *                                  with toString() method, like a Buffer
- * @param {processOptions} [opts] - options with only `from` and `map` keys
- *
- * @return {Root} PostCSS AST
- */
-
-/**
- * @callback stringifier
+ * Default function to convert a node tree into a CSS string.
  *
  * @param {Node} node       - start node for stringifing. Usually {@link Root}.
  * @param {builder} builder - function to concatenate CSS from node’s parts
  *                            or generate string and source map
  *
  * @return {void}
+ *
+ * @function
  */
+postcss.stringify = _stringify2.default;
 
 /**
- * @typedef {object} syntax
- * @property {parser} parse          - function to generate AST by string
- * @property {stringifier} stringify - function to generate string by AST
+ * Parses source css and returns a new {@link Root} node,
+ * which contains the source CSS nodes.
+ *
+ * @param {string|toString} css   - string with input CSS or any object
+ *                                  with toString() method, like a Buffer
+ * @param {processOptions} [opts] - options with only `from` and `map` keys
+ *
+ * @return {Root} PostCSS AST
+ *
+ * @example
+ * // Simple CSS concatenation with source map support
+ * const root1 = postcss.parse(css1, { from: file1 });
+ * const root2 = postcss.parse(css2, { from: file2 });
+ * root1.append(root2).toResult().css;
+ *
+ * @function
  */
+postcss.parse = _parse2.default;
 
 /**
- * @typedef {object} toString
- * @property {function} toString
+ * @member {vendor} - Contains the {@link vendor} module.
+ *
+ * @example
+ * postcss.vendor.unprefixed('-moz-tab') //=> ['tab']
  */
+postcss.vendor = _vendor2.default;
 
 /**
- * @callback pluginFunction
- * @param {Root} root     - parsed input CSS
- * @param {Result} result - result to set warnings or check other plugins
+ * @member {list} - Contains the {@link list} module.
+ *
+ * @example
+ * postcss.list.space('5px calc(10% + 5px)') //=> ['5px', 'calc(10% + 5px)']
  */
+postcss.list = _list2.default;
 
 /**
- * @typedef {object} Plugin
- * @property {function} postcss - PostCSS plugin function
+ * Creates a new {@link Comment} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Comment} new Comment node
+ *
+ * @example
+ * postcss.comment({ text: 'test' })
  */
+postcss.comment = function (defaults) {
+  return new _comment2.default(defaults);
+};
 
 /**
- * @typedef {object} processOptions
- * @property {string} from             - the path of the CSS source file.
- *                                       You should always set `from`,
- *                                       because it is used in source map
- *                                       generation and syntax error messages.
- * @property {string} to               - the path where you’ll put the output
- *                                       CSS file. You should always set `to`
- *                                       to generate correct source maps.
- * @property {parser} parser           - function to generate AST by string
- * @property {stringifier} stringifier - class to generate string by AST
- * @property {syntax} syntax           - object with `parse` and `stringify`
- * @property {object} map              - source map options
- * @property {boolean} map.inline                    - does source map should
- *                                                     be embedded in the output
- *                                                     CSS as a base64-encoded
- *                                                     comment
- * @property {string|object|false|function} map.prev - source map content
- *                                                     from a previous
- *                                                     processing step
- *                                                     (for example, Sass).
- *                                                     PostCSS will try to find
- *                                                     previous map
- *                                                     automatically, so you
- *                                                     could disable it by
- *                                                     `false` value.
- * @property {boolean} map.sourcesContent            - does PostCSS should set
- *                                                     the origin content to map
- * @property {string|false} map.annotation           - does PostCSS should set
- *                                                     annotation comment to map
- * @property {string} map.from                       - override `from` in map’s
- *                                                     `sources`
+ * Creates a new {@link AtRule} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {AtRule} new AtRule node
+ *
+ * @example
+ * postcss.atRule({ name: 'charset' }).toString() //=> "@charset"
  */
+postcss.atRule = function (defaults) {
+  return new _atRule2.default(defaults);
+};
 
+/**
+ * Creates a new {@link Declaration} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Declaration} new Declaration node
+ *
+ * @example
+ * postcss.decl({ prop: 'color', value: 'red' }).toString() //=> "color: red"
+ */
+postcss.decl = function (defaults) {
+  return new _declaration2.default(defaults);
+};
+
+/**
+ * Creates a new {@link Rule} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Rule} new Rule node
+ *
+ * @example
+ * postcss.rule({ selector: 'a' }).toString() //=> "a {\n}"
+ */
+postcss.rule = function (defaults) {
+  return new _rule2.default(defaults);
+};
+
+/**
+ * Creates a new {@link Root} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Root} new Root node
+ *
+ * @example
+ * postcss.root({ after: '\n' }).toString() //=> "\n"
+ */
+postcss.root = function (defaults) {
+  return new _root2.default(defaults);
+};
+
+exports.default = postcss;
 module.exports = exports['default'];
 
-}, {"441":441}];
+}, {"479":479,"481":481,"483":483,"484":484,"485":485,"486":486,"492":492,"496":496,"500":500,"501":501}];

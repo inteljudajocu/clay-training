@@ -1,27 +1,14 @@
 window.modules["342"] = [function(require,module,exports){/**
- * Creates a function that returns `value`.
+ * Checks if a `cache` value for `key` exists.
  *
- * @static
- * @memberOf _
- * @since 2.4.0
- * @category Util
- * @param {*} value The value to return from the new function.
- * @returns {Function} Returns the new constant function.
- * @example
- *
- * var objects = _.times(2, _.constant({ 'a': 1 }));
- *
- * console.log(objects);
- * // => [{ 'a': 1 }, { 'a': 1 }]
- *
- * console.log(objects[0] === objects[1]);
- * // => true
+ * @private
+ * @param {Object} cache The cache to query.
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function constant(value) {
-  return function() {
-    return value;
-  };
+function cacheHas(cache, key) {
+  return cache.has(key);
 }
 
-module.exports = constant;
+module.exports = cacheHas;
 }, {}];

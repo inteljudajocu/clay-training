@@ -1,71 +1,30 @@
 window.modules["651"] = [function(require,module,exports){'use strict';
 
-var moment = require(385);
+var truncate = require(216);
 /**
- * Format date <10-07-2017> to <October 7>
- * or <10-07-2017 && 11-08-2017> to <October 7-November 8, 2017>
+ * truncateText
  *
- * @param {string} dateFrom - Beginning date.
- * @param {string} dateTo - Ending date.
- * @param {string} [format] - Format for parsing date // Full Month Name, Day number, Full Year.
- * @returns {string} formatted Date.
+ * Truncates text or text + HTML at a specified limit without breaking up inner HTML tags. If the text is truncated, return a button with the shortened and full text
+ * (expansion behavior should be handled in client-side js and showing/hiding should be handled in css)
  *
- * Note (c.g. 2017-11-22): Since we're not passing the hour moment
- * is returning a day less so for avoiding this we need to set
- * the hours in this case 24.
+ * @param {String} innerText the contents of the element to expand. Can be text or a mix of HTML + text
+ * @param {Number} limit where in the string to start truncation
+ * @returns {String} truncated HTML
  */
 
 
-function formatDateRange() {
-  var dateFrom = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-  var dateTo = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-  var format = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'MMMM D, YYYY';
+function truncateText(innerText, limit) {
+  var truncated = truncate(innerText, limit);
+  var fullText;
 
-  if (dateTo && dateFrom) {
-    return "".concat(moment(new Date(dateFrom).setHours(24)).format('MMMM D'), "-").concat(moment(new Date(dateTo).setHours(24)).format(format));
-  } else if (!dateTo && dateFrom) {
-    return "".concat(moment(new Date(dateFrom).setHours(24)).format(format));
+  if (truncated.length !== innerText.length) {
+    fullText = "\n    <div class=\"attribution truncated\">\n      <span class=\"shortened\">".concat(truncated, " <button class=\"more-trigger\">more</button></span>\n      <span class=\"full\">").concat(innerText, "</span>\n    </div>\n    ");
   } else {
-    return '';
-  }
-}
-
-function secondsToISO(seconds) {
-  return moment.duration(seconds, 'seconds').toISOString();
-}
-/**
- * Returns true if article was published within the past 24 hrs.
- * @function
- * @param {Object} date - The date the article was published.
- * @returns {boolean}
- */
-
-
-function isPublished24HrsAgo(date) {
-  var pubWithin24Hrs = false,
-      articleDate = moment(new Date(date)).valueOf(),
-      now = moment().valueOf();
-
-  if (now - articleDate <= 24 * 60 * 60 * 1000) {
-    pubWithin24Hrs = true;
+    fullText = "\n    <div class=\"attribution\">\n      <span class=\"full\">".concat(innerText, "</span>\n    </div>\n    ");
   }
 
-  return pubWithin24Hrs;
-}
-/**
- * Returns "X hours ago" timestamp of when article was published
- * @function
- * @param {Object} date - The date the article was published.
- * @return {string}
- */
-
-
-function hrsOnlyTimestamp(date) {
-  return moment().format('H') - moment(date).format('H') + ' hours ago';
+  return fullText;
 }
 
-module.exports.formatDateRange = formatDateRange;
-module.exports.secondsToISO = secondsToISO;
-module.exports.isPublished24HrsAgo = isPublished24HrsAgo;
-module.exports.hrsOnlyTimestamp = hrsOnlyTimestamp;
-}, {"385":385}];
+module.exports = truncateText;
+}, {"216":216}];

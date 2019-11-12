@@ -1,15 +1,41 @@
-window.modules["345"] = [function(require,module,exports){/**
- * The base implementation of `_.unary` without support for storing metadata.
+window.modules["345"] = [function(require,module,exports){var assignValue = require(277),
+    baseAssignValue = require(279);
+
+/**
+ * Copies properties of `source` to `object`.
  *
  * @private
- * @param {Function} func The function to cap arguments for.
- * @returns {Function} Returns the new capped function.
+ * @param {Object} source The object to copy properties from.
+ * @param {Array} props The property identifiers to copy.
+ * @param {Object} [object={}] The object to copy properties to.
+ * @param {Function} [customizer] The function to customize copied values.
+ * @returns {Object} Returns `object`.
  */
-function baseUnary(func) {
-  return function(value) {
-    return func(value);
-  };
+function copyObject(source, props, object, customizer) {
+  var isNew = !object;
+  object || (object = {});
+
+  var index = -1,
+      length = props.length;
+
+  while (++index < length) {
+    var key = props[index];
+
+    var newValue = customizer
+      ? customizer(object[key], source[key], key, object, source)
+      : undefined;
+
+    if (newValue === undefined) {
+      newValue = source[key];
+    }
+    if (isNew) {
+      baseAssignValue(object, key, newValue);
+    } else {
+      assignValue(object, key, newValue);
+    }
+  }
+  return object;
 }
 
-module.exports = baseUnary;
-}, {}];
+module.exports = copyObject;
+}, {"277":277,"279":279}];

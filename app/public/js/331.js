@@ -1,25 +1,17 @@
-window.modules["331"] = [function(require,module,exports){var isStrictComparable = require(333),
-    keys = require(293);
+window.modules["331"] = [function(require,module,exports){var baseGet = require(289);
 
 /**
- * Gets the property names, values, and compare flags of `object`.
+ * A specialized version of `baseProperty` which supports deep paths.
  *
  * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the match data of `object`.
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
  */
-function getMatchData(object) {
-  var result = keys(object),
-      length = result.length;
-
-  while (length--) {
-    var key = result[length],
-        value = object[key];
-
-    result[length] = [key, value, isStrictComparable(value)];
-  }
-  return result;
+function basePropertyDeep(path) {
+  return function(object) {
+    return baseGet(object, path);
+  };
 }
 
-module.exports = getMatchData;
-}, {"293":293,"333":333}];
+module.exports = basePropertyDeep;
+}, {"289":289}];

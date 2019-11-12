@@ -1,119 +1,164 @@
-window.modules["542"] = [function(require,module,exports){"use strict";
+window.modules["542"] = [function(require,module,exports){(function (Buffer){
+"use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _container = _interopRequireDefault(require(539));
+var _sourceMap = _interopRequireDefault(require(444));
 
-var _list = _interopRequireDefault(require(551));
+var _path = _interopRequireDefault(require(381));
+
+var _fs = _interopRequireDefault(require(19));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
-
+function fromBase64(str) {
+  if (Buffer) {
+    return Buffer.from(str, 'base64').toString();
+  } else {
+    return window.atob(str);
+  }
+}
 /**
- * Represents a CSS rule: a selector followed by a declaration block.
+ * Source map information from input CSS.
+ * For example, source map after Sass compiler.
  *
- * @extends Container
+ * This class will automatically find source map in input CSS or in file system
+ * near input file (according `from` option).
  *
  * @example
- * const root = postcss.parse('a{}')
- * const rule = root.first
- * rule.type       //=> 'rule'
- * rule.toString() //=> 'a{}'
+ * const root = postcss.parse(css, { from: 'a.sass.css' })
+ * root.input.map //=> PreviousMap
  */
-var Rule =
+
+
+var PreviousMap =
 /*#__PURE__*/
-function (_Container) {
-  _inheritsLoose(Rule, _Container);
+function () {
+  /**
+   * @param {string}         css    Input CSS source.
+   * @param {processOptions} [opts] {@link Processor#process} options.
+   */
+  function PreviousMap(css, opts) {
+    this.loadAnnotation(css);
+    /**
+     * Was source map inlined by data-uri to input CSS.
+     *
+     * @type {boolean}
+     */
 
-  function Rule(defaults) {
-    var _this;
-
-    _this = _Container.call(this, defaults) || this;
-    _this.type = 'rule';
-    if (!_this.nodes) _this.nodes = [];
-    return _this;
+    this.inline = this.startWith(this.annotation, 'data:');
+    var prev = opts.map ? opts.map.prev : undefined;
+    var text = this.loadMap(opts.from, prev);
+    if (text) this.text = text;
   }
   /**
-   * An array containing the rule’s individual selectors.
-   * Groups of selectors are split at commas.
+   * Create a instance of `SourceMapGenerator` class
+   * from the `source-map` library to work with source map information.
    *
-   * @type {string[]}
+   * It is lazy method, so it will create object only on first call
+   * and then it will use cache.
    *
-   * @example
-   * const root = postcss.parse('a, b { }')
-   * const rule = root.first
-   *
-   * rule.selector  //=> 'a, b'
-   * rule.selectors //=> ['a', 'b']
-   *
-   * rule.selectors = ['a', 'strong']
-   * rule.selector //=> 'a, strong'
+   * @return {SourceMapGenerator} Object with source map information.
    */
 
 
-  _createClass(Rule, [{
-    key: "selectors",
-    get: function get() {
-      return _list.default.comma(this.selector);
-    },
-    set: function set(values) {
-      var match = this.selector ? this.selector.match(/,\s*/) : null;
-      var sep = match ? match[0] : ',' + this.raw('between', 'beforeOpen');
-      this.selector = values.join(sep);
+  var _proto = PreviousMap.prototype;
+
+  _proto.consumer = function consumer() {
+    if (!this.consumerCache) {
+      this.consumerCache = new _sourceMap.default.SourceMapConsumer(this.text);
     }
-    /**
-     * @memberof Rule#
-     * @member {string} selector The rule’s full selector represented
-     *                           as a string.
-     *
-     * @example
-     * const root = postcss.parse('a, b { }')
-     * const rule = root.first
-     * rule.selector //=> 'a, b'
-     */
 
-    /**
-     * @memberof Rule#
-     * @member {object} raws Information to generate byte-to-byte equal
-     *                       node string as it was in the origin input.
-     *
-     * Every parser saves its own properties,
-     * but the default CSS parser uses:
-     *
-     * * `before`: the space symbols before the node. It also stores `*`
-     *   and `_` symbols before the declaration (IE hack).
-     * * `after`: the space symbols after the last child of the node
-     *   to the end of the node.
-     * * `between`: the symbols between the property and value
-     *   for declarations, selector and `{` for rules, or last parameter
-     *   and `{` for at-rules.
-     * * `semicolon`: contains `true` if the last child has
-     *   an (optional) semicolon.
-     * * `ownSemicolon`: contains `true` if there is semicolon after rule.
-     *
-     * PostCSS cleans selectors from comments and extra spaces,
-     * but it stores origin content in raws properties.
-     * As such, if you don’t change a declaration’s value,
-     * PostCSS will use the raw value with comments.
-     *
-     * @example
-     * const root = postcss.parse('a {\n  color:black\n}')
-     * root.first.first.raws //=> { before: '', between: ' ', after: '\n' }
-     */
+    return this.consumerCache;
+  }
+  /**
+   * Does source map contains `sourcesContent` with input source text.
+   *
+   * @return {boolean} Is `sourcesContent` present.
+   */
+  ;
 
-  }]);
+  _proto.withContent = function withContent() {
+    return !!(this.consumer().sourcesContent && this.consumer().sourcesContent.length > 0);
+  };
 
-  return Rule;
-}(_container.default);
+  _proto.startWith = function startWith(string, start) {
+    if (!string) return false;
+    return string.substr(0, start.length) === start;
+  };
 
-var _default = Rule;
+  _proto.loadAnnotation = function loadAnnotation(css) {
+    var match = css.match(/\/\*\s*# sourceMappingURL=(.*)\s*\*\//);
+    if (match) this.annotation = match[1].trim();
+  };
+
+  _proto.decodeInline = function decodeInline(text) {
+    var baseCharsetUri = /^data:application\/json;charset=utf-?8;base64,/;
+    var baseUri = /^data:application\/json;base64,/;
+    var uri = 'data:application/json,';
+
+    if (this.startWith(text, uri)) {
+      return decodeURIComponent(text.substr(uri.length));
+    }
+
+    if (baseCharsetUri.test(text) || baseUri.test(text)) {
+      return fromBase64(text.substr(RegExp.lastMatch.length));
+    }
+
+    var encoding = text.match(/data:application\/json;([^,]+),/)[1];
+    throw new Error('Unsupported source map encoding ' + encoding);
+  };
+
+  _proto.loadMap = function loadMap(file, prev) {
+    if (prev === false) return false;
+
+    if (prev) {
+      if (typeof prev === 'string') {
+        return prev;
+      } else if (typeof prev === 'function') {
+        var prevPath = prev(file);
+
+        if (prevPath && _fs.default.existsSync && _fs.default.existsSync(prevPath)) {
+          return _fs.default.readFileSync(prevPath, 'utf-8').toString().trim();
+        } else {
+          throw new Error('Unable to load previous source map: ' + prevPath.toString());
+        }
+      } else if (prev instanceof _sourceMap.default.SourceMapConsumer) {
+        return _sourceMap.default.SourceMapGenerator.fromSourceMap(prev).toString();
+      } else if (prev instanceof _sourceMap.default.SourceMapGenerator) {
+        return prev.toString();
+      } else if (this.isMap(prev)) {
+        return JSON.stringify(prev);
+      } else {
+        throw new Error('Unsupported previous source map format: ' + prev.toString());
+      }
+    } else if (this.inline) {
+      return this.decodeInline(this.annotation);
+    } else if (this.annotation) {
+      var map = this.annotation;
+      if (file) map = _path.default.join(_path.default.dirname(file), map);
+      this.root = _path.default.dirname(map);
+
+      if (_fs.default.existsSync && _fs.default.existsSync(map)) {
+        return _fs.default.readFileSync(map, 'utf-8').toString().trim();
+      } else {
+        return false;
+      }
+    }
+  };
+
+  _proto.isMap = function isMap(map) {
+    if (typeof map !== 'object') return false;
+    return typeof map.mappings === 'string' || typeof map._mappings === 'string';
+  };
+
+  return PreviousMap;
+}();
+
+var _default = PreviousMap;
 exports.default = _default;
 module.exports = exports.default;
 
-}, {"539":539,"551":551}];
+
+}).call(this,require(21).Buffer)}, {"19":19,"21":21,"381":381,"444":444}];

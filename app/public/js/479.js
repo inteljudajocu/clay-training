@@ -1,91 +1,132 @@
 window.modules["479"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.universal = exports.tag = exports.string = exports.selector = exports.root = exports.pseudo = exports.nesting = exports.id = exports.comment = exports.combinator = exports.className = exports.attribute = undefined;
 
-var _attribute = require(470);
+var _container = require(480);
 
-var _attribute2 = _interopRequireDefault(_attribute);
-
-var _className = require(472);
-
-var _className2 = _interopRequireDefault(_className);
-
-var _combinator = require(465);
-
-var _combinator2 = _interopRequireDefault(_combinator);
-
-var _comment = require(467);
-
-var _comment2 = _interopRequireDefault(_comment);
-
-var _id = require(474);
-
-var _id2 = _interopRequireDefault(_id);
-
-var _nesting = require(466);
-
-var _nesting2 = _interopRequireDefault(_nesting);
-
-var _pseudo = require(475);
-
-var _pseudo2 = _interopRequireDefault(_pseudo);
-
-var _root = require(473);
-
-var _root2 = _interopRequireDefault(_root);
-
-var _selector = require(471);
-
-var _selector2 = _interopRequireDefault(_selector);
-
-var _string = require(464);
-
-var _string2 = _interopRequireDefault(_string);
-
-var _tag = require(469);
-
-var _tag2 = _interopRequireDefault(_tag);
-
-var _universal = require(468);
-
-var _universal2 = _interopRequireDefault(_universal);
+var _container2 = _interopRequireDefault(_container);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var attribute = exports.attribute = function attribute(opts) {
-  return new _attribute2.default(opts);
-};
-var className = exports.className = function className(opts) {
-  return new _className2.default(opts);
-};
-var combinator = exports.combinator = function combinator(opts) {
-  return new _combinator2.default(opts);
-};
-var comment = exports.comment = function comment(opts) {
-  return new _comment2.default(opts);
-};
-var id = exports.id = function id(opts) {
-  return new _id2.default(opts);
-};
-var nesting = exports.nesting = function nesting(opts) {
-  return new _nesting2.default(opts);
-};
-var pseudo = exports.pseudo = function pseudo(opts) {
-  return new _pseudo2.default(opts);
-};
-var root = exports.root = function root(opts) {
-  return new _root2.default(opts);
-};
-var selector = exports.selector = function selector(opts) {
-  return new _selector2.default(opts);
-};
-var string = exports.string = function string(opts) {
-  return new _string2.default(opts);
-};
-var tag = exports.tag = function tag(opts) {
-  return new _tag2.default(opts);
-};
-var universal = exports.universal = function universal(opts) {
-  return new _universal2.default(opts);
-};}, {"464":464,"465":465,"466":466,"467":467,"468":468,"469":469,"470":470,"471":471,"472":472,"473":473,"474":474,"475":475}];
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Represents an at-rule.
+ *
+ * If it’s followed in the CSS by a {} block, this node will have
+ * a nodes property representing its children.
+ *
+ * @extends Container
+ *
+ * @example
+ * const root = postcss.parse('@charset "UTF-8"; @media print {}');
+ *
+ * const charset = root.first;
+ * charset.type  //=> 'atrule'
+ * charset.nodes //=> undefined
+ *
+ * const media = root.last;
+ * media.nodes   //=> []
+ */
+var AtRule = function (_Container) {
+  _inherits(AtRule, _Container);
+
+  function AtRule(defaults) {
+    _classCallCheck(this, AtRule);
+
+    var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
+
+    _this.type = 'atrule';
+    return _this;
+  }
+
+  AtRule.prototype.append = function append() {
+    var _Container$prototype$;
+
+    if (!this.nodes) this.nodes = [];
+
+    for (var _len = arguments.length, children = Array(_len), _key = 0; _key < _len; _key++) {
+      children[_key] = arguments[_key];
+    }
+
+    return (_Container$prototype$ = _Container.prototype.append).call.apply(_Container$prototype$, [this].concat(children));
+  };
+
+  AtRule.prototype.prepend = function prepend() {
+    var _Container$prototype$2;
+
+    if (!this.nodes) this.nodes = [];
+
+    for (var _len2 = arguments.length, children = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      children[_key2] = arguments[_key2];
+    }
+
+    return (_Container$prototype$2 = _Container.prototype.prepend).call.apply(_Container$prototype$2, [this].concat(children));
+  };
+
+  /**
+   * @memberof AtRule#
+   * @member {string} name - the at-rule’s name immediately follows the `@`
+   *
+   * @example
+   * const root  = postcss.parse('@media print {}');
+   * media.name //=> 'media'
+   * const media = root.first;
+   */
+
+  /**
+   * @memberof AtRule#
+   * @member {string} params - the at-rule’s parameters, the values
+   *                           that follow the at-rule’s name but precede
+   *                           any {} block
+   *
+   * @example
+   * const root  = postcss.parse('@media print, screen {}');
+   * const media = root.first;
+   * media.params //=> 'print, screen'
+   */
+
+  /**
+   * @memberof AtRule#
+   * @member {object} raws - Information to generate byte-to-byte equal
+   *                         node string as it was in the origin input.
+   *
+   * Every parser saves its own properties,
+   * but the default CSS parser uses:
+   *
+   * * `before`: the space symbols before the node. It also stores `*`
+   *   and `_` symbols before the declaration (IE hack).
+   * * `after`: the space symbols after the last child of the node
+   *   to the end of the node.
+   * * `between`: the symbols between the property and value
+   *   for declarations, selector and `{` for rules, or last parameter
+   *   and `{` for at-rules.
+   * * `semicolon`: contains true if the last child has
+   *   an (optional) semicolon.
+   * * `afterName`: the space between the at-rule name and its parameters.
+   *
+   * PostCSS cleans at-rule parameters from comments and extra spaces,
+   * but it stores origin content in raws properties.
+   * As such, if you don’t change a declaration’s value,
+   * PostCSS will use the raw value with comments.
+   *
+   * @example
+   * const root = postcss.parse('  @media\nprint {\n}')
+   * root.first.first.raws //=> { before: '  ',
+   *                       //     between: ' ',
+   *                       //     afterName: '\n',
+   *                       //     after: '\n' }
+   */
+
+
+  return AtRule;
+}(_container2.default);
+
+exports.default = AtRule;
+module.exports = exports['default'];
+
+}, {"480":480}];

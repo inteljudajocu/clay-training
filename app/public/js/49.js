@@ -1,17 +1,18 @@
 window.modules["49"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(58),
-  isLayout = require(53),
-  getLayoutInstance = require(57);
+const isUriStringCheck = require(50);
 
 /**
- * First test if argument is a String. If true, test if '/_layouts/:name/instances/:id/meta' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
+ * First test if argument passed in is a String. If true, get layout instance
+ * from uri without the layout version. Otherwise, throw an error.
+ * @example /_layouts/text/instances/0@published returns 0
+ * @param  {string} uri
+ * @return {string|null}
  */
 module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return isLayout(uri) && !!getLayoutInstance(uri) && !!uri.match(/\/meta$/i);
+  const result = /\/_layouts\/.+?\/instances\/([^\.\/@]+)/.exec(uri);
+
+  return result && result[1];
 };
-}, {"53":53,"57":57,"58":58}];
+}, {"50":50}];

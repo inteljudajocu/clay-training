@@ -1,32 +1,105 @@
-window.modules["414"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
-    var prev = item.prev;
-    var next = item.next;
+window.modules["414"] = [function(require,module,exports){var List = require(57).List;
+var resolveKeyword = require(57).keyword;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var walkRulesRight = require(57).walkRulesRight;
 
-    if (next !== null) {
-        if (next.data.type === 'WhiteSpace' && (prev === null || prev.data.type === 'WhiteSpace')) {
-            list.remove(next);
-        }
-    } else if (prev !== null && prev.data.type === 'WhiteSpace') {
-        list.remove(prev);
+function addRuleToMap(map, item, list, single) {
+    var node = item.data;
+    var name = resolveKeyword(node.name).name;
+    var id = node.name.toLowerCase() + '/' + (node.prelude ? node.prelude.id : null);
+
+    if (!hasOwnProperty.call(map, name)) {
+        map[name] = Object.create(null);
     }
 
-    list.remove(item);
+    if (single) {
+        delete map[name][id];
+    }
+
+    if (!hasOwnProperty.call(map[name], id)) {
+        map[name][id] = new List();
+    }
+
+    map[name][id].append(list.remove(item));
 }
 
-module.exports = function compressBorder(node) {
-    node.children.each(function(node, item, list) {
-        if (node.type === 'Identifier' && node.name.toLowerCase() === 'none') {
-            if (list.head === list.tail) {
-                // replace `none` for zero when `none` is a single term
-                item.data = {
-                    type: 'Number',
-                    loc: node.loc,
-                    value: '0'
-                };
-            } else {
-                removeItemAndRedundantWhiteSpace(list, item);
+function relocateAtrules(ast, options) {
+    var collected = Object.create(null);
+    var topInjectPoint = null;
+
+    ast.children.each(function(node, item, list) {
+        if (node.type === 'Atrule') {
+            var keyword = resolveKeyword(node.name);
+
+            switch (keyword.name) {
+                case 'keyframes':
+                    addRuleToMap(collected, item, list, true);
+                    return;
+
+                case 'media':
+                    if (options.forceMediaMerge) {
+                        addRuleToMap(collected, item, list, false);
+                        return;
+                    }
+                    break;
+            }
+
+            if (topInjectPoint === null &&
+                keyword.name !== 'charset' &&
+                keyword.name !== 'import') {
+                topInjectPoint = item;
+            }
+        } else {
+            if (topInjectPoint === null) {
+                topInjectPoint = item;
             }
         }
     });
+
+    for (var atrule in collected) {
+        for (var id in collected[atrule]) {
+            ast.children.insertList(collected[atrule][id], atrule === 'media' ? null : topInjectPoint);
+        }
+    }
 };
-}, {}];
+
+function isMediaRule(node) {
+    return node.type === 'Atrule' && node.name === 'media';
+}
+
+function processAtrule(node, item, list) {
+    if (!isMediaRule(node)) {
+        return;
+    }
+
+    var prev = item.prev && item.prev.data;
+
+    if (!prev || !isMediaRule(prev)) {
+        return;
+    }
+
+    // merge @media with same query
+    if (node.prelude &&
+        prev.prelude &&
+        node.prelude.id === prev.prelude.id) {
+        prev.block.children.appendList(node.block.children);
+        list.remove(item);
+
+        // TODO: use it when we can refer to several points in source
+        // prev.loc = {
+        //     primary: prev.loc,
+        //     merged: node.loc
+        // };
+    }
+}
+
+module.exports = function rejoinAtrule(ast, options) {
+    relocateAtrules(ast, options);
+
+    walkRulesRight(ast, function(node, item, list) {
+        if (node.type === 'Atrule') {
+            processAtrule(node, item, list);
+        }
+    });
+};
+}, {"57":57}];

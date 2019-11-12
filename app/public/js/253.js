@@ -1,19 +1,28 @@
-window.modules["253"] = [function(require,module,exports){var getMapData = require(359);
+window.modules["253"] = [function(require,module,exports){var MapCache = require(245),
+    setCacheAdd = require(255),
+    setCacheHas = require(254);
 
 /**
- * Removes `key` and its value from the map.
+ *
+ * Creates an array cache object to store unique values.
  *
  * @private
- * @name delete
- * @memberOf MapCache
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ * @constructor
+ * @param {Array} [values] The values to cache.
  */
-function mapCacheDelete(key) {
-  var result = getMapData(this, key)['delete'](key);
-  this.size -= result ? 1 : 0;
-  return result;
+function SetCache(values) {
+  var index = -1,
+      length = values == null ? 0 : values.length;
+
+  this.__data__ = new MapCache;
+  while (++index < length) {
+    this.add(values[index]);
+  }
 }
 
-module.exports = mapCacheDelete;
-}, {"359":359}];
+// Add methods to `SetCache`.
+SetCache.prototype.add = SetCache.prototype.push = setCacheAdd;
+SetCache.prototype.has = setCacheHas;
+
+module.exports = SetCache;
+}, {"245":245,"254":254,"255":255}];

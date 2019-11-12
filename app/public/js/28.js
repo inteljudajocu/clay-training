@@ -1,54 +1,18 @@
-window.modules["28"] = [function(require,module,exports){var baseIndexOf = require(302),
-    isArrayLike = require(329),
-    isString = require(371),
-    toInteger = require(373),
-    values = require(372);
+window.modules["28"] = [function(require,module,exports){'use strict';
 
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeMax = Math.max;
+const isUriStringCheck = require(50);
 
 /**
- * Checks if `value` is in `collection`. If `collection` is a string, it's
- * checked for a substring of `value`, otherwise
- * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
- * is used for equality comparisons. If `fromIndex` is negative, it's used as
- * the offset from the end of `collection`.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Collection
- * @param {Array|Object|string} collection The collection to inspect.
- * @param {*} value The value to search for.
- * @param {number} [fromIndex=0] The index to search from.
- * @param- {Object} [guard] Enables use as an iteratee for methods like `_.reduce`.
- * @returns {boolean} Returns `true` if `value` is found, else `false`.
- * @example
- *
- * _.includes([1, 2, 3], 1);
- * // => true
- *
- * _.includes([1, 2, 3], 1, 2);
- * // => false
- *
- * _.includes({ 'a': 1, 'b': 2 }, 1);
- * // => true
- *
- * _.includes('abcd', 'bc');
- * // => true
+ * First test if the argument passed in is a String. If true, get page version from uri.
+ * Otherwise throw an error.
+ * @example /_pages/foo/@published returns published
+ * @param  {string} uri
+ * @return {string|null}
  */
-function includes(collection, value, fromIndex, guard) {
-  collection = isArrayLike(collection) ? collection : values(collection);
-  fromIndex = (fromIndex && !guard) ? toInteger(fromIndex) : 0;
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  const result = /\/_pages\/.+?@(.+)/.exec(uri);
 
-  var length = collection.length;
-  if (fromIndex < 0) {
-    fromIndex = nativeMax(length + fromIndex, 0);
-  }
-  return isString(collection)
-    ? (fromIndex <= length && collection.indexOf(value, fromIndex) > -1)
-    : (!!length && baseIndexOf(collection, value, fromIndex) > -1);
-}
-
-module.exports = includes;
-}, {"302":302,"329":329,"371":371,"372":372,"373":373}];
+  return result && result[1];
+};
+}, {"50":50}];

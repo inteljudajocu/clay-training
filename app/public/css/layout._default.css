@@ -27,10 +27,6 @@ html {
   text-rendering: optimizelegibility;
 }
 
-::-moz-selection {
-  background-color: #e7e7e7;
-}
-
 ::selection {
   background-color: #e7e7e7;
 }

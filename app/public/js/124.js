@@ -1,53 +1,35 @@
-window.modules["124"] = [function(require,module,exports){// https://drafts.csswg.org/css-syntax-3/#the-anb-type
-module.exports = {
-    name: 'Nth',
+window.modules["124"] = [function(require,module,exports){module.exports = {
+    name: 'Raw',
     structure: {
-        nth: ['AnPlusB', 'Identifier'],
-        selector: ['SelectorList', null]
+        value: String
     },
-    parse: function(allowOfClause) {
-        this.scanner.skipSC();
+    parse: function(startToken, endTokenType1, endTokenType2, includeTokenType2, excludeWhiteSpace) {
+        var startOffset = this.scanner.getTokenStart(startToken);
+        var endOffset;
 
-        var start = this.scanner.tokenStart;
-        var end = start;
-        var selector = null;
-        var query;
+        this.scanner.skip(
+            this.scanner.getRawLength(
+                startToken,
+                endTokenType1,
+                endTokenType2,
+                includeTokenType2
+            )
+        );
 
-        if (this.scanner.lookupValue(0, 'odd') || this.scanner.lookupValue(0, 'even')) {
-            query = this.Identifier();
+        if (excludeWhiteSpace && this.scanner.tokenStart > startOffset) {
+            endOffset = this.scanner.getOffsetExcludeWS();
         } else {
-            query = this.AnPlusB();
-        }
-
-        this.scanner.skipSC();
-
-        if (allowOfClause && this.scanner.lookupValue(0, 'of')) {
-            this.scanner.next();
-
-            selector = this.SelectorList();
-
-            if (this.needPositions) {
-                end = selector.children.last().loc.end.offset;
-            }
-        } else {
-            if (this.needPositions) {
-                end = query.loc.end.offset;
-            }
+            endOffset = this.scanner.tokenStart;
         }
 
         return {
-            type: 'Nth',
-            loc: this.getLocation(start, end),
-            nth: query,
-            selector: selector
+            type: 'Raw',
+            loc: this.getLocation(startOffset, endOffset),
+            value: this.scanner.source.substring(startOffset, endOffset)
         };
     },
     generate: function(processChunk, node) {
-        this.generate(processChunk, node.nth);
-        if (node.selector !== null) {
-            processChunk(' of ');
-            this.generate(processChunk, node.selector);
-        }
+        processChunk(node.value);
     }
 };
 }, {}];

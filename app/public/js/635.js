@@ -1,21 +1,27 @@
-window.modules["635"] = [function(require,module,exports){var makeString = require(578);
-var htmlEntities = require(595);
+window.modules["635"] = [function(require,module,exports){var makeString = require(576);
+var strRepeat = require(594);
 
-module.exports = function unescapeHTML(str) {
-  return makeString(str).replace(/\&([^;]{1,10});/g, function(entity, entityCode) {
-    var match;
+module.exports = function pad(str, length, padStr, type) {
+  str = makeString(str);
+  length = ~~length;
 
-    if (entityCode in htmlEntities) {
-      return htmlEntities[entityCode];
-    /*eslint no-cond-assign: 0*/
-    } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
-      return String.fromCharCode(parseInt(match[1], 16));
-    /*eslint no-cond-assign: 0*/
-    } else if (match = entityCode.match(/^#(\d+)$/)) {
-      return String.fromCharCode(~~match[1]);
-    } else {
-      return entity;
-    }
-  });
+  var padlen = 0;
+
+  if (!padStr)
+    padStr = ' ';
+  else if (padStr.length > 1)
+    padStr = padStr.charAt(0);
+
+  switch (type) {
+  case 'right':
+    padlen = length - str.length;
+    return str + strRepeat(padStr, padlen);
+  case 'both':
+    padlen = length - str.length;
+    return strRepeat(padStr, Math.ceil(padlen / 2)) + str + strRepeat(padStr, Math.floor(padlen / 2));
+  default: // 'left'
+    padlen = length - str.length;
+    return strRepeat(padStr, padlen) + str;
+  }
 };
-}, {"578":578,"595":595}];
+}, {"576":576,"594":594}];

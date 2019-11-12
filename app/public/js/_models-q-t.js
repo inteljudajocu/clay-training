@@ -1,13 +1,13 @@
 window.modules["recipe.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(14);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   return data;
 };
 
-var _get = require(15),
+var _get = require(2),
     defaultWidth = 'inline';
 
 module.exports.render = function (uri, data) {
@@ -33,24 +33,24 @@ module.exports.save = function (uri, data) {
 
   return Object.assign(data, image);
 };
-}, {"14":14,"15":15}];
+}, {"1":1,"2":2}];
 window.modules["subheader.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(14);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   data.subheaderId = "".concat(data.subheaderId || data.text).trim().replace(/\s+/g, '-');
   return data;
 };
-}, {"14":14}];
+}, {"1":1}];
 window.modules["tags.model"] = [function(require,module,exports){'use strict';
 
-var _map = require(30),
-    _assign = require(29),
-    _set = require(27),
-    _includes = require(28),
-    _require = require(14),
+var _map = require(17),
+    _assign = require(16),
+    _set = require(14),
+    _includes = require(15),
+    _require = require(1),
     removeNonAlphanumericCharacters = _require.removeNonAlphanumericCharacters,
     invisibleTags = [];
 /**
@@ -104,23 +104,23 @@ module.exports.save = function (uri, data) {
   data.items = items;
   return data;
 };
-}, {"14":14,"27":27,"28":28,"29":29,"30":30}];
+}, {"1":1,"14":14,"15":15,"16":16,"17":17}];
 window.modules["title-ingridients.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(14);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   return data;
 };
 
-var striptags = require(17),
-    _require = require(18),
+var striptags = require(3),
+    _require = require(4),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
-    _require2 = require(22),
+    _require2 = require(9),
     render = _require2.render,
-    _require3 = require(14),
+    _require3 = require(1),
     toSmartText = _require3.toSmartText;
 
 module.exports.save = function (uri, data) {
@@ -142,4 +142,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"14":14,"17":17,"18":18,"22":22}];
+}, {"1":1,"3":3,"4":4,"9":9}];

@@ -1,11 +1,11 @@
-window.modules["591"] = [function(require,module,exports){module.exports = function() {
-  var result = {};
+window.modules["591"] = [function(require,module,exports){var escapeRegExp = require(592);
 
-  for (var prop in this) {
-    if (!this.hasOwnProperty(prop) || prop.match(/^(?:include|contains|reverse|join|map|wrap)$/)) continue;
-    result[prop] = this[prop];
-  }
-
-  return result;
+module.exports = function defaultToWhiteSpace(characters) {
+  if (characters == null)
+    return '\\s';
+  else if (characters.source)
+    return characters.source;
+  else
+    return '[' + escapeRegExp(characters) + ']';
 };
-}, {}];
+}, {"592":592}];

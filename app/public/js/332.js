@@ -1,30 +1,18 @@
-window.modules["332"] = [function(require,module,exports){var isArray = require(273),
-    isSymbol = require(344);
-
-/** Used to match property names within property paths. */
-var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
-    reIsPlainProp = /^\w*$/;
+window.modules["332"] = [function(require,module,exports){var identity = require(316),
+    overRest = require(333),
+    setToString = require(334);
 
 /**
- * Checks if `value` is a property name and not a property path.
+ * The base implementation of `_.rest` which doesn't validate or coerce arguments.
  *
  * @private
- * @param {*} value The value to check.
- * @param {Object} [object] The object to query keys on.
- * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+ * @param {Function} func The function to apply a rest parameter to.
+ * @param {number} [start=func.length-1] The start position of the rest parameter.
+ * @returns {Function} Returns the new function.
  */
-function isKey(value, object) {
-  if (isArray(value)) {
-    return false;
-  }
-  var type = typeof value;
-  if (type == 'number' || type == 'symbol' || type == 'boolean' ||
-      value == null || isSymbol(value)) {
-    return true;
-  }
-  return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
-    (object != null && value in Object(object));
+function baseRest(func, start) {
+  return setToString(overRest(func, start, identity), func + '');
 }
 
-module.exports = isKey;
-}, {"273":273,"344":344}];
+module.exports = baseRest;
+}, {"316":316,"333":333,"334":334}];

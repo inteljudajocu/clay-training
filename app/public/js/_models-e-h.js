@@ -1,13 +1,13 @@
 window.modules["explore.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(14);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   return data;
 };
 
-var _get = require(15),
+var _get = require(2),
     defaultWidth = 'inline';
 
 module.exports.render = function (uri, data) {
@@ -33,7 +33,7 @@ module.exports.save = function (uri, data) {
 
   return Object.assign(data, image);
 };
-}, {"14":14,"15":15}];
+}, {"1":1,"2":2}];
 window.modules["header.model"] = [function(require,module,exports){'use strict';
 
 module.exports.save = function (uri, data) {

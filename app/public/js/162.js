@@ -1,260 +1,115 @@
-window.modules["162"] = [function(require,module,exports){'use strict';
+window.modules["162"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+/*
+ * Copyright 2011 Mozilla Foundation and contributors
+ * Licensed under the New BSD license. See LICENSE or:
+ * http://opensource.org/licenses/BSD-3-Clause
+ */
 
-var constants = require(161);
-var PUNCTUATION = constants.PUNCTUATION;
-var STOP_URL_RAW = constants.STOP_URL_RAW;
-var TYPE = constants.TYPE;
-var FULLSTOP = TYPE.FullStop;
-var PLUSSIGN = TYPE.PlusSign;
-var HYPHENMINUS = TYPE.HyphenMinus;
-var PUNCTUATOR = TYPE.Punctuator;
-var TAB = 9;
-var N = 10;
-var F = 12;
-var R = 13;
-var SPACE = 32;
-var BACK_SLASH = 92;
-var E = 101; // 'e'.charCodeAt(0)
+// It turns out that some (most?) JavaScript engines don't self-host
+// `Array.prototype.sort`. This makes sense because C++ will likely remain
+// faster than JS when doing raw CPU-intensive sorting. However, when using a
+// custom comparator function, calling back and forth between the VM's C++ and
+// JIT'd JS is rather slow *and* loses JIT type information, resulting in
+// worse generated code for the comparator function than would be optimal. In
+// fact, when sorting with a comparator, these costs outweigh the benefits of
+// sorting in C++. By using our own JS-implemented Quick Sort (below), we get
+// a ~3500ms mean speed-up in `bench/bench.html`.
 
-function firstCharOffset(source) {
-    // detect BOM (https://en.wikipedia.org/wiki/Byte_order_mark)
-    if (source.charCodeAt(0) === 0xFEFF ||  // UTF-16BE
-        source.charCodeAt(0) === 0xFFFE) {  // UTF-16LE
-        return 1;
-    }
-
-    return 0;
+/**
+ * Swap the elements indexed by `x` and `y` in the array `ary`.
+ *
+ * @param {Array} ary
+ *        The array.
+ * @param {Number} x
+ *        The index of the first item.
+ * @param {Number} y
+ *        The index of the second item.
+ */
+function swap(ary, x, y) {
+  var temp = ary[x];
+  ary[x] = ary[y];
+  ary[y] = temp;
 }
 
-function isHex(code) {
-    return (code >= 48 && code <= 57) || // 0 .. 9
-           (code >= 65 && code <= 70) || // A .. F
-           (code >= 97 && code <= 102);  // a .. f
+/**
+ * Returns a random integer within the range `low .. high` inclusive.
+ *
+ * @param {Number} low
+ *        The lower bound on the range.
+ * @param {Number} high
+ *        The upper bound on the range.
+ */
+function randomIntInRange(low, high) {
+  return Math.round(low + (Math.random() * (high - low)));
 }
 
-function isNumber(code) {
-    return code >= 48 && code <= 57;
+/**
+ * The Quick Sort algorithm.
+ *
+ * @param {Array} ary
+ *        An array to sort.
+ * @param {function} comparator
+ *        Function to use to compare two items.
+ * @param {Number} p
+ *        Start index of the array
+ * @param {Number} r
+ *        End index of the array
+ */
+function doQuickSort(ary, comparator, p, r) {
+  // If our lower bound is less than our upper bound, we (1) partition the
+  // array into two pieces and (2) recurse on each half. If it is not, this is
+  // the empty array and our base case.
+
+  if (p < r) {
+    // (1) Partitioning.
+    //
+    // The partitioning chooses a pivot between `p` and `r` and moves all
+    // elements that are less than or equal to the pivot to the before it, and
+    // all the elements that are greater than it after it. The effect is that
+    // once partition is done, the pivot is in the exact place it will be when
+    // the array is put in sorted order, and it will not need to be moved
+    // again. This runs in O(n) time.
+
+    // Always choose a random pivot so that an input array which is reverse
+    // sorted does not cause O(n^2) running time.
+    var pivotIndex = randomIntInRange(p, r);
+    var i = p - 1;
+
+    swap(ary, pivotIndex, r);
+    var pivot = ary[r];
+
+    // Immediately after `j` is incremented in this loop, the following hold
+    // true:
+    //
+    //   * Every element in `ary[p .. i]` is less than or equal to the pivot.
+    //
+    //   * Every element in `ary[i+1 .. j-1]` is greater than the pivot.
+    for (var j = p; j < r; j++) {
+      if (comparator(ary[j], pivot) <= 0) {
+        i += 1;
+        swap(ary, i, j);
+      }
+    }
+
+    swap(ary, i + 1, j);
+    var q = i + 1;
+
+    // (2) Recurse on each half.
+
+    doQuickSort(ary, comparator, p, q - 1);
+    doQuickSort(ary, comparator, q + 1, r);
+  }
 }
 
-function isNewline(source, offset, code) {
-    if (code === N || code === F || code === R) {
-        if (code === R && offset + 1 < source.length && source.charCodeAt(offset + 1) === N) {
-            return 2;
-        }
-
-        return 1;
-    }
-
-    return 0;
-}
-
-function cmpChar(testStr, offset, referenceCode) {
-    var code = testStr.charCodeAt(offset);
-
-    // code.toLowerCase()
-    if (code >= 65 && code <= 90) {
-        code = code | 32;
-    }
-
-    return code === referenceCode;
-}
-
-function cmpStr(testStr, start, end, referenceStr) {
-    if (end - start !== referenceStr.length) {
-        return false;
-    }
-
-    if (start < 0 || end > testStr.length) {
-        return false;
-    }
-
-    for (var i = start; i < end; i++) {
-        var testCode = testStr.charCodeAt(i);
-        var refCode = referenceStr.charCodeAt(i - start);
-
-        // testStr[i].toLowerCase()
-        if (testCode >= 65 && testCode <= 90) {
-            testCode = testCode | 32;
-        }
-
-        if (testCode !== refCode) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function endsWith(testStr, referenceStr) {
-    return cmpStr(testStr, testStr.length - referenceStr.length, testStr.length, referenceStr);
-}
-
-function findLastNonSpaceLocation(scanner) {
-    for (var i = scanner.source.length - 1; i >= 0; i--) {
-        var code = scanner.source.charCodeAt(i);
-
-        if (code !== SPACE && code !== TAB && code !== R && code !== N && code !== F) {
-            break;
-        }
-    }
-
-    return scanner.getLocation(i + 1);
-}
-
-function findWhiteSpaceEnd(source, offset) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        if (code !== SPACE && code !== TAB && code !== R && code !== N && code !== F) {
-            break;
-        }
-    }
-
-    return offset;
-}
-
-function findCommentEnd(source, offset) {
-    var commentEnd = source.indexOf('*/', offset);
-
-    if (commentEnd === -1) {
-        return source.length;
-    }
-
-    return commentEnd + 2;
-}
-
-function findStringEnd(source, offset, quote) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        // TODO: bad string
-        if (code === BACK_SLASH) {
-            offset++;
-        } else if (code === quote) {
-            offset++;
-            break;
-        }
-    }
-
-    return offset;
-}
-
-function findDecimalNumberEnd(source, offset) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        if (code < 48 || code > 57) {  // not a 0 .. 9
-            break;
-        }
-    }
-
-    return offset;
-}
-
-function findNumberEnd(source, offset, allowFraction) {
-    var code;
-
-    offset = findDecimalNumberEnd(source, offset);
-
-    // fraction: .\d+
-    if (allowFraction && offset + 1 < source.length && source.charCodeAt(offset) === FULLSTOP) {
-        code = source.charCodeAt(offset + 1);
-
-        if (isNumber(code)) {
-            offset = findDecimalNumberEnd(source, offset + 1);
-        }
-    }
-
-    // exponent: e[+-]\d+
-    if (offset + 1 < source.length) {
-        if ((source.charCodeAt(offset) | 32) === E) { // case insensitive check for `e`
-            code = source.charCodeAt(offset + 1);
-
-            if (code === PLUSSIGN || code === HYPHENMINUS) {
-                if (offset + 2 < source.length) {
-                    code = source.charCodeAt(offset + 2);
-                }
-            }
-
-            if (isNumber(code)) {
-                offset = findDecimalNumberEnd(source, offset + 2);
-            }
-        }
-    }
-
-    return offset;
-}
-
-// skip escaped unicode sequence that can ends with space
-// [0-9a-f]{1,6}(\r\n|[ \n\r\t\f])?
-function findEscaseEnd(source, offset) {
-    for (var i = 0; i < 7 && offset + i < source.length; i++) {
-        var code = source.charCodeAt(offset + i);
-
-        if (i !== 6 && isHex(code)) {
-            continue;
-        }
-
-        if (i > 0) {
-            offset += i - 1 + isNewline(source, offset + i, code);
-            if (code === SPACE || code === TAB) {
-                offset++;
-            }
-        }
-
-        break;
-    }
-
-    return offset;
-}
-
-function findIdentifierEnd(source, offset) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        if (code === BACK_SLASH) {
-            offset = findEscaseEnd(source, offset + 1);
-        } else if (code < 0x80 && PUNCTUATION[code] === PUNCTUATOR) {
-            break;
-        }
-    }
-
-    return offset;
-}
-
-function findUrlRawEnd(source, offset) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        if (code === BACK_SLASH) {
-            offset = findEscaseEnd(source, offset + 1);
-        } else if (code < 0x80 && STOP_URL_RAW[code] === 1) {
-            break;
-        }
-    }
-
-    return offset;
-}
-
-module.exports = {
-    firstCharOffset: firstCharOffset,
-
-    isHex: isHex,
-    isNumber: isNumber,
-    isNewline: isNewline,
-
-    cmpChar: cmpChar,
-    cmpStr: cmpStr,
-    endsWith: endsWith,
-
-    findLastNonSpaceLocation: findLastNonSpaceLocation,
-    findWhiteSpaceEnd: findWhiteSpaceEnd,
-    findCommentEnd: findCommentEnd,
-    findStringEnd: findStringEnd,
-    findDecimalNumberEnd: findDecimalNumberEnd,
-    findNumberEnd: findNumberEnd,
-    findEscaseEnd: findEscaseEnd,
-    findIdentifierEnd: findIdentifierEnd,
-    findUrlRawEnd: findUrlRawEnd
+/**
+ * Sort the given array in-place with the given comparator function.
+ *
+ * @param {Array} ary
+ *        An array to sort.
+ * @param {function} comparator
+ *        Function to use to compare two items.
+ */
+exports.quickSort = function (ary, comparator) {
+  doQuickSort(ary, comparator, 0, ary.length - 1);
 };
-}, {"161":161}];
+}, {}];

@@ -1,19 +1,7 @@
-window.modules["263"] = [function(require,module,exports){/**
- * Removes `key` and its value from the stack.
- *
- * @private
- * @name delete
- * @memberOf Stack
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
- */
-function stackDelete(key) {
-  var data = this.__data__,
-      result = data['delete'](key);
+window.modules["263"] = [function(require,module,exports){var root = require(230);
 
-  this.size = data.size;
-  return result;
-}
+/** Built-in value references. */
+var Uint8Array = root.Uint8Array;
 
-module.exports = stackDelete;
-}, {}];
+module.exports = Uint8Array;
+}, {"230":230}];

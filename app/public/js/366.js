@@ -1,7 +1,31 @@
-window.modules["366"] = [function(require,module,exports){var getNative = require(236);
+window.modules["366"] = [function(require,module,exports){var baseGetTag = require(293),
+    isArray = require(272),
+    isObjectLike = require(301);
 
-/* Built-in method references that are verified to be native. */
-var nativeCreate = getNative(Object, 'create');
+/** `Object#toString` result references. */
+var stringTag = '[object String]';
 
-module.exports = nativeCreate;
-}, {"236":236}];
+/**
+ * Checks if `value` is classified as a `String` primitive or object.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a string, else `false`.
+ * @example
+ *
+ * _.isString('abc');
+ * // => true
+ *
+ * _.isString(1);
+ * // => false
+ */
+function isString(value) {
+  return typeof value == 'string' ||
+    (!isArray(value) && isObjectLike(value) && baseGetTag(value) == stringTag);
+}
+
+module.exports = isString;
+}, {"272":272,"293":293,"301":301}];

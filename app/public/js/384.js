@@ -1,14 +1,144 @@
-window.modules["384"] = [function(require,module,exports){/*!
- * word-regex <https://github.com/jonschlinkert/word-regex>
- *
- * Copyright (c) 2015 Jon Schlinkert.
- * Licensed under the MIT license.
- */
+window.modules["384"] = [function(require,module,exports){var csstree = require(57);
+var parse = csstree.parse;
+var compress = require(396);
+var translate = csstree.translate;
+var translateWithSourceMap = csstree.translateWithSourceMap;
 
-'use strict';
+function debugOutput(name, options, startTime, data) {
+    if (options.debug) {
+        console.error('## ' + name + ' done in %d ms\n', Date.now() - startTime);
+    }
 
-// Modified from: https://github.com/lepture/editor/blob/master/src/intro.js#L343
-module.exports = function () {
-  return /[a-zA-Z0-9_\u0392-\u03c9\u0400-\u04FF]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af\u0400-\u04FF]+|[\u00E4\u00C4\u00E5\u00C5\u00F6\u00D6]+|\w+/g;
+    return data;
+}
+
+function createDefaultLogger(level) {
+    var lastDebug;
+
+    return function logger(title, ast) {
+        var line = title;
+
+        if (ast) {
+            line = '[' + ((Date.now() - lastDebug) / 1000).toFixed(3) + 's] ' + line;
+        }
+
+        if (level > 1 && ast) {
+            var css = translate(ast, true);
+
+            // when level 2, limit css to 256 symbols
+            if (level === 2 && css.length > 256) {
+                css = css.substr(0, 256) + '...';
+            }
+
+            line += '\n  ' + css + '\n';
+        }
+
+        console.error(line);
+        lastDebug = Date.now();
+    };
+}
+
+function copy(obj) {
+    var result = {};
+
+    for (var key in obj) {
+        result[key] = obj[key];
+    }
+
+    return result;
+}
+
+function buildCompressOptions(options) {
+    options = copy(options);
+
+    if (typeof options.logger !== 'function' && options.debug) {
+        options.logger = createDefaultLogger(options.debug);
+    }
+
+    return options;
+}
+
+function runHandler(ast, options, handlers) {
+    if (!Array.isArray(handlers)) {
+        handlers = [handlers];
+    }
+
+    handlers.forEach(function(fn) {
+        fn(ast, options);
+    });
+}
+
+function minify(context, source, options) {
+    options = options || {};
+
+    var filename = options.filename || '<unknown>';
+    var result;
+
+    // parse
+    var ast = debugOutput('parsing', options, Date.now(),
+        parse(source, {
+            context: context,
+            filename: filename,
+            positions: Boolean(options.sourceMap)
+        })
+    );
+
+    // before compress handlers
+    if (options.beforeCompress) {
+        debugOutput('beforeCompress', options, Date.now(),
+            runHandler(ast, options, options.beforeCompress)
+        );
+    }
+
+    // compress
+    var compressResult = debugOutput('compress', options, Date.now(),
+        compress(ast, buildCompressOptions(options))
+    );
+
+    // after compress handlers
+    if (options.afterCompress) {
+        debugOutput('afterCompress', options, Date.now(),
+            runHandler(compressResult, options, options.afterCompress)
+        );
+    }
+
+    // translate
+    if (options.sourceMap) {
+        result = debugOutput('translateWithSourceMap', options, Date.now(), (function() {
+            var tmp = translateWithSourceMap(compressResult.ast);
+            tmp.map._file = filename; // since other tools can relay on file in source map transform chain
+            tmp.map.setSourceContent(filename, source);
+            return tmp;
+        })());
+    } else {
+        result = debugOutput('translate', options, Date.now(), {
+            css: translate(compressResult.ast),
+            map: null
+        });
+    }
+
+    return result;
+}
+
+function minifyStylesheet(source, options) {
+    return minify('stylesheet', source, options);
+}
+
+function minifyBlock(source, options) {
+    return minify('declarationList', source, options);
+}
+
+module.exports = {
+    version: require(400).version,
+
+    // main methods
+    minify: minifyStylesheet,
+    minifyBlock: minifyBlock,
+
+    // compress an AST
+    compress: compress,
+
+    // css syntax parser/walkers/generator/etc
+    syntax: csstree
 };
-}, {}];
+}, {"57":57,"396":396,"400":400}];

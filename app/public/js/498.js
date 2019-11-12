@@ -1,326 +1,553 @@
-window.modules["498"] = [function(require,module,exports){(function (Buffer){
-'use strict';
+window.modules["498"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _sourceMap = require(447);
+var _declaration = require(483);
 
-var _sourceMap2 = _interopRequireDefault(_sourceMap);
+var _declaration2 = _interopRequireDefault(_declaration);
 
-var _path = require(7);
+var _tokenize = require(499);
 
-var _path2 = _interopRequireDefault(_path);
+var _tokenize2 = _interopRequireDefault(_tokenize);
+
+var _comment = require(481);
+
+var _comment2 = _interopRequireDefault(_comment);
+
+var _atRule = require(479);
+
+var _atRule2 = _interopRequireDefault(_atRule);
+
+var _root = require(486);
+
+var _root2 = _interopRequireDefault(_root);
+
+var _rule = require(485);
+
+var _rule2 = _interopRequireDefault(_rule);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var MapGenerator = function () {
-    function MapGenerator(stringify, root, opts) {
-        _classCallCheck(this, MapGenerator);
+var Parser = function () {
+    function Parser(input) {
+        _classCallCheck(this, Parser);
 
-        this.stringify = stringify;
-        this.mapOpts = opts.map || {};
-        this.root = root;
-        this.opts = opts;
+        this.input = input;
+
+        this.root = new _root2.default();
+        this.current = this.root;
+        this.spaces = '';
+        this.semicolon = false;
+
+        this.createTokenizer();
+        this.root.source = { input: input, start: { line: 1, column: 1 } };
     }
 
-    MapGenerator.prototype.isMap = function isMap() {
-        if (typeof this.opts.map !== 'undefined') {
-            return !!this.opts.map;
+    Parser.prototype.createTokenizer = function createTokenizer() {
+        this.tokenizer = (0, _tokenize2.default)(this.input);
+    };
+
+    Parser.prototype.parse = function parse() {
+        var token = void 0;
+        while (!this.tokenizer.endOfFile()) {
+            token = this.tokenizer.nextToken();
+
+            switch (token[0]) {
+
+                case 'space':
+                    this.spaces += token[1];
+                    break;
+
+                case ';':
+                    this.freeSemicolon(token);
+                    break;
+
+                case '}':
+                    this.end(token);
+                    break;
+
+                case 'comment':
+                    this.comment(token);
+                    break;
+
+                case 'at-word':
+                    this.atrule(token);
+                    break;
+
+                case '{':
+                    this.emptyRule(token);
+                    break;
+
+                default:
+                    this.other(token);
+                    break;
+            }
+        }
+        this.endFile();
+    };
+
+    Parser.prototype.comment = function comment(token) {
+        var node = new _comment2.default();
+        this.init(node, token[2], token[3]);
+        node.source.end = { line: token[4], column: token[5] };
+
+        var text = token[1].slice(2, -2);
+        if (/^\s*$/.test(text)) {
+            node.text = '';
+            node.raws.left = text;
+            node.raws.right = '';
         } else {
-            return this.previous().length > 0;
+            var match = text.match(/^(\s*)([^]*[^\s])(\s*)$/);
+            node.text = match[2];
+            node.raws.left = match[1];
+            node.raws.right = match[3];
         }
     };
 
-    MapGenerator.prototype.previous = function previous() {
-        var _this = this;
+    Parser.prototype.emptyRule = function emptyRule(token) {
+        var node = new _rule2.default();
+        this.init(node, token[2], token[3]);
+        node.selector = '';
+        node.raws.between = '';
+        this.current = node;
+    };
 
-        if (!this.previousMaps) {
-            this.previousMaps = [];
-            this.root.walk(function (node) {
-                if (node.source && node.source.input.map) {
-                    var map = node.source.input.map;
-                    if (_this.previousMaps.indexOf(map) === -1) {
-                        _this.previousMaps.push(map);
+    Parser.prototype.other = function other(start) {
+        var end = false;
+        var type = null;
+        var colon = false;
+        var bracket = null;
+        var brackets = [];
+
+        var tokens = [];
+        var token = start;
+        while (token) {
+            type = token[0];
+            tokens.push(token);
+
+            if (type === '(' || type === '[') {
+                if (!bracket) bracket = token;
+                brackets.push(type === '(' ? ')' : ']');
+            } else if (brackets.length === 0) {
+                if (type === ';') {
+                    if (colon) {
+                        this.decl(tokens);
+                        return;
+                    } else {
+                        break;
+                    }
+                } else if (type === '{') {
+                    this.rule(tokens);
+                    return;
+                } else if (type === '}') {
+                    this.tokenizer.back(tokens.pop());
+                    end = true;
+                    break;
+                } else if (type === ':') {
+                    colon = true;
+                }
+            } else if (type === brackets[brackets.length - 1]) {
+                brackets.pop();
+                if (brackets.length === 0) bracket = null;
+            }
+
+            token = this.tokenizer.nextToken();
+        }
+
+        if (this.tokenizer.endOfFile()) end = true;
+        if (brackets.length > 0) this.unclosedBracket(bracket);
+
+        if (end && colon) {
+            while (tokens.length) {
+                token = tokens[tokens.length - 1][0];
+                if (token !== 'space' && token !== 'comment') break;
+                this.tokenizer.back(tokens.pop());
+            }
+            this.decl(tokens);
+            return;
+        } else {
+            this.unknownWord(tokens);
+        }
+    };
+
+    Parser.prototype.rule = function rule(tokens) {
+        tokens.pop();
+
+        var node = new _rule2.default();
+        this.init(node, tokens[0][2], tokens[0][3]);
+
+        node.raws.between = this.spacesAndCommentsFromEnd(tokens);
+        this.raw(node, 'selector', tokens);
+        this.current = node;
+    };
+
+    Parser.prototype.decl = function decl(tokens) {
+        var node = new _declaration2.default();
+        this.init(node);
+
+        var last = tokens[tokens.length - 1];
+        if (last[0] === ';') {
+            this.semicolon = true;
+            tokens.pop();
+        }
+        if (last[4]) {
+            node.source.end = { line: last[4], column: last[5] };
+        } else {
+            node.source.end = { line: last[2], column: last[3] };
+        }
+
+        while (tokens[0][0] !== 'word') {
+            if (tokens.length === 1) this.unknownWord(tokens);
+            node.raws.before += tokens.shift()[1];
+        }
+        node.source.start = { line: tokens[0][2], column: tokens[0][3] };
+
+        node.prop = '';
+        while (tokens.length) {
+            var type = tokens[0][0];
+            if (type === ':' || type === 'space' || type === 'comment') {
+                break;
+            }
+            node.prop += tokens.shift()[1];
+        }
+
+        node.raws.between = '';
+
+        var token = void 0;
+        while (tokens.length) {
+            token = tokens.shift();
+
+            if (token[0] === ':') {
+                node.raws.between += token[1];
+                break;
+            } else {
+                node.raws.between += token[1];
+            }
+        }
+
+        if (node.prop[0] === '_' || node.prop[0] === '*') {
+            node.raws.before += node.prop[0];
+            node.prop = node.prop.slice(1);
+        }
+        node.raws.between += this.spacesAndCommentsFromStart(tokens);
+        this.precheckMissedSemicolon(tokens);
+
+        for (var i = tokens.length - 1; i > 0; i--) {
+            token = tokens[i];
+            if (token[1].toLowerCase() === '!important') {
+                node.important = true;
+                var string = this.stringFrom(tokens, i);
+                string = this.spacesFromEnd(tokens) + string;
+                if (string !== ' !important') node.raws.important = string;
+                break;
+            } else if (token[1].toLowerCase() === 'important') {
+                var cache = tokens.slice(0);
+                var str = '';
+                for (var j = i; j > 0; j--) {
+                    var _type = cache[j][0];
+                    if (str.trim().indexOf('!') === 0 && _type !== 'space') {
+                        break;
+                    }
+                    str = cache.pop()[1] + str;
+                }
+                if (str.trim().indexOf('!') === 0) {
+                    node.important = true;
+                    node.raws.important = str;
+                    tokens = cache;
+                }
+            }
+
+            if (token[0] !== 'space' && token[0] !== 'comment') {
+                break;
+            }
+        }
+
+        this.raw(node, 'value', tokens);
+
+        if (node.value.indexOf(':') !== -1) this.checkMissedSemicolon(tokens);
+    };
+
+    Parser.prototype.atrule = function atrule(token) {
+        var node = new _atRule2.default();
+        node.name = token[1].slice(1);
+        if (node.name === '') {
+            this.unnamedAtrule(node, token);
+        }
+        this.init(node, token[2], token[3]);
+
+        var prev = void 0;
+        var shift = void 0;
+        var last = false;
+        var open = false;
+        var params = [];
+
+        while (!this.tokenizer.endOfFile()) {
+            token = this.tokenizer.nextToken();
+
+            if (token[0] === ';') {
+                node.source.end = { line: token[2], column: token[3] };
+                this.semicolon = true;
+                break;
+            } else if (token[0] === '{') {
+                open = true;
+                break;
+            } else if (token[0] === '}') {
+                if (params.length > 0) {
+                    shift = params.length - 1;
+                    prev = params[shift];
+                    while (prev && prev[0] === 'space') {
+                        prev = params[--shift];
+                    }
+                    if (prev) {
+                        node.source.end = { line: prev[4], column: prev[5] };
                     }
                 }
-            });
-        }
-
-        return this.previousMaps;
-    };
-
-    MapGenerator.prototype.isInline = function isInline() {
-        if (typeof this.mapOpts.inline !== 'undefined') {
-            return this.mapOpts.inline;
-        }
-
-        var annotation = this.mapOpts.annotation;
-        if (typeof annotation !== 'undefined' && annotation !== true) {
-            return false;
-        }
-
-        if (this.previous().length) {
-            return this.previous().some(function (i) {
-                return i.inline;
-            });
-        } else {
-            return true;
-        }
-    };
-
-    MapGenerator.prototype.isSourcesContent = function isSourcesContent() {
-        if (typeof this.mapOpts.sourcesContent !== 'undefined') {
-            return this.mapOpts.sourcesContent;
-        }
-        if (this.previous().length) {
-            return this.previous().some(function (i) {
-                return i.withContent();
-            });
-        } else {
-            return true;
-        }
-    };
-
-    MapGenerator.prototype.clearAnnotation = function clearAnnotation() {
-        if (this.mapOpts.annotation === false) return;
-
-        var node = void 0;
-        for (var i = this.root.nodes.length - 1; i >= 0; i--) {
-            node = this.root.nodes[i];
-            if (node.type !== 'comment') continue;
-            if (node.text.indexOf('# sourceMappingURL=') === 0) {
-                this.root.removeChild(i);
-            }
-        }
-    };
-
-    MapGenerator.prototype.setSourcesContent = function setSourcesContent() {
-        var _this2 = this;
-
-        var already = {};
-        this.root.walk(function (node) {
-            if (node.source) {
-                var from = node.source.input.from;
-                if (from && !already[from]) {
-                    already[from] = true;
-                    var relative = _this2.relative(from);
-                    _this2.map.setSourceContent(relative, node.source.input.css);
-                }
-            }
-        });
-    };
-
-    MapGenerator.prototype.applyPrevMaps = function applyPrevMaps() {
-        for (var _iterator = this.previous(), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref;
-
-            if (_isArray) {
-                if (_i >= _iterator.length) break;
-                _ref = _iterator[_i++];
+                this.end(token);
+                break;
             } else {
-                _i = _iterator.next();
-                if (_i.done) break;
-                _ref = _i.value;
+                params.push(token);
             }
 
-            var prev = _ref;
-
-            var from = this.relative(prev.file);
-            var root = prev.root || _path2.default.dirname(prev.file);
-            var map = void 0;
-
-            if (this.mapOpts.sourcesContent === false) {
-                map = new _sourceMap2.default.SourceMapConsumer(prev.text);
-                if (map.sourcesContent) {
-                    map.sourcesContent = map.sourcesContent.map(function () {
-                        return null;
-                    });
-                }
-            } else {
-                map = prev.consumer();
+            if (this.tokenizer.endOfFile()) {
+                last = true;
+                break;
             }
-
-            this.map.applySourceMap(map, from, this.relative(root));
         }
-    };
 
-    MapGenerator.prototype.isAnnotation = function isAnnotation() {
-        if (this.isInline()) {
-            return true;
-        } else if (typeof this.mapOpts.annotation !== 'undefined') {
-            return this.mapOpts.annotation;
-        } else if (this.previous().length) {
-            return this.previous().some(function (i) {
-                return i.annotation;
-            });
-        } else {
-            return true;
-        }
-    };
-
-    MapGenerator.prototype.toBase64 = function toBase64(str) {
-        if (Buffer) {
-            if (Buffer.from && Buffer.from !== Uint8Array.from) {
-                return Buffer.from(str).toString('base64');
-            } else {
-                return new Buffer(str).toString('base64');
+        node.raws.between = this.spacesAndCommentsFromEnd(params);
+        if (params.length) {
+            node.raws.afterName = this.spacesAndCommentsFromStart(params);
+            this.raw(node, 'params', params);
+            if (last) {
+                token = params[params.length - 1];
+                node.source.end = { line: token[4], column: token[5] };
+                this.spaces = node.raws.between;
+                node.raws.between = '';
             }
         } else {
-            return window.btoa(unescape(encodeURIComponent(str)));
+            node.raws.afterName = '';
+            node.params = '';
+        }
+
+        if (open) {
+            node.nodes = [];
+            this.current = node;
         }
     };
 
-    MapGenerator.prototype.addAnnotation = function addAnnotation() {
-        var content = void 0;
+    Parser.prototype.end = function end(token) {
+        if (this.current.nodes && this.current.nodes.length) {
+            this.current.raws.semicolon = this.semicolon;
+        }
+        this.semicolon = false;
 
-        if (this.isInline()) {
+        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
+        this.spaces = '';
 
-            content = 'data:application/json;base64,' + this.toBase64(this.map.toString());
-        } else if (typeof this.mapOpts.annotation === 'string') {
-            content = this.mapOpts.annotation;
+        if (this.current.parent) {
+            this.current.source.end = { line: token[2], column: token[3] };
+            this.current = this.current.parent;
         } else {
-            content = this.outputFile() + '.map';
-        }
-
-        var eol = '\n';
-        if (this.css.indexOf('\r\n') !== -1) eol = '\r\n';
-
-        this.css += eol + '/*# sourceMappingURL=' + content + ' */';
-    };
-
-    MapGenerator.prototype.outputFile = function outputFile() {
-        if (this.opts.to) {
-            return this.relative(this.opts.to);
-        } else if (this.opts.from) {
-            return this.relative(this.opts.from);
-        } else {
-            return 'to.css';
+            this.unexpectedClose(token);
         }
     };
 
-    MapGenerator.prototype.generateMap = function generateMap() {
-        this.generateString();
-        if (this.isSourcesContent()) this.setSourcesContent();
-        if (this.previous().length > 0) this.applyPrevMaps();
-        if (this.isAnnotation()) this.addAnnotation();
+    Parser.prototype.endFile = function endFile() {
+        if (this.current.parent) this.unclosedBlock();
+        if (this.current.nodes && this.current.nodes.length) {
+            this.current.raws.semicolon = this.semicolon;
+        }
+        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
+    };
 
-        if (this.isInline()) {
-            return [this.css];
-        } else {
-            return [this.css, this.map];
+    Parser.prototype.freeSemicolon = function freeSemicolon(token) {
+        this.spaces += token[1];
+        if (this.current.nodes) {
+            var prev = this.current.nodes[this.current.nodes.length - 1];
+            if (prev && prev.type === 'rule' && !prev.raws.ownSemicolon) {
+                prev.raws.ownSemicolon = this.spaces;
+                this.spaces = '';
+            }
         }
     };
 
-    MapGenerator.prototype.relative = function relative(file) {
-        if (file.indexOf('<') === 0) return file;
-        if (/^\w+:\/\//.test(file)) return file;
+    // Helpers
 
-        var from = this.opts.to ? _path2.default.dirname(this.opts.to) : '.';
+    Parser.prototype.init = function init(node, line, column) {
+        this.current.push(node);
 
-        if (typeof this.mapOpts.annotation === 'string') {
-            from = _path2.default.dirname(_path2.default.resolve(from, this.mapOpts.annotation));
-        }
-
-        file = _path2.default.relative(from, file);
-        if (_path2.default.sep === '\\') {
-            return file.replace(/\\/g, '/');
-        } else {
-            return file;
-        }
+        node.source = { start: { line: line, column: column }, input: this.input };
+        node.raws.before = this.spaces;
+        this.spaces = '';
+        if (node.type !== 'comment') this.semicolon = false;
     };
 
-    MapGenerator.prototype.sourcePath = function sourcePath(node) {
-        if (this.mapOpts.from) {
-            return this.mapOpts.from;
-        } else {
-            return this.relative(node.source.input.from);
-        }
-    };
+    Parser.prototype.raw = function raw(node, prop, tokens) {
+        var token = void 0,
+            type = void 0;
+        var length = tokens.length;
+        var value = '';
+        var clean = true;
+        var next = void 0,
+            prev = void 0;
+        var pattern = /^([.|#])?([\w])+/i;
 
-    MapGenerator.prototype.generateString = function generateString() {
-        var _this3 = this;
+        for (var i = 0; i < length; i += 1) {
+            token = tokens[i];
+            type = token[0];
 
-        this.css = '';
-        this.map = new _sourceMap2.default.SourceMapGenerator({ file: this.outputFile() });
+            if (type === 'comment' && node.type === 'rule') {
+                prev = tokens[i - 1];
+                next = tokens[i + 1];
 
-        var line = 1;
-        var column = 1;
-
-        var lines = void 0,
-            last = void 0;
-        this.stringify(this.root, function (str, node, type) {
-            _this3.css += str;
-
-            if (node && type !== 'end') {
-                if (node.source && node.source.start) {
-                    _this3.map.addMapping({
-                        source: _this3.sourcePath(node),
-                        generated: { line: line, column: column - 1 },
-                        original: {
-                            line: node.source.start.line,
-                            column: node.source.start.column - 1
-                        }
-                    });
+                if (prev[0] !== 'space' && next[0] !== 'space' && pattern.test(prev[1]) && pattern.test(next[1])) {
+                    value += token[1];
                 } else {
-                    _this3.map.addMapping({
-                        source: '<no source>',
-                        original: { line: 1, column: 0 },
-                        generated: { line: line, column: column - 1 }
-                    });
+                    clean = false;
                 }
+
+                continue;
             }
 
-            lines = str.match(/\n/g);
-            if (lines) {
-                line += lines.length;
-                last = str.lastIndexOf('\n');
-                column = str.length - last;
+            if (type === 'comment' || type === 'space' && i === length - 1) {
+                clean = false;
             } else {
-                column += str.length;
+                value += token[1];
             }
+        }
+        if (!clean) {
+            var raw = tokens.reduce(function (all, i) {
+                return all + i[1];
+            }, '');
+            node.raws[prop] = { value: value, raw: raw };
+        }
+        node[prop] = value;
+    };
 
-            if (node && type !== 'start') {
-                if (node.source && node.source.end) {
-                    _this3.map.addMapping({
-                        source: _this3.sourcePath(node),
-                        generated: { line: line, column: column - 1 },
-                        original: {
-                            line: node.source.end.line,
-                            column: node.source.end.column
-                        }
-                    });
+    Parser.prototype.spacesAndCommentsFromEnd = function spacesAndCommentsFromEnd(tokens) {
+        var lastTokenType = void 0;
+        var spaces = '';
+        while (tokens.length) {
+            lastTokenType = tokens[tokens.length - 1][0];
+            if (lastTokenType !== 'space' && lastTokenType !== 'comment') break;
+            spaces = tokens.pop()[1] + spaces;
+        }
+        return spaces;
+    };
+
+    Parser.prototype.spacesAndCommentsFromStart = function spacesAndCommentsFromStart(tokens) {
+        var next = void 0;
+        var spaces = '';
+        while (tokens.length) {
+            next = tokens[0][0];
+            if (next !== 'space' && next !== 'comment') break;
+            spaces += tokens.shift()[1];
+        }
+        return spaces;
+    };
+
+    Parser.prototype.spacesFromEnd = function spacesFromEnd(tokens) {
+        var lastTokenType = void 0;
+        var spaces = '';
+        while (tokens.length) {
+            lastTokenType = tokens[tokens.length - 1][0];
+            if (lastTokenType !== 'space') break;
+            spaces = tokens.pop()[1] + spaces;
+        }
+        return spaces;
+    };
+
+    Parser.prototype.stringFrom = function stringFrom(tokens, from) {
+        var result = '';
+        for (var i = from; i < tokens.length; i++) {
+            result += tokens[i][1];
+        }
+        tokens.splice(from, tokens.length - from);
+        return result;
+    };
+
+    Parser.prototype.colon = function colon(tokens) {
+        var brackets = 0;
+        var token = void 0,
+            type = void 0,
+            prev = void 0;
+        for (var i = 0; i < tokens.length; i++) {
+            token = tokens[i];
+            type = token[0];
+
+            if (type === '(') {
+                brackets += 1;
+            } else if (type === ')') {
+                brackets -= 1;
+            } else if (brackets === 0 && type === ':') {
+                if (!prev) {
+                    this.doubleColon(token);
+                } else if (prev[0] === 'word' && prev[1] === 'progid') {
+                    continue;
                 } else {
-                    _this3.map.addMapping({
-                        source: '<no source>',
-                        original: { line: 1, column: 0 },
-                        generated: { line: line, column: column - 1 }
-                    });
+                    return i;
                 }
             }
-        });
-    };
 
-    MapGenerator.prototype.generate = function generate() {
-        this.clearAnnotation();
-
-        if (this.isMap()) {
-            return this.generateMap();
-        } else {
-            var result = '';
-            this.stringify(this.root, function (i) {
-                result += i;
-            });
-            return [result];
+            prev = token;
         }
+        return false;
     };
 
-    return MapGenerator;
+    // Errors
+
+    Parser.prototype.unclosedBracket = function unclosedBracket(bracket) {
+        throw this.input.error('Unclosed bracket', bracket[2], bracket[3]);
+    };
+
+    Parser.prototype.unknownWord = function unknownWord(tokens) {
+        throw this.input.error('Unknown word', tokens[0][2], tokens[0][3]);
+    };
+
+    Parser.prototype.unexpectedClose = function unexpectedClose(token) {
+        throw this.input.error('Unexpected }', token[2], token[3]);
+    };
+
+    Parser.prototype.unclosedBlock = function unclosedBlock() {
+        var pos = this.current.source.start;
+        throw this.input.error('Unclosed block', pos.line, pos.column);
+    };
+
+    Parser.prototype.doubleColon = function doubleColon(token) {
+        throw this.input.error('Double colon', token[2], token[3]);
+    };
+
+    Parser.prototype.unnamedAtrule = function unnamedAtrule(node, token) {
+        throw this.input.error('At-rule without name', token[2], token[3]);
+    };
+
+    Parser.prototype.precheckMissedSemicolon = function precheckMissedSemicolon(tokens) {
+        // Hook for Safe Parser
+        tokens;
+    };
+
+    Parser.prototype.checkMissedSemicolon = function checkMissedSemicolon(tokens) {
+        var colon = this.colon(tokens);
+        if (colon === false) return;
+
+        var founded = 0;
+        var token = void 0;
+        for (var j = colon - 1; j >= 0; j--) {
+            token = tokens[j];
+            if (token[0] !== 'space') {
+                founded += 1;
+                if (founded === 2) break;
+            }
+        }
+        throw this.input.error('Missed semicolon', token[2], token[3]);
+    };
+
+    return Parser;
 }();
 
-exports.default = MapGenerator;
+exports.default = Parser;
 module.exports = exports['default'];
 
-
-}).call(this,require(4).Buffer)}, {"4":4,"7":7,"447":447}];
+}, {"479":479,"481":481,"483":483,"485":485,"486":486,"499":499}];

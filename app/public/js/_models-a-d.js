@@ -1,13 +1,13 @@
 window.modules["article.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(15),
-    striptags = require(17),
-    dateFormat = require(19),
-    dateParse = require(16),
-    utils = require(18),
+var _get = require(2),
+    striptags = require(3),
+    dateFormat = require(6),
+    dateParse = require(5),
+    utils = require(4),
     has = utils.has,
     // convenience
-sanitize = require(14);
+sanitize = require(1);
 /**
  * only allow emphasis, italic, and strikethroughs in headlines
  * @param  {string} oldHeadline
@@ -84,12 +84,12 @@ module.exports.save = function (uri, data, locals) {
   generateFeedImage(data);
   return data;
 };
-}, {"14":14,"15":15,"16":16,"17":17,"18":18,"19":19}];
+}, {"1":1,"2":2,"3":3,"4":4,"5":5,"6":6}];
 window.modules["code-sample.model"] = [function(require,module,exports){'use strict';
 
-var Prism = require(21);
+var Prism = require(8);
 
-require(20);
+require(7);
 
 module.exports.save = function (uri, data) {
   // Adds manual spaces, Kiln codemirror doesn't recognizes tab spaces
@@ -98,23 +98,23 @@ module.exports.save = function (uri, data) {
   data.html = Prism.highlight(data.code, Prism.languages[data.language], data.language);
   return data;
 };
-}, {"20":20,"21":21}];
+}, {"7":7,"8":8}];
 window.modules["direcctions.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(14);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   return data;
 };
 
-var striptags = require(17),
-    _require = require(18),
+var striptags = require(3),
+    _require = require(4),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
-    _require2 = require(22),
+    _require2 = require(9),
     render = _require2.render,
-    _require3 = require(14),
+    _require3 = require(1),
     toSmartText = _require3.toSmartText;
 
 module.exports.save = function (uri, data) {
@@ -136,13 +136,13 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"14":14,"17":17,"18":18,"22":22}];
+}, {"1":1,"3":3,"4":4,"9":9}];
 window.modules["divider.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(14);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   return data;
 };
-}, {"14":14}];
+}, {"1":1}];

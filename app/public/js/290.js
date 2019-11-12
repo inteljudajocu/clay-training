@@ -1,25 +1,22 @@
-window.modules["290"] = [function(require,module,exports){/**
- * The base implementation of `_.findIndex` and `_.findLastIndex` without
- * support for iteratee shorthands.
+window.modules["290"] = [function(require,module,exports){var isSymbol = require(339);
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/**
+ * Converts `value` to a string key if it's not a string or symbol.
  *
  * @private
- * @param {Array} array The array to inspect.
- * @param {Function} predicate The function invoked per iteration.
- * @param {number} fromIndex The index to search from.
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {number} Returns the index of the matched value, else `-1`.
+ * @param {*} value The value to inspect.
+ * @returns {string|symbol} Returns the key.
  */
-function baseFindIndex(array, predicate, fromIndex, fromRight) {
-  var length = array.length,
-      index = fromIndex + (fromRight ? 1 : -1);
-
-  while ((fromRight ? index-- : ++index < length)) {
-    if (predicate(array[index], index, array)) {
-      return index;
-    }
+function toKey(value) {
+  if (typeof value == 'string' || isSymbol(value)) {
+    return value;
   }
-  return -1;
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
 }
 
-module.exports = baseFindIndex;
-}, {}];
+module.exports = toKey;
+}, {"339":339}];

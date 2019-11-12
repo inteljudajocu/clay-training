@@ -5,7 +5,7 @@ var props = ['inputs', 'modals', 'plugins', 'toolbarButtons', 'validators', 'tra
 module.exports = function () {
   window.kiln = window.kiln || {}; // create global kiln if it doesn't exist
 
-  window.kiln.helpers = require(646);
+  window.kiln.helpers = require(645);
   props.forEach(function (prop) {
     // create global properties if they don't exist
     window.kiln[prop] = window.kiln[prop] || {};
@@ -13,10 +13,10 @@ module.exports = function () {
 
   require("plugins_word-count.kilnplugin")();
 };
-}, {"646":646,"plugins_word-count.kilnplugin":"plugins_word-count.kilnplugin"}];
+}, {"645":645,"plugins_word-count.kilnplugin":"plugins_word-count.kilnplugin"}];
 window.modules["plugins_word-count.kilnplugin"] = [function(require,module,exports){'use strict';
 
-var wordCount = require(647);
+var wordCount = require(646);
 /**
  * update word count element after vue's current tick
  * @param  {number} count
@@ -45,4 +45,4 @@ module.exports = function () {
     });
   };
 };
-}, {"647":647}];
+}, {"646":646}];

@@ -1,84 +1,43 @@
 window.modules["647"] = [function(require,module,exports){'use strict';
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var moment = require(380);
 
-var htmlWordCount = require(223),
-    COMPONENTS_WITH_WORDS = {
-  article: null,
-  // just trigger recount
-  'article-sidebar': null,
-  blockquote: 'text',
-  // trigger recount, AND count text in this property
-  paragraph: 'text',
-  subheader: 'text',
-  subsection: null
-},
-    _require = require(31),
-    getComponentName = _require.getComponentName;
-/**
- * determine if mutation uri is a component that we care about
- * @param  {string}  uri
- * @return {Boolean}
- */
+function getPrettyMonthAbrev(month) {
+  switch (month) {
+    case 'May':
+      return month;
+      break;
 
+    case 'Jun':
+      return 'June';
+      break;
 
-function isComponentWithWords(uri) {
-  return COMPONENTS_WITH_WORDS[getComponentName(uri)] !== undefined;
+    case 'Jul':
+      return 'July';
+      break;
+
+    case 'Sep':
+      return 'Sept.';
+      break;
+
+    default:
+      return month + '.';
+      break;
+  }
 }
-/**
- * get the component field that contains the text we should count
- * @param  {string} uri
- * @return {string|null}
- */
 
+module.exports = function (date) {
+  var mDate = moment(date),
+      now = moment();
 
-function getComponentField(uri) {
-  return COMPONENTS_WITH_WORDS[getComponentName(uri)];
-}
-/**
- * Given an object mapping component URIs to their data or an array of
- * components with _ref attributes, return an array of components in the latter
- * format.
- * @param {Object} cmptSrc
- * @return {Object[]}
- */
-
-
-function normalizeCmptSrc(cmptSrc) {
-  if (Array.isArray(cmptSrc)) {
-    return cmptSrc;
-  } else if (_typeof(cmptSrc) === 'object') {
-    return Object.keys(cmptSrc).map(function (key) {
-      return Object.assign({}, cmptSrc[key], {
-        _ref: key
-      });
-    });
+  if (!mDate.isValid(date)) {
+    return '';
   }
 
-  return [];
-}
-/**
- * count words in components we care about
- * @param  {Object|Object[]} components Object mapping URI to data or
- * array of cmpts with _ref
- * @return {number}
- */
-
-
-function count(components) {
-  return normalizeCmptSrc(components).filter(function (cmpt) {
-    return isComponentWithWords(cmpt._ref);
-  }).map(function (cmpt) {
-    return cmpt[getComponentField(cmpt._ref)];
-  }).reduce(function (acc, fieldValue) {
-    return acc + htmlWordCount(fieldValue || '');
-  }, 0);
-}
-
-module.exports.count = count;
-module.exports.isComponentWithWords = isComponentWithWords; // for testing
-
-module.exports.setComponentsWithWords = function (i) {
-  return COMPONENTS_WITH_WORDS = i;
+  if (moment.duration(now.diff(mDate)).asDays() < 1) {
+    return "".concat(mDate.format('h:mm'), " ").concat(mDate.format('A'));
+  } else {
+    return "".concat(getPrettyMonthAbrev(mDate.format('MMM')), " ").concat(mDate.format('D, YYYY'));
+  }
 };
-}, {"31":31,"223":223}];
+}, {"380":380}];

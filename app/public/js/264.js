@@ -1,15 +1,8 @@
-window.modules["264"] = [function(require,module,exports){/**
- * Gets the stack value for `key`.
- *
- * @private
- * @name get
- * @memberOf Stack
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
- */
-function stackGet(key) {
-  return this.__data__.get(key);
-}
+window.modules["264"] = [function(require,module,exports){var getNative = require(231),
+    root = require(230);
 
-module.exports = stackGet;
-}, {}];
+/* Built-in method references that are verified to be native. */
+var WeakMap = getNative(root, 'WeakMap');
+
+module.exports = WeakMap;
+}, {"230":230,"231":231}];

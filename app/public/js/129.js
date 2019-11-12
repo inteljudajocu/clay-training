@@ -1,62 +1,76 @@
-window.modules["129"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
+window.modules["129"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
-var IDENTIFIER = TYPE.Identifier;
-var FUNCTION = TYPE.Function;
-var COLON = TYPE.Colon;
-var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+var WHITESPACE = TYPE.WhiteSpace;
+var COMMENT = TYPE.Comment;
+var EXCLAMATIONMARK = TYPE.ExclamationMark;
+var ATRULE = TYPE.Atrule;
+var CDO = TYPE.CDO;
+var CDC = TYPE.CDC;
 
-// : ident [ '(' .. ')' ]?
+function consumeRaw(startToken) {
+    return this.Raw(startToken, 0, 0, false, false);
+}
+
 module.exports = {
-    name: 'PseudoClassSelector',
+    name: 'StyleSheet',
     structure: {
-        name: String,
-        children: [['Raw'], null]
+        children: [['Comment', 'Atrule', 'Rule', 'Raw']]
     },
     parse: function() {
         var start = this.scanner.tokenStart;
-        var children = null;
-        var name;
-        var nameLowerCase;
+        var children = new List();
+        var child;
 
-        this.scanner.eat(COLON);
+        scan:
+        while (!this.scanner.eof) {
+            switch (this.scanner.tokenType) {
+                case WHITESPACE:
+                    this.scanner.next();
+                    continue;
 
-        if (this.scanner.tokenType === FUNCTION) {
-            name = this.scanner.consumeFunctionName();
-            nameLowerCase = name.toLowerCase();
+                case COMMENT:
+                    // ignore comments except exclamation comments (i.e. /*! .. */) on top level
+                    if (this.scanner.source.charCodeAt(this.scanner.tokenStart + 2) !== EXCLAMATIONMARK) {
+                        this.scanner.next();
+                        continue;
+                    }
 
-            if (this.pseudo.hasOwnProperty(nameLowerCase)) {
-                this.scanner.skipSC();
-                children = this.pseudo[nameLowerCase].call(this);
-                this.scanner.skipSC();
-            } else {
-                children = new List().appendData(
-                    this.Raw(this.scanner.currentToken, 0, 0, false, false)
-                );
+                    child = this.Comment();
+                    break;
+
+                case CDO: // <!--
+                    child = this.CDO();
+                    break;
+
+                case CDC: // -->
+                    child = this.CDC();
+                    break;
+
+                // CSS Syntax Module Level 3
+                // §2.2 Error handling
+                // At the "top level" of a stylesheet, an <at-keyword-token> starts an at-rule.
+                case ATRULE:
+                    child = this.Atrule();
+                    break;
+
+                // Anything else starts a qualified rule ...
+                default:
+                    child = this.tolerantParse(this.Rule, consumeRaw);
             }
 
-            this.scanner.eat(RIGHTPARENTHESIS);
-        } else {
-            name = this.scanner.consume(IDENTIFIER);
+            children.appendData(child);
         }
 
         return {
-            type: 'PseudoClassSelector',
+            type: 'StyleSheet',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            name: name,
             children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk(':');
-        processChunk(node.name);
-
-        if (node.children !== null) {
-            processChunk('(');
-            this.each(processChunk, node);
-            processChunk(')');
-        }
+        this.each(processChunk, node);
     },
-    walkContext: 'function'
+    walkContext: 'stylesheet'
 };
-}, {"61":61,"82":82}];
+}, {"53":53,"75":75}];

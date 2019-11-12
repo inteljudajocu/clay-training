@@ -1,21 +1,22 @@
-window.modules["280"] = [function(require,module,exports){/**
- * Appends the elements of `values` to `array`.
+window.modules["280"] = [function(require,module,exports){var eq = require(278);
+
+/**
+ * Gets the index at which the `key` is found in `array` of key-value pairs.
  *
  * @private
- * @param {Array} array The array to modify.
- * @param {Array} values The values to append.
- * @returns {Array} Returns `array`.
+ * @param {Array} array The array to inspect.
+ * @param {*} key The key to search for.
+ * @returns {number} Returns the index of the matched value, else `-1`.
  */
-function arrayPush(array, values) {
-  var index = -1,
-      length = values.length,
-      offset = array.length;
-
-  while (++index < length) {
-    array[offset + index] = values[index];
+function assocIndexOf(array, key) {
+  var length = array.length;
+  while (length--) {
+    if (eq(array[length][0], key)) {
+      return length;
+    }
   }
-  return array;
+  return -1;
 }
 
-module.exports = arrayPush;
-}, {}];
+module.exports = assocIndexOf;
+}, {"278":278}];

@@ -1,28 +1,19 @@
-window.modules["128"] = [function(require,module,exports){var TYPE = require(82).TYPE;
-
-var NUMBER = TYPE.Number;
-var PERCENTSIGN = TYPE.PercentSign;
+window.modules["128"] = [function(require,module,exports){var STRING = require(75).TYPE.String;
 
 module.exports = {
-    name: 'Percentage',
+    name: 'String',
     structure: {
         value: String
     },
     parse: function() {
-        var start = this.scanner.tokenStart;
-        var number = this.scanner.consume(NUMBER);
-
-        this.scanner.eat(PERCENTSIGN);
-
         return {
-            type: 'Percentage',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            value: number
+            type: 'String',
+            loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+            value: this.scanner.consume(STRING)
         };
     },
     generate: function(processChunk, node) {
         processChunk(node.value);
-        processChunk('%');
     }
 };
-}, {"82":82}];
+}, {"75":75}];

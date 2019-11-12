@@ -4,8 +4,8 @@ _components:
     items: []
     prep: ''
     cook: ''
-    readytime: ''
+    readyTime: ''
     nutrition: ''
-    nutritiondetail: ''
-    nutritionlink: ''
+    nutritionDetail: ''
+    nutritionLink: ''
     sass: ''

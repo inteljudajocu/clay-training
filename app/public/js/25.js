@@ -1,32 +1,18 @@
-window.modules["25"] = [function(require,module,exports){/**
- * Checks if `value` is the
- * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
- * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */
-function isObject(value) {
-  var type = typeof value;
-  return value != null && (type == 'object' || type == 'function');
-}
+window.modules["25"] = [function(require,module,exports){'use strict';
 
-module.exports = isObject;
-}, {}];
+const isUriStringCheck = require(50);
+
+/**
+ * First test if argument passed in is a String. If true, get page instance
+ * from uri that includes page version. Otherwise, throw an error.
+ * @example /_pages/cj21ud3rt00wmqpyefc944hez@published returns cj21ud3rt00wmqpyefc944hez@published
+ * @param  {string} uri
+ * @return {string|null}
+ */
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  const result = /\/_pages\/([^\.\/]+)/.exec(uri);
+
+  return result && result[1];
+};
+}, {"50":50}];

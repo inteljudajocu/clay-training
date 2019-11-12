@@ -1,9 +1,9 @@
-window.modules["622"] = [function(require,module,exports){var makeString = require(578);
+window.modules["622"] = [function(require,module,exports){var makeString = require(576);
 
-module.exports = function replaceAll(str, find, replace, ignorecase) {
-  var flags = (ignorecase === true)?'gi':'g';
-  var reg = new RegExp(find, flags);
-
-  return makeString(str).replace(reg, replace);
+module.exports = function truncate(str, length, truncateStr) {
+  str = makeString(str);
+  truncateStr = truncateStr || '...';
+  length = ~~length;
+  return str.length > length ? str.slice(0, length) + truncateStr : str;
 };
-}, {"578":578}];
+}, {"576":576}];

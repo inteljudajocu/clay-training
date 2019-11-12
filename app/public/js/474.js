@@ -2,11 +2,11 @@ window.modules["474"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _namespace = require(477);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _namespace2 = _interopRequireDefault(_namespace);
+var _node = require(475);
 
-var _types = require(463);
+var _node2 = _interopRequireDefault(_node);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -16,24 +16,68 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ID = function (_Namespace) {
-    _inherits(ID, _Namespace);
+var Namespace = function (_Node) {
+    _inherits(Namespace, _Node);
 
-    function ID(opts) {
-        _classCallCheck(this, ID);
+    function Namespace() {
+        _classCallCheck(this, Namespace);
 
-        var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
-
-        _this.type = _types.ID;
-        return _this;
+        return _possibleConstructorReturn(this, _Node.apply(this, arguments));
     }
 
-    ID.prototype.toString = function toString() {
-        return [this.spaces.before, this.ns, String('#' + this.value), this.spaces.after].join('');
+    Namespace.prototype.qualifiedName = function qualifiedName(value) {
+        if (this.namespace) {
+            return this.namespaceString + '|' + value;
+        } else {
+            return value;
+        }
     };
 
-    return ID;
-}(_namespace2.default);
+    Namespace.prototype.toString = function toString() {
+        return [this.spaces.before, this.qualifiedName(this.value), this.spaces.after].join('');
+    };
 
-exports.default = ID;
-module.exports = exports['default'];}, {"463":463,"477":477}];
+    _createClass(Namespace, [{
+        key: 'namespace',
+        get: function get() {
+            return this._namespace;
+        },
+        set: function set(namespace) {
+            this._namespace = namespace;
+            if (this.raws) {
+                delete this.raws.namespace;
+            }
+        }
+    }, {
+        key: 'ns',
+        get: function get() {
+            return this._namespace;
+        },
+        set: function set(namespace) {
+            this._namespace = namespace;
+            if (this.raws) {
+                delete this.raws.namespace;
+            }
+        }
+    }, {
+        key: 'namespaceString',
+        get: function get() {
+            if (this.namespace) {
+                var ns = this.raws && this.raws.namespace || this.namespace;
+                if (ns === true) {
+                    return '';
+                } else {
+                    return ns;
+                }
+            } else {
+                return '';
+            }
+        }
+    }]);
+
+    return Namespace;
+}(_node2.default);
+
+exports.default = Namespace;
+;
+module.exports = exports['default'];}, {"475":475}];

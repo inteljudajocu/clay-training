@@ -1,33 +1,31 @@
-window.modules["237"] = [function(require,module,exports){var hashClear = require(241),
-    hashDelete = require(238),
-    hashGet = require(240),
-    hashHas = require(242),
-    hashSet = require(239);
+window.modules["237"] = [function(require,module,exports){var nativeCreate = require(361);
+
+/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED = '__lodash_hash_undefined__';
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
 
 /**
- * Creates a hash object.
+ * Gets the hash value for `key`.
  *
  * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
+ * @name get
+ * @memberOf Hash
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
  */
-function Hash(entries) {
-  var index = -1,
-      length = entries == null ? 0 : entries.length;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
+function hashGet(key) {
+  var data = this.__data__;
+  if (nativeCreate) {
+    var result = data[key];
+    return result === HASH_UNDEFINED ? undefined : result;
   }
+  return hasOwnProperty.call(data, key) ? data[key] : undefined;
 }
 
-// Add methods to `Hash`.
-Hash.prototype.clear = hashClear;
-Hash.prototype['delete'] = hashDelete;
-Hash.prototype.get = hashGet;
-Hash.prototype.has = hashHas;
-Hash.prototype.set = hashSet;
-
-module.exports = Hash;
-}, {"238":238,"239":239,"240":240,"241":241,"242":242}];
+module.exports = hashGet;
+}, {"361":361}];

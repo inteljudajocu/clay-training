@@ -1,59 +1,14 @@
-window.modules["29"] = [function(require,module,exports){var assignValue = require(282),
-    copyObject = require(350),
-    createAssigner = require(352),
-    isArrayLike = require(329),
-    isPrototype = require(326),
-    keys = require(293);
+window.modules["29"] = [function(require,module,exports){'use strict';
 
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
+const isUriStringCheck = require(50);
 
 /**
- * Assigns own enumerable string keyed properties of source objects to the
- * destination object. Source objects are applied from left to right.
- * Subsequent sources overwrite property assignments of previous sources.
- *
- * **Note:** This method mutates `object` and is loosely based on
- * [`Object.assign`](https://mdn.io/Object/assign).
- *
- * @static
- * @memberOf _
- * @since 0.10.0
- * @category Object
- * @param {Object} object The destination object.
- * @param {...Object} [sources] The source objects.
- * @returns {Object} Returns `object`.
- * @see _.assignIn
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- * }
- *
- * function Bar() {
- *   this.c = 3;
- * }
- *
- * Foo.prototype.b = 2;
- * Bar.prototype.d = 4;
- *
- * _.assign({ 'a': 0 }, new Foo, new Bar);
- * // => { 'a': 1, 'c': 3 }
+ * Return the site prefix from the URI.
+ * @param  {string}  uri
+ * @return {string}
  */
-var assign = createAssigner(function(object, source) {
-  if (isPrototype(source) || isArrayLike(source)) {
-    copyObject(source, keys(source), object);
-    return;
-  }
-  for (var key in source) {
-    if (hasOwnProperty.call(source, key)) {
-      assignValue(object, key, source[key]);
-    }
-  }
-});
-
-module.exports = assign;
-}, {"282":282,"293":293,"326":326,"329":329,"350":350,"352":352}];
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  return uri.split(/\/_(pages|components|lists|uris|schedule|users|layouts)/)[0];
+};
+}, {"50":50}];

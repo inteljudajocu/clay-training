@@ -1,26 +1,80 @@
-window.modules["99"] = [function(require,module,exports){'use strict';
+window.modules["99"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
-var List = require(61);
+var WHITESPACE = TYPE.WhiteSpace;
+var COMMENT = TYPE.Comment;
+var SEMICOLON = TYPE.Semicolon;
+var ATRULE = TYPE.Atrule;
+var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
 
-module.exports = function clone(node) {
-    var result = {};
+function consumeRaw(startToken) {
+    return this.Raw(startToken, 0, 0, false, true);
+}
+function consumeRule() {
+    return this.tolerantParse(this.Rule, consumeRaw);
+}
+function consumeRawDeclaration(startToken) {
+    return this.Raw(startToken, 0, SEMICOLON, true, true);
+}
+function consumeDeclaration() {
+    var node = this.tolerantParse(this.Declaration, consumeRawDeclaration);
 
-    for (var key in node) {
-        var value = node[key];
+    if (this.scanner.tokenType === SEMICOLON) {
+        this.scanner.next();
+    }
 
-        if (value) {
-            if (Array.isArray(value)) {
-                value = value.slice(0);
-            } else if (value instanceof List) {
-                value = new List().fromArray(value.map(clone));
-            } else if (value.constructor === Object) {
-                value = clone(value);
+    return node;
+}
+
+module.exports = {
+    name: 'Block',
+    structure: {
+        children: [['Atrule', 'Rule', 'Declaration']]
+    },
+    parse: function(isDeclaration) {
+        var consumer = isDeclaration ? consumeDeclaration : consumeRule;
+
+        var start = this.scanner.tokenStart;
+        var children = new List();
+
+        this.scanner.eat(LEFTCURLYBRACKET);
+
+        scan:
+        while (!this.scanner.eof) {
+            switch (this.scanner.tokenType) {
+                case RIGHTCURLYBRACKET:
+                    break scan;
+
+                case WHITESPACE:
+                case COMMENT:
+                    this.scanner.next();
+                    break;
+
+                case ATRULE:
+                    children.appendData(this.tolerantParse(this.Atrule, consumeRaw));
+                    break;
+
+                default:
+                    children.appendData(consumer.call(this));
             }
         }
 
-        result[key] = value;
-    }
+        if (!this.tolerant || !this.scanner.eof) {
+            this.scanner.eat(RIGHTCURLYBRACKET);
+        }
 
-    return result;
+        return {
+            type: 'Block',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            children: children
+        };
+    },
+    generate: function(processChunk, node) {
+        processChunk('{');
+        this.each(processChunk, node);
+        processChunk('}');
+    },
+    walkContext: 'block'
 };
-}, {"61":61}];
+}, {"53":53,"75":75}];

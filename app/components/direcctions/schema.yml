@@ -23,7 +23,7 @@ cook:
   _label: Cook time
   _has:
     input: text
-readytime:
+readyTime:
   _label: estimated time
   _has:
     input: text
@@ -31,11 +31,11 @@ nutrition:
     _label: nutrition facts
     _has:
       input: text
-nutritiondetail:
+nutritionDetail:
   _label: nutrition detail
   _has:
     input: text
-nutritionlink:
+nutritionLink:
   _label: nutrion link
   _has:
     input: text
@@ -50,10 +50,10 @@ _groups:
       - items (List Items)
       - prep
       - cook
-      - readytime
+      - readyTime
       - nutrition
-      - nutritiondetail
-      - nutritionlink
+      - nutritionDetail
+      - nutritionLink
     _placeholder:
       text: New step
       height: 30px

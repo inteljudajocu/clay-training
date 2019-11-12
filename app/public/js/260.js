@@ -1,15 +1,16 @@
-window.modules["260"] = [function(require,module,exports){/**
- * Checks if `value` is in the array cache.
+window.modules["260"] = [function(require,module,exports){var ListCache = require(238);
+
+/**
+ * Removes all key-value entries from the stack.
  *
  * @private
- * @name has
- * @memberOf SetCache
- * @param {*} value The value to search for.
- * @returns {number} Returns `true` if `value` is found, else `false`.
+ * @name clear
+ * @memberOf Stack
  */
-function setCacheHas(value) {
-  return this.__data__.has(value);
+function stackClear() {
+  this.__data__ = new ListCache;
+  this.size = 0;
 }
 
-module.exports = setCacheHas;
-}, {}];
+module.exports = stackClear;
+}, {"238":238}];

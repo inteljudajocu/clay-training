@@ -1,6 +1,6 @@
 window.modules["image.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(15),
+var _get = require(2),
     defaultWidth = 'inline';
 
 module.exports.render = function (uri, data) {
@@ -26,4 +26,4 @@ module.exports.save = function (uri, data) {
 
   return Object.assign(data, image);
 };
-}, {"15":15}];
+}, {"2":2}];

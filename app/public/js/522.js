@@ -1,257 +1,173 @@
-window.modules["522"] = [function(require,module,exports){'use strict';
+window.modules["522"] = [function(require,module,exports){(function (Buffer){
+'use strict';
 
 exports.__esModule = true;
 
-var _supportsColor = require(2);
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _supportsColor2 = _interopRequireDefault(_supportsColor);
+var _sourceMap = require(444);
 
-var _chalk = require(2);
+var _sourceMap2 = _interopRequireDefault(_sourceMap);
 
-var _chalk2 = _interopRequireDefault(_chalk);
+var _path = require(381);
 
-var _terminalHighlight = require(523);
+var _path2 = _interopRequireDefault(_path);
 
-var _terminalHighlight2 = _interopRequireDefault(_terminalHighlight);
+var _fs = require(19);
+
+var _fs2 = _interopRequireDefault(_fs);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function fromBase64(str) {
+    if (Buffer) {
+        if (Buffer.from && Buffer.from !== Uint8Array.from) {
+            return Buffer.from(str, 'base64').toString();
+        } else {
+            return new Buffer(str, 'base64').toString();
+        }
+    } else {
+        return window.atob(str);
+    }
+}
+
 /**
- * The CSS parser throws this error for broken CSS.
+ * Source map information from input CSS.
+ * For example, source map after Sass compiler.
  *
- * Custom parsers can throw this error for broken custom syntax using
- * the {@link Node#error} method.
- *
- * PostCSS will use the input source map to detect the original error location.
- * If you wrote a Sass file, compiled it to CSS and then parsed it with PostCSS,
- * PostCSS will show the original position in the Sass file.
- *
- * If you need the position in the PostCSS input
- * (e.g., to debug the previous compiler), use `error.input.file`.
+ * This class will automatically find source map in input CSS or in file system
+ * near input file (according `from` option).
  *
  * @example
- * // Catching and checking syntax error
- * try {
- *   postcss.parse('a{')
- * } catch (error) {
- *   if ( error.name === 'CssSyntaxError' ) {
- *     error //=> CssSyntaxError
- *   }
- * }
- *
- * @example
- * // Raising error from plugin
- * throw node.error('Unknown variable', { plugin: 'postcss-vars' });
+ * const root = postcss.parse(css, { from: 'a.sass.css' });
+ * root.input.map //=> PreviousMap
  */
-var CssSyntaxError = function () {
+
+var PreviousMap = function () {
 
     /**
-     * @param {string} message  - error message
-     * @param {number} [line]   - source line of the error
-     * @param {number} [column] - source column of the error
-     * @param {string} [source] - source code of the broken file
-     * @param {string} [file]   - absolute path to the broken file
-     * @param {string} [plugin] - PostCSS plugin name, if error came from plugin
+     * @param {string}         css    - input CSS source
+     * @param {processOptions} [opts] - {@link Processor#process} options
      */
-    function CssSyntaxError(message, line, column, source, file, plugin) {
-        _classCallCheck(this, CssSyntaxError);
+    function PreviousMap(css, opts) {
+        _classCallCheck(this, PreviousMap);
 
+        this.loadAnnotation(css);
         /**
-         * @member {string} - Always equal to `'CssSyntaxError'`. You should
-         *                    always check error type
-         *                    by `error.name === 'CssSyntaxError'` instead of
-         *                    `error instanceof CssSyntaxError`, because
-         *                    npm could have several PostCSS versions.
-         *
-         * @example
-         * if ( error.name === 'CssSyntaxError' ) {
-         *   error //=> CssSyntaxError
-         * }
+         * @member {boolean} - Was source map inlined by data-uri to input CSS.
          */
-        this.name = 'CssSyntaxError';
-        /**
-         * @member {string} - Error message.
-         *
-         * @example
-         * error.message //=> 'Unclosed block'
-         */
-        this.reason = message;
+        this.inline = this.startWith(this.annotation, 'data:');
 
-        if (file) {
-            /**
-             * @member {string} - Absolute path to the broken file.
-             *
-             * @example
-             * error.file       //=> 'a.sass'
-             * error.input.file //=> 'a.css'
-             */
-            this.file = file;
-        }
-        if (source) {
-            /**
-             * @member {string} - Source code of the broken file.
-             *
-             * @example
-             * error.source       //=> 'a { b {} }'
-             * error.input.column //=> 'a b { }'
-             */
-            this.source = source;
-        }
-        if (plugin) {
-            /**
-             * @member {string} - Plugin name, if error came from plugin.
-             *
-             * @example
-             * error.plugin //=> 'postcss-vars'
-             */
-            this.plugin = plugin;
-        }
-        if (typeof line !== 'undefined' && typeof column !== 'undefined') {
-            /**
-             * @member {number} - Source line of the error.
-             *
-             * @example
-             * error.line       //=> 2
-             * error.input.line //=> 4
-             */
-            this.line = line;
-            /**
-             * @member {number} - Source column of the error.
-             *
-             * @example
-             * error.column       //=> 1
-             * error.input.column //=> 4
-             */
-            this.column = column;
-        }
-
-        this.setMessage();
-
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, CssSyntaxError);
-        }
+        var prev = opts.map ? opts.map.prev : undefined;
+        var text = this.loadMap(opts.from, prev);
+        if (text) this.text = text;
     }
 
-    CssSyntaxError.prototype.setMessage = function setMessage() {
-        /**
-         * @member {string} - Full error text in the GNU error format
-         *                    with plugin, file, line and column.
-         *
-         * @example
-         * error.message //=> 'a.css:1:1: Unclosed block'
-         */
-        this.message = this.plugin ? this.plugin + ': ' : '';
-        this.message += this.file ? this.file : '<css input>';
-        if (typeof this.line !== 'undefined') {
-            this.message += ':' + this.line + ':' + this.column;
-        }
-        this.message += ': ' + this.reason;
-    };
-
     /**
-     * Returns a few lines of CSS source that caused the error.
+     * Create a instance of `SourceMapGenerator` class
+     * from the `source-map` library to work with source map information.
      *
-     * If the CSS has an input source map without `sourceContent`,
-     * this method will return an empty string.
+     * It is lazy method, so it will create object only on first call
+     * and then it will use cache.
      *
-     * @param {boolean} [color] whether arrow will be colored red by terminal
-     *                          color codes. By default, PostCSS will detect
-     *                          color support by `process.stdout.isTTY`
-     *                          and `window.process.env.NODE_DISABLE_COLORS`.
-     *
-     * @example
-     * error.showSourceCode() //=> "  4 | }
-     *                        //      5 | a {
-     *                        //    > 6 |   bad
-     *                        //        |   ^
-     *                        //      7 | }
-     *                        //      8 | b {"
-     *
-     * @return {string} few lines of CSS source that caused the error
+     * @return {SourceMapGenerator} object with source map information
      */
 
 
-    CssSyntaxError.prototype.showSourceCode = function showSourceCode(color) {
-        var _this = this;
-
-        if (!this.source) return '';
-
-        var css = this.source;
-        if (typeof color === 'undefined') color = _supportsColor2.default.stdout;
-        if (color) css = (0, _terminalHighlight2.default)(css);
-
-        var lines = css.split(/\r?\n/);
-        var start = Math.max(this.line - 3, 0);
-        var end = Math.min(this.line + 2, lines.length);
-
-        var maxWidth = String(end).length;
-
-        function mark(text) {
-            if (color && _chalk2.default.red) {
-                return _chalk2.default.red.bold(text);
-            } else {
-                return text;
-            }
+    PreviousMap.prototype.consumer = function consumer() {
+        if (!this.consumerCache) {
+            this.consumerCache = new _sourceMap2.default.SourceMapConsumer(this.text);
         }
-        function aside(text) {
-            if (color && _chalk2.default.gray) {
-                return _chalk2.default.gray(text);
-            } else {
-                return text;
-            }
-        }
-
-        return lines.slice(start, end).map(function (line, index) {
-            var number = start + 1 + index;
-            var gutter = ' ' + (' ' + number).slice(-maxWidth) + ' | ';
-            if (number === _this.line) {
-                var spacing = aside(gutter.replace(/\d/g, ' ')) + line.slice(0, _this.column - 1).replace(/[^\t]/g, ' ');
-                return mark('>') + aside(gutter) + line + '\n ' + spacing + mark('^');
-            } else {
-                return ' ' + aside(gutter) + line;
-            }
-        }).join('\n');
+        return this.consumerCache;
     };
 
     /**
-     * Returns error position, message and source code of the broken part.
+     * Does source map contains `sourcesContent` with input source text.
      *
-     * @example
-     * error.toString() //=> "CssSyntaxError: app.css:1:1: Unclosed block
-     *                  //    > 1 | a {
-     *                  //        | ^"
-     *
-     * @return {string} error position, message and source code
+     * @return {boolean} Is `sourcesContent` present
      */
 
 
-    CssSyntaxError.prototype.toString = function toString() {
-        var code = this.showSourceCode();
-        if (code) {
-            code = '\n\n' + code + '\n';
-        }
-        return this.name + ': ' + this.message + code;
+    PreviousMap.prototype.withContent = function withContent() {
+        return !!(this.consumer().sourcesContent && this.consumer().sourcesContent.length > 0);
     };
 
-    /**
-     * @memberof CssSyntaxError#
-     * @member {Input} input - Input object with PostCSS internal information
-     *                         about input file. If input has source map
-     *                         from previous tool, PostCSS will use origin
-     *                         (for example, Sass) source. You can use this
-     *                         object to get PostCSS input source.
-     *
-     * @example
-     * error.input.file //=> 'a.css'
-     * error.file       //=> 'a.sass'
-     */
+    PreviousMap.prototype.startWith = function startWith(string, start) {
+        if (!string) return false;
+        return string.substr(0, start.length) === start;
+    };
 
-    return CssSyntaxError;
+    PreviousMap.prototype.loadAnnotation = function loadAnnotation(css) {
+        var match = css.match(/\/\*\s*# sourceMappingURL=(.*)\s*\*\//);
+        if (match) this.annotation = match[1].trim();
+    };
+
+    PreviousMap.prototype.decodeInline = function decodeInline(text) {
+        // data:application/json;charset=utf-8;base64,
+        // data:application/json;charset=utf8;base64,
+        // data:application/json;base64,
+        var baseUri = /^data:application\/json;(?:charset=utf-?8;)?base64,/;
+        var uri = 'data:application/json,';
+
+        if (this.startWith(text, uri)) {
+            return decodeURIComponent(text.substr(uri.length));
+        } else if (baseUri.test(text)) {
+            return fromBase64(text.substr(RegExp.lastMatch.length));
+        } else {
+            var encoding = text.match(/data:application\/json;([^,]+),/)[1];
+            throw new Error('Unsupported source map encoding ' + encoding);
+        }
+    };
+
+    PreviousMap.prototype.loadMap = function loadMap(file, prev) {
+        if (prev === false) return false;
+
+        if (prev) {
+            if (typeof prev === 'string') {
+                return prev;
+            } else if (typeof prev === 'function') {
+                var prevPath = prev(file);
+                if (prevPath && _fs2.default.existsSync && _fs2.default.existsSync(prevPath)) {
+                    return _fs2.default.readFileSync(prevPath, 'utf-8').toString().trim();
+                } else {
+                    throw new Error('Unable to load previous source map: ' + prevPath.toString());
+                }
+            } else if (prev instanceof _sourceMap2.default.SourceMapConsumer) {
+                return _sourceMap2.default.SourceMapGenerator.fromSourceMap(prev).toString();
+            } else if (prev instanceof _sourceMap2.default.SourceMapGenerator) {
+                return prev.toString();
+            } else if (this.isMap(prev)) {
+                return JSON.stringify(prev);
+            } else {
+                throw new Error('Unsupported previous source map format: ' + prev.toString());
+            }
+        } else if (this.inline) {
+            return this.decodeInline(this.annotation);
+        } else if (this.annotation) {
+            var map = this.annotation;
+            if (file) map = _path2.default.join(_path2.default.dirname(file), map);
+
+            this.root = _path2.default.dirname(map);
+            if (_fs2.default.existsSync && _fs2.default.existsSync(map)) {
+                return _fs2.default.readFileSync(map, 'utf-8').toString().trim();
+            } else {
+                return false;
+            }
+        }
+    };
+
+    PreviousMap.prototype.isMap = function isMap(map) {
+        if ((typeof map === 'undefined' ? 'undefined' : _typeof(map)) !== 'object') return false;
+        return typeof map.mappings === 'string' || typeof map._mappings === 'string';
+    };
+
+    return PreviousMap;
 }();
 
-exports.default = CssSyntaxError;
+exports.default = PreviousMap;
 module.exports = exports['default'];
 
-}, {"2":2,"523":523}];
+
+}).call(this,require(21).Buffer)}, {"19":19,"21":21,"381":381,"444":444}];

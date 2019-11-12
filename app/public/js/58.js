@@ -1,19 +1,21 @@
-window.modules["58"] = [function(require,module,exports){'use strict';
+window.modules["58"] = [function(require,module,exports){function merge() {
+    var dest = {};
 
-/**
- * Return true if argument passed in is a string. If not, throw an error.
- * strCheck is used in each util function to check if the URI passed in is a string.
- *
- * @param  {string} arg
- * @return {boolean|error}
- */
-function strCheck(arg) {
-  if (typeof arg === 'string') {
-    return true;
-  } else {
-    throw new Error('Argument must be a string, not ' + typeof arg);
-  }
+    for (var i = 0; i < arguments.length; i++) {
+        var src = arguments[i];
+        for (var key in src) {
+            dest[key] = src[key];
+        }
+    }
+
+    return dest;
 }
 
-module.exports.strCheck = strCheck;
-}, {}];
+module.exports = require(89).create(
+    merge(
+        require(82),
+        require(85),
+        require(88)
+    )
+);
+}, {"82":82,"85":85,"88":88,"89":89}];

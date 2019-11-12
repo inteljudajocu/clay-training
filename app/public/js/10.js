@@ -1,65 +1,82 @@
-window.modules["10"] = [function(require,module,exports){/* eslint-disable node/no-deprecated-api */
-var buffer = require(4)
-var Buffer = buffer.Buffer
+window.modules["10"] = [function(require,module,exports){'use strict';
 
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key]
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var popup = require(644);
+
+var sharePopUp =
+/*#__PURE__*/
+function () {
+  /**
+   * Create a Popup for share services
+   * @param {Node} shareLink - html anchor tag
+   * @param {string} shareURL - url of page to be shared
+   */
+  function sharePopUp(shareLink, shareURL) {
+    _classCallCheck(this, sharePopUp);
+
+    this.shareLink = shareLink;
+    this.shareURL = shareURL;
+    this.shareService = this.shareLink.getAttribute('data-shareService') || null;
+    this.shareTitle = this.shareLink.getAttribute('title') || 'Clay Starter';
+    this.setDimensions();
+    this.addShareURL();
+    this.addClickHandler();
   }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer
-} else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports)
-  exports.Buffer = SafeBuffer
-}
 
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
+  _createClass(sharePopUp, [{
+    key: "addShareURL",
+    value: function addShareURL() {
+      switch (this.shareService) {
+        case 'twitter':
+          this.shareLink.href = "https://twitter.com/share?text=".concat(encodeURIComponent(this.shareTitle), "&url='").concat(this.shareURL, "?utm_source=tw&utm_medium=s3&utm_campaign=sharebutton-t");
+          break;
 
-SafeBuffer.prototype = Object.create(Buffer.prototype)
+        case 'facebook':
+          this.shareLink.href = "http://www.facebook.com/sharer/sharer.php?u=".concat(this.shareURL, "?utm_source=fb&utm_medium=s3&utm_campaign=sharebutton-t");
+          break;
 
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer)
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size)
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding)
-    } else {
-      buf.fill(fill)
+        default:
+      }
     }
-  } else {
-    buf.fill(0)
-  }
-  return buf
-}
+  }, {
+    key: "addClickHandler",
+    value: function addClickHandler() {
+      this.shareLink.addEventListener('click', this.handleClick.bind(this));
+    }
+  }, {
+    key: "handleClick",
+    value: function handleClick(e) {
+      e.preventDefault();
+      var dimensions = this.popupDimensions[this.shareService] || this.popupDimensions.default;
+      popup.openPopUp(this.shareLink.href, dimensions);
+    }
+  }, {
+    key: "setDimensions",
+    value: function setDimensions() {
+      this.popupDimensions = {
+        default: {
+          w: 520,
+          h: 304
+        },
+        facebook: {
+          w: 520,
+          h: 304
+        },
+        twitter: {
+          w: 550,
+          h: 572
+        }
+      };
+    }
+  }]);
 
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-}
+  return sharePopUp;
+}();
 
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return buffer.SlowBuffer(size)
-}
-}, {"4":4}];
+module.exports = sharePopUp;
+}, {"644":644}];

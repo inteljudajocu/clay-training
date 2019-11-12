@@ -1,8 +1,8 @@
 window.modules["code-sample.model"] = [function(require,module,exports){'use strict';
 
-var Prism = require(21);
+var Prism = require(8);
 
-require(20);
+require(7);
 
 module.exports.save = function (uri, data) {
   // Adds manual spaces, Kiln codemirror doesn't recognizes tab spaces
@@ -11,4 +11,4 @@ module.exports.save = function (uri, data) {
   data.html = Prism.highlight(data.code, Prism.languages[data.language], data.language);
   return data;
 };
-}, {"20":20,"21":21}];
+}, {"7":7,"8":8}];

@@ -1,60 +1,58 @@
-window.modules["473"] = [function(require,module,exports){'use strict';
+window.modules["473"] = [function(require,module,exports){"use strict"
 
-exports.__esModule = true;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _container = require(480);
-
-var _container2 = _interopRequireDefault(_container);
-
-var _types = require(463);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Root = function (_Container) {
-    _inherits(Root, _Container);
-
-    function Root(opts) {
-        _classCallCheck(this, Root);
-
-        var _this = _possibleConstructorReturn(this, _Container.call(this, opts));
-
-        _this.type = _types.ROOT;
-        return _this;
+function unique_pred(list, compare) {
+  var ptr = 1
+    , len = list.length
+    , a=list[0], b=list[0]
+  for(var i=1; i<len; ++i) {
+    b = a
+    a = list[i]
+    if(compare(a, b)) {
+      if(i === ptr) {
+        ptr++
+        continue
+      }
+      list[ptr++] = a
     }
+  }
+  list.length = ptr
+  return list
+}
 
-    Root.prototype.toString = function toString() {
-        var str = this.reduce(function (memo, selector) {
-            var sel = String(selector);
-            return sel ? memo + sel + ',' : '';
-        }, '').slice(0, -1);
-        return this.trailingComma ? str + ',' : str;
-    };
+function unique_eq(list) {
+  var ptr = 1
+    , len = list.length
+    , a=list[0], b = list[0]
+  for(var i=1; i<len; ++i, b=a) {
+    b = a
+    a = list[i]
+    if(a !== b) {
+      if(i === ptr) {
+        ptr++
+        continue
+      }
+      list[ptr++] = a
+    }
+  }
+  list.length = ptr
+  return list
+}
 
-    Root.prototype.error = function error(message, options) {
-        if (this._error) {
-            return this._error(message, options);
-        } else {
-            return new Error(message);
-        }
-    };
+function unique(list, compare, sorted) {
+  if(list.length === 0) {
+    return list
+  }
+  if(compare) {
+    if(!sorted) {
+      list.sort(compare)
+    }
+    return unique_pred(list, compare)
+  }
+  if(!sorted) {
+    list.sort()
+  }
+  return unique_eq(list)
+}
 
-    _createClass(Root, [{
-        key: 'errorGenerator',
-        set: function set(handler) {
-            this._error = handler;
-        }
-    }]);
-
-    return Root;
-}(_container2.default);
-
-exports.default = Root;
-module.exports = exports['default'];}, {"463":463,"480":480}];
+module.exports = unique
+}, {}];

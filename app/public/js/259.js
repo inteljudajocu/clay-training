@@ -1,20 +1,15 @@
-window.modules["259"] = [function(require,module,exports){/** Used to stand-in for `undefined` hash values. */
-var HASH_UNDEFINED = '__lodash_hash_undefined__';
-
-/**
- * Adds `value` to the array cache.
+window.modules["259"] = [function(require,module,exports){/**
+ * Checks if a stack value for `key` exists.
  *
  * @private
- * @name add
- * @memberOf SetCache
- * @alias push
- * @param {*} value The value to cache.
- * @returns {Object} Returns the cache instance.
+ * @name has
+ * @memberOf Stack
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function setCacheAdd(value) {
-  this.__data__.set(value, HASH_UNDEFINED);
-  return this;
+function stackHas(key) {
+  return this.__data__.has(key);
 }
 
-module.exports = setCacheAdd;
+module.exports = stackHas;
 }, {}];

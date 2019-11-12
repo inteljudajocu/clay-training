@@ -1,6 +1,5 @@
-window.modules["598"] = [function(require,module,exports){var trim = require(576);
-
-module.exports = function underscored(str) {
-  return trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[-\s]+/g, '_').toLowerCase();
+window.modules["598"] = [function(require,module,exports){module.exports = function lines(str) {
+  if (str == null) return [];
+  return String(str).split(/\r\n?|\n/);
 };
-}, {"576":576}];
+}, {}];

@@ -1,8 +1,6 @@
-window.modules["606"] = [function(require,module,exports){var chars = require(579);
+window.modules["606"] = [function(require,module,exports){var chars = require(577);
 
-module.exports = function splice(str, i, howmany, substr) {
-  var arr = chars(str);
-  arr.splice(~~i, ~~howmany, substr);
-  return arr.join('');
+module.exports = function reverse(str) {
+  return chars(str).reverse().join('');
 };
-}, {"579":579}];
+}, {"577":577}];

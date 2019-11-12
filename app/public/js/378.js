@@ -1,27 +1,18 @@
-window.modules["378"] = [function(require,module,exports){/** Used for built-in method references. */
-var arrayProto = Array.prototype;
-
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeJoin = arrayProto.join;
-
-/**
- * Converts all elements in `array` into a string separated by `separator`.
+window.modules["378"] = [function(require,module,exports){/*!
+ * match-words <https://github.com/jonschlinkert/match-words>
  *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Array
- * @param {Array} array The array to convert.
- * @param {string} [separator=','] The element separator.
- * @returns {string} Returns the joined string.
- * @example
- *
- * _.join(['a', 'b', 'c'], '~');
- * // => 'a~b~c'
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
-function join(array, separator) {
-  return array == null ? '' : nativeJoin.call(array, separator);
-}
 
-module.exports = join;
-}, {}];
+'use strict';
+
+var regex = require(379);
+
+module.exports = function(str) {
+  if (typeof str !== 'string') {
+    throw new TypeError('expected a string');
+  }
+  return str.match(regex());
+};
+}, {"379":379}];

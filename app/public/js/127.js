@@ -1,30 +1,36 @@
-window.modules["127"] = [function(require,module,exports){var TYPE = require(82).TYPE;
-var LEFTPARENTHESIS = TYPE.LeftParenthesis;
-var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+window.modules["127"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
+
+var COMMA = TYPE.Comma;
 
 module.exports = {
-    name: 'Parentheses',
+    name: 'SelectorList',
     structure: {
-        children: [[]]
+        children: [['Selector', 'Raw']]
     },
-    parse: function(readSequence, recognizer) {
-        var start = this.scanner.tokenStart;
-        var children = null;
+    parse: function() {
+        var children = new List();
 
-        this.scanner.eat(LEFTPARENTHESIS);
-        children = readSequence.call(this, recognizer);
-        this.scanner.eat(RIGHTPARENTHESIS);
+        while (!this.scanner.eof) {
+            children.appendData(this.Selector());
+
+            if (this.scanner.tokenType === COMMA) {
+                this.scanner.next();
+                continue;
+            }
+
+            break;
+        }
 
         return {
-            type: 'Parentheses',
-            loc: this.getLocation(start, this.scanner.tokenStart),
+            type: 'SelectorList',
+            loc: this.getLocationFromList(children),
             children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk('(');
-        this.each(processChunk, node);
-        processChunk(')');
-    }
+        this.eachComma(processChunk, node);
+    },
+    walkContext: 'selector'
 };
-}, {"82":82}];
+}, {"53":53,"75":75}];

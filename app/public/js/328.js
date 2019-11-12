@@ -1,23 +1,16 @@
-window.modules["328"] = [function(require,module,exports){var baseEach = require(287),
-    isArrayLike = require(329);
+window.modules["328"] = [function(require,module,exports){var isObject = require(12);
 
 /**
- * The base implementation of `_.map` without support for iteratee shorthands.
+ * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
  *
  * @private
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the new mapped array.
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` if suitable for strict
+ *  equality comparisons, else `false`.
  */
-function baseMap(collection, iteratee) {
-  var index = -1,
-      result = isArrayLike(collection) ? Array(collection.length) : [];
-
-  baseEach(collection, function(value, key, collection) {
-    result[++index] = iteratee(value, key, collection);
-  });
-  return result;
+function isStrictComparable(value) {
+  return value === value && !isObject(value);
 }
 
-module.exports = baseMap;
-}, {"287":287,"329":329}];
+module.exports = isStrictComparable;
+}, {"12":12}];

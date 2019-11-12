@@ -1,63 +1,54 @@
-window.modules["130"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
+window.modules["130"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
-var FUNCTION = TYPE.Function;
-var COLON = TYPE.Colon;
-var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+var ASTERISK = TYPE.Asterisk;
+var VERTICALLINE = TYPE.VerticalLine;
 
-// :: ident [ '(' .. ')' ]?
+function eatIdentifierOrAsterisk() {
+    if (this.scanner.tokenType !== IDENTIFIER &&
+        this.scanner.tokenType !== ASTERISK) {
+        this.scanner.error('Identifier or asterisk is expected');
+    }
+
+    this.scanner.next();
+}
+
+// ident
+// ident|ident
+// ident|*
+// *
+// *|ident
+// *|*
+// |ident
+// |*
 module.exports = {
-    name: 'PseudoElementSelector',
+    name: 'TypeSelector',
     structure: {
-        name: String,
-        children: [['Raw'], null]
+        name: String
     },
     parse: function() {
         var start = this.scanner.tokenStart;
-        var children = null;
-        var name;
-        var nameLowerCase;
 
-        this.scanner.eat(COLON);
-        this.scanner.eat(COLON);
-
-        if (this.scanner.tokenType === FUNCTION) {
-            name = this.scanner.consumeFunctionName();
-            nameLowerCase = name.toLowerCase();
-
-            if (this.pseudo.hasOwnProperty(nameLowerCase)) {
-                this.scanner.skipSC();
-                children = this.pseudo[nameLowerCase].call(this);
-                this.scanner.skipSC();
-            } else {
-                children = new List().appendData(
-                    this.Raw(this.scanner.currentToken, 0, 0, false, false)
-                );
-            }
-
-            this.scanner.eat(RIGHTPARENTHESIS);
+        if (this.scanner.tokenType === VERTICALLINE) {
+            this.scanner.next();
+            eatIdentifierOrAsterisk.call(this);
         } else {
-            name = this.scanner.consume(IDENTIFIER);
+            eatIdentifierOrAsterisk.call(this);
+
+            if (this.scanner.tokenType === VERTICALLINE) {
+                this.scanner.next();
+                eatIdentifierOrAsterisk.call(this);
+            }
         }
 
         return {
-            type: 'PseudoElementSelector',
+            type: 'TypeSelector',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            name: name,
-            children: children
+            name: this.scanner.substrToCursor(start)
         };
     },
     generate: function(processChunk, node) {
-        processChunk('::');
         processChunk(node.name);
-
-        if (node.children !== null) {
-            processChunk('(');
-            this.each(processChunk, node);
-            processChunk(')');
-        }
-    },
-    walkContext: 'function'
+    }
 };
-}, {"61":61,"82":82}];
+}, {"75":75}];

@@ -1,14 +1,7 @@
-window.modules["361"] = [function(require,module,exports){/**
- * Gets the value at `key` of `object`.
- *
- * @private
- * @param {Object} [object] The object to query.
- * @param {string} key The key of the property to get.
- * @returns {*} Returns the property value.
- */
-function getValue(object, key) {
-  return object == null ? undefined : object[key];
-}
+window.modules["361"] = [function(require,module,exports){var getNative = require(231);
 
-module.exports = getValue;
-}, {}];
+/* Built-in method references that are verified to be native. */
+var nativeCreate = getNative(Object, 'create');
+
+module.exports = nativeCreate;
+}, {"231":231}];

@@ -1,9 +1,9 @@
-window.modules["624"] = [function(require,module,exports){var makeString = require(578);
+window.modules["624"] = [function(require,module,exports){var makeString = require(576);
 
-module.exports = function truncate(str, length, truncateStr) {
+module.exports = function strRight(str, sep) {
   str = makeString(str);
-  truncateStr = truncateStr || '...';
-  length = ~~length;
-  return str.length > length ? str.slice(0, length) + truncateStr : str;
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.indexOf(sep);
+  return~ pos ? str.slice(pos + sep.length, str.length) : str;
 };
-}, {"578":578}];
+}, {"576":576}];

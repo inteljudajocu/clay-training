@@ -1,28 +1,35 @@
-window.modules["261"] = [function(require,module,exports){var ListCache = require(243),
-    stackClear = require(265),
-    stackDelete = require(263),
-    stackGet = require(264),
-    stackHas = require(262),
-    stackSet = require(266);
+window.modules["261"] = [function(require,module,exports){var ListCache = require(238),
+    Map = require(244),
+    MapCache = require(245);
+
+/** Used as the size to enable large array optimizations. */
+var LARGE_ARRAY_SIZE = 200;
 
 /**
- * Creates a stack cache object to store key-value pairs.
+ * Sets the stack `key` to `value`.
  *
  * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
+ * @name set
+ * @memberOf Stack
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the stack cache instance.
  */
-function Stack(entries) {
-  var data = this.__data__ = new ListCache(entries);
+function stackSet(key, value) {
+  var data = this.__data__;
+  if (data instanceof ListCache) {
+    var pairs = data.__data__;
+    if (!Map || (pairs.length < LARGE_ARRAY_SIZE - 1)) {
+      pairs.push([key, value]);
+      this.size = ++data.size;
+      return this;
+    }
+    data = this.__data__ = new MapCache(pairs);
+  }
+  data.set(key, value);
   this.size = data.size;
+  return this;
 }
 
-// Add methods to `Stack`.
-Stack.prototype.clear = stackClear;
-Stack.prototype['delete'] = stackDelete;
-Stack.prototype.get = stackGet;
-Stack.prototype.has = stackHas;
-Stack.prototype.set = stackSet;
-
-module.exports = Stack;
-}, {"243":243,"262":262,"263":263,"264":264,"265":265,"266":266}];
+module.exports = stackSet;
+}, {"238":238,"244":244,"245":245}];

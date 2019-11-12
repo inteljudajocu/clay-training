@@ -1,29 +1,31 @@
-window.modules["348"] = [function(require,module,exports){var baseToString = require(343);
+window.modules["348"] = [function(require,module,exports){var eq = require(278),
+    isArrayLike = require(324),
+    isIndex = require(271),
+    isObject = require(12);
 
 /**
- * Converts `value` to a string. An empty string is returned for `null`
- * and `undefined` values. The sign of `-0` is preserved.
+ * Checks if the given arguments are from an iteratee call.
  *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to convert.
- * @returns {string} Returns the converted string.
- * @example
- *
- * _.toString(null);
- * // => ''
- *
- * _.toString(-0);
- * // => '-0'
- *
- * _.toString([1, 2, 3]);
- * // => '1,2,3'
+ * @private
+ * @param {*} value The potential iteratee value argument.
+ * @param {*} index The potential iteratee index or key argument.
+ * @param {*} object The potential iteratee object argument.
+ * @returns {boolean} Returns `true` if the arguments are from an iteratee call,
+ *  else `false`.
  */
-function toString(value) {
-  return value == null ? '' : baseToString(value);
+function isIterateeCall(value, index, object) {
+  if (!isObject(object)) {
+    return false;
+  }
+  var type = typeof index;
+  if (type == 'number'
+        ? (isArrayLike(object) && isIndex(index, object.length))
+        : (type == 'string' && index in object)
+      ) {
+    return eq(object[index], value);
+  }
+  return false;
 }
 
-module.exports = toString;
-}, {"343":343}];
+module.exports = isIterateeCall;
+}, {"12":12,"271":271,"278":278,"324":324}];

@@ -1,18 +1,24 @@
-window.modules["236"] = [function(require,module,exports){var baseIsNative = require(314),
-    getValue = require(361);
+window.modules["236"] = [function(require,module,exports){var nativeCreate = require(361);
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
 
 /**
- * Gets the native function at `key` of `object`.
+ * Checks if a hash value for `key` exists.
  *
  * @private
- * @param {Object} object The object to query.
- * @param {string} key The key of the method to get.
- * @returns {*} Returns the function if it's native, else `undefined`.
+ * @name has
+ * @memberOf Hash
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function getNative(object, key) {
-  var value = getValue(object, key);
-  return baseIsNative(value) ? value : undefined;
+function hashHas(key) {
+  var data = this.__data__;
+  return nativeCreate ? (data[key] !== undefined) : hasOwnProperty.call(data, key);
 }
 
-module.exports = getNative;
-}, {"314":314,"361":361}];
+module.exports = hashHas;
+}, {"361":361}];

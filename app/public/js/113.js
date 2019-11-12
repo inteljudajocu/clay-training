@@ -1,36 +1,74 @@
-window.modules["113"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+window.modules["113"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
-var ASTERISK = TYPE.Asterisk;
+var IDENTIFIER = TYPE.Identifier;
+var NUMBER = TYPE.Number;
+var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+var COLON = TYPE.Colon;
 var SOLIDUS = TYPE.Solidus;
 
-// '/*' .* '*/'
 module.exports = {
-    name: 'Comment',
+    name: 'MediaFeature',
     structure: {
-        value: String
+        name: String,
+        value: ['Identifier', 'Number', 'Dimension', 'Ratio', null]
     },
     parse: function() {
         var start = this.scanner.tokenStart;
-        var end = this.scanner.tokenEnd;
+        var name;
+        var value = null;
 
-        if ((end - start + 2) >= 2 &&
-            this.scanner.source.charCodeAt(end - 2) === ASTERISK &&
-            this.scanner.source.charCodeAt(end - 1) === SOLIDUS) {
-            end -= 2;
+        this.scanner.eat(LEFTPARENTHESIS);
+        this.scanner.skipSC();
+
+        name = this.scanner.consume(IDENTIFIER);
+        this.scanner.skipSC();
+
+        if (this.scanner.tokenType !== RIGHTPARENTHESIS) {
+            this.scanner.eat(COLON);
+            this.scanner.skipSC();
+
+            switch (this.scanner.tokenType) {
+                case NUMBER:
+                    if (this.scanner.lookupType(1) === IDENTIFIER) {
+                        value = this.Dimension();
+                    } else if (this.scanner.lookupNonWSType(1) === SOLIDUS) {
+                        value = this.Ratio();
+                    } else {
+                        value = this.Number();
+                    }
+
+                    break;
+
+                case IDENTIFIER:
+                    value = this.Identifier();
+
+                    break;
+
+                default:
+                    this.scanner.error('Number, dimension, ratio or identifier is expected');
+            }
+
+            this.scanner.skipSC();
         }
 
-        this.scanner.next();
+        this.scanner.eat(RIGHTPARENTHESIS);
 
         return {
-            type: 'Comment',
+            type: 'MediaFeature',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            value: this.scanner.source.substring(start + 2, end)
+            name: name,
+            value: value
         };
     },
     generate: function(processChunk, node) {
-        processChunk('/*');
-        processChunk(node.value);
-        processChunk('*/');
+        processChunk('(');
+        processChunk(node.name);
+        if (node.value !== null) {
+            processChunk(':');
+            this.generate(processChunk, node.value);
+        }
+        processChunk(')');
     }
 };
-}, {"82":82}];
+}, {"75":75}];

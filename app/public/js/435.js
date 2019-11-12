@@ -2,129 +2,83 @@ window.modules["435"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _container = require(430);
+var _chalk = require(19);
 
-var _container2 = _interopRequireDefault(_container);
+var _chalk2 = _interopRequireDefault(_chalk);
+
+var _tokenize = require(447);
+
+var _tokenize2 = _interopRequireDefault(_tokenize);
+
+var _input = require(436);
+
+var _input2 = _interopRequireDefault(_input);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var HIGHLIGHT_THEME = {
+    'brackets': _chalk2.default.cyan,
+    'at-word': _chalk2.default.cyan,
+    'call': _chalk2.default.cyan,
+    'comment': _chalk2.default.gray,
+    'string': _chalk2.default.green,
+    'class': _chalk2.default.yellow,
+    'hash': _chalk2.default.magenta,
+    '(': _chalk2.default.cyan,
+    ')': _chalk2.default.cyan,
+    '{': _chalk2.default.yellow,
+    '}': _chalk2.default.yellow,
+    '[': _chalk2.default.yellow,
+    ']': _chalk2.default.yellow,
+    ':': _chalk2.default.yellow,
+    ';': _chalk2.default.yellow
+};
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function getTokenType(_ref, processor) {
+    var type = _ref[0],
+        value = _ref[1];
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/**
- * Represents a CSS file and contains all its parsed nodes.
- *
- * @extends Container
- *
- * @example
- * const root = postcss.parse('a{color:black} b{z-index:2}');
- * root.type         //=> 'root'
- * root.nodes.length //=> 2
- */
-var Root = function (_Container) {
-    _inherits(Root, _Container);
-
-    function Root(defaults) {
-        _classCallCheck(this, Root);
-
-        var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
-
-        _this.type = 'root';
-        if (!_this.nodes) _this.nodes = [];
-        return _this;
+    if (type === 'word') {
+        if (value[0] === '.') {
+            return 'class';
+        }
+        if (value[0] === '#') {
+            return 'hash';
+        }
     }
 
-    Root.prototype.removeChild = function removeChild(child, ignore) {
-        var index = this.index(child);
+    if (!processor.endOfFile()) {
+        var next = processor.nextToken();
+        processor.back(next);
+        if (next[0] === 'brackets' || next[0] === '(') return 'call';
+    }
 
-        if (!ignore && index === 0 && this.nodes.length > 1) {
-            this.nodes[1].raws.before = this.nodes[index].raws.before;
+    return type;
+}
+
+function terminalHighlight(css) {
+    var processor = (0, _tokenize2.default)(new _input2.default(css), { ignoreErrors: true });
+    var result = '';
+
+    var _loop = function _loop() {
+        var token = processor.nextToken();
+        var color = HIGHLIGHT_THEME[getTokenType(token, processor)];
+        if (color) {
+            result += token[1].split(/\r?\n/).map(function (i) {
+                return color(i);
+            }).join('\n');
+        } else {
+            result += token[1];
         }
-
-        return _Container.prototype.removeChild.call(this, child);
     };
 
-    Root.prototype.normalize = function normalize(child, sample, type) {
-        var nodes = _Container.prototype.normalize.call(this, child);
+    while (!processor.endOfFile()) {
+        _loop();
+    }
+    return result;
+}
 
-        if (sample) {
-            if (type === 'prepend') {
-                if (this.nodes.length > 1) {
-                    sample.raws.before = this.nodes[1].raws.before;
-                } else {
-                    delete sample.raws.before;
-                }
-            } else if (this.first !== sample) {
-                for (var _iterator = nodes, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-                    var _ref;
-
-                    if (_isArray) {
-                        if (_i >= _iterator.length) break;
-                        _ref = _iterator[_i++];
-                    } else {
-                        _i = _iterator.next();
-                        if (_i.done) break;
-                        _ref = _i.value;
-                    }
-
-                    var node = _ref;
-
-                    node.raws.before = sample.raws.before;
-                }
-            }
-        }
-
-        return nodes;
-    };
-
-    /**
-     * Returns a {@link Result} instance representing the root’s CSS.
-     *
-     * @param {processOptions} [opts] - options with only `to` and `map` keys
-     *
-     * @return {Result} result with current root’s CSS
-     *
-     * @example
-     * const root1 = postcss.parse(css1, { from: 'a.css' });
-     * const root2 = postcss.parse(css2, { from: 'b.css' });
-     * root1.append(root2);
-     * const result = root1.toResult({ to: 'all.css', map: true });
-     */
-
-
-    Root.prototype.toResult = function toResult() {
-        var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        var LazyResult = require(441);
-        var Processor = require(452);
-
-        var lazy = new LazyResult(new Processor(), this, opts);
-        return lazy.stringify();
-    };
-
-    /**
-     * @memberof Root#
-     * @member {object} raws - Information to generate byte-to-byte equal
-     *                         node string as it was in the origin input.
-     *
-     * Every parser saves its own properties,
-     * but the default CSS parser uses:
-     *
-     * * `after`: the space symbols after the last child to the end of file.
-     * * `semicolon`: is the last child has an (optional) semicolon.
-     *
-     * @example
-     * postcss.parse('a {}\n').raws //=> { after: '\n' }
-     * postcss.parse('a {}').raws   //=> { after: '' }
-     */
-
-    return Root;
-}(_container2.default);
-
-exports.default = Root;
+exports.default = terminalHighlight;
 module.exports = exports['default'];
 
-}, {"430":430,"441":441,"452":452}];
+}, {"19":19,"436":436,"447":447}];

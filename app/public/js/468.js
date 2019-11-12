@@ -2,11 +2,11 @@ window.modules["468"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _namespace = require(477);
+var _node = require(475);
 
-var _namespace2 = _interopRequireDefault(_namespace);
+var _node2 = _interopRequireDefault(_node);
 
-var _types = require(463);
+var _types = require(460);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -16,21 +16,20 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Universal = function (_Namespace) {
-    _inherits(Universal, _Namespace);
+var Comment = function (_Node) {
+    _inherits(Comment, _Node);
 
-    function Universal(opts) {
-        _classCallCheck(this, Universal);
+    function Comment(opts) {
+        _classCallCheck(this, Comment);
 
-        var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
+        var _this = _possibleConstructorReturn(this, _Node.call(this, opts));
 
-        _this.type = _types.UNIVERSAL;
-        _this.value = '*';
+        _this.type = _types.COMMENT;
         return _this;
     }
 
-    return Universal;
-}(_namespace2.default);
+    return Comment;
+}(_node2.default);
 
-exports.default = Universal;
-module.exports = exports['default'];}, {"463":463,"477":477}];
+exports.default = Comment;
+module.exports = exports['default'];}, {"460":460,"475":475}];

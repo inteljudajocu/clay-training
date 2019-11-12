@@ -1,1 +1,119 @@
-window.modules["207"] = [function(require,module,exports){module.exports={"Aacute":"\u00C1","aacute":"\u00E1","Acirc":"\u00C2","acirc":"\u00E2","acute":"\u00B4","AElig":"\u00C6","aelig":"\u00E6","Agrave":"\u00C0","agrave":"\u00E0","amp":"&","AMP":"&","Aring":"\u00C5","aring":"\u00E5","Atilde":"\u00C3","atilde":"\u00E3","Auml":"\u00C4","auml":"\u00E4","brvbar":"\u00A6","Ccedil":"\u00C7","ccedil":"\u00E7","cedil":"\u00B8","cent":"\u00A2","copy":"\u00A9","COPY":"\u00A9","curren":"\u00A4","deg":"\u00B0","divide":"\u00F7","Eacute":"\u00C9","eacute":"\u00E9","Ecirc":"\u00CA","ecirc":"\u00EA","Egrave":"\u00C8","egrave":"\u00E8","ETH":"\u00D0","eth":"\u00F0","Euml":"\u00CB","euml":"\u00EB","frac12":"\u00BD","frac14":"\u00BC","frac34":"\u00BE","gt":">","GT":">","Iacute":"\u00CD","iacute":"\u00ED","Icirc":"\u00CE","icirc":"\u00EE","iexcl":"\u00A1","Igrave":"\u00CC","igrave":"\u00EC","iquest":"\u00BF","Iuml":"\u00CF","iuml":"\u00EF","laquo":"\u00AB","lt":"<","LT":"<","macr":"\u00AF","micro":"\u00B5","middot":"\u00B7","nbsp":"\u00A0","not":"\u00AC","Ntilde":"\u00D1","ntilde":"\u00F1","Oacute":"\u00D3","oacute":"\u00F3","Ocirc":"\u00D4","ocirc":"\u00F4","Ograve":"\u00D2","ograve":"\u00F2","ordf":"\u00AA","ordm":"\u00BA","Oslash":"\u00D8","oslash":"\u00F8","Otilde":"\u00D5","otilde":"\u00F5","Ouml":"\u00D6","ouml":"\u00F6","para":"\u00B6","plusmn":"\u00B1","pound":"\u00A3","quot":"\"","QUOT":"\"","raquo":"\u00BB","reg":"\u00AE","REG":"\u00AE","sect":"\u00A7","shy":"\u00AD","sup1":"\u00B9","sup2":"\u00B2","sup3":"\u00B3","szlig":"\u00DF","THORN":"\u00DE","thorn":"\u00FE","times":"\u00D7","Uacute":"\u00DA","uacute":"\u00FA","Ucirc":"\u00DB","ucirc":"\u00FB","Ugrave":"\u00D9","ugrave":"\u00F9","uml":"\u00A8","Uuml":"\u00DC","uuml":"\u00FC","Yacute":"\u00DD","yacute":"\u00FD","yen":"\u00A5","yuml":"\u00FF"}}, {}];
+window.modules["207"] = [function(require,module,exports){'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (str) {
+  str = prependWhitelist(str);
+  str = prependDecades(str);
+  str = inWord(str);
+  str = specialCase(str);
+  str = quote(str);
+  str = appendWhitelist(str);
+  str = appendPlurals(str);
+  str = unmatchedLeftQuotes(str);
+  str = unmatchedRightQuotes(str);
+  return str;
+};
+
+var a = '’',
+    // apostrophe
+l = '‘',
+    // left single quote
+r = '’'; // right single quote
+
+/**
+ * prepended apostrophes, a whitelist of words
+ * @param {string} str
+ * @returns {string}
+ */
+function prependWhitelist(str) {
+  return str.replace(/'(tis|twas)/gi, a + '$1');
+}
+
+/**
+ * prepended apostrophes for decades
+ * @param {string} str
+ * @returns {string}
+ */
+function prependDecades(str) {
+  return str.replace(/'(\d0s)/gi, a + '$1');
+}
+
+/**
+ * apostrophes in words, including posessives
+ * @param {string} str
+ * @returns {string}
+ */
+function inWord(str) {
+  return str.replace(/(\S)'(\S)/gi, '$1' + a + '$2').replace(/(\S)'(\S)/gi, '$1' + a + '$2');
+  // run through twice to catch complex contractions
+  // like `hadn't've` (one letter separating apostrophes)
+}
+
+/**
+ * special cases for apostrophes
+ * @param {string} str
+ * @returns {string}
+ */
+function specialCase(str) {
+  return str.replace(/'(n)'/gi, a + '$1' + a); // matches 'n' and 'N'
+}
+
+/**
+ * match paired groups of single or double quotes
+ * note: converts double quotes to single quotes
+ * @param {string} str
+ * @returns {string}
+ */
+function quote(str) {
+  // DON'T match if an ending single quote comes after `o`, `ol`, or `s`
+  // because those might be apostrophes (they'll be rendered afterwards)
+
+  // note: this only matches US-style quotes, so you need spaces before and after
+  // (or the beginning / ending of the string)
+  // (i.e. this won't match `"Punctuation outside the quote", like this`)
+
+  // note: quotes that AREN'T plural posessives will not be caught by this,
+  // so we run through unmatchedQuotes afterwards
+  return str.replace(/(^|\s)(?:"(.*?)"|'(.*?[^(?:o|ol|s)])')(\s|$)/, '$1' + l + '$2$3' + r + '$4');
+}
+
+/**
+ * appended apostrophes, a whitelist of words
+ * @param {string} str
+ * @returns {string}
+ */
+function appendWhitelist(str) {
+  return str.replace(/(o|ol)'/gi, '$1' + a);
+}
+
+/**
+ * appended apostrophes for plural posessives
+ * @param {string} str
+ * @returns {string}
+ */
+function appendPlurals(str) {
+  return str.replace(/(s)'(\s|$)/gi, '$1' + a + '$2');
+}
+
+/**
+ * curl any unmatched left quotes
+ * @param {string} str
+ * @returns {string}
+ */
+function unmatchedLeftQuotes(str) {
+  return str.replace(/(^|\s)['"](.*?)/gi, '$1' + l + '$2');
+}
+
+/**
+ * finally, curl any unmatched right quotes
+ * @param {string} str
+ * @returns {string}
+ */
+function unmatchedRightQuotes(str) {
+  return str.replace(/(.*?)['"](\s|$)/gi, '$1' + r + '$2');
+}
+
+module.exports = exports['default'];}, {}];

@@ -1,30 +1,28 @@
-window.modules["344"] = [function(require,module,exports){var baseGetTag = require(298),
-    isObjectLike = require(306);
+window.modules["344"] = [function(require,module,exports){var memoizeCapped = require(362);
 
-/** `Object#toString` result references. */
-var symbolTag = '[object Symbol]';
+/** Used to match property names within property paths. */
+var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
+
+/** Used to match backslashes in property paths. */
+var reEscapeChar = /\\(\\)?/g;
 
 /**
- * Checks if `value` is classified as a `Symbol` primitive or object.
+ * Converts `string` to a property path array.
  *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
- * @example
- *
- * _.isSymbol(Symbol.iterator);
- * // => true
- *
- * _.isSymbol('abc');
- * // => false
+ * @private
+ * @param {string} string The string to convert.
+ * @returns {Array} Returns the property path array.
  */
-function isSymbol(value) {
-  return typeof value == 'symbol' ||
-    (isObjectLike(value) && baseGetTag(value) == symbolTag);
-}
+var stringToPath = memoizeCapped(function(string) {
+  var result = [];
+  if (string.charCodeAt(0) === 46 /* . */) {
+    result.push('');
+  }
+  string.replace(rePropName, function(match, number, quote, subString) {
+    result.push(quote ? subString.replace(reEscapeChar, '$1') : (number || match));
+  });
+  return result;
+});
 
-module.exports = isSymbol;
-}, {"298":298,"306":306}];
+module.exports = stringToPath;
+}, {"362":362}];

@@ -1,12 +1,17 @@
-window.modules["286"] = [function(require,module,exports){var getNative = require(236);
+window.modules["286"] = [function(require,module,exports){var createBaseFor = require(287);
 
-var defineProperty = (function() {
-  try {
-    var func = getNative(Object, 'defineProperty');
-    func({}, '', {});
-    return func;
-  } catch (e) {}
-}());
+/**
+ * The base implementation of `baseForOwn` which iterates over `object`
+ * properties returned by `keysFunc` and invokes `iteratee` for each property.
+ * Iteratee functions may exit iteration early by explicitly returning `false`.
+ *
+ * @private
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @param {Function} keysFunc The function to get the keys of `object`.
+ * @returns {Object} Returns `object`.
+ */
+var baseFor = createBaseFor();
 
-module.exports = defineProperty;
-}, {"236":236}];
+module.exports = baseFor;
+}, {"287":287}];

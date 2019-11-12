@@ -1,8 +1,17 @@
-window.modules["249"] = [function(require,module,exports){var getNative = require(236),
-    root = require(235);
+window.modules["249"] = [function(require,module,exports){var getMapData = require(354);
 
-/* Built-in method references that are verified to be native. */
-var Map = getNative(root, 'Map');
+/**
+ * Checks if a map value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf MapCache
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function mapCacheHas(key) {
+  return getMapData(this, key).has(key);
+}
 
-module.exports = Map;
-}, {"235":235,"236":236}];
+module.exports = mapCacheHas;
+}, {"354":354}];

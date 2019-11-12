@@ -1,22 +1,20 @@
-window.modules["255"] = [function(require,module,exports){var Hash = require(237),
-    ListCache = require(243),
-    Map = require(249);
+window.modules["255"] = [function(require,module,exports){/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
 /**
- * Removes all key-value entries from the map.
+ * Adds `value` to the array cache.
  *
  * @private
- * @name clear
- * @memberOf MapCache
+ * @name add
+ * @memberOf SetCache
+ * @alias push
+ * @param {*} value The value to cache.
+ * @returns {Object} Returns the cache instance.
  */
-function mapCacheClear() {
-  this.size = 0;
-  this.__data__ = {
-    'hash': new Hash,
-    'map': new (Map || ListCache),
-    'string': new Hash
-  };
+function setCacheAdd(value) {
+  this.__data__.set(value, HASH_UNDEFINED);
+  return this;
 }
 
-module.exports = mapCacheClear;
-}, {"237":237,"243":243,"249":249}];
+module.exports = setCacheAdd;
+}, {}];

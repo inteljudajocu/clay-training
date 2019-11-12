@@ -1,70 +1,49 @@
-window.modules["415"] = [function(require,module,exports){var List = require(65).List;
+window.modules["415"] = [function(require,module,exports){var walkRules = require(57).walkRules;
+var utils = require(416);
 
-module.exports = function compressBackground(node) {
-    function lastType() {
-        if (buffer.length) {
-            return buffer[buffer.length - 1].type;
-        }
-    }
+function processRule(node, item, list) {
+    var selectors = node.prelude.children;
+    var declarations = node.block.children;
 
-    function flush() {
-        if (lastType() === 'WhiteSpace') {
-            buffer.pop();
-        }
-
-        if (!buffer.length) {
-            buffer.unshift(
-                {
-                    type: 'Number',
-                    loc: null,
-                    value: '0'
-                },
-                {
-                    type: 'WhiteSpace',
-                    value: ' '
-                },
-                {
-                    type: 'Number',
-                    loc: null,
-                    value: '0'
-                }
-            );
+    list.prevUntil(item.prev, function(prev) {
+        // skip non-ruleset node if safe
+        if (prev.type !== 'Rule') {
+            return utils.unsafeToSkipNode.call(selectors, prev);
         }
 
-        newValue.push.apply(newValue, buffer);
+        var prevSelectors = prev.prelude.children;
+        var prevDeclarations = prev.block.children;
 
-        buffer = [];
-    }
+        // try to join rulesets with equal pseudo signature
+        if (node.pseudoSignature === prev.pseudoSignature) {
+            // try to join by selectors
+            if (utils.isEqualSelectors(prevSelectors, selectors)) {
+                prevDeclarations.appendList(declarations);
+                list.remove(item);
+                return true;
+            }
 
-    var newValue = [];
-    var buffer = [];
-
-    node.children.each(function(node) {
-        if (node.type === 'Operator' && node.value === ',') {
-            flush();
-            newValue.push(node);
-            return;
-        }
-
-        // remove defaults
-        if (node.type === 'Identifier') {
-            if (node.name === 'transparent' ||
-                node.name === 'none' ||
-                node.name === 'repeat' ||
-                node.name === 'scroll') {
-                return;
+            // try to join by declarations
+            if (utils.isEqualDeclarations(declarations, prevDeclarations)) {
+                utils.addSelectors(prevSelectors, selectors);
+                list.remove(item);
+                return true;
             }
         }
 
-        // don't add redundant spaces
-        if (node.type === 'WhiteSpace' && (!buffer.length || lastType() === 'WhiteSpace')) {
-            return;
-        }
-
-        buffer.push(node);
+        // go to prev ruleset if has no selector similarities
+        return utils.hasSimilarSelectors(selectors, prevSelectors);
     });
+}
 
-    flush();
-    node.children = new List().fromArray(newValue);
+// NOTE: direction should be left to right, since rulesets merge to left
+// ruleset. When direction right to left unmerged rulesets may prevent lookup
+// TODO: remove initial merge
+module.exports = function initialMergeRule(ast) {
+    walkRules(ast, function(node, item, list) {
+        if (node.type === 'Rule') {
+            processRule(node, item, list);
+        }
+    });
 };
-}, {"65":65}];
+}, {"57":57,"416":416}];

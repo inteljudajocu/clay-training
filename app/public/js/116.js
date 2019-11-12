@@ -1,46 +1,53 @@
-window.modules["116"] = [function(require,module,exports){var NUMBER = require(82).TYPE.Number;
-
-// special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
-function readUnit(scanner) {
-    var unit = scanner.getTokenValue();
-    var backSlashPos = unit.indexOf('\\');
-
-    if (backSlashPos > 0) {
-        // patch token offset
-        scanner.tokenStart += backSlashPos;
-
-        // return part before backslash
-        return unit.substring(0, backSlashPos);
-    }
-
-    // no backslash in unit name
-    scanner.next();
-
-    return unit;
-}
-
-// number ident
+window.modules["116"] = [function(require,module,exports){// https://drafts.csswg.org/css-syntax-3/#the-anb-type
 module.exports = {
-    name: 'Dimension',
+    name: 'Nth',
     structure: {
-        value: String,
-        unit: String
+        nth: ['AnPlusB', 'Identifier'],
+        selector: ['SelectorList', null]
     },
-    parse: function() {
+    parse: function(allowOfClause) {
+        this.scanner.skipSC();
+
         var start = this.scanner.tokenStart;
-        var value = this.scanner.consume(NUMBER);
-        var unit = readUnit(this.scanner);
+        var end = start;
+        var selector = null;
+        var query;
+
+        if (this.scanner.lookupValue(0, 'odd') || this.scanner.lookupValue(0, 'even')) {
+            query = this.Identifier();
+        } else {
+            query = this.AnPlusB();
+        }
+
+        this.scanner.skipSC();
+
+        if (allowOfClause && this.scanner.lookupValue(0, 'of')) {
+            this.scanner.next();
+
+            selector = this.SelectorList();
+
+            if (this.needPositions) {
+                end = selector.children.last().loc.end.offset;
+            }
+        } else {
+            if (this.needPositions) {
+                end = query.loc.end.offset;
+            }
+        }
 
         return {
-            type: 'Dimension',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            value: value,
-            unit: unit
+            type: 'Nth',
+            loc: this.getLocation(start, end),
+            nth: query,
+            selector: selector
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.value);
-        processChunk(node.unit);
+        this.generate(processChunk, node.nth);
+        if (node.selector !== null) {
+            processChunk(' of ');
+            this.generate(processChunk, node.selector);
+        }
     }
 };
-}, {"82":82}];
+}, {}];

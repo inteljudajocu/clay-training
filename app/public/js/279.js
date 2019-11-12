@@ -1,22 +1,26 @@
-window.modules["279"] = [function(require,module,exports){/**
- * A specialized version of `_.map` for arrays without support for iteratee
- * shorthands.
+window.modules["279"] = [function(require,module,exports){var defineProperty = require(281);
+
+/**
+ * The base implementation of `assignValue` and `assignMergeValue` without
+ * value checks.
  *
  * @private
- * @param {Array} [array] The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the new mapped array.
+ * @param {Object} object The object to modify.
+ * @param {string} key The key of the property to assign.
+ * @param {*} value The value to assign.
  */
-function arrayMap(array, iteratee) {
-  var index = -1,
-      length = array == null ? 0 : array.length,
-      result = Array(length);
-
-  while (++index < length) {
-    result[index] = iteratee(array[index], index, array);
+function baseAssignValue(object, key, value) {
+  if (key == '__proto__' && defineProperty) {
+    defineProperty(object, key, {
+      'configurable': true,
+      'enumerable': true,
+      'value': value,
+      'writable': true
+    });
+  } else {
+    object[key] = value;
   }
-  return result;
 }
 
-module.exports = arrayMap;
-}, {}];
+module.exports = baseAssignValue;
+}, {"281":281}];

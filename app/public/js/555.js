@@ -1,54 +1,119 @@
-window.modules["555"] = [function(require,module,exports){"use strict";
+window.modules["555"] = [function(require,module,exports){'use strict';
 
-exports.__esModule = true;
-exports.default = void 0;
+var has = Object.prototype.hasOwnProperty
+  , undef;
 
 /**
- * Contains helpers for working with vendor prefixes.
+ * Decode a URI encoded string.
  *
- * @example
- * const vendor = postcss.vendor
- *
- * @namespace vendor
+ * @param {String} input The URI encoded string.
+ * @returns {String|Null} The decoded string.
+ * @api private
  */
-var vendor = {
-  /**
-   * Returns the vendor prefix extracted from an input string.
-   *
-   * @param {string} prop String with or without vendor prefix.
-   *
-   * @return {string} vendor prefix or empty string
-   *
-   * @example
-   * postcss.vendor.prefix('-moz-tab-size') //=> '-moz-'
-   * postcss.vendor.prefix('tab-size')      //=> ''
-   */
-  prefix: function prefix(prop) {
-    var match = prop.match(/^(-\w+-)/);
-
-    if (match) {
-      return match[0];
-    }
-
-    return '';
-  },
-
-  /**
-     * Returns the input string stripped of its vendor prefix.
-     *
-     * @param {string} prop String with or without vendor prefix.
-     *
-     * @return {string} String name without vendor prefixes.
-     *
-     * @example
-     * postcss.vendor.unprefixed('-moz-tab-size') //=> 'tab-size'
-     */
-  unprefixed: function unprefixed(prop) {
-    return prop.replace(/^-\w+-/, '');
+function decode(input) {
+  try {
+    return decodeURIComponent(input.replace(/\+/g, ' '));
+  } catch (e) {
+    return null;
   }
-};
-var _default = vendor;
-exports.default = _default;
-module.exports = exports.default;
+}
 
+/**
+ * Attempts to encode a given input.
+ *
+ * @param {String} input The string that needs to be encoded.
+ * @returns {String|Null} The encoded string.
+ * @api private
+ */
+function encode(input) {
+  try {
+    return encodeURIComponent(input);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Simple query string parser.
+ *
+ * @param {String} query The query string that needs to be parsed.
+ * @returns {Object}
+ * @api public
+ */
+function querystring(query) {
+  var parser = /([^=?&]+)=?([^&]*)/g
+    , result = {}
+    , part;
+
+  while (part = parser.exec(query)) {
+    var key = decode(part[1])
+      , value = decode(part[2]);
+
+    //
+    // Prevent overriding of existing properties. This ensures that build-in
+    // methods like `toString` or __proto__ are not overriden by malicious
+    // querystrings.
+    //
+    // In the case if failed decoding, we want to omit the key/value pairs
+    // from the result.
+    //
+    if (key === null || value === null || key in result) continue;
+    result[key] = value;
+  }
+
+  return result;
+}
+
+/**
+ * Transform a query string to an object.
+ *
+ * @param {Object} obj Object that should be transformed.
+ * @param {String} prefix Optional prefix.
+ * @returns {String}
+ * @api public
+ */
+function querystringify(obj, prefix) {
+  prefix = prefix || '';
+
+  var pairs = []
+    , value
+    , key;
+
+  //
+  // Optionally prefix with a '?' if needed
+  //
+  if ('string' !== typeof prefix) prefix = '?';
+
+  for (key in obj) {
+    if (has.call(obj, key)) {
+      value = obj[key];
+
+      //
+      // Edge cases where we actually want to encode the value to an empty
+      // string instead of the stringified value.
+      //
+      if (!value && (value === null || value === undef || isNaN(value))) {
+        value = '';
+      }
+
+      key = encodeURIComponent(key);
+      value = encodeURIComponent(value);
+
+      //
+      // If we failed to encode the strings, we should bail out as we don't
+      // want to add invalid strings to the query.
+      //
+      if (key === null || value === null) continue;
+      pairs.push(key +'='+ value);
+    }
+  }
+
+  return pairs.length ? prefix + pairs.join('&') : '';
+}
+
+//
+// Expose the module.
+//
+exports.stringify = querystringify;
+exports.parse = querystring;
 }, {}];

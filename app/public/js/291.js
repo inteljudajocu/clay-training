@@ -1,17 +1,22 @@
-window.modules["291"] = [function(require,module,exports){var createBaseFor = require(292);
+window.modules["291"] = [function(require,module,exports){var isArray = require(272),
+    isKey = require(327),
+    stringToPath = require(344),
+    toString = require(343);
 
 /**
- * The base implementation of `baseForOwn` which iterates over `object`
- * properties returned by `keysFunc` and invokes `iteratee` for each property.
- * Iteratee functions may exit iteration early by explicitly returning `false`.
+ * Casts `value` to a path array if it's not one.
  *
  * @private
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @param {Function} keysFunc The function to get the keys of `object`.
- * @returns {Object} Returns `object`.
+ * @param {*} value The value to inspect.
+ * @param {Object} [object] The object to query keys on.
+ * @returns {Array} Returns the cast property path array.
  */
-var baseFor = createBaseFor();
+function castPath(value, object) {
+  if (isArray(value)) {
+    return value;
+  }
+  return isKey(value, object) ? [value] : stringToPath(toString(value));
+}
 
-module.exports = baseFor;
-}, {"292":292}];
+module.exports = castPath;
+}, {"272":272,"327":327,"343":343,"344":344}];

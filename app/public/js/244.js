@@ -1,14 +1,8 @@
-window.modules["244"] = [function(require,module,exports){/**
- * Removes all key-value entries from the list cache.
- *
- * @private
- * @name clear
- * @memberOf ListCache
- */
-function listCacheClear() {
-  this.__data__ = [];
-  this.size = 0;
-}
+window.modules["244"] = [function(require,module,exports){var getNative = require(231),
+    root = require(230);
 
-module.exports = listCacheClear;
-}, {}];
+/* Built-in method references that are verified to be native. */
+var Map = getNative(root, 'Map');
+
+module.exports = Map;
+}, {"230":230,"231":231}];

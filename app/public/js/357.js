@@ -1,7 +1,7 @@
-window.modules["357"] = [function(require,module,exports){(function (global){
-/** Detect free variable `global` from Node.js. */
-var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+window.modules["357"] = [function(require,module,exports){var overArg = require(358);
 
-module.exports = freeGlobal;
+/** Built-in value references. */
+var getPrototype = overArg(Object.getPrototypeOf, Object);
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})}, {}];
+module.exports = getPrototype;
+}, {"358":358}];

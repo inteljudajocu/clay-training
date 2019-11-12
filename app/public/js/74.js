@@ -1,85 +1,56 @@
-window.modules["74"] = [function(require,module,exports){var List = require(61);
+window.modules["74"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
+var WHITESPACE = TYPE.WhiteSpace;
+var COMMENT = TYPE.Comment;
 
-function getFirstMatchNode(matchNode) {
-    if (matchNode.type === 'ASTNode') {
-        return matchNode.node;
-    }
+module.exports = function readSequence(recognizer) {
+    var children = new List();
+    var child = null;
+    var context = {
+        recognizer: recognizer,
+        space: null,
+        ignoreWS: false,
+        ignoreWSAfter: false
+    };
 
-    if (matchNode.match.length !== 0) {
-        return getFirstMatchNode(matchNode.match[0]);
-    }
+    this.scanner.skipSC();
 
-    return null;
-}
+    while (!this.scanner.eof) {
+        switch (this.scanner.tokenType) {
+            case COMMENT:
+                this.scanner.next();
+                continue;
 
-function getLastMatchNode(matchNode) {
-    if (matchNode.type === 'ASTNode') {
-        return matchNode.node;
-    }
-
-    if (matchNode.match.length !== 0) {
-        return getLastMatchNode(matchNode.match[matchNode.match.length - 1]);
-    }
-
-    return null;
-}
-
-function matchFragments(lexer, ast, match, type, name) {
-    function findFragments(matchNode) {
-        if (matchNode.type === 'ASTNode') {
-            return;
-        }
-
-        if (matchNode.syntax.type === type &&
-            matchNode.syntax.name === name) {
-            var start = getFirstMatchNode(matchNode);
-            var end = getLastMatchNode(matchNode);
-
-            lexer.syntax.walk(ast, function(node, item, list) {
-                if (node === start) {
-                    var nodes = new List();
-                    var loc = null;
-
-                    do {
-                        nodes.appendData(item.data);
-
-                        if (item.data === end) {
-                            break;
-                        }
-
-                        item = item.next;
-                    } while (item !== null);
-
-                    if (start.loc !== null && end.loc !== null) {
-                        loc = {
-                            source: start.loc.source,
-                            start: start.loc.start,
-                            end: end.loc.end
-                        };
-                    }
-
-                    fragments.push({
-                        parent: list,
-                        loc: loc,
-                        nodes: nodes
-                    });
+            case WHITESPACE:
+                if (context.ignoreWS) {
+                    this.scanner.next();
+                } else {
+                    context.space = this.WhiteSpace();
                 }
-            });
+                continue;
         }
 
-        matchNode.match.forEach(findFragments);
+        child = recognizer.getNode.call(this, context);
+
+        if (child === undefined) {
+            break;
+        }
+
+        if (context.space !== null) {
+            children.appendData(context.space);
+            context.space = null;
+        }
+
+        children.appendData(child);
+
+        if (context.ignoreWSAfter) {
+            context.ignoreWSAfter = false;
+            context.ignoreWS = true;
+        } else {
+            context.ignoreWS = false;
+        }
     }
 
-    var fragments = [];
-
-    if (match.matched !== null) {
-        findFragments(match.matched);
-    }
-
-    return fragments;
-}
-
-module.exports = {
-    matchFragments: matchFragments
+    return children;
 };
-}, {"61":61}];
+}, {"53":53,"75":75}];

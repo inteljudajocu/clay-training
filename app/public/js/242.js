@@ -1,24 +1,36 @@
-window.modules["242"] = [function(require,module,exports){var nativeCreate = require(366);
+window.modules["242"] = [function(require,module,exports){var assocIndexOf = require(280);
 
 /** Used for built-in method references. */
-var objectProto = Object.prototype;
+var arrayProto = Array.prototype;
 
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
+/** Built-in value references. */
+var splice = arrayProto.splice;
 
 /**
- * Checks if a hash value for `key` exists.
+ * Removes `key` and its value from the list cache.
  *
  * @private
- * @name has
- * @memberOf Hash
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ * @name delete
+ * @memberOf ListCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
  */
-function hashHas(key) {
-  var data = this.__data__;
-  return nativeCreate ? (data[key] !== undefined) : hasOwnProperty.call(data, key);
+function listCacheDelete(key) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  if (index < 0) {
+    return false;
+  }
+  var lastIndex = data.length - 1;
+  if (index == lastIndex) {
+    data.pop();
+  } else {
+    splice.call(data, index, 1);
+  }
+  --this.size;
+  return true;
 }
 
-module.exports = hashHas;
-}, {"366":366}];
+module.exports = listCacheDelete;
+}, {"280":280}];

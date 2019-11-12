@@ -1,16 +1,23 @@
 window.modules["42"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(58);
+const isUriStringCheck = require(50);
 
 /**
- * First test if argument passed in is a String. If true, determine if a uri points
- * to a DEFAULT instance of a layout. Otherwise, throw an error.
+ * Remove the site's slug for the url-patterned prefix
  *
- * @param  {string}  uri
- * @return {Boolean}
+ * @param  {String} uri
+ * @param  {Object} site
+ * @return {String}
  */
-module.exports = function (uri) {
+module.exports = function (uri, site) {
+  var { slug, prefix, host, path } = site,
+    hasSlash = uri.indexOf('/_') !== -1;
+
+  if (!prefix) {
+    prefix = path && path.length > 1 ? `${host}${path}` : host;
+  }
+
   isUriStringCheck.strCheck(uri);
-  return !!uri.match(/\/_layouts\/[A-Za-z0-9\-]+$/);
+  return uri.replace(`${slug}${hasSlash ? '/' : ''}`, `${prefix}${hasSlash ? '/' : ''}`);
 };
-}, {"58":58}];
+}, {"50":50}];

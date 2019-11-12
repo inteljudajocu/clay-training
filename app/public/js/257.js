@@ -1,8 +1,15 @@
-window.modules["257"] = [function(require,module,exports){var getNative = require(236),
-    root = require(235);
+window.modules["257"] = [function(require,module,exports){/**
+ * Gets the stack value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf Stack
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function stackGet(key) {
+  return this.__data__.get(key);
+}
 
-/* Built-in method references that are verified to be native. */
-var Set = getNative(root, 'Set');
-
-module.exports = Set;
-}, {"235":235,"236":236}];
+module.exports = stackGet;
+}, {}];

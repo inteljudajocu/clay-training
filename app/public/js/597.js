@@ -1,8 +1,7 @@
-window.modules["597"] = [function(require,module,exports){var capitalize = require(577);
-var underscored = require(598);
-var trim = require(576);
+window.modules["597"] = [function(require,module,exports){var makeString = require(576);
 
-module.exports = function humanize(str) {
-  return capitalize(trim(underscored(str).replace(/_id$/, '').replace(/_/g, ' ')));
+module.exports = function include(str, needle) {
+  if (needle === '') return true;
+  return makeString(str).indexOf(needle) !== -1;
 };
-}, {"576":576,"577":577,"598":598}];
+}, {"576":576}];

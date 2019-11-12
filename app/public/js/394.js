@@ -1,15 +1,20 @@
-window.modules["394"] = [function(require,module,exports){// remove white spaces around operators when safe
-module.exports = function cleanWhitespace(node, item, list) {
-    if (node.value === '+' || node.value === '-') {
+window.modules["394"] = [function(require,module,exports){module.exports = function cleanWhitespace(node, item, list) {
+    // remove when first or last item in sequence
+    if (item.next === null || item.prev === null) {
+        list.remove(item);
         return;
     }
 
-    if (item.prev !== null && item.prev.data.type === 'WhiteSpace') {
-        list.remove(item.prev);
+    // remove when previous node is whitespace
+    if (item.prev.data.type === 'WhiteSpace') {
+        list.remove(item);
+        return;
     }
 
-    if (item.next !== null && item.next.data.type === 'WhiteSpace') {
-        list.remove(item.next);
+    if ((this.stylesheet !== null && this.stylesheet.children === list) ||
+        (this.block !== null && this.block.children === list)) {
+        list.remove(item);
+        return;
     }
 };
 }, {}];

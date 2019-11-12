@@ -1,23 +1,34 @@
-window.modules["324"] = [function(require,module,exports){var baseIsMatch = require(313),
-    getMatchData = require(331),
-    matchesStrictComparable = require(330);
+window.modules["324"] = [function(require,module,exports){var isFunction = require(310),
+    isLength = require(314);
 
 /**
- * The base implementation of `_.matches` which doesn't clone `source`.
+ * Checks if `value` is array-like. A value is considered array-like if it's
+ * not a function and has a `value.length` that's an integer greater than or
+ * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
  *
- * @private
- * @param {Object} source The object of property values to match.
- * @returns {Function} Returns the new spec function.
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ * @example
+ *
+ * _.isArrayLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLike(document.body.children);
+ * // => true
+ *
+ * _.isArrayLike('abc');
+ * // => true
+ *
+ * _.isArrayLike(_.noop);
+ * // => false
  */
-function baseMatches(source) {
-  var matchData = getMatchData(source);
-  if (matchData.length == 1 && matchData[0][2]) {
-    return matchesStrictComparable(matchData[0][0], matchData[0][1]);
-  }
-  return function(object) {
-    return object === source || baseIsMatch(object, source, matchData);
-  };
+function isArrayLike(value) {
+  return value != null && isLength(value.length) && !isFunction(value);
 }
 
-module.exports = baseMatches;
-}, {"313":313,"330":330,"331":331}];
+module.exports = isArrayLike;
+}, {"310":310,"314":314}];

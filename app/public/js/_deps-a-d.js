@@ -1,190 +1,5 @@
-window.modules["8"] = [function(require,module,exports){// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-}, {}];
-window.modules["59"] = [function(require,module,exports){module.exports={"generic":true,"types":{"absolute-size":"xx-small | x-small | small | medium | large | x-large | xx-large","alpha-value":"<number> | <percentage>","angle-percentage":"<angle> | <percentage>","animateable-feature":"scroll-position | contents | <custom-ident>","attachment":"scroll | fixed | local","auto-repeat":"repeat( [ auto-fill | auto-fit ] , [ <line-names>? <fixed-size> ]+ <line-names>? )","auto-track-list":"[ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>? <auto-repeat> [ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>?","basic-shape":"<inset()> | <circle()> | <ellipse()> | <polygon()>","bg-image":"none | <image>","bg-layer":"<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box>{1,2}","bg-size":"[ <length-percentage> | auto ]{1,2} | cover | contain","blur()":"blur( <length> )","blend-mode":"normal | multiply | screen | overlay | darken | lighten | color-dodge | color-burn | hard-light | soft-light | difference | exclusion | hue | saturation | color | luminosity","box":"border-box | padding-box | content-box","br-style":"none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset","br-width":"<length> | thin | medium | thick","brightness()":"brightness( <number-percentage> )","calc()":"calc( <calc-sum> )","calc-sum":"<calc-product> [ [ '+' | '-' ] <calc-product> ]*","calc-product":"<calc-value> [ '*' <calc-value> | '/' <number> ]*","calc-value":"<number> | <dimension> | <percentage> | ( <calc-sum> )","cf-final-image":"<image> | <color>","cf-mixing-image":"<percentage>? && <image>","circle()":"circle( [ <shape-radius> ]? [ at <position> ]? )","clip-source":"<url>","color":"<rgb()> | <rgba()> | <hsl()> | <hsla()> | <hex-color> | <named-color> | currentcolor | <deprecated-system-color>","color-stop":"<color> <length-percentage>?","color-stop-list":"<color-stop>#{2,}","common-lig-values":"[ common-ligatures | no-common-ligatures ]","composite-style":"clear | copy | source-over | source-in | source-out | source-atop | destination-over | destination-in | destination-out | destination-atop | xor","compositing-operator":"add | subtract | intersect | exclude","contextual-alt-values":"[ contextual | no-contextual ]","content-list":"[ <string> | contents | <url> | <quote> | <attr()> | counter( <ident> , <'list-style-type'>? ) ]+","content-replacement":"<image>","contrast()":"contrast( [ <number-percentage> ] )","counter-style":"<counter-style-name> | symbols()","counter-style-name":"<custom-ident>","cross-fade()":"cross-fade( <cf-mixing-image> , <cf-final-image>? )","cubic-bezier-timing-function":"ease | ease-in | ease-out | ease-in-out | cubic-bezier( <number> , <number> , <number> , <number> )","deprecated-system-color":"ActiveBorder | ActiveCaption | AppWorkspace | Background | ButtonFace | ButtonHighlight | ButtonShadow | ButtonText | CaptionText | GrayText | Highlight | HighlightText | InactiveBorder | InactiveCaption | InactiveCaptionText | InfoBackground | InfoText | Menu | MenuText | Scrollbar | ThreeDDarkShadow | ThreeDFace | ThreeDHighlight | ThreeDLightShadow | ThreeDShadow | Window | WindowFrame | WindowText","discretionary-lig-values":"[ discretionary-ligatures | no-discretionary-ligatures ]","display-box":"contents | none","display-inside":"flow | flow-root | table | flex | grid | subgrid | ruby","display-internal":"table-row-group | table-header-group | table-footer-group | table-row | table-cell | table-column-group | table-column | table-caption | ruby-base | ruby-text | ruby-base-container | ruby-text-container","display-legacy":"inline-block | inline-list-item | inline-table | inline-flex | inline-grid","display-listitem":"list-item && <display-outside>? && [ flow | flow-root ]?","display-outside":"block | inline | run-in","drop-shadow()":"drop-shadow( <length>{2,3} <color>? )","east-asian-variant-values":"[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ]","east-asian-width-values":"[ full-width | proportional-width ]","element()":"element( <id-selector> )","ellipse()":"ellipse( [ <shape-radius>{2} ]? [ at <position> ]? )","ending-shape":"circle | ellipse","explicit-track-list":"[ <line-names>? <track-size> ]+ <line-names>?","family-name":"<string> | <custom-ident>+","feature-tag-value":"<string> [ <integer> | on | off ]?","feature-value-name":"<custom-ident>","fill-rule":"nonzero | evenodd","filter-function":"<blur()> | <brightness()> | <contrast()> | <drop-shadow()> | <grayscale()> | <hue-rotate()> | <invert()> | <opacity()> | <sepia()> | <saturate()>","filter-function-list":"[ <filter-function> | <url> ]+","final-bg-layer":"<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box> || <box> || <'background-color'>","fit-content()":"fit-content( [ <length> | <percentage> ] )","fixed-breadth":"<length-percentage>","fixed-repeat":"repeat( [ <positive-integer> ] , [ <line-names>? <fixed-size> ]+ <line-names>? )","fixed-size":"<fixed-breadth> | minmax( <fixed-breadth> , <track-breadth> ) | minmax( <inflexible-breadth> , <fixed-breadth> )","font-variant-css21":"[ normal | small-caps ]","frames-timing-function":"frames( <integer> )","frequency-percentage":"<frequency> | <percentage>","generic-family":"serif | sans-serif | cursive | fantasy | monospace | -apple-system","generic-name":"serif | sans-serif | cursive | fantasy | monospace","geometry-box":"<shape-box> | fill-box | stroke-box | view-box","gradient":"<-legacy-gradient()> | <linear-gradient()> | <repeating-linear-gradient()> | <radial-gradient()> | <repeating-radial-gradient()>","grayscale()":"grayscale( <number-percentage> )","grid-line":"auto | <custom-ident> | [ <integer> && <custom-ident>? ] | [ span && [ <integer> || <custom-ident> ] ]","historical-lig-values":"[ historical-ligatures | no-historical-ligatures ]","hsl()":"hsl( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue> , <percentage> , <percentage> , <alpha-value>? ] )","hsla()":"hsla( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue> , <percentage> , <percentage> , <alpha-value>? ] )","hue":"<number> | <angle>","hue-rotate()":"hue-rotate( <angle> )","image":"<url> | <image()> | <image-set()> | <element()> | <cross-fade()> | <gradient>","image()":"image( [ [ <image> | <string> ]? , <color>? ]! )","image-set()":"image-set( <image-set-option># )","image-set-option":"[ <image> | <string> ] <resolution>","inflexible-breadth":"<length> | <percentage> | min-content | max-content | auto","inset()":"inset( <length-percentage>{1,4} [ round <'border-radius'> ]? )","invert()":"invert( <number-percentage> )","keyframes-name":"<custom-ident> | <string>","keyframe-selector":"from | to | <percentage>","leader()":"leader( <leader-type> )","leader-type":"dotted | solid | space | <string>","length-percentage":"<length> | <percentage>","line-names":"'[' <custom-ident>* ']'","line-name-list":"[ <line-names> | <name-repeat> ]+","linear-gradient()":"linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )","mask-layer":"<mask-reference> || <position> [ / <bg-size> ]? || <repeat-style> || <geometry-box> || [ <geometry-box> | no-clip ] || <compositing-operator> || <masking-mode>","mask-position":"[ <length-percentage> | left | center | right ] [ <length-percentage> | top | center | bottom ]?","mask-reference":"none | <image> | <mask-source>","mask-source":"<url>","masking-mode":"alpha | luminance | match-source","matrix()":"matrix( <number> [, <number> ]{5} )","matrix3d()":"matrix3d( <number> [, <number> ]{15} )","media-type":"<ident>","mf-boolean":"<mf-name>","mf-name":"<ident>","minmax()":"minmax( [ <length> | <percentage> | <flex> | min-content | max-content | auto ] , [ <length> | <percentage> | <flex> | min-content | max-content | auto ] )","named-color":"transparent | aliceblue | antiquewhite | aqua | aquamarine | azure | beige | bisque | black | blanchedalmond | blue | blueviolet | brown | burlywood | cadetblue | chartreuse | chocolate | coral | cornflowerblue | cornsilk | crimson | cyan | darkblue | darkcyan | darkgoldenrod | darkgray | darkgreen | darkgrey | darkkhaki | darkmagenta | darkolivegreen | darkorange | darkorchid | darkred | darksalmon | darkseagreen | darkslateblue | darkslategray | darkslategrey | darkturquoise | darkviolet | deeppink | deepskyblue | dimgray | dimgrey | dodgerblue | firebrick | floralwhite | forestgreen | fuchsia | gainsboro | ghostwhite | gold | goldenrod | gray | green | greenyellow | grey | honeydew | hotpink | indianred | indigo | ivory | khaki | lavender | lavenderblush | lawngreen | lemonchiffon | lightblue | lightcoral | lightcyan | lightgoldenrodyellow | lightgray | lightgreen | lightgrey | lightpink | lightsalmon | lightseagreen | lightskyblue | lightslategray | lightslategrey | lightsteelblue | lightyellow | lime | limegreen | linen | magenta | maroon | mediumaquamarine | mediumblue | mediumorchid | mediumpurple | mediumseagreen | mediumslateblue | mediumspringgreen | mediumturquoise | mediumvioletred | midnightblue | mintcream | mistyrose | moccasin | navajowhite | navy | oldlace | olive | olivedrab | orange | orangered | orchid | palegoldenrod | palegreen | paleturquoise | palevioletred | papayawhip | peachpuff | peru | pink | plum | powderblue | purple | rebeccapurple | red | rosybrown | royalblue | saddlebrown | salmon | sandybrown | seagreen | seashell | sienna | silver | skyblue | slateblue | slategray | slategrey | snow | springgreen | steelblue | tan | teal | thistle | tomato | turquoise | violet | wheat | white | whitesmoke | yellow | yellowgreen | <-non-standart-color>","namespace-prefix":"<ident>","number-percentage":"<number> | <percentage>","numeric-figure-values":"[ lining-nums | oldstyle-nums ]","numeric-fraction-values":"[ diagonal-fractions | stacked-fractions ]","numeric-spacing-values":"[ proportional-nums | tabular-nums ]","opacity()":"opacity( [ <number-percentage> ] )","perspective()":"perspective( <length> )","polygon()":"polygon( <fill-rule>? , [ <length-percentage> <length-percentage> ]# )","position":"[ center && [ left | right | top | bottom ] <length-percentage>? ] | [ [ left | right ] <length-percentage>? ] && [ [ top | bottom ] <length-percentage>? ] | [ [ left | center | right | <length-percentage> ] || [ top | center | bottom | <length-percentage> ] ]","quote":"open-quote | close-quote | no-open-quote | no-close-quote","radial-gradient()":"radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )","relative-size":"larger | smaller","repeat-style":"repeat-x | repeat-y | [ repeat | space | round | no-repeat ]{1,2}","repeating-linear-gradient()":"repeating-linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )","repeating-radial-gradient()":"repeating-radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )","rgb()":"rgb( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )","rgba()":"rgba( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )","rotate()":"rotate( <angle> )","rotate3d()":"rotate3d( <number> , <number> , <number> , <angle> )","rotateX()":"rotateX( <angle> )","rotateY()":"rotateY( <angle> )","rotateZ()":"rotateZ( <angle> )","saturate()":"saturate( <number-percentage> )","scale()":"scale( <number> [, <number> ]? )","scale3d()":"scale3d( <number> , <number> , <number> )","scaleX()":"scaleX( <number> )","scaleY()":"scaleY( <number> )","scaleZ()":"scaleZ( <number> )","shape-radius":"<length-percentage> | closest-side | farthest-side","skew()":"skew( <angle> [, <angle> ]? )","skewX()":"skewX( <angle> )","skewY()":"skewY( <angle> )","sepia()":"sepia( <number-percentage> )","shadow":"inset? && <length>{2,4} && <color>?","shadow-t":"[ <length>{2,3} && <color>? ]","shape":"rect( [ [ <top> , <right> , <bottom> , <left> ] | [ <top> <right> <bottom> <left> ] ] )","shape-box":"<box> | margin-box","side-or-corner":"[ left | right ] || [ top | bottom ]","single-animation":"<time> || <single-timing-function> || <time> || <single-animation-iteration-count> || <single-animation-direction> || <single-animation-fill-mode> || <single-animation-play-state> || [ none | <keyframes-name> ]","single-animation-direction":"normal | reverse | alternate | alternate-reverse","single-animation-fill-mode":"none | forwards | backwards | both","single-animation-iteration-count":"infinite | <number>","single-animation-play-state":"running | paused","single-timing-function":"linear | <cubic-bezier-timing-function> | <step-timing-function> | <frames-timing-function>","single-transition":"<single-transition-timing-function> || [ none | <single-transition-property> ] || <time> || <time>","single-transition-timing-function":"<single-timing-function>","single-transition-property":"all | <custom-ident>","size":"closest-side | farthest-side | closest-corner | farthest-corner | <length> | <length-percentage>{2}","step-timing-function":"step-start | step-end | steps( <integer> [, [ start | end ] ]? )","symbol":"<string> | <image> | <ident>","target":"<target-counter()> | <target-counters()> | <target-text()>","target-counter()":"target-counter( [ <string> | <url> ] , <custom-ident> , <counter-style>? )","target-counters()":"target-counters( [ <string> | <url> ] , <custom-ident> , <string> , <counter-style>? )","target-text()":"target-text( [ <string> | <url> ] , [ content | before | after | first-letter ]? )","time-percentage":"<time> | <percentage>","track-breadth":"<length-percentage> | <flex> | min-content | max-content | auto","track-list":"[ <line-names>? [ <track-size> | <track-repeat> ] ]+ <line-names>?","track-repeat":"repeat( [ <positive-integer> ] , [ <line-names>? <track-size> ]+ <line-names>? )","track-size":"<track-breadth> | minmax( <inflexible-breadth> , <track-breadth> ) | fit-content( [ <length> | <percentage> ] )","transform-function":"[ <matrix()> || <translate()> || <translateX()> || <translateY()> || <scale()> || <scaleX()> || <scaleY()> || <rotate()> || <skew()> || <skewX()> || <skewY()> || <matrix3d()> || <translate3d()> || <translateZ()> || <scale3d()> || <scaleZ()> || <rotate3d()> || <rotateX()> || <rotateY()> || <rotateZ()> || <perspective()> ]+","transform-list":"<transform-function>+","translate()":"translate( <length-percentage> [, <length-percentage> ]? )","translate3d()":"translate3d( <length-percentage> , <length-percentage> , <length> )","translateX()":"translateX( <length-percentage> )","translateY()":"translateY( <length-percentage> )","translateZ()":"translateZ( <length> )","type-or-unit":"string | integer | color | url | integer | number | length | angle | time | frequency | em | ex | px | rem | vw | vh | vmin | vmax | mm | q | cm | in | pt | pc | deg | grad | rad | ms | s | Hz | kHz | %","viewport-length":"auto | <length-percentage>","-legacy-gradient()":"<-webkit-gradient()> | <-legacy-linear-gradient()> | <-legacy-repeating-linear-gradient()> | <-legacy-radial-gradient()> | <-legacy-repeating-radial-gradient()>","-legacy-linear-gradient()":"-moz-linear-gradient( <-legacy-linear-gradient-arguments> ) | -ms-linear-gradient( <-legacy-linear-gradient-arguments> ) | -webkit-linear-gradient( <-legacy-linear-gradient-arguments> ) | -o-linear-gradient( <-legacy-linear-gradient-arguments> )","-legacy-repeating-linear-gradient()":"-moz-repeating-linear-gradient( <-legacy-linear-gradient-arguments> ) | -ms-repeating-linear-gradient( <-legacy-linear-gradient-arguments> ) | -webkit-repeating-linear-gradient( <-legacy-linear-gradient-arguments> ) | -o-repeating-linear-gradient( <-legacy-linear-gradient-arguments> )","-legacy-linear-gradient-arguments":"[ <angle> | <side-or-corner> ]? , <color-stop-list>","-legacy-radial-gradient()":"-moz-radial-gradient( <-legacy-radial-gradient-arguments> ) | -ms-radial-gradient( <-legacy-radial-gradient-arguments> ) | -webkit-radial-gradient( <-legacy-radial-gradient-arguments> ) | -o-radial-gradient( <-legacy-radial-gradient-arguments> )","-legacy-repeating-radial-gradient()":"-moz-repeating-radial-gradient( <-legacy-radial-gradient-arguments> ) | -ms-repeating-radial-gradient( <-legacy-radial-gradient-arguments> ) | -webkit-repeating-radial-gradient( <-legacy-radial-gradient-arguments> ) | -o-repeating-radial-gradient( <-legacy-radial-gradient-arguments> )","-legacy-radial-gradient-arguments":"[ <position> , ]? [ [ [ <-legacy-radial-gradient-shape> || <-legacy-radial-gradient-size> ] | [ <length> | <percentage> ]{2} ] , ]? <color-stop-list>","-legacy-radial-gradient-size":"closest-side | closest-corner | farthest-side | farthest-corner | contain | cover","-legacy-radial-gradient-shape":"circle | ellipse","-non-standart-font":"-apple-system-body | -apple-system-headline | -apple-system-subheadline | -apple-system-caption1 | -apple-system-caption2 | -apple-system-footnote | -apple-system-short-body | -apple-system-short-headline | -apple-system-short-subheadline | -apple-system-short-caption1 | -apple-system-short-footnote | -apple-system-tall-body","-non-standart-color":"-moz-ButtonDefault | -moz-ButtonHoverFace | -moz-ButtonHoverText | -moz-CellHighlight | -moz-CellHighlightText | -moz-Combobox | -moz-ComboboxText | -moz-Dialog | -moz-DialogText | -moz-dragtargetzone | -moz-EvenTreeRow | -moz-Field | -moz-FieldText | -moz-html-CellHighlight | -moz-html-CellHighlightText | -moz-mac-accentdarkestshadow | -moz-mac-accentdarkshadow | -moz-mac-accentface | -moz-mac-accentlightesthighlight | -moz-mac-accentlightshadow | -moz-mac-accentregularhighlight | -moz-mac-accentregularshadow | -moz-mac-chrome-active | -moz-mac-chrome-inactive | -moz-mac-focusring | -moz-mac-menuselect | -moz-mac-menushadow | -moz-mac-menutextselect | -moz-MenuHover | -moz-MenuHoverText | -moz-MenuBarText | -moz-MenuBarHoverText | -moz-nativehyperlinktext | -moz-OddTreeRow | -moz-win-communicationstext | -moz-win-mediatext | -moz-activehyperlinktext | -moz-default-background-color | -moz-default-color | -moz-hyperlinktext | -moz-visitedhyperlinktext | -webkit-activelink | -webkit-focus-ring-color | -webkit-link | -webkit-text","-non-standart-image-rendering":"optimize-contrast | -moz-crisp-edges | -o-crisp-edges | -webkit-optimize-contrast","-non-standart-width":"min-intrinsic | intrinsic | -moz-min-content | -moz-max-content | -webkit-min-content | -webkit-max-content","-non-standart-word-break":"break-word","-webkit-image-set()":"<image-set()>","-webkit-gradient()":"-webkit-gradient( <-webkit-gradient-type> , <-webkit-gradient-point> [ , <-webkit-gradient-point> | , <-webkit-gradient-radius> , <-webkit-gradient-point> ] [, <-webkit-gradient-radius> ]? [, <-webkit-gradient-color-stop()> ]* )","-webkit-gradient-color-stop()":"from( <color> ) | color-stop( [ <number-zero-one> | <percentage> ] , <color> ) | to( <color> )","-webkit-gradient-point":"[ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]","-webkit-gradient-radius":"<length> | <percentage>","-webkit-gradient-type":"linear | radial","-webkit-mask-box-repeat":"repeat | stretch | round","-webkit-mask-clip-style":"border | border-box | padding | padding-box | content | content-box | text","-ms-filter":"[ <progid> | FlipH | FlipV ]+","age":"child | young | old","border-radius":"<length-percentage>{1,2}","bottom":"<length> | auto","generic-voice":"[ <age>? <gender> <integer>? ]","gender":"male | female | neutral","left":"<length> | auto","mask-image":"<mask-reference>#","name-repeat":"repeat( [ <positive-integer> | auto-fill ] , <line-names>+ )","outline-radius":"<border-radius>","paint":"none | currentColor | <color> | <url> [ none | currentColor | <color> ]?","path()":"path( <string> )","right":"<length> | auto","svg-length":"<percentage> | <length> | <number>","svg-writing-mode":"lr-tb | rl-tb | tb-rl | lr | rl | tb","top":"<length> | auto","x":"<number>","y":"<number>"},"properties":{"-ms-overflow-style":"auto | none | scrollbar | -ms-autohiding-scrollbar","-moz-appearance":"none | button | button-arrow-down | button-arrow-next | button-arrow-previous | button-arrow-up | button-bevel | button-focus | caret | checkbox | checkbox-container | checkbox-label | checkmenuitem | dualbutton | groupbox | listbox | listitem | menuarrow | menubar | menucheckbox | menuimage | menuitem | menuitemtext | menulist | menulist-button | menulist-text | menulist-textfield | menupopup | menuradio | menuseparator | meterbar | meterchunk | progressbar | progressbar-vertical | progresschunk | progresschunk-vertical | radio | radio-container | radio-label | radiomenuitem | range | range-thumb | resizer | resizerpanel | scale-horizontal | scalethumbend | scalethumb-horizontal | scalethumbstart | scalethumbtick | scalethumb-vertical | scale-vertical | scrollbarbutton-down | scrollbarbutton-left | scrollbarbutton-right | scrollbarbutton-up | scrollbarthumb-horizontal | scrollbarthumb-vertical | scrollbartrack-horizontal | scrollbartrack-vertical | searchfield | separator | sheet | spinner | spinner-downbutton | spinner-textfield | spinner-upbutton | splitter | statusbar | statusbarpanel | tab | tabpanel | tabpanels | tab-scroll-arrow-back | tab-scroll-arrow-forward | textfield | textfield-multiline | toolbar | toolbarbutton | toolbarbutton-dropdown | toolbargripper | toolbox | tooltip | treeheader | treeheadercell | treeheadersortarrow | treeitem | treeline | treetwisty | treetwistyopen | treeview | -moz-mac-unified-toolbar | -moz-win-borderless-glass | -moz-win-browsertabbar-toolbox | -moz-win-communicationstext | -moz-win-communications-toolbox | -moz-win-exclude-glass | -moz-win-glass | -moz-win-mediatext | -moz-win-media-toolbox | -moz-window-button-box | -moz-window-button-box-maximized | -moz-window-button-close | -moz-window-button-maximize | -moz-window-button-minimize | -moz-window-button-restore | -moz-window-frame-bottom | -moz-window-frame-left | -moz-window-frame-right | -moz-window-titlebar | -moz-window-titlebar-maximized","-moz-binding":"<url> | none","-moz-border-bottom-colors":"[ <color> ]* <color> | none","-moz-border-left-colors":"[ <color> ]* <color> | none","-moz-border-right-colors":"[ <color> ]* <color> | none","-moz-border-top-colors":"[ <color> ]* <color> | none","-moz-context-properties":"none | [ fill | fill-opacity | stroke | stroke-opacity ]#","-moz-float-edge":"border-box | content-box | margin-box | padding-box","-moz-force-broken-image-icon":"<integer>","-moz-image-region":"<shape> | auto","-moz-orient":"inline | block | horizontal | vertical","-moz-outline-radius":"<outline-radius>{1,4} [ / <outline-radius>{1,4} ]?","-moz-outline-radius-bottomleft":"<outline-radius>","-moz-outline-radius-bottomright":"<outline-radius>","-moz-outline-radius-topleft":"<outline-radius>","-moz-outline-radius-topright":"<outline-radius>","-moz-stack-sizing":"ignore | stretch-to-fit","-moz-text-blink":"none | blink","-moz-user-focus":"ignore | normal | select-after | select-before | select-menu | select-same | select-all | none","-moz-user-input":"auto | none | enabled | disabled","-moz-user-modify":"read-only | read-write | write-only","-moz-window-shadow":"default | menu | tooltip | sheet | none","-webkit-border-before":"<'border-width'> || <'border-style'> || <'color'>","-webkit-border-before-color":"<'color'>","-webkit-border-before-style":"<'border-style'>","-webkit-border-before-width":"<'border-width'>","-webkit-box-reflect":"[ above | below | right | left ]? <length>? <image>?","-webkit-mask":"<mask-image> [ <'-webkit-mask-repeat'> || <'-webkit-mask-attachment'> || <'-webkit-mask-position'> || <'-webkit-mask-origin'> || <'-webkit-mask-clip'> ]*","-webkit-mask-attachment":"<attachment> [, <attachment> ]*","-webkit-mask-clip":"<-webkit-mask-clip-style> [, <-webkit-mask-clip-style> ]*","-webkit-mask-composite":"<composite-style> [, <composite-style> ]*","-webkit-mask-image":"<mask-image> [, <mask-image> ]*","-webkit-mask-origin":"[ padding | border | content ] [, [ border | padding | content ] ]*","-webkit-mask-position":"<mask-position>#","-webkit-mask-position-x":"[ <length-percentage> | left | center | right ]#","-webkit-mask-position-y":"[ <length-percentage> | top | center | bottom ]#","-webkit-mask-repeat":"<repeat-style> [, <repeat-style> ]*","-webkit-mask-repeat-x":"repeat | no-repeat | space | round","-webkit-mask-repeat-y":"repeat | no-repeat | space | round","-webkit-tap-highlight-color":"<color>","-webkit-text-fill-color":"<color>","-webkit-text-stroke":"<length> || <color>","-webkit-text-stroke-color":"<color>","-webkit-text-stroke-width":"<length>","-webkit-touch-callout":"default | none","align-content":"flex-start | flex-end | center | space-between | space-around | space-evenly | stretch","align-items":"flex-start | flex-end | center | baseline | stretch","align-self":"auto | flex-start | flex-end | center | baseline | stretch","all":"initial | inherit | unset","animation":"<single-animation>#","animation-delay":"<time>#","animation-direction":"<single-animation-direction>#","animation-duration":"<time>#","animation-fill-mode":"<single-animation-fill-mode>#","animation-iteration-count":"<single-animation-iteration-count>#","animation-name":"[ none | <keyframes-name> ]#","animation-play-state":"<single-animation-play-state>#","animation-timing-function":"<single-timing-function>#","appearance":"auto | none","azimuth":"<angle> | [ [ left-side | far-left | left | center-left | center | center-right | right | far-right | right-side ] || behind ] | leftwards | rightwards","backdrop-filter":"none | <filter-function-list>","backface-visibility":"visible | hidden","background":"[ <bg-layer> , ]* <final-bg-layer>","background-attachment":"<attachment>#","background-blend-mode":"<blend-mode>#","background-clip":"<box>#","background-color":"<color>","background-image":"<bg-image>#","background-origin":"<box>#","background-position":"<position>#","background-position-x":"[ center | [ left | right | x-start | x-end ]? <length-percentage>? ]#","background-position-y":"[ center | [ top | bottom | y-start | y-end ]? <length-percentage>? ]#","background-repeat":"<repeat-style>#","background-size":"<bg-size>#","block-size":"<'width'>","border":"<br-width> || <br-style> || <color>","border-block-end":"<'border-width'> || <'border-style'> || <'color'>","border-block-end-color":"<'color'>","border-block-end-style":"<'border-style'>","border-block-end-width":"<'border-width'>","border-block-start":"<'border-width'> || <'border-style'> || <'color'>","border-block-start-color":"<'color'>","border-block-start-style":"<'border-style'>","border-block-start-width":"<'border-width'>","border-bottom":"<br-width> || <br-style> || <color>","border-bottom-color":"<color>","border-bottom-left-radius":"<length-percentage>{1,2}","border-bottom-right-radius":"<length-percentage>{1,2}","border-bottom-style":"<br-style>","border-bottom-width":"<br-width>","border-collapse":"collapse | separate","border-color":"<color>{1,4}","border-image":"<'border-image-source'> || <'border-image-slice'> [ / <'border-image-width'> | / <'border-image-width'>? / <'border-image-outset'> ]? || <'border-image-repeat'>","border-image-outset":"[ <length> | <number> ]{1,4}","border-image-repeat":"[ stretch | repeat | round | space ]{1,2}","border-image-slice":"<number-percentage>{1,4} && fill?","border-image-source":"none | <image>","border-image-width":"[ <length-percentage> | <number> | auto ]{1,4}","border-inline-end":"<'border-width'> || <'border-style'> || <'color'>","border-inline-end-color":"<'color'>","border-inline-end-style":"<'border-style'>","border-inline-end-width":"<'border-width'>","border-inline-start":"<'border-width'> || <'border-style'> || <'color'>","border-inline-start-color":"<'color'>","border-inline-start-style":"<'border-style'>","border-inline-start-width":"<'border-width'>","border-left":"<br-width> || <br-style> || <color>","border-left-color":"<color>","border-left-style":"<br-style>","border-left-width":"<br-width>","border-radius":"<length-percentage>{1,4} [ / <length-percentage>{1,4} ]?","border-right":"<br-width> || <br-style> || <color>","border-right-color":"<color>","border-right-style":"<br-style>","border-right-width":"<br-width>","border-spacing":"<length> <length>?","border-style":"<br-style>{1,4}","border-top":"<br-width> || <br-style> || <color>","border-top-color":"<color>","border-top-left-radius":"<length-percentage>{1,2}","border-top-right-radius":"<length-percentage>{1,2}","border-top-style":"<br-style>","border-top-width":"<br-width>","border-width":"<br-width>{1,4}","bottom":"<length> | <percentage> | auto","box-align":"start | center | end | baseline | stretch","box-decoration-break":"slice | clone","box-direction":"normal | reverse | inherit","box-flex":"<number>","box-flex-group":"<integer>","box-lines":"single | multiple","box-ordinal-group":"<integer>","box-orient":"horizontal | vertical | inline-axis | block-axis | inherit","box-pack":"start | center | end | justify","box-shadow":"none | <shadow>#","box-sizing":"content-box | border-box","break-after":"auto | avoid | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region","break-before":"auto | avoid | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region","break-inside":"auto | avoid | avoid-page | avoid-column | avoid-region","caption-side":"top | bottom | block-start | block-end | inline-start | inline-end","caret-color":"auto | <color>","clear":"none | left | right | both | inline-start | inline-end","clip":"<shape> | auto","clip-path":"<clip-source> | [ <basic-shape> || <geometry-box> ] | none","color":"<color>","column-count":"<number> | auto","column-fill":"auto | balance","column-gap":"<length> | normal","column-rule":"<'column-rule-width'> || <'column-rule-style'> || <'column-rule-color'>","column-rule-color":"<color>","column-rule-style":"<br-style>","column-rule-width":"<br-width>","column-span":"none | all","column-width":"<length> | auto","columns":"<'column-width'> || <'column-count'>","contain":"none | strict | content | [ size || layout || style || paint ]","content":"normal | none | [ <content-replacement> | <content-list> ] [ / <string> ]?","counter-increment":"[ <custom-ident> <integer>? ]+ | none","counter-reset":"[ <custom-ident> <integer>? ]+ | none","cursor":"[ [ <url> [ <x> <y> ]? , ]* [ auto | default | none | context-menu | help | pointer | progress | wait | cell | crosshair | text | vertical-text | alias | copy | move | no-drop | not-allowed | e-resize | n-resize | ne-resize | nw-resize | s-resize | se-resize | sw-resize | w-resize | ew-resize | ns-resize | nesw-resize | nwse-resize | col-resize | row-resize | all-scroll | zoom-in | zoom-out | grab | grabbing | hand | -webkit-grab | -webkit-grabbing | -webkit-zoom-in | -webkit-zoom-out | -moz-grab | -moz-grabbing | -moz-zoom-in | -moz-zoom-out ] ]","direction":"ltr | rtl","display":"none | inline | block | list-item | inline-list-item | inline-block | inline-table | table | table-cell | table-column | table-column-group | table-footer-group | table-header-group | table-row | table-row-group | flex | inline-flex | grid | inline-grid | run-in | ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | contents | -ms-flexbox | -ms-inline-flexbox | -ms-grid | -ms-inline-grid | -webkit-flex | -webkit-inline-flex | -webkit-box | -webkit-inline-box | -moz-inline-stack | -moz-box | -moz-inline-box","display-inside":"auto | block | table | flex | grid | ruby","display-list":"none | list-item","display-outside":"block-level | inline-level | run-in | contents | none | table-row-group | table-header-group | table-footer-group | table-row | table-cell | table-column-group | table-column | table-caption | ruby-base | ruby-text | ruby-base-container | ruby-text-container","empty-cells":"show | hide","filter":"none | <filter-function-list> | <-ms-filter>","flex":"none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]","flex-basis":"content | <'width'>","flex-direction":"row | row-reverse | column | column-reverse","flex-flow":"<'flex-direction'> || <'flex-wrap'>","flex-grow":"<number>","flex-shrink":"<number>","flex-wrap":"nowrap | wrap | wrap-reverse","float":"left | right | none | inline-start | inline-end","font":"[ [ <'font-style'> || <font-variant-css21> || <'font-weight'> || <'font-stretch'> ]? <'font-size'> [ / <'line-height'> ]? <'font-family'> ] | caption | icon | menu | message-box | small-caption | status-bar | <-non-standart-font>","font-family":"[ <family-name> | <generic-family> ]#","font-feature-settings":"normal | <feature-tag-value>#","font-kerning":"auto | normal | none","font-language-override":"normal | <string>","font-variation-settings":"normal | [ <string> <number> ]#","font-size":"<absolute-size> | <relative-size> | <length-percentage>","font-size-adjust":"none | <number>","font-stretch":"normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded","font-style":"normal | italic | oblique","font-synthesis":"none | [ weight || style ]","font-variant":"normal | none | [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> || stylistic( <feature-value-name> ) || historical-forms || styleset( <feature-value-name># ) || character-variant( <feature-value-name># ) || swash( <feature-value-name> ) || ornaments( <feature-value-name> ) || annotation( <feature-value-name> ) || [ small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps ] || <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero || <east-asian-variant-values> || <east-asian-width-values> || ruby ]","font-variant-alternates":"normal | [ stylistic( <feature-value-name> ) || historical-forms || styleset( <feature-value-name># ) || character-variant( <feature-value-name># ) || swash( <feature-value-name> ) || ornaments( <feature-value-name> ) || annotation( <feature-value-name> ) ]","font-variant-caps":"normal | small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps","font-variant-east-asian":"normal | [ <east-asian-variant-values> || <east-asian-width-values> || ruby ]","font-variant-ligatures":"normal | none | [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> ]","font-variant-numeric":"normal | [ <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero ]","font-variant-position":"normal | sub | super","font-weight":"normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900","grid":"<'grid-template'> | <'grid-template-rows'> / [ auto-flow && dense? ] <'grid-auto-columns'>? | [ auto-flow && dense? ] <'grid-auto-rows'>? / <'grid-template-columns'>","grid-area":"<grid-line> [ / <grid-line> ]{0,3}","grid-auto-columns":"<track-size>+","grid-auto-flow":"[ row | column ] || dense","grid-auto-rows":"<track-size>+","grid-column":"<grid-line> [ / <grid-line> ]?","grid-column-end":"<grid-line>","grid-column-gap":"<length-percentage>","grid-column-start":"<grid-line>","grid-gap":"<'grid-row-gap'> <'grid-column-gap'>?","grid-row":"<grid-line> [ / <grid-line> ]?","grid-row-end":"<grid-line>","grid-row-gap":"<length-percentage>","grid-row-start":"<grid-line>","grid-template":"none | [ <'grid-template-rows'> / <'grid-template-columns'> ] | [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <explicit-track-list> ]?","grid-template-areas":"none | <string>+","grid-template-columns":"none | <track-list> | <auto-track-list>","grid-template-rows":"none | <track-list> | <auto-track-list>","height":"[ <length> | <percentage> ] && [ border-box | content-box ]? | available | min-content | max-content | fit-content | auto","hyphens":"none | manual | auto","image-orientation":"from-image | <angle> | [ <angle>? flip ]","image-rendering":"auto | crisp-edges | pixelated | optimizeSpeed | optimizeQuality | <-non-standart-image-rendering>","image-resolution":"[ from-image || <resolution> ] && snap?","ime-mode":"auto | normal | active | inactive | disabled","initial-letter":"normal | [ <number> <integer>? ]","initial-letter-align":"[ auto | alphabetic | hanging | ideographic ]","inline-size":"<'width'>","isolation":"auto | isolate","justify-content":"flex-start | flex-end | center | space-between | space-around | space-evenly","left":"<length> | <percentage> | auto","letter-spacing":"normal | <length-percentage>","line-break":"auto | loose | normal | strict","line-height":"normal | <number> | <length> | <percentage>","list-style":"<'list-style-type'> || <'list-style-position'> || <'list-style-image'>","list-style-image":"<url> | none","list-style-position":"inside | outside","list-style-type":"<counter-style> | <string> | none","margin":"[ <length> | <percentage> | auto ]{1,4}","margin-block-end":"<'margin-left'>","margin-block-start":"<'margin-left'>","margin-bottom":"<length> | <percentage> | auto","margin-inline-end":"<'margin-left'>","margin-inline-start":"<'margin-left'>","margin-left":"<length> | <percentage> | auto","margin-right":"<length> | <percentage> | auto","margin-top":"<length> | <percentage> | auto","marker-offset":"<length> | auto","mask":"<mask-layer>#","mask-clip":"[ <geometry-box> | no-clip ]#","mask-composite":"<compositing-operator>#","mask-image":"<mask-reference>#","mask-mode":"<masking-mode>#","mask-origin":"<geometry-box>#","mask-position":"<position>#","mask-repeat":"<repeat-style>#","mask-size":"<bg-size>#","mask-type":"luminance | alpha","max-block-size":"<'max-width'>","max-height":"<length> | <percentage> | none | max-content | min-content | fit-content | fill-available","max-inline-size":"<'max-width'>","max-width":"<length> | <percentage> | none | max-content | min-content | fit-content | fill-available | <-non-standart-width>","min-block-size":"<'min-width'>","min-height":"<length> | <percentage> | auto | max-content | min-content | fit-content | fill-available","min-inline-size":"<'min-width'>","min-width":"<length> | <percentage> | auto | max-content | min-content | fit-content | fill-available | <-non-standart-width>","mix-blend-mode":"<blend-mode>","object-fit":"fill | contain | cover | none | scale-down","object-position":"<position>","offset":"[ <'offset-position'>? [ <'offset-path'> [ <'offset-distance'> || <'offset-rotate'> ]? ]? ]! [ / <'offset-anchor'> ]?","offset-anchor":"auto | <position>","offset-block-end":"<'left'>","offset-block-start":"<'left'>","offset-inline-end":"<'left'>","offset-inline-start":"<'left'>","offset-distance":"<length-percentage>","offset-path":"none | ray( [ <angle> && <size>? && contain? ] ) | <path()> | <url> | [ <basic-shape> || <geometry-box> ]","offset-position":"auto | <position>","offset-rotate":"[ auto | reverse ] || <angle>","opacity":"<number-zero-one>","order":"<integer>","orphans":"<integer>","outline":"[ <'outline-color'> || <'outline-style'> || <'outline-width'> ]","outline-color":"<color> | invert","outline-offset":"<length>","outline-style":"auto | <br-style>","outline-width":"<br-width>","overflow":"visible | hidden | scroll | auto","overflow-clip-box":"padding-box | content-box","overflow-wrap":"normal | break-word","overflow-x":"visible | hidden | scroll | auto","overflow-y":"visible | hidden | scroll | auto","padding":"[ <length> | <percentage> ]{1,4}","padding-block-end":"<'padding-left'>","padding-block-start":"<'padding-left'>","padding-bottom":"<length> | <percentage>","padding-inline-end":"<'padding-left'>","padding-inline-start":"<'padding-left'>","padding-left":"<length> | <percentage>","padding-right":"<length> | <percentage>","padding-top":"<length> | <percentage>","page-break-after":"auto | always | avoid | left | right","page-break-before":"auto | always | avoid | left | right","page-break-inside":"auto | avoid","perspective":"none | <length>","perspective-origin":"<position>","pointer-events":"auto | none | visiblePainted | visibleFill | visibleStroke | visible | painted | fill | stroke | all | inherit","position":"static | relative | absolute | sticky | fixed | -webkit-sticky","quotes":"none | [ <string> <string> ]+","resize":"none | both | horizontal | vertical","right":"<length> | <percentage> | auto","ruby-align":"start | center | space-between | space-around","ruby-merge":"separate | collapse | auto","ruby-position":"over | under | inter-character","scroll-behavior":"auto | smooth","scroll-snap-coordinate":"none | <position>#","scroll-snap-destination":"<position>","scroll-snap-points-x":"none | repeat( <length-percentage> )","scroll-snap-points-y":"none | repeat( <length-percentage> )","scroll-snap-type":"none | mandatory | proximity","scroll-snap-type-x":"none | mandatory | proximity","scroll-snap-type-y":"none | mandatory | proximity","shape-image-threshold":"<number>","shape-margin":"<length-percentage>","shape-outside":"none | <shape-box> || <basic-shape> | <image>","tab-size":"<integer> | <length>","table-layout":"auto | fixed","text-align":"start | end | left | right | center | justify | match-parent","text-align-last":"auto | start | end | left | right | center | justify","text-combine-upright":"none | all | [ digits <integer>? ]","text-decoration":"<'text-decoration-line'> || <'text-decoration-style'> || <'text-decoration-color'>","text-decoration-color":"<color>","text-decoration-line":"none | [ underline || overline || line-through || blink ]","text-decoration-skip":"none | [ objects || spaces || ink || edges || box-decoration ]","text-decoration-style":"solid | double | dotted | dashed | wavy","text-emphasis":"<'text-emphasis-style'> || <'text-emphasis-color'>","text-emphasis-color":"<color>","text-emphasis-position":"[ over | under ] && [ right | left ]","text-emphasis-style":"none | [ [ filled | open ] || [ dot | circle | double-circle | triangle | sesame ] ] | <string>","text-indent":"<length-percentage> && hanging? && each-line?","text-justify":"auto | inter-character | inter-word | none","text-orientation":"mixed | upright | sideways","text-overflow":"[ clip | ellipsis | <string> ]{1,2}","text-rendering":"auto | optimizeSpeed | optimizeLegibility | geometricPrecision","text-shadow":"none | <shadow-t>#","text-size-adjust":"none | auto | <percentage>","text-transform":"none | capitalize | uppercase | lowercase | full-width","text-underline-position":"auto | [ under || [ left | right ] ]","top":"<length> | <percentage> | auto","touch-action":"auto | none | [ [ pan-x | pan-left | pan-right ] || [ pan-y | pan-up | pan-down ] || pinch-zoom ] | manipulation","transform":"none | <transform-list>","transform-box":"border-box | fill-box | view-box","transform-origin":"[ [ <length-percentage> | left | center | right ] && [ <length-percentage> | top | center | bottom ] ] <length>? | [ <length-percentage> | left | center | right | top | bottom ]","transform-style":"flat | preserve-3d","transition":"<single-transition>#","transition-delay":"<time>#","transition-duration":"<time>#","transition-property":"none | <single-transition-property>#","transition-timing-function":"<single-transition-timing-function>#","unicode-bidi":"normal | embed | isolate | bidi-override | isolate-override | plaintext | -moz-isolate | -moz-isolate-override | -moz-plaintext | -webkit-isolate","user-select":"auto | text | none | contain | all","vertical-align":"baseline | sub | super | text-top | text-bottom | middle | top | bottom | <percentage> | <length>","visibility":"visible | hidden | collapse","white-space":"normal | pre | nowrap | pre-wrap | pre-line","widows":"<integer>","width":"[ <length> | <percentage> ] && [ border-box | content-box ]? | available | min-content | max-content | fit-content | auto","will-change":"auto | <animateable-feature>#","word-break":"normal | break-all | keep-all | <-non-standart-word-break>","word-spacing":"normal | <length-percentage>","word-wrap":"normal | break-word","writing-mode":"horizontal-tb | vertical-rl | vertical-lr | sideways-rl | sideways-lr | <svg-writing-mode>","z-index":"auto | <integer>","-moz-background-clip":"padding | border","-moz-border-radius-bottomleft":"<'border-bottom-left-radius'>","-moz-border-radius-bottomright":"<'border-bottom-right-radius'>","-moz-border-radius-topleft":"<'border-top-left-radius'>","-moz-border-radius-topright":"<'border-bottom-right-radius'>","-moz-osx-font-smoothing":"auto | unset | grayscale","-moz-user-select":"none | text | all | -moz-none","-ms-filter":"<string>","-ms-flex-align":"start | end | center | baseline | stretch","-ms-flex-item-align":"auto | start | end | center | baseline | stretch","-ms-flex-line-pack":"start | end | center | justify | distribute | stretch","-ms-flex-negative":"<'flex-shrink'>","-ms-flex-pack":"start | end | center | justify | distribute","-ms-flex-order":"<integer>","-ms-flex-positive":"<'flex-grow'>","-ms-flex-preferred-size":"<'flex-basis'>","-ms-interpolation-mode":"nearest-neighbor | bicubic","-ms-grid-column-align":"start | end | center | stretch","-ms-grid-row-align":"start | end | center | stretch","-ms-high-contrast-adjust":"auto | none","-ms-user-select":"none | element | text","-webkit-appearance":"none | button | button-bevel | caps-lock-indicator | caret | checkbox | default-button | listbox | listitem | media-fullscreen-button | media-mute-button | media-play-button | media-seek-back-button | media-seek-forward-button | media-slider | media-sliderthumb | menulist | menulist-button | menulist-text | menulist-textfield | push-button | radio | scrollbarbutton-down | scrollbarbutton-left | scrollbarbutton-right | scrollbarbutton-up | scrollbargripper-horizontal | scrollbargripper-vertical | scrollbarthumb-horizontal | scrollbarthumb-vertical | scrollbartrack-horizontal | scrollbartrack-vertical | searchfield | searchfield-cancel-button | searchfield-decoration | searchfield-results-button | searchfield-results-decoration | slider-horizontal | slider-vertical | sliderthumb-horizontal | sliderthumb-vertical | square-button | textarea | textfield","-webkit-background-clip":"[ <box> | border | padding | content | text ]#","-webkit-column-break-after":"always | auto | avoid","-webkit-column-break-before":"always | auto | avoid","-webkit-column-break-inside":"always | auto | avoid","-webkit-font-smoothing":"none | antialiased | subpixel-antialiased","-webkit-line-clamp":"<positive-integer>","-webkit-mask-box-image":"[ <url> | <gradient> | none ] [ <length-percentage>{4} <-webkit-mask-box-repeat>{2} ]?","-webkit-overflow-scrolling":"auto | touch","-webkit-print-color-adjust":"economy | exact","-webkit-text-security":"none | circle | disc | square","-webkit-user-drag":"none | element | auto","-webkit-user-select":"auto | none | text | all","alignment-baseline":"auto | baseline | before-edge | text-before-edge | middle | central | after-edge | text-after-edge | ideographic | alphabetic | hanging | mathematical","baseline-shift":"baseline | sub | super | <svg-length>","behavior":"<url>+","clip-rule":"nonzero | evenodd","cue":"<'cue-before'> <'cue-after'>?","cue-after":"<url> <decibel>? | none","cue-before":"<url> <decibel>? | none","dominant-baseline":"auto | use-script | no-change | reset-size | ideographic | alphabetic | hanging | mathematical | central | middle | text-after-edge | text-before-edge","fill":"<paint>","fill-opacity":"<number-zero-one>","fill-rule":"nonzero | evenodd","glyph-orientation-horizontal":"<angle>","glyph-orientation-vertical":"<angle>","kerning":"auto | <svg-length>","marker":"none | <url>","marker-end":"none | <url>","marker-mid":"none | <url>","marker-start":"none | <url>","pause":"<'pause-before'> <'pause-after'>?","pause-after":"<time> | none | x-weak | weak | medium | strong | x-strong","pause-before":"<time> | none | x-weak | weak | medium | strong | x-strong","rest":"<'rest-before'> <'rest-after'>?","rest-after":"<time> | none | x-weak | weak | medium | strong | x-strong","rest-before":"<time> | none | x-weak | weak | medium | strong | x-strong","shape-rendering":"auto | optimizeSpeed | crispEdges | geometricPrecision","src":"[ <url> format( <string># )? | local( <family-name> ) ]#","speak":"auto | none | normal","speak-as":"normal | spell-out || digits || [ literal-punctuation | no-punctuation ]","stroke":"<paint>","stroke-dasharray":"none | [ <svg-length>+ ]#","stroke-dashoffset":"<svg-length>","stroke-linecap":"butt | round | square","stroke-linejoin":"miter | round | bevel","stroke-miterlimit":"<number-one-or-greater>","stroke-opacity":"<number-zero-one>","stroke-width":"<svg-length>","text-anchor":"start | middle | end","unicode-range":"<unicode-range>#","voice-balance":"<number> | left | center | right | leftwards | rightwards","voice-duration":"auto | <time>","voice-family":"[ [ <family-name> | <generic-voice> ] , ]* [ <family-name> | <generic-voice> ] | preserve","voice-pitch":"<frequency> && absolute | [ [ x-low | low | medium | high | x-high ] || [ <frequency> | <semitones> | <percentage> ] ]","voice-range":"<frequency> && absolute | [ [ x-low | low | medium | high | x-high ] || [ <frequency> | <semitones> | <percentage> ] ]","voice-rate":"[ normal | x-slow | slow | medium | fast | x-fast ] || <percentage>","voice-stress":"normal | strong | moderate | none | reduced","voice-volume":"silent | [ [ x-soft | soft | medium | loud | x-loud ] || <decibel> ]","zoom":"normal | reset | <number> | <percentage>"}}}, {}];
-window.modules["60"] = [function(require,module,exports){var List = require(61);
+window.modules["51"] = [function(require,module,exports){module.exports={"generic":true,"types":{"absolute-size":"xx-small | x-small | small | medium | large | x-large | xx-large","alpha-value":"<number> | <percentage>","angle-percentage":"<angle> | <percentage>","animateable-feature":"scroll-position | contents | <custom-ident>","attachment":"scroll | fixed | local","auto-repeat":"repeat( [ auto-fill | auto-fit ] , [ <line-names>? <fixed-size> ]+ <line-names>? )","auto-track-list":"[ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>? <auto-repeat> [ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>?","basic-shape":"<inset()> | <circle()> | <ellipse()> | <polygon()>","bg-image":"none | <image>","bg-layer":"<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box>{1,2}","bg-size":"[ <length-percentage> | auto ]{1,2} | cover | contain","blur()":"blur( <length> )","blend-mode":"normal | multiply | screen | overlay | darken | lighten | color-dodge | color-burn | hard-light | soft-light | difference | exclusion | hue | saturation | color | luminosity","box":"border-box | padding-box | content-box","br-style":"none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset","br-width":"<length> | thin | medium | thick","brightness()":"brightness( <number-percentage> )","calc()":"calc( <calc-sum> )","calc-sum":"<calc-product> [ [ '+' | '-' ] <calc-product> ]*","calc-product":"<calc-value> [ '*' <calc-value> | '/' <number> ]*","calc-value":"<number> | <dimension> | <percentage> | ( <calc-sum> )","cf-final-image":"<image> | <color>","cf-mixing-image":"<percentage>? && <image>","circle()":"circle( [ <shape-radius> ]? [ at <position> ]? )","clip-source":"<url>","color":"<rgb()> | <rgba()> | <hsl()> | <hsla()> | <hex-color> | <named-color> | currentcolor | <deprecated-system-color>","color-stop":"<color> <length-percentage>?","color-stop-list":"<color-stop>#{2,}","common-lig-values":"[ common-ligatures | no-common-ligatures ]","composite-style":"clear | copy | source-over | source-in | source-out | source-atop | destination-over | destination-in | destination-out | destination-atop | xor","compositing-operator":"add | subtract | intersect | exclude","contextual-alt-values":"[ contextual | no-contextual ]","content-list":"[ <string> | contents | <url> | <quote> | <attr()> | counter( <ident> , <'list-style-type'>? ) ]+","content-replacement":"<image>","contrast()":"contrast( [ <number-percentage> ] )","counter-style":"<counter-style-name> | symbols()","counter-style-name":"<custom-ident>","cross-fade()":"cross-fade( <cf-mixing-image> , <cf-final-image>? )","cubic-bezier-timing-function":"ease | ease-in | ease-out | ease-in-out | cubic-bezier( <number> , <number> , <number> , <number> )","deprecated-system-color":"ActiveBorder | ActiveCaption | AppWorkspace | Background | ButtonFace | ButtonHighlight | ButtonShadow | ButtonText | CaptionText | GrayText | Highlight | HighlightText | InactiveBorder | InactiveCaption | InactiveCaptionText | InfoBackground | InfoText | Menu | MenuText | Scrollbar | ThreeDDarkShadow | ThreeDFace | ThreeDHighlight | ThreeDLightShadow | ThreeDShadow | Window | WindowFrame | WindowText","discretionary-lig-values":"[ discretionary-ligatures | no-discretionary-ligatures ]","display-box":"contents | none","display-inside":"flow | flow-root | table | flex | grid | subgrid | ruby","display-internal":"table-row-group | table-header-group | table-footer-group | table-row | table-cell | table-column-group | table-column | table-caption | ruby-base | ruby-text | ruby-base-container | ruby-text-container","display-legacy":"inline-block | inline-list-item | inline-table | inline-flex | inline-grid","display-listitem":"list-item && <display-outside>? && [ flow | flow-root ]?","display-outside":"block | inline | run-in","drop-shadow()":"drop-shadow( <length>{2,3} <color>? )","east-asian-variant-values":"[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ]","east-asian-width-values":"[ full-width | proportional-width ]","element()":"element( <id-selector> )","ellipse()":"ellipse( [ <shape-radius>{2} ]? [ at <position> ]? )","ending-shape":"circle | ellipse","explicit-track-list":"[ <line-names>? <track-size> ]+ <line-names>?","family-name":"<string> | <custom-ident>+","feature-tag-value":"<string> [ <integer> | on | off ]?","feature-value-name":"<custom-ident>","fill-rule":"nonzero | evenodd","filter-function":"<blur()> | <brightness()> | <contrast()> | <drop-shadow()> | <grayscale()> | <hue-rotate()> | <invert()> | <opacity()> | <sepia()> | <saturate()>","filter-function-list":"[ <filter-function> | <url> ]+","final-bg-layer":"<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box> || <box> || <'background-color'>","fit-content()":"fit-content( [ <length> | <percentage> ] )","fixed-breadth":"<length-percentage>","fixed-repeat":"repeat( [ <positive-integer> ] , [ <line-names>? <fixed-size> ]+ <line-names>? )","fixed-size":"<fixed-breadth> | minmax( <fixed-breadth> , <track-breadth> ) | minmax( <inflexible-breadth> , <fixed-breadth> )","font-variant-css21":"[ normal | small-caps ]","frames-timing-function":"frames( <integer> )","frequency-percentage":"<frequency> | <percentage>","generic-family":"serif | sans-serif | cursive | fantasy | monospace | -apple-system","generic-name":"serif | sans-serif | cursive | fantasy | monospace","geometry-box":"<shape-box> | fill-box | stroke-box | view-box","gradient":"<-legacy-gradient()> | <linear-gradient()> | <repeating-linear-gradient()> | <radial-gradient()> | <repeating-radial-gradient()>","grayscale()":"grayscale( <number-percentage> )","grid-line":"auto | <custom-ident> | [ <integer> && <custom-ident>? ] | [ span && [ <integer> || <custom-ident> ] ]","historical-lig-values":"[ historical-ligatures | no-historical-ligatures ]","hsl()":"hsl( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue> , <percentage> , <percentage> , <alpha-value>? ] )","hsla()":"hsla( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue> , <percentage> , <percentage> , <alpha-value>? ] )","hue":"<number> | <angle>","hue-rotate()":"hue-rotate( <angle> )","image":"<url> | <image()> | <image-set()> | <element()> | <cross-fade()> | <gradient>","image()":"image( [ [ <image> | <string> ]? , <color>? ]! )","image-set()":"image-set( <image-set-option># )","image-set-option":"[ <image> | <string> ] <resolution>","inflexible-breadth":"<length> | <percentage> | min-content | max-content | auto","inset()":"inset( <length-percentage>{1,4} [ round <'border-radius'> ]? )","invert()":"invert( <number-percentage> )","keyframes-name":"<custom-ident> | <string>","keyframe-selector":"from | to | <percentage>","leader()":"leader( <leader-type> )","leader-type":"dotted | solid | space | <string>","length-percentage":"<length> | <percentage>","line-names":"'[' <custom-ident>* ']'","line-name-list":"[ <line-names> | <name-repeat> ]+","linear-gradient()":"linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )","mask-layer":"<mask-reference> || <position> [ / <bg-size> ]? || <repeat-style> || <geometry-box> || [ <geometry-box> | no-clip ] || <compositing-operator> || <masking-mode>","mask-position":"[ <length-percentage> | left | center | right ] [ <length-percentage> | top | center | bottom ]?","mask-reference":"none | <image> | <mask-source>","mask-source":"<url>","masking-mode":"alpha | luminance | match-source","matrix()":"matrix( <number> [, <number> ]{5} )","matrix3d()":"matrix3d( <number> [, <number> ]{15} )","media-type":"<ident>","mf-boolean":"<mf-name>","mf-name":"<ident>","minmax()":"minmax( [ <length> | <percentage> | <flex> | min-content | max-content | auto ] , [ <length> | <percentage> | <flex> | min-content | max-content | auto ] )","named-color":"transparent | aliceblue | antiquewhite | aqua | aquamarine | azure | beige | bisque | black | blanchedalmond | blue | blueviolet | brown | burlywood | cadetblue | chartreuse | chocolate | coral | cornflowerblue | cornsilk | crimson | cyan | darkblue | darkcyan | darkgoldenrod | darkgray | darkgreen | darkgrey | darkkhaki | darkmagenta | darkolivegreen | darkorange | darkorchid | darkred | darksalmon | darkseagreen | darkslateblue | darkslategray | darkslategrey | darkturquoise | darkviolet | deeppink | deepskyblue | dimgray | dimgrey | dodgerblue | firebrick | floralwhite | forestgreen | fuchsia | gainsboro | ghostwhite | gold | goldenrod | gray | green | greenyellow | grey | honeydew | hotpink | indianred | indigo | ivory | khaki | lavender | lavenderblush | lawngreen | lemonchiffon | lightblue | lightcoral | lightcyan | lightgoldenrodyellow | lightgray | lightgreen | lightgrey | lightpink | lightsalmon | lightseagreen | lightskyblue | lightslategray | lightslategrey | lightsteelblue | lightyellow | lime | limegreen | linen | magenta | maroon | mediumaquamarine | mediumblue | mediumorchid | mediumpurple | mediumseagreen | mediumslateblue | mediumspringgreen | mediumturquoise | mediumvioletred | midnightblue | mintcream | mistyrose | moccasin | navajowhite | navy | oldlace | olive | olivedrab | orange | orangered | orchid | palegoldenrod | palegreen | paleturquoise | palevioletred | papayawhip | peachpuff | peru | pink | plum | powderblue | purple | rebeccapurple | red | rosybrown | royalblue | saddlebrown | salmon | sandybrown | seagreen | seashell | sienna | silver | skyblue | slateblue | slategray | slategrey | snow | springgreen | steelblue | tan | teal | thistle | tomato | turquoise | violet | wheat | white | whitesmoke | yellow | yellowgreen | <-non-standart-color>","namespace-prefix":"<ident>","number-percentage":"<number> | <percentage>","numeric-figure-values":"[ lining-nums | oldstyle-nums ]","numeric-fraction-values":"[ diagonal-fractions | stacked-fractions ]","numeric-spacing-values":"[ proportional-nums | tabular-nums ]","opacity()":"opacity( [ <number-percentage> ] )","perspective()":"perspective( <length> )","polygon()":"polygon( <fill-rule>? , [ <length-percentage> <length-percentage> ]# )","position":"[ center && [ left | right | top | bottom ] <length-percentage>? ] | [ [ left | right ] <length-percentage>? ] && [ [ top | bottom ] <length-percentage>? ] | [ [ left | center | right | <length-percentage> ] || [ top | center | bottom | <length-percentage> ] ]","quote":"open-quote | close-quote | no-open-quote | no-close-quote","radial-gradient()":"radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )","relative-size":"larger | smaller","repeat-style":"repeat-x | repeat-y | [ repeat | space | round | no-repeat ]{1,2}","repeating-linear-gradient()":"repeating-linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )","repeating-radial-gradient()":"repeating-radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )","rgb()":"rgb( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )","rgba()":"rgba( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )","rotate()":"rotate( <angle> )","rotate3d()":"rotate3d( <number> , <number> , <number> , <angle> )","rotateX()":"rotateX( <angle> )","rotateY()":"rotateY( <angle> )","rotateZ()":"rotateZ( <angle> )","saturate()":"saturate( <number-percentage> )","scale()":"scale( <number> [, <number> ]? )","scale3d()":"scale3d( <number> , <number> , <number> )","scaleX()":"scaleX( <number> )","scaleY()":"scaleY( <number> )","scaleZ()":"scaleZ( <number> )","shape-radius":"<length-percentage> | closest-side | farthest-side","skew()":"skew( <angle> [, <angle> ]? )","skewX()":"skewX( <angle> )","skewY()":"skewY( <angle> )","sepia()":"sepia( <number-percentage> )","shadow":"inset? && <length>{2,4} && <color>?","shadow-t":"[ <length>{2,3} && <color>? ]","shape":"rect( [ [ <top> , <right> , <bottom> , <left> ] | [ <top> <right> <bottom> <left> ] ] )","shape-box":"<box> | margin-box","side-or-corner":"[ left | right ] || [ top | bottom ]","single-animation":"<time> || <single-timing-function> || <time> || <single-animation-iteration-count> || <single-animation-direction> || <single-animation-fill-mode> || <single-animation-play-state> || [ none | <keyframes-name> ]","single-animation-direction":"normal | reverse | alternate | alternate-reverse","single-animation-fill-mode":"none | forwards | backwards | both","single-animation-iteration-count":"infinite | <number>","single-animation-play-state":"running | paused","single-timing-function":"linear | <cubic-bezier-timing-function> | <step-timing-function> | <frames-timing-function>","single-transition":"<single-transition-timing-function> || [ none | <single-transition-property> ] || <time> || <time>","single-transition-timing-function":"<single-timing-function>","single-transition-property":"all | <custom-ident>","size":"closest-side | farthest-side | closest-corner | farthest-corner | <length> | <length-percentage>{2}","step-timing-function":"step-start | step-end | steps( <integer> [, [ start | end ] ]? )","symbol":"<string> | <image> | <ident>","target":"<target-counter()> | <target-counters()> | <target-text()>","target-counter()":"target-counter( [ <string> | <url> ] , <custom-ident> , <counter-style>? )","target-counters()":"target-counters( [ <string> | <url> ] , <custom-ident> , <string> , <counter-style>? )","target-text()":"target-text( [ <string> | <url> ] , [ content | before | after | first-letter ]? )","time-percentage":"<time> | <percentage>","track-breadth":"<length-percentage> | <flex> | min-content | max-content | auto","track-list":"[ <line-names>? [ <track-size> | <track-repeat> ] ]+ <line-names>?","track-repeat":"repeat( [ <positive-integer> ] , [ <line-names>? <track-size> ]+ <line-names>? )","track-size":"<track-breadth> | minmax( <inflexible-breadth> , <track-breadth> ) | fit-content( [ <length> | <percentage> ] )","transform-function":"[ <matrix()> || <translate()> || <translateX()> || <translateY()> || <scale()> || <scaleX()> || <scaleY()> || <rotate()> || <skew()> || <skewX()> || <skewY()> || <matrix3d()> || <translate3d()> || <translateZ()> || <scale3d()> || <scaleZ()> || <rotate3d()> || <rotateX()> || <rotateY()> || <rotateZ()> || <perspective()> ]+","transform-list":"<transform-function>+","translate()":"translate( <length-percentage> [, <length-percentage> ]? )","translate3d()":"translate3d( <length-percentage> , <length-percentage> , <length> )","translateX()":"translateX( <length-percentage> )","translateY()":"translateY( <length-percentage> )","translateZ()":"translateZ( <length> )","type-or-unit":"string | integer | color | url | integer | number | length | angle | time | frequency | em | ex | px | rem | vw | vh | vmin | vmax | mm | q | cm | in | pt | pc | deg | grad | rad | ms | s | Hz | kHz | %","viewport-length":"auto | <length-percentage>","-legacy-gradient()":"<-webkit-gradient()> | <-legacy-linear-gradient()> | <-legacy-repeating-linear-gradient()> | <-legacy-radial-gradient()> | <-legacy-repeating-radial-gradient()>","-legacy-linear-gradient()":"-moz-linear-gradient( <-legacy-linear-gradient-arguments> ) | -ms-linear-gradient( <-legacy-linear-gradient-arguments> ) | -webkit-linear-gradient( <-legacy-linear-gradient-arguments> ) | -o-linear-gradient( <-legacy-linear-gradient-arguments> )","-legacy-repeating-linear-gradient()":"-moz-repeating-linear-gradient( <-legacy-linear-gradient-arguments> ) | -ms-repeating-linear-gradient( <-legacy-linear-gradient-arguments> ) | -webkit-repeating-linear-gradient( <-legacy-linear-gradient-arguments> ) | -o-repeating-linear-gradient( <-legacy-linear-gradient-arguments> )","-legacy-linear-gradient-arguments":"[ <angle> | <side-or-corner> ]? , <color-stop-list>","-legacy-radial-gradient()":"-moz-radial-gradient( <-legacy-radial-gradient-arguments> ) | -ms-radial-gradient( <-legacy-radial-gradient-arguments> ) | -webkit-radial-gradient( <-legacy-radial-gradient-arguments> ) | -o-radial-gradient( <-legacy-radial-gradient-arguments> )","-legacy-repeating-radial-gradient()":"-moz-repeating-radial-gradient( <-legacy-radial-gradient-arguments> ) | -ms-repeating-radial-gradient( <-legacy-radial-gradient-arguments> ) | -webkit-repeating-radial-gradient( <-legacy-radial-gradient-arguments> ) | -o-repeating-radial-gradient( <-legacy-radial-gradient-arguments> )","-legacy-radial-gradient-arguments":"[ <position> , ]? [ [ [ <-legacy-radial-gradient-shape> || <-legacy-radial-gradient-size> ] | [ <length> | <percentage> ]{2} ] , ]? <color-stop-list>","-legacy-radial-gradient-size":"closest-side | closest-corner | farthest-side | farthest-corner | contain | cover","-legacy-radial-gradient-shape":"circle | ellipse","-non-standart-font":"-apple-system-body | -apple-system-headline | -apple-system-subheadline | -apple-system-caption1 | -apple-system-caption2 | -apple-system-footnote | -apple-system-short-body | -apple-system-short-headline | -apple-system-short-subheadline | -apple-system-short-caption1 | -apple-system-short-footnote | -apple-system-tall-body","-non-standart-color":"-moz-ButtonDefault | -moz-ButtonHoverFace | -moz-ButtonHoverText | -moz-CellHighlight | -moz-CellHighlightText | -moz-Combobox | -moz-ComboboxText | -moz-Dialog | -moz-DialogText | -moz-dragtargetzone | -moz-EvenTreeRow | -moz-Field | -moz-FieldText | -moz-html-CellHighlight | -moz-html-CellHighlightText | -moz-mac-accentdarkestshadow | -moz-mac-accentdarkshadow | -moz-mac-accentface | -moz-mac-accentlightesthighlight | -moz-mac-accentlightshadow | -moz-mac-accentregularhighlight | -moz-mac-accentregularshadow | -moz-mac-chrome-active | -moz-mac-chrome-inactive | -moz-mac-focusring | -moz-mac-menuselect | -moz-mac-menushadow | -moz-mac-menutextselect | -moz-MenuHover | -moz-MenuHoverText | -moz-MenuBarText | -moz-MenuBarHoverText | -moz-nativehyperlinktext | -moz-OddTreeRow | -moz-win-communicationstext | -moz-win-mediatext | -moz-activehyperlinktext | -moz-default-background-color | -moz-default-color | -moz-hyperlinktext | -moz-visitedhyperlinktext | -webkit-activelink | -webkit-focus-ring-color | -webkit-link | -webkit-text","-non-standart-image-rendering":"optimize-contrast | -moz-crisp-edges | -o-crisp-edges | -webkit-optimize-contrast","-non-standart-width":"min-intrinsic | intrinsic | -moz-min-content | -moz-max-content | -webkit-min-content | -webkit-max-content","-non-standart-word-break":"break-word","-webkit-image-set()":"<image-set()>","-webkit-gradient()":"-webkit-gradient( <-webkit-gradient-type> , <-webkit-gradient-point> [ , <-webkit-gradient-point> | , <-webkit-gradient-radius> , <-webkit-gradient-point> ] [, <-webkit-gradient-radius> ]? [, <-webkit-gradient-color-stop()> ]* )","-webkit-gradient-color-stop()":"from( <color> ) | color-stop( [ <number-zero-one> | <percentage> ] , <color> ) | to( <color> )","-webkit-gradient-point":"[ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]","-webkit-gradient-radius":"<length> | <percentage>","-webkit-gradient-type":"linear | radial","-webkit-mask-box-repeat":"repeat | stretch | round","-webkit-mask-clip-style":"border | border-box | padding | padding-box | content | content-box | text","-ms-filter":"[ <progid> | FlipH | FlipV ]+","age":"child | young | old","border-radius":"<length-percentage>{1,2}","bottom":"<length> | auto","generic-voice":"[ <age>? <gender> <integer>? ]","gender":"male | female | neutral","left":"<length> | auto","mask-image":"<mask-reference>#","name-repeat":"repeat( [ <positive-integer> | auto-fill ] , <line-names>+ )","outline-radius":"<border-radius>","paint":"none | currentColor | <color> | <url> [ none | currentColor | <color> ]?","path()":"path( <string> )","right":"<length> | auto","svg-length":"<percentage> | <length> | <number>","svg-writing-mode":"lr-tb | rl-tb | tb-rl | lr | rl | tb","top":"<length> | auto","x":"<number>","y":"<number>"},"properties":{"-ms-overflow-style":"auto | none | scrollbar | -ms-autohiding-scrollbar","-moz-appearance":"none | button | button-arrow-down | button-arrow-next | button-arrow-previous | button-arrow-up | button-bevel | button-focus | caret | checkbox | checkbox-container | checkbox-label | checkmenuitem | dualbutton | groupbox | listbox | listitem | menuarrow | menubar | menucheckbox | menuimage | menuitem | menuitemtext | menulist | menulist-button | menulist-text | menulist-textfield | menupopup | menuradio | menuseparator | meterbar | meterchunk | progressbar | progressbar-vertical | progresschunk | progresschunk-vertical | radio | radio-container | radio-label | radiomenuitem | range | range-thumb | resizer | resizerpanel | scale-horizontal | scalethumbend | scalethumb-horizontal | scalethumbstart | scalethumbtick | scalethumb-vertical | scale-vertical | scrollbarbutton-down | scrollbarbutton-left | scrollbarbutton-right | scrollbarbutton-up | scrollbarthumb-horizontal | scrollbarthumb-vertical | scrollbartrack-horizontal | scrollbartrack-vertical | searchfield | separator | sheet | spinner | spinner-downbutton | spinner-textfield | spinner-upbutton | splitter | statusbar | statusbarpanel | tab | tabpanel | tabpanels | tab-scroll-arrow-back | tab-scroll-arrow-forward | textfield | textfield-multiline | toolbar | toolbarbutton | toolbarbutton-dropdown | toolbargripper | toolbox | tooltip | treeheader | treeheadercell | treeheadersortarrow | treeitem | treeline | treetwisty | treetwistyopen | treeview | -moz-mac-unified-toolbar | -moz-win-borderless-glass | -moz-win-browsertabbar-toolbox | -moz-win-communicationstext | -moz-win-communications-toolbox | -moz-win-exclude-glass | -moz-win-glass | -moz-win-mediatext | -moz-win-media-toolbox | -moz-window-button-box | -moz-window-button-box-maximized | -moz-window-button-close | -moz-window-button-maximize | -moz-window-button-minimize | -moz-window-button-restore | -moz-window-frame-bottom | -moz-window-frame-left | -moz-window-frame-right | -moz-window-titlebar | -moz-window-titlebar-maximized","-moz-binding":"<url> | none","-moz-border-bottom-colors":"[ <color> ]* <color> | none","-moz-border-left-colors":"[ <color> ]* <color> | none","-moz-border-right-colors":"[ <color> ]* <color> | none","-moz-border-top-colors":"[ <color> ]* <color> | none","-moz-context-properties":"none | [ fill | fill-opacity | stroke | stroke-opacity ]#","-moz-float-edge":"border-box | content-box | margin-box | padding-box","-moz-force-broken-image-icon":"<integer>","-moz-image-region":"<shape> | auto","-moz-orient":"inline | block | horizontal | vertical","-moz-outline-radius":"<outline-radius>{1,4} [ / <outline-radius>{1,4} ]?","-moz-outline-radius-bottomleft":"<outline-radius>","-moz-outline-radius-bottomright":"<outline-radius>","-moz-outline-radius-topleft":"<outline-radius>","-moz-outline-radius-topright":"<outline-radius>","-moz-stack-sizing":"ignore | stretch-to-fit","-moz-text-blink":"none | blink","-moz-user-focus":"ignore | normal | select-after | select-before | select-menu | select-same | select-all | none","-moz-user-input":"auto | none | enabled | disabled","-moz-user-modify":"read-only | read-write | write-only","-moz-window-shadow":"default | menu | tooltip | sheet | none","-webkit-border-before":"<'border-width'> || <'border-style'> || <'color'>","-webkit-border-before-color":"<'color'>","-webkit-border-before-style":"<'border-style'>","-webkit-border-before-width":"<'border-width'>","-webkit-box-reflect":"[ above | below | right | left ]? <length>? <image>?","-webkit-mask":"<mask-image> [ <'-webkit-mask-repeat'> || <'-webkit-mask-attachment'> || <'-webkit-mask-position'> || <'-webkit-mask-origin'> || <'-webkit-mask-clip'> ]*","-webkit-mask-attachment":"<attachment> [, <attachment> ]*","-webkit-mask-clip":"<-webkit-mask-clip-style> [, <-webkit-mask-clip-style> ]*","-webkit-mask-composite":"<composite-style> [, <composite-style> ]*","-webkit-mask-image":"<mask-image> [, <mask-image> ]*","-webkit-mask-origin":"[ padding | border | content ] [, [ border | padding | content ] ]*","-webkit-mask-position":"<mask-position>#","-webkit-mask-position-x":"[ <length-percentage> | left | center | right ]#","-webkit-mask-position-y":"[ <length-percentage> | top | center | bottom ]#","-webkit-mask-repeat":"<repeat-style> [, <repeat-style> ]*","-webkit-mask-repeat-x":"repeat | no-repeat | space | round","-webkit-mask-repeat-y":"repeat | no-repeat | space | round","-webkit-tap-highlight-color":"<color>","-webkit-text-fill-color":"<color>","-webkit-text-stroke":"<length> || <color>","-webkit-text-stroke-color":"<color>","-webkit-text-stroke-width":"<length>","-webkit-touch-callout":"default | none","align-content":"flex-start | flex-end | center | space-between | space-around | space-evenly | stretch","align-items":"flex-start | flex-end | center | baseline | stretch","align-self":"auto | flex-start | flex-end | center | baseline | stretch","all":"initial | inherit | unset","animation":"<single-animation>#","animation-delay":"<time>#","animation-direction":"<single-animation-direction>#","animation-duration":"<time>#","animation-fill-mode":"<single-animation-fill-mode>#","animation-iteration-count":"<single-animation-iteration-count>#","animation-name":"[ none | <keyframes-name> ]#","animation-play-state":"<single-animation-play-state>#","animation-timing-function":"<single-timing-function>#","appearance":"auto | none","azimuth":"<angle> | [ [ left-side | far-left | left | center-left | center | center-right | right | far-right | right-side ] || behind ] | leftwards | rightwards","backdrop-filter":"none | <filter-function-list>","backface-visibility":"visible | hidden","background":"[ <bg-layer> , ]* <final-bg-layer>","background-attachment":"<attachment>#","background-blend-mode":"<blend-mode>#","background-clip":"<box>#","background-color":"<color>","background-image":"<bg-image>#","background-origin":"<box>#","background-position":"<position>#","background-position-x":"[ center | [ left | right | x-start | x-end ]? <length-percentage>? ]#","background-position-y":"[ center | [ top | bottom | y-start | y-end ]? <length-percentage>? ]#","background-repeat":"<repeat-style>#","background-size":"<bg-size>#","block-size":"<'width'>","border":"<br-width> || <br-style> || <color>","border-block-end":"<'border-width'> || <'border-style'> || <'color'>","border-block-end-color":"<'color'>","border-block-end-style":"<'border-style'>","border-block-end-width":"<'border-width'>","border-block-start":"<'border-width'> || <'border-style'> || <'color'>","border-block-start-color":"<'color'>","border-block-start-style":"<'border-style'>","border-block-start-width":"<'border-width'>","border-bottom":"<br-width> || <br-style> || <color>","border-bottom-color":"<color>","border-bottom-left-radius":"<length-percentage>{1,2}","border-bottom-right-radius":"<length-percentage>{1,2}","border-bottom-style":"<br-style>","border-bottom-width":"<br-width>","border-collapse":"collapse | separate","border-color":"<color>{1,4}","border-image":"<'border-image-source'> || <'border-image-slice'> [ / <'border-image-width'> | / <'border-image-width'>? / <'border-image-outset'> ]? || <'border-image-repeat'>","border-image-outset":"[ <length> | <number> ]{1,4}","border-image-repeat":"[ stretch | repeat | round | space ]{1,2}","border-image-slice":"<number-percentage>{1,4} && fill?","border-image-source":"none | <image>","border-image-width":"[ <length-percentage> | <number> | auto ]{1,4}","border-inline-end":"<'border-width'> || <'border-style'> || <'color'>","border-inline-end-color":"<'color'>","border-inline-end-style":"<'border-style'>","border-inline-end-width":"<'border-width'>","border-inline-start":"<'border-width'> || <'border-style'> || <'color'>","border-inline-start-color":"<'color'>","border-inline-start-style":"<'border-style'>","border-inline-start-width":"<'border-width'>","border-left":"<br-width> || <br-style> || <color>","border-left-color":"<color>","border-left-style":"<br-style>","border-left-width":"<br-width>","border-radius":"<length-percentage>{1,4} [ / <length-percentage>{1,4} ]?","border-right":"<br-width> || <br-style> || <color>","border-right-color":"<color>","border-right-style":"<br-style>","border-right-width":"<br-width>","border-spacing":"<length> <length>?","border-style":"<br-style>{1,4}","border-top":"<br-width> || <br-style> || <color>","border-top-color":"<color>","border-top-left-radius":"<length-percentage>{1,2}","border-top-right-radius":"<length-percentage>{1,2}","border-top-style":"<br-style>","border-top-width":"<br-width>","border-width":"<br-width>{1,4}","bottom":"<length> | <percentage> | auto","box-align":"start | center | end | baseline | stretch","box-decoration-break":"slice | clone","box-direction":"normal | reverse | inherit","box-flex":"<number>","box-flex-group":"<integer>","box-lines":"single | multiple","box-ordinal-group":"<integer>","box-orient":"horizontal | vertical | inline-axis | block-axis | inherit","box-pack":"start | center | end | justify","box-shadow":"none | <shadow>#","box-sizing":"content-box | border-box","break-after":"auto | avoid | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region","break-before":"auto | avoid | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region","break-inside":"auto | avoid | avoid-page | avoid-column | avoid-region","caption-side":"top | bottom | block-start | block-end | inline-start | inline-end","caret-color":"auto | <color>","clear":"none | left | right | both | inline-start | inline-end","clip":"<shape> | auto","clip-path":"<clip-source> | [ <basic-shape> || <geometry-box> ] | none","color":"<color>","column-count":"<number> | auto","column-fill":"auto | balance","column-gap":"<length> | normal","column-rule":"<'column-rule-width'> || <'column-rule-style'> || <'column-rule-color'>","column-rule-color":"<color>","column-rule-style":"<br-style>","column-rule-width":"<br-width>","column-span":"none | all","column-width":"<length> | auto","columns":"<'column-width'> || <'column-count'>","contain":"none | strict | content | [ size || layout || style || paint ]","content":"normal | none | [ <content-replacement> | <content-list> ] [ / <string> ]?","counter-increment":"[ <custom-ident> <integer>? ]+ | none","counter-reset":"[ <custom-ident> <integer>? ]+ | none","cursor":"[ [ <url> [ <x> <y> ]? , ]* [ auto | default | none | context-menu | help | pointer | progress | wait | cell | crosshair | text | vertical-text | alias | copy | move | no-drop | not-allowed | e-resize | n-resize | ne-resize | nw-resize | s-resize | se-resize | sw-resize | w-resize | ew-resize | ns-resize | nesw-resize | nwse-resize | col-resize | row-resize | all-scroll | zoom-in | zoom-out | grab | grabbing | hand | -webkit-grab | -webkit-grabbing | -webkit-zoom-in | -webkit-zoom-out | -moz-grab | -moz-grabbing | -moz-zoom-in | -moz-zoom-out ] ]","direction":"ltr | rtl","display":"none | inline | block | list-item | inline-list-item | inline-block | inline-table | table | table-cell | table-column | table-column-group | table-footer-group | table-header-group | table-row | table-row-group | flex | inline-flex | grid | inline-grid | run-in | ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | contents | -ms-flexbox | -ms-inline-flexbox | -ms-grid | -ms-inline-grid | -webkit-flex | -webkit-inline-flex | -webkit-box | -webkit-inline-box | -moz-inline-stack | -moz-box | -moz-inline-box","display-inside":"auto | block | table | flex | grid | ruby","display-list":"none | list-item","display-outside":"block-level | inline-level | run-in | contents | none | table-row-group | table-header-group | table-footer-group | table-row | table-cell | table-column-group | table-column | table-caption | ruby-base | ruby-text | ruby-base-container | ruby-text-container","empty-cells":"show | hide","filter":"none | <filter-function-list> | <-ms-filter>","flex":"none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]","flex-basis":"content | <'width'>","flex-direction":"row | row-reverse | column | column-reverse","flex-flow":"<'flex-direction'> || <'flex-wrap'>","flex-grow":"<number>","flex-shrink":"<number>","flex-wrap":"nowrap | wrap | wrap-reverse","float":"left | right | none | inline-start | inline-end","font":"[ [ <'font-style'> || <font-variant-css21> || <'font-weight'> || <'font-stretch'> ]? <'font-size'> [ / <'line-height'> ]? <'font-family'> ] | caption | icon | menu | message-box | small-caption | status-bar | <-non-standart-font>","font-family":"[ <family-name> | <generic-family> ]#","font-feature-settings":"normal | <feature-tag-value>#","font-kerning":"auto | normal | none","font-language-override":"normal | <string>","font-variation-settings":"normal | [ <string> <number> ]#","font-size":"<absolute-size> | <relative-size> | <length-percentage>","font-size-adjust":"none | <number>","font-stretch":"normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded","font-style":"normal | italic | oblique","font-synthesis":"none | [ weight || style ]","font-variant":"normal | none | [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> || stylistic( <feature-value-name> ) || historical-forms || styleset( <feature-value-name># ) || character-variant( <feature-value-name># ) || swash( <feature-value-name> ) || ornaments( <feature-value-name> ) || annotation( <feature-value-name> ) || [ small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps ] || <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero || <east-asian-variant-values> || <east-asian-width-values> || ruby ]","font-variant-alternates":"normal | [ stylistic( <feature-value-name> ) || historical-forms || styleset( <feature-value-name># ) || character-variant( <feature-value-name># ) || swash( <feature-value-name> ) || ornaments( <feature-value-name> ) || annotation( <feature-value-name> ) ]","font-variant-caps":"normal | small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps","font-variant-east-asian":"normal | [ <east-asian-variant-values> || <east-asian-width-values> || ruby ]","font-variant-ligatures":"normal | none | [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> ]","font-variant-numeric":"normal | [ <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero ]","font-variant-position":"normal | sub | super","font-weight":"normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900","grid":"<'grid-template'> | <'grid-template-rows'> / [ auto-flow && dense? ] <'grid-auto-columns'>? | [ auto-flow && dense? ] <'grid-auto-rows'>? / <'grid-template-columns'>","grid-area":"<grid-line> [ / <grid-line> ]{0,3}","grid-auto-columns":"<track-size>+","grid-auto-flow":"[ row | column ] || dense","grid-auto-rows":"<track-size>+","grid-column":"<grid-line> [ / <grid-line> ]?","grid-column-end":"<grid-line>","grid-column-gap":"<length-percentage>","grid-column-start":"<grid-line>","grid-gap":"<'grid-row-gap'> <'grid-column-gap'>?","grid-row":"<grid-line> [ / <grid-line> ]?","grid-row-end":"<grid-line>","grid-row-gap":"<length-percentage>","grid-row-start":"<grid-line>","grid-template":"none | [ <'grid-template-rows'> / <'grid-template-columns'> ] | [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <explicit-track-list> ]?","grid-template-areas":"none | <string>+","grid-template-columns":"none | <track-list> | <auto-track-list>","grid-template-rows":"none | <track-list> | <auto-track-list>","height":"[ <length> | <percentage> ] && [ border-box | content-box ]? | available | min-content | max-content | fit-content | auto","hyphens":"none | manual | auto","image-orientation":"from-image | <angle> | [ <angle>? flip ]","image-rendering":"auto | crisp-edges | pixelated | optimizeSpeed | optimizeQuality | <-non-standart-image-rendering>","image-resolution":"[ from-image || <resolution> ] && snap?","ime-mode":"auto | normal | active | inactive | disabled","initial-letter":"normal | [ <number> <integer>? ]","initial-letter-align":"[ auto | alphabetic | hanging | ideographic ]","inline-size":"<'width'>","isolation":"auto | isolate","justify-content":"flex-start | flex-end | center | space-between | space-around | space-evenly","left":"<length> | <percentage> | auto","letter-spacing":"normal | <length-percentage>","line-break":"auto | loose | normal | strict","line-height":"normal | <number> | <length> | <percentage>","list-style":"<'list-style-type'> || <'list-style-position'> || <'list-style-image'>","list-style-image":"<url> | none","list-style-position":"inside | outside","list-style-type":"<counter-style> | <string> | none","margin":"[ <length> | <percentage> | auto ]{1,4}","margin-block-end":"<'margin-left'>","margin-block-start":"<'margin-left'>","margin-bottom":"<length> | <percentage> | auto","margin-inline-end":"<'margin-left'>","margin-inline-start":"<'margin-left'>","margin-left":"<length> | <percentage> | auto","margin-right":"<length> | <percentage> | auto","margin-top":"<length> | <percentage> | auto","marker-offset":"<length> | auto","mask":"<mask-layer>#","mask-clip":"[ <geometry-box> | no-clip ]#","mask-composite":"<compositing-operator>#","mask-image":"<mask-reference>#","mask-mode":"<masking-mode>#","mask-origin":"<geometry-box>#","mask-position":"<position>#","mask-repeat":"<repeat-style>#","mask-size":"<bg-size>#","mask-type":"luminance | alpha","max-block-size":"<'max-width'>","max-height":"<length> | <percentage> | none | max-content | min-content | fit-content | fill-available","max-inline-size":"<'max-width'>","max-width":"<length> | <percentage> | none | max-content | min-content | fit-content | fill-available | <-non-standart-width>","min-block-size":"<'min-width'>","min-height":"<length> | <percentage> | auto | max-content | min-content | fit-content | fill-available","min-inline-size":"<'min-width'>","min-width":"<length> | <percentage> | auto | max-content | min-content | fit-content | fill-available | <-non-standart-width>","mix-blend-mode":"<blend-mode>","object-fit":"fill | contain | cover | none | scale-down","object-position":"<position>","offset":"[ <'offset-position'>? [ <'offset-path'> [ <'offset-distance'> || <'offset-rotate'> ]? ]? ]! [ / <'offset-anchor'> ]?","offset-anchor":"auto | <position>","offset-block-end":"<'left'>","offset-block-start":"<'left'>","offset-inline-end":"<'left'>","offset-inline-start":"<'left'>","offset-distance":"<length-percentage>","offset-path":"none | ray( [ <angle> && <size>? && contain? ] ) | <path()> | <url> | [ <basic-shape> || <geometry-box> ]","offset-position":"auto | <position>","offset-rotate":"[ auto | reverse ] || <angle>","opacity":"<number-zero-one>","order":"<integer>","orphans":"<integer>","outline":"[ <'outline-color'> || <'outline-style'> || <'outline-width'> ]","outline-color":"<color> | invert","outline-offset":"<length>","outline-style":"auto | <br-style>","outline-width":"<br-width>","overflow":"visible | hidden | scroll | auto","overflow-clip-box":"padding-box | content-box","overflow-wrap":"normal | break-word","overflow-x":"visible | hidden | scroll | auto","overflow-y":"visible | hidden | scroll | auto","padding":"[ <length> | <percentage> ]{1,4}","padding-block-end":"<'padding-left'>","padding-block-start":"<'padding-left'>","padding-bottom":"<length> | <percentage>","padding-inline-end":"<'padding-left'>","padding-inline-start":"<'padding-left'>","padding-left":"<length> | <percentage>","padding-right":"<length> | <percentage>","padding-top":"<length> | <percentage>","page-break-after":"auto | always | avoid | left | right","page-break-before":"auto | always | avoid | left | right","page-break-inside":"auto | avoid","perspective":"none | <length>","perspective-origin":"<position>","pointer-events":"auto | none | visiblePainted | visibleFill | visibleStroke | visible | painted | fill | stroke | all | inherit","position":"static | relative | absolute | sticky | fixed | -webkit-sticky","quotes":"none | [ <string> <string> ]+","resize":"none | both | horizontal | vertical","right":"<length> | <percentage> | auto","ruby-align":"start | center | space-between | space-around","ruby-merge":"separate | collapse | auto","ruby-position":"over | under | inter-character","scroll-behavior":"auto | smooth","scroll-snap-coordinate":"none | <position>#","scroll-snap-destination":"<position>","scroll-snap-points-x":"none | repeat( <length-percentage> )","scroll-snap-points-y":"none | repeat( <length-percentage> )","scroll-snap-type":"none | mandatory | proximity","scroll-snap-type-x":"none | mandatory | proximity","scroll-snap-type-y":"none | mandatory | proximity","shape-image-threshold":"<number>","shape-margin":"<length-percentage>","shape-outside":"none | <shape-box> || <basic-shape> | <image>","tab-size":"<integer> | <length>","table-layout":"auto | fixed","text-align":"start | end | left | right | center | justify | match-parent","text-align-last":"auto | start | end | left | right | center | justify","text-combine-upright":"none | all | [ digits <integer>? ]","text-decoration":"<'text-decoration-line'> || <'text-decoration-style'> || <'text-decoration-color'>","text-decoration-color":"<color>","text-decoration-line":"none | [ underline || overline || line-through || blink ]","text-decoration-skip":"none | [ objects || spaces || ink || edges || box-decoration ]","text-decoration-style":"solid | double | dotted | dashed | wavy","text-emphasis":"<'text-emphasis-style'> || <'text-emphasis-color'>","text-emphasis-color":"<color>","text-emphasis-position":"[ over | under ] && [ right | left ]","text-emphasis-style":"none | [ [ filled | open ] || [ dot | circle | double-circle | triangle | sesame ] ] | <string>","text-indent":"<length-percentage> && hanging? && each-line?","text-justify":"auto | inter-character | inter-word | none","text-orientation":"mixed | upright | sideways","text-overflow":"[ clip | ellipsis | <string> ]{1,2}","text-rendering":"auto | optimizeSpeed | optimizeLegibility | geometricPrecision","text-shadow":"none | <shadow-t>#","text-size-adjust":"none | auto | <percentage>","text-transform":"none | capitalize | uppercase | lowercase | full-width","text-underline-position":"auto | [ under || [ left | right ] ]","top":"<length> | <percentage> | auto","touch-action":"auto | none | [ [ pan-x | pan-left | pan-right ] || [ pan-y | pan-up | pan-down ] || pinch-zoom ] | manipulation","transform":"none | <transform-list>","transform-box":"border-box | fill-box | view-box","transform-origin":"[ [ <length-percentage> | left | center | right ] && [ <length-percentage> | top | center | bottom ] ] <length>? | [ <length-percentage> | left | center | right | top | bottom ]","transform-style":"flat | preserve-3d","transition":"<single-transition>#","transition-delay":"<time>#","transition-duration":"<time>#","transition-property":"none | <single-transition-property>#","transition-timing-function":"<single-transition-timing-function>#","unicode-bidi":"normal | embed | isolate | bidi-override | isolate-override | plaintext | -moz-isolate | -moz-isolate-override | -moz-plaintext | -webkit-isolate","user-select":"auto | text | none | contain | all","vertical-align":"baseline | sub | super | text-top | text-bottom | middle | top | bottom | <percentage> | <length>","visibility":"visible | hidden | collapse","white-space":"normal | pre | nowrap | pre-wrap | pre-line","widows":"<integer>","width":"[ <length> | <percentage> ] && [ border-box | content-box ]? | available | min-content | max-content | fit-content | auto","will-change":"auto | <animateable-feature>#","word-break":"normal | break-all | keep-all | <-non-standart-word-break>","word-spacing":"normal | <length-percentage>","word-wrap":"normal | break-word","writing-mode":"horizontal-tb | vertical-rl | vertical-lr | sideways-rl | sideways-lr | <svg-writing-mode>","z-index":"auto | <integer>","-moz-background-clip":"padding | border","-moz-border-radius-bottomleft":"<'border-bottom-left-radius'>","-moz-border-radius-bottomright":"<'border-bottom-right-radius'>","-moz-border-radius-topleft":"<'border-top-left-radius'>","-moz-border-radius-topright":"<'border-bottom-right-radius'>","-moz-osx-font-smoothing":"auto | unset | grayscale","-moz-user-select":"none | text | all | -moz-none","-ms-filter":"<string>","-ms-flex-align":"start | end | center | baseline | stretch","-ms-flex-item-align":"auto | start | end | center | baseline | stretch","-ms-flex-line-pack":"start | end | center | justify | distribute | stretch","-ms-flex-negative":"<'flex-shrink'>","-ms-flex-pack":"start | end | center | justify | distribute","-ms-flex-order":"<integer>","-ms-flex-positive":"<'flex-grow'>","-ms-flex-preferred-size":"<'flex-basis'>","-ms-interpolation-mode":"nearest-neighbor | bicubic","-ms-grid-column-align":"start | end | center | stretch","-ms-grid-row-align":"start | end | center | stretch","-ms-high-contrast-adjust":"auto | none","-ms-user-select":"none | element | text","-webkit-appearance":"none | button | button-bevel | caps-lock-indicator | caret | checkbox | default-button | listbox | listitem | media-fullscreen-button | media-mute-button | media-play-button | media-seek-back-button | media-seek-forward-button | media-slider | media-sliderthumb | menulist | menulist-button | menulist-text | menulist-textfield | push-button | radio | scrollbarbutton-down | scrollbarbutton-left | scrollbarbutton-right | scrollbarbutton-up | scrollbargripper-horizontal | scrollbargripper-vertical | scrollbarthumb-horizontal | scrollbarthumb-vertical | scrollbartrack-horizontal | scrollbartrack-vertical | searchfield | searchfield-cancel-button | searchfield-decoration | searchfield-results-button | searchfield-results-decoration | slider-horizontal | slider-vertical | sliderthumb-horizontal | sliderthumb-vertical | square-button | textarea | textfield","-webkit-background-clip":"[ <box> | border | padding | content | text ]#","-webkit-column-break-after":"always | auto | avoid","-webkit-column-break-before":"always | auto | avoid","-webkit-column-break-inside":"always | auto | avoid","-webkit-font-smoothing":"none | antialiased | subpixel-antialiased","-webkit-line-clamp":"<positive-integer>","-webkit-mask-box-image":"[ <url> | <gradient> | none ] [ <length-percentage>{4} <-webkit-mask-box-repeat>{2} ]?","-webkit-overflow-scrolling":"auto | touch","-webkit-print-color-adjust":"economy | exact","-webkit-text-security":"none | circle | disc | square","-webkit-user-drag":"none | element | auto","-webkit-user-select":"auto | none | text | all","alignment-baseline":"auto | baseline | before-edge | text-before-edge | middle | central | after-edge | text-after-edge | ideographic | alphabetic | hanging | mathematical","baseline-shift":"baseline | sub | super | <svg-length>","behavior":"<url>+","clip-rule":"nonzero | evenodd","cue":"<'cue-before'> <'cue-after'>?","cue-after":"<url> <decibel>? | none","cue-before":"<url> <decibel>? | none","dominant-baseline":"auto | use-script | no-change | reset-size | ideographic | alphabetic | hanging | mathematical | central | middle | text-after-edge | text-before-edge","fill":"<paint>","fill-opacity":"<number-zero-one>","fill-rule":"nonzero | evenodd","glyph-orientation-horizontal":"<angle>","glyph-orientation-vertical":"<angle>","kerning":"auto | <svg-length>","marker":"none | <url>","marker-end":"none | <url>","marker-mid":"none | <url>","marker-start":"none | <url>","pause":"<'pause-before'> <'pause-after'>?","pause-after":"<time> | none | x-weak | weak | medium | strong | x-strong","pause-before":"<time> | none | x-weak | weak | medium | strong | x-strong","rest":"<'rest-before'> <'rest-after'>?","rest-after":"<time> | none | x-weak | weak | medium | strong | x-strong","rest-before":"<time> | none | x-weak | weak | medium | strong | x-strong","shape-rendering":"auto | optimizeSpeed | crispEdges | geometricPrecision","src":"[ <url> format( <string># )? | local( <family-name> ) ]#","speak":"auto | none | normal","speak-as":"normal | spell-out || digits || [ literal-punctuation | no-punctuation ]","stroke":"<paint>","stroke-dasharray":"none | [ <svg-length>+ ]#","stroke-dashoffset":"<svg-length>","stroke-linecap":"butt | round | square","stroke-linejoin":"miter | round | bevel","stroke-miterlimit":"<number-one-or-greater>","stroke-opacity":"<number-zero-one>","stroke-width":"<svg-length>","text-anchor":"start | middle | end","unicode-range":"<unicode-range>#","voice-balance":"<number> | left | center | right | leftwards | rightwards","voice-duration":"auto | <time>","voice-family":"[ [ <family-name> | <generic-voice> ] , ]* [ <family-name> | <generic-voice> ] | preserve","voice-pitch":"<frequency> && absolute | [ [ x-low | low | medium | high | x-high ] || [ <frequency> | <semitones> | <percentage> ] ]","voice-range":"<frequency> && absolute | [ [ x-low | low | medium | high | x-high ] || [ <frequency> | <semitones> | <percentage> ] ]","voice-rate":"[ normal | x-slow | slow | medium | fast | x-fast ] || <percentage>","voice-stress":"normal | strong | moderate | none | reduced","voice-volume":"silent | [ [ x-soft | soft | medium | loud | x-loud ] || <decibel> ]","zoom":"normal | reset | <number> | <percentage>"}}}, {}];
+window.modules["52"] = [function(require,module,exports){var List = require(53);
 
 module.exports = function createConvertors(walker) {
     var walk = walker.walk;
@@ -211,10 +26,10 @@ module.exports = function createConvertors(walker) {
         }
     };
 };
-}, {"61":61}];
-window.modules["62"] = [function(require,module,exports){'use strict';
+}, {"53":53}];
+window.modules["54"] = [function(require,module,exports){'use strict';
 
-var sourceMapGenerator = require(63);
+var sourceMapGenerator = require(55);
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var noop = function() {};
 
@@ -372,12 +187,12 @@ module.exports = function(config) {
 
 module.exports.createGenerator = createGenerator;
 module.exports.createMarkupGenerator = createMarkupGenerator;
-module.exports.sourceMap = require(63);
-}, {"63":63}];
-window.modules["81"] = [function(require,module,exports){'use strict';
+module.exports.sourceMap = require(55);
+}, {"55":55}];
+window.modules["73"] = [function(require,module,exports){'use strict';
 
-var Tokenizer = require(82);
-var sequence = require(83);
+var Tokenizer = require(75);
+var sequence = require(74);
 var noop = function() {};
 
 function createParseContext(name) {
@@ -532,18 +347,18 @@ module.exports = function createParser(config) {
         return ast;
     };
 };
-}, {"82":82,"83":83}];
-window.modules["97"] = [function(require,module,exports){var List = require(61);
-var Tokenizer = require(82);
-var Lexer = require(67);
-var grammar = require(80);
-var createParser = require(81);
-var createGenerator = require(62);
-var createConvertor = require(60);
-var createWalker = require(98);
-var clone = require(99);
-var names = require(68);
-var mix = require(92);
+}, {"74":74,"75":75}];
+window.modules["89"] = [function(require,module,exports){var List = require(53);
+var Tokenizer = require(75);
+var Lexer = require(59);
+var grammar = require(72);
+var createParser = require(73);
+var createGenerator = require(54);
+var createConvertor = require(52);
+var createWalker = require(91);
+var clone = require(90);
+var names = require(60);
+var mix = require(84);
 
 function assign(dest, src) {
     for (var key in src) {
@@ -615,10 +430,10 @@ function createSyntax(config) {
 exports.create = function(config) {
     return createSyntax(mix({}, config));
 };
-}, {"60":60,"61":61,"62":62,"67":67,"68":68,"80":80,"81":81,"82":82,"92":92,"98":98,"99":99}];
-window.modules["103"] = [function(require,module,exports){var cmpChar = require(82).cmpChar;
-var isNumber = require(82).isNumber;
-var TYPE = require(82).TYPE;
+}, {"52":52,"53":53,"54":54,"59":59,"60":60,"72":72,"73":73,"75":75,"84":84,"90":90,"91":91}];
+window.modules["95"] = [function(require,module,exports){var cmpChar = require(75).cmpChar;
+var isNumber = require(75).isNumber;
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var NUMBER = TYPE.Number;
@@ -796,8 +611,8 @@ module.exports = {
         }
     }
 };
-}, {"82":82}];
-window.modules["104"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["96"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var ATRULE = TYPE.Atrule;
 var SEMICOLON = TYPE.Semicolon;
@@ -931,8 +746,8 @@ module.exports = {
     },
     walkContext: 'atrule'
 };
-}, {"82":82}];
-window.modules["105"] = [function(require,module,exports){var List = require(61);
+}, {"75":75}];
+window.modules["97"] = [function(require,module,exports){var List = require(53);
 
 module.exports = {
     name: 'AtrulePrelude',
@@ -972,8 +787,8 @@ module.exports = {
     },
     walkContext: 'atrulePrelude'
 };
-}, {"61":61}];
-window.modules["106"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+}, {"53":53}];
+window.modules["98"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var STRING = TYPE.String;
@@ -1135,9 +950,9 @@ module.exports = {
         processChunk(']');
     }
 };
-}, {"82":82}];
-window.modules["107"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["99"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
 var WHITESPACE = TYPE.WhiteSpace;
 var COMMENT = TYPE.Comment;
@@ -1215,8 +1030,8 @@ module.exports = {
     },
     walkContext: 'block'
 };
-}, {"61":61,"82":82}];
-window.modules["108"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+}, {"53":53,"75":75}];
+window.modules["100"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
 var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
 
@@ -1248,8 +1063,8 @@ module.exports = {
         processChunk(']');
     }
 };
-}, {"82":82}];
-window.modules["109"] = [function(require,module,exports){var CDC = require(82).TYPE.CDC;
+}, {"75":75}];
+window.modules["101"] = [function(require,module,exports){var CDC = require(75).TYPE.CDC;
 
 module.exports = {
     name: 'CDC',
@@ -1268,8 +1083,8 @@ module.exports = {
         processChunk('-->');
     }
 };
-}, {"82":82}];
-window.modules["110"] = [function(require,module,exports){var CDO = require(82).TYPE.CDO;
+}, {"75":75}];
+window.modules["102"] = [function(require,module,exports){var CDO = require(75).TYPE.CDO;
 
 module.exports = {
     name: 'CDO',
@@ -1288,8 +1103,8 @@ module.exports = {
         processChunk('<!--');
     }
 };
-}, {"82":82}];
-window.modules["111"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["103"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 var IDENTIFIER = TYPE.Identifier;
 var FULLSTOP = TYPE.FullStop;
 
@@ -1313,8 +1128,8 @@ module.exports = {
         processChunk(node.name);
     }
 };
-}, {"82":82}];
-window.modules["112"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["104"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var PLUSSIGN = TYPE.PlusSign;
 var SOLIDUS = TYPE.Solidus;
@@ -1357,8 +1172,8 @@ module.exports = {
         processChunk(node.name);
     }
 };
-}, {"82":82}];
-window.modules["113"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["105"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var ASTERISK = TYPE.Asterisk;
 var SOLIDUS = TYPE.Solidus;
@@ -1393,8 +1208,8 @@ module.exports = {
         processChunk('*/');
     }
 };
-}, {"82":82}];
-window.modules["114"] = [function(require,module,exports){var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["106"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var COLON = TYPE.Colon;
@@ -1521,9 +1336,9 @@ function getImportant(scanner) {
     // for better original source restoring and hacks like `!ie` support
     return important === 'important' ? true : important;
 }
-}, {"82":82}];
-window.modules["115"] = [function(require,module,exports){var List = require(61);
-var TYPE = require(82).TYPE;
+}, {"75":75}];
+window.modules["107"] = [function(require,module,exports){var List = require(53);
+var TYPE = require(75).TYPE;
 
 var WHITESPACE = TYPE.WhiteSpace;
 var COMMENT = TYPE.Comment;
@@ -1565,8 +1380,8 @@ module.exports = {
         this.each(processChunk, node);
     }
 };
-}, {"61":61,"82":82}];
-window.modules["116"] = [function(require,module,exports){var NUMBER = require(82).TYPE.Number;
+}, {"53":53,"75":75}];
+window.modules["108"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
 
 // special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
 function readUnit(scanner) {
@@ -1611,8 +1426,8 @@ module.exports = {
         processChunk(node.unit);
     }
 };
-}, {"82":82}];
-window.modules["146"] = [function(require,module,exports){var List = require(61);
+}, {"75":75}];
+window.modules["138"] = [function(require,module,exports){var List = require(53);
 
 module.exports = {
     parse: function() {
@@ -1621,13 +1436,13 @@ module.exports = {
         );
     }
 };
-}, {"61":61}];
-window.modules["156"] = [function(require,module,exports){module.exports = {
-    getNode: require(157)
+}, {"53":53}];
+window.modules["148"] = [function(require,module,exports){module.exports = {
+    getNode: require(149)
 };
-}, {"157":157}];
-window.modules["157"] = [function(require,module,exports){var cmpChar = require(82).cmpChar;
-var TYPE = require(82).TYPE;
+}, {"149":149}];
+window.modules["149"] = [function(require,module,exports){var cmpChar = require(75).cmpChar;
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var STRING = TYPE.String;
@@ -1704,8 +1519,8 @@ module.exports = function defaultRecognizer(context) {
             }
     }
 };
-}, {"82":82}];
-window.modules["161"] = [function(require,module,exports){'use strict';
+}, {"75":75}];
+window.modules["153"] = [function(require,module,exports){'use strict';
 
 // token types (note: value shouldn't intersect with used char codes)
 var WHITESPACE = 1;
@@ -1877,9 +1692,9 @@ module.exports = {
     STOP_URL_RAW: STOP_URL_RAW
 };
 }, {}];
-window.modules["99"] = [function(require,module,exports){'use strict';
+window.modules["90"] = [function(require,module,exports){'use strict';
 
-var List = require(61);
+var List = require(53);
 
 module.exports = function clone(node) {
     var result = {};
@@ -1902,8 +1717,8 @@ module.exports = function clone(node) {
 
     return result;
 };
-}, {"61":61}];
-window.modules["78"] = [function(require,module,exports){module.exports = function createCustomError(name, message) {
+}, {"53":53}];
+window.modules["70"] = [function(require,module,exports){module.exports = function createCustomError(name, message) {
     // use Object.create(), because some VMs prevent setting line/column otherwise
     // (iOS Safari 10 even throws an exception)
     var error = Object.create(SyntaxError.prototype);
@@ -1921,7 +1736,7 @@ window.modules["78"] = [function(require,module,exports){module.exports = functi
     return error;
 };
 }, {}];
-window.modules["98"] = [function(require,module,exports){'use strict';
+window.modules["91"] = [function(require,module,exports){'use strict';
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -2210,14 +2025,14 @@ module.exports = function createWalker(config) {
     };
 };
 }, {}];
-window.modules["164"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+window.modules["156"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = require(165);
+var util = require(157);
 var has = Object.prototype.hasOwnProperty;
 var hasNativeMap = typeof Map !== "undefined";
 
@@ -2331,8 +2146,8 @@ ArraySet.prototype.toArray = function ArraySet_toArray() {
 };
 
 exports.ArraySet = ArraySet;
-}, {"165":165}];
-window.modules["166"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+}, {"157":157}];
+window.modules["158"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
@@ -2369,7 +2184,7 @@ window.modules["166"] = [function(require,module,exports){/* -*- Mode: js; js-in
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var base64 = require(167);
+var base64 = require(159);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -2472,8 +2287,8 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
   aOutParam.value = fromVLQSigned(result);
   aOutParam.rest = aIndex;
 };
-}, {"167":167}];
-window.modules["167"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+}, {"159":159}];
+window.modules["159"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
@@ -2541,7 +2356,7 @@ exports.decode = function (charCode) {
   return -1;
 };
 }, {}];
-window.modules["168"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+window.modules["160"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
@@ -2653,10 +2468,10 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
   return index;
 };
 }, {}];
-window.modules["205"] = [function(require,module,exports){var entityMap = require(208),
-    legacyMap = require(207),
-    xmlMap = require(209),
-    decodeCodePoint = require(210);
+window.modules["198"] = [function(require,module,exports){var entityMap = require(200),
+    legacyMap = require(199),
+    xmlMap = require(202),
+    decodeCodePoint = require(201);
 
 var decodeXMLStrict = getStrictDecoder(xmlMap),
     decodeHTMLStrict = getStrictDecoder(entityMap);
@@ -2723,8 +2538,8 @@ module.exports = {
     HTML: decodeHTML,
     HTMLStrict: decodeHTMLStrict
 };
-}, {"207":207,"208":208,"209":209,"210":210}];
-window.modules["210"] = [function(require,module,exports){var decodeMap = require(211);
+}, {"199":199,"200":200,"201":201,"202":202}];
+window.modules["201"] = [function(require,module,exports){var decodeMap = require(203);
 
 module.exports = decodeCodePoint;
 
@@ -2749,9 +2564,9 @@ function decodeCodePoint(codePoint) {
     output += String.fromCharCode(codePoint);
     return output;
 }
-}, {"211":211}];
-window.modules["211"] = [function(require,module,exports){module.exports={"0":65533,"128":8364,"130":8218,"131":402,"132":8222,"133":8230,"134":8224,"135":8225,"136":710,"137":8240,"138":352,"139":8249,"140":338,"142":381,"145":8216,"146":8217,"147":8220,"148":8221,"149":8226,"150":8211,"151":8212,"152":732,"153":8482,"154":353,"155":8250,"156":339,"158":382,"159":376}}, {}];
-window.modules["212"] = [function(require,module,exports){/**
+}, {"203":203}];
+window.modules["203"] = [function(require,module,exports){module.exports={"0":65533,"128":8364,"130":8218,"131":402,"132":8222,"133":8230,"134":8224,"135":8225,"136":710,"137":8240,"138":352,"139":8249,"140":338,"142":381,"145":8216,"146":8217,"147":8220,"148":8221,"149":8226,"150":8211,"151":8212,"152":732,"153":8482,"154":353,"155":8250,"156":339,"158":382,"159":376}}, {}];
+window.modules["205"] = [function(require,module,exports){/**
  * ascii-folder.js
  * https://github.com/mplatt/fold-to-ascii-js
  *
@@ -4061,14 +3876,14 @@ ASCIIFolder.mapping = new Map([
 
 module.exports = ASCIIFolder;
 }, {}];
-window.modules["225"] = [function(require,module,exports){module.exports = CollectingHandler;
+window.modules["219"] = [function(require,module,exports){module.exports = CollectingHandler;
 
 function CollectingHandler(cbs) {
     this._cbs = cbs || {};
     this.events = [];
 }
 
-var EVENTS = require(221).EVENTS;
+var EVENTS = require(215).EVENTS;
 Object.keys(EVENTS).forEach(function(name) {
     if (EVENTS[name] === 0) {
         name = "on" + name;
@@ -4118,13 +3933,13 @@ CollectingHandler.prototype.restart = function() {
         }
     }
 };
-}, {"221":221}];
-window.modules["29"] = [function(require,module,exports){var assignValue = require(282),
-    copyObject = require(350),
-    createAssigner = require(352),
-    isArrayLike = require(329),
-    isPrototype = require(326),
-    keys = require(293);
+}, {"215":215}];
+window.modules["16"] = [function(require,module,exports){var assignValue = require(277),
+    copyObject = require(345),
+    createAssigner = require(347),
+    isArrayLike = require(324),
+    isPrototype = require(321),
+    keys = require(288);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -4177,8 +3992,8 @@ var assign = createAssigner(function(object, source) {
 });
 
 module.exports = assign;
-}, {"282":282,"293":293,"326":326,"329":329,"350":350,"352":352}];
-window.modules["342"] = [function(require,module,exports){/**
+}, {"277":277,"288":288,"321":321,"324":324,"345":345,"347":347}];
+window.modules["337"] = [function(require,module,exports){/**
  * Creates a function that returns `value`.
  *
  * @static
@@ -4205,8 +4020,8 @@ function constant(value) {
 
 module.exports = constant;
 }, {}];
-window.modules["389"] = [function(require,module,exports){var postcss = require(387);
-var translate = require(388).syntax.translate;
+window.modules["385"] = [function(require,module,exports){var postcss = require(386);
+var translate = require(384).syntax.translate;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 var DEFAULT_RAWS = {
@@ -4357,8 +4172,8 @@ module.exports = function(node) {
 
     return result;
 };
-}, {"387":387,"388":388}];
-window.modules["391"] = [function(require,module,exports){var resolveKeyword = require(65).keyword;
+}, {"384":384,"386":386}];
+window.modules["388"] = [function(require,module,exports){var resolveKeyword = require(57).keyword;
 
 module.exports = function cleanAtrule(node, item, list) {
     if (node.block) {
@@ -4423,24 +4238,24 @@ module.exports = function cleanAtrule(node, item, list) {
             }
     }
 };
-}, {"65":65}];
-window.modules["392"] = [function(require,module,exports){module.exports = function cleanComment(data, item, list) {
+}, {"57":57}];
+window.modules["389"] = [function(require,module,exports){module.exports = function cleanComment(data, item, list) {
     list.remove(item);
 };
 }, {}];
-window.modules["393"] = [function(require,module,exports){module.exports = function cleanDeclartion(node, item, list) {
+window.modules["390"] = [function(require,module,exports){module.exports = function cleanDeclartion(node, item, list) {
     if (node.value.children && node.value.children.isEmpty()) {
         list.remove(item);
     }
 };
 }, {}];
-window.modules["399"] = [function(require,module,exports){var List = require(65).List;
-var clone = require(65).clone;
-var usageUtils = require(400);
-var clean = require(398);
-var replace = require(402);
-var restructure = require(401);
-var walkRules = require(65).walkRules;
+window.modules["396"] = [function(require,module,exports){var List = require(57).List;
+var clone = require(57).clone;
+var usageUtils = require(397);
+var clean = require(395);
+var replace = require(398);
+var restructure = require(399);
+var walkRules = require(57).walkRules;
 
 function readChunk(children, specialComments) {
     var buffer = new List();
@@ -4626,9 +4441,9 @@ module.exports = function compress(ast, options) {
         ast: ast
     };
 };
-}, {"65":65,"398":398,"400":400,"401":401,"402":402}];
-window.modules["404"] = [function(require,module,exports){var resolveKeyword = require(65).keyword;
-var compressKeyframes = require(405);
+}, {"57":57,"395":395,"397":397,"398":398,"399":399}];
+window.modules["401"] = [function(require,module,exports){var resolveKeyword = require(57).keyword;
+var compressKeyframes = require(402);
 
 module.exports = function(node) {
     // compress @keyframe selectors
@@ -4636,8 +4451,8 @@ module.exports = function(node) {
         compressKeyframes(node);
     }
 };
-}, {"65":65,"405":405}];
-window.modules["406"] = [function(require,module,exports){// Can unquote attribute detection
+}, {"57":57,"402":402}];
+window.modules["403"] = [function(require,module,exports){// Can unquote attribute detection
 // Adopted implementation of Mathias Bynens
 // https://github.com/mathiasbynens/mothereff.in/blob/master/unquoted-attributes/eff.js
 var escapesRx = /\\([0-9A-Fa-f]{1,6})(\r\n|[ \t\n\f\r])?|\\./g;
@@ -4671,7 +4486,7 @@ module.exports = function(node) {
     }
 };
 }, {}];
-window.modules["407"] = [function(require,module,exports){var packNumber = require(408).pack;
+window.modules["404"] = [function(require,module,exports){var packNumber = require(405).pack;
 var LENGTH_UNIT = {
     // absolute length units
     'px': true,
@@ -4725,9 +4540,9 @@ module.exports = function compressDimension(node, item) {
         };
     }
 };
-}, {"408":408}];
-window.modules["416"] = [function(require,module,exports){var lexer = require(65).lexer;
-var packNumber = require(408).pack;
+}, {"405":405}];
+window.modules["413"] = [function(require,module,exports){var lexer = require(57).lexer;
+var packNumber = require(405).pack;
 
 // http://www.w3.org/TR/css3-color/#svg-color
 var NAME_TO_HEX = {
@@ -5236,8 +5051,8 @@ module.exports = {
     compressIdent: compressIdent,
     compressHex: compressHex
 };
-}, {"65":65,"408":408}];
-window.modules["415"] = [function(require,module,exports){var List = require(65).List;
+}, {"57":57,"405":405}];
+window.modules["412"] = [function(require,module,exports){var List = require(57).List;
 
 module.exports = function compressBackground(node) {
     function lastType() {
@@ -5306,8 +5121,8 @@ module.exports = function compressBackground(node) {
     flush();
     node.children = new List().fromArray(newValue);
 };
-}, {"65":65}];
-window.modules["414"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
+}, {"57":57}];
+window.modules["410"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
     var prev = item.prev;
     var next = item.next;
 
@@ -5339,7 +5154,7 @@ module.exports = function compressBorder(node) {
     });
 };
 }, {}];
-window.modules["426"] = [function(require,module,exports){var translate = require(65).translate;
+window.modules["423"] = [function(require,module,exports){var translate = require(57).translate;
 
 function Index() {
     this.seed = 0;
@@ -5370,12 +5185,12 @@ module.exports = function createDeclarationIndexer() {
         return node;
     };
 };
-}, {"65":65}];
-window.modules["429"] = [function(require,module,exports){'use strict';
+}, {"57":57}];
+window.modules["426"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _container = require(430);
+var _container = require(427);
 
 var _container2 = _interopRequireDefault(_container);
 
@@ -5502,12 +5317,12 @@ var AtRule = function (_Container) {
 exports.default = AtRule;
 module.exports = exports['default'];
 
-}, {"430":430}];
-window.modules["431"] = [function(require,module,exports){'use strict';
+}, {"427":427}];
+window.modules["428"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(432);
+var _node = require(429);
 
 var _node2 = _interopRequireDefault(_node);
 
@@ -5564,22 +5379,22 @@ var Comment = function (_Node) {
 exports.default = Comment;
 module.exports = exports['default'];
 
-}, {"432":432}];
-window.modules["430"] = [function(require,module,exports){'use strict';
+}, {"429":429}];
+window.modules["427"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _declaration = require(433);
+var _declaration = require(430);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
-var _comment = require(431);
+var _comment = require(428);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _node = require(432);
+var _node = require(429);
 
 var _node2 = _interopRequireDefault(_node);
 
@@ -6306,7 +6121,7 @@ var Container = function (_Node) {
         var _this2 = this;
 
         if (typeof nodes === 'string') {
-            var parse = require(434);
+            var parse = require(432);
             nodes = cleanSource(parse(nodes).nodes);
         } else if (Array.isArray(nodes)) {
             nodes = nodes.slice(0);
@@ -6354,10 +6169,10 @@ var Container = function (_Node) {
             }
             nodes = [new _declaration2.default(nodes)];
         } else if (nodes.selector) {
-            var Rule = require(436);
+            var Rule = require(431);
             nodes = [new Rule(nodes)];
         } else if (nodes.name) {
-            var AtRule = require(429);
+            var AtRule = require(426);
             nodes = [new AtRule(nodes)];
         } else if (nodes.text) {
             nodes = [new _comment2.default(nodes)];
@@ -6386,13 +6201,13 @@ var Container = function (_Node) {
 
         var fix = void 0;
         if (node.type === 'root') {
-            var Root = require(435);
+            var Root = require(433);
             fix = new Root();
         } else if (node.type === 'atrule') {
-            var AtRule = require(429);
+            var AtRule = require(426);
             fix = new AtRule();
         } else if (node.type === 'rule') {
-            var Rule = require(436);
+            var Rule = require(431);
             fix = new Rule();
         } else if (node.type === 'decl') {
             fix = new _declaration2.default();
@@ -6472,20 +6287,20 @@ exports.default = Container;
 
 module.exports = exports['default'];
 
-}, {"429":429,"431":431,"432":432,"433":433,"434":434,"435":435,"436":436}];
-window.modules["437"] = [function(require,module,exports){'use strict';
+}, {"426":426,"428":428,"429":429,"430":430,"431":431,"432":432,"433":433}];
+window.modules["434"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _supportsColor = require(2);
+var _supportsColor = require(19);
 
 var _supportsColor2 = _interopRequireDefault(_supportsColor);
 
-var _chalk = require(2);
+var _chalk = require(19);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
-var _terminalHighlight = require(438);
+var _terminalHighlight = require(435);
 
 var _terminalHighlight2 = _interopRequireDefault(_terminalHighlight);
 
@@ -6729,12 +6544,12 @@ var CssSyntaxError = function () {
 exports.default = CssSyntaxError;
 module.exports = exports['default'];
 
-}, {"2":2,"438":438}];
-window.modules["433"] = [function(require,module,exports){'use strict';
+}, {"19":19,"435":435}];
+window.modules["430"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(432);
+var _node = require(429);
 
 var _node2 = _interopRequireDefault(_node);
 
@@ -6831,18 +6646,18 @@ var Declaration = function (_Node) {
 exports.default = Declaration;
 module.exports = exports['default'];
 
-}, {"432":432}];
-window.modules["470"] = [function(require,module,exports){'use strict';
+}, {"429":429}];
+window.modules["467"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _namespace = require(477);
+var _namespace = require(474);
 
 var _namespace2 = _interopRequireDefault(_namespace);
 
-var _types = require(463);
+var _types = require(460);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7027,16 +6842,16 @@ exports.default = Attribute;
 function defaultAttrConcat(attrValue, attrSpaces) {
     return '' + attrSpaces.before + attrValue + attrSpaces.after;
 }
-module.exports = exports['default'];}, {"463":463,"477":477}];
-window.modules["472"] = [function(require,module,exports){'use strict';
+module.exports = exports['default'];}, {"460":460,"474":474}];
+window.modules["470"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _namespace = require(477);
+var _namespace = require(474);
 
 var _namespace2 = _interopRequireDefault(_namespace);
 
-var _types = require(463);
+var _types = require(460);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7066,16 +6881,16 @@ var ClassName = function (_Namespace) {
 }(_namespace2.default);
 
 exports.default = ClassName;
-module.exports = exports['default'];}, {"463":463,"477":477}];
+module.exports = exports['default'];}, {"460":460,"474":474}];
 window.modules["465"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(478);
+var _node = require(475);
 
 var _node2 = _interopRequireDefault(_node);
 
-var _types = require(463);
+var _types = require(460);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7101,16 +6916,16 @@ var Combinator = function (_Node) {
 }(_node2.default);
 
 exports.default = Combinator;
-module.exports = exports['default'];}, {"463":463,"478":478}];
-window.modules["467"] = [function(require,module,exports){'use strict';
+module.exports = exports['default'];}, {"460":460,"475":475}];
+window.modules["468"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(478);
+var _node = require(475);
 
 var _node2 = _interopRequireDefault(_node);
 
-var _types = require(463);
+var _types = require(460);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7136,17 +6951,17 @@ var Comment = function (_Node) {
 }(_node2.default);
 
 exports.default = Comment;
-module.exports = exports['default'];}, {"463":463,"478":478}];
-window.modules["479"] = [function(require,module,exports){'use strict';
+module.exports = exports['default'];}, {"460":460,"475":475}];
+window.modules["476"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 exports.universal = exports.tag = exports.string = exports.selector = exports.root = exports.pseudo = exports.nesting = exports.id = exports.comment = exports.combinator = exports.className = exports.attribute = undefined;
 
-var _attribute = require(470);
+var _attribute = require(467);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
-var _className = require(472);
+var _className = require(470);
 
 var _className2 = _interopRequireDefault(_className);
 
@@ -7154,11 +6969,11 @@ var _combinator = require(465);
 
 var _combinator2 = _interopRequireDefault(_combinator);
 
-var _comment = require(467);
+var _comment = require(468);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _id = require(474);
+var _id = require(461);
 
 var _id2 = _interopRequireDefault(_id);
 
@@ -7166,27 +6981,27 @@ var _nesting = require(466);
 
 var _nesting2 = _interopRequireDefault(_nesting);
 
-var _pseudo = require(475);
+var _pseudo = require(462);
 
 var _pseudo2 = _interopRequireDefault(_pseudo);
 
-var _root = require(473);
+var _root = require(471);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _selector = require(471);
+var _selector = require(469);
 
 var _selector2 = _interopRequireDefault(_selector);
 
-var _string = require(464);
+var _string = require(463);
 
 var _string2 = _interopRequireDefault(_string);
 
-var _tag = require(469);
+var _tag = require(472);
 
 var _tag2 = _interopRequireDefault(_tag);
 
-var _universal = require(468);
+var _universal = require(464);
 
 var _universal2 = _interopRequireDefault(_universal);
 
@@ -7227,18 +7042,18 @@ var tag = exports.tag = function tag(opts) {
 };
 var universal = exports.universal = function universal(opts) {
   return new _universal2.default(opts);
-};}, {"464":464,"465":465,"466":466,"467":467,"468":468,"469":469,"470":470,"471":471,"472":472,"473":473,"474":474,"475":475}];
-window.modules["480"] = [function(require,module,exports){'use strict';
+};}, {"461":461,"462":462,"463":463,"464":464,"465":465,"466":466,"467":467,"468":468,"469":469,"470":470,"471":471,"472":472}];
+window.modules["477"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _node = require(478);
+var _node = require(475);
 
 var _node2 = _interopRequireDefault(_node);
 
-var _types = require(463);
+var _types = require(460);
 
 var types = _interopRequireWildcard(_types);
 
@@ -7571,12 +7386,12 @@ var Container = function (_Node) {
 }(_node2.default);
 
 exports.default = Container;
-module.exports = exports['default'];}, {"463":463,"478":478}];
-window.modules["482"] = [function(require,module,exports){'use strict';
+module.exports = exports['default'];}, {"460":460,"475":475}];
+window.modules["479"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _container = require(483);
+var _container = require(480);
 
 var _container2 = _interopRequireDefault(_container);
 
@@ -7703,12 +7518,12 @@ var AtRule = function (_Container) {
 exports.default = AtRule;
 module.exports = exports['default'];
 
-}, {"483":483}];
-window.modules["484"] = [function(require,module,exports){'use strict';
+}, {"480":480}];
+window.modules["481"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(485);
+var _node = require(482);
 
 var _node2 = _interopRequireDefault(_node);
 
@@ -7765,1177 +7580,1177 @@ var Comment = function (_Node) {
 exports.default = Comment;
 module.exports = exports['default'];
 
-}, {"485":485}];
+}, {"482":482}];
+window.modules["480"] = [function(require,module,exports){'use strict';
+
+exports.__esModule = true;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _declaration = require(483);
+
+var _declaration2 = _interopRequireDefault(_declaration);
+
+var _comment = require(481);
+
+var _comment2 = _interopRequireDefault(_comment);
+
+var _node = require(482);
+
+var _node2 = _interopRequireDefault(_node);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function cleanSource(nodes) {
+    return nodes.map(function (i) {
+        if (i.nodes) i.nodes = cleanSource(i.nodes);
+        delete i.source;
+        return i;
+    });
+}
+
+/**
+ * The {@link Root}, {@link AtRule}, and {@link Rule} container nodes
+ * inherit some common methods to help work with their children.
+ *
+ * Note that all containers can store any content. If you write a rule inside
+ * a rule, PostCSS will parse it.
+ *
+ * @extends Node
+ * @abstract
+ */
+
+var Container = function (_Node) {
+    _inherits(Container, _Node);
+
+    function Container() {
+        _classCallCheck(this, Container);
+
+        return _possibleConstructorReturn(this, _Node.apply(this, arguments));
+    }
+
+    Container.prototype.push = function push(child) {
+        child.parent = this;
+        this.nodes.push(child);
+        return this;
+    };
+
+    /**
+     * Iterates through the container’s immediate children,
+     * calling `callback` for each child.
+     *
+     * Returning `false` in the callback will break iteration.
+     *
+     * This method only iterates through the container’s immediate children.
+     * If you need to recursively iterate through all the container’s descendant
+     * nodes, use {@link Container#walk}.
+     *
+     * Unlike the for `{}`-cycle or `Array#forEach` this iterator is safe
+     * if you are mutating the array of child nodes during iteration.
+     * PostCSS will adjust the current index to match the mutations.
+     *
+     * @param {childIterator} callback - iterator receives each node and index
+     *
+     * @return {false|undefined} returns `false` if iteration was broke
+     *
+     * @example
+     * const root = postcss.parse('a { color: black; z-index: 1 }');
+     * const rule = root.first;
+     *
+     * for ( let decl of rule.nodes ) {
+     *     decl.cloneBefore({ prop: '-webkit-' + decl.prop });
+     *     // Cycle will be infinite, because cloneBefore moves the current node
+     *     // to the next index
+     * }
+     *
+     * rule.each(decl => {
+     *     decl.cloneBefore({ prop: '-webkit-' + decl.prop });
+     *     // Will be executed only for color and z-index
+     * });
+     */
+
+
+    Container.prototype.each = function each(callback) {
+        if (!this.lastEach) this.lastEach = 0;
+        if (!this.indexes) this.indexes = {};
+
+        this.lastEach += 1;
+        var id = this.lastEach;
+        this.indexes[id] = 0;
+
+        if (!this.nodes) return undefined;
+
+        var index = void 0,
+            result = void 0;
+        while (this.indexes[id] < this.nodes.length) {
+            index = this.indexes[id];
+            result = callback(this.nodes[index], index);
+            if (result === false) break;
+
+            this.indexes[id] += 1;
+        }
+
+        delete this.indexes[id];
+
+        return result;
+    };
+
+    /**
+     * Traverses the container’s descendant nodes, calling callback
+     * for each node.
+     *
+     * Like container.each(), this method is safe to use
+     * if you are mutating arrays during iteration.
+     *
+     * If you only need to iterate through the container’s immediate children,
+     * use {@link Container#each}.
+     *
+     * @param {childIterator} callback - iterator receives each node and index
+     *
+     * @return {false|undefined} returns `false` if iteration was broke
+     *
+     * @example
+     * root.walk(node => {
+     *   // Traverses all descendant nodes.
+     * });
+     */
+
+
+    Container.prototype.walk = function walk(callback) {
+        return this.each(function (child, i) {
+            var result = callback(child, i);
+            if (result !== false && child.walk) {
+                result = child.walk(callback);
+            }
+            return result;
+        });
+    };
+
+    /**
+     * Traverses the container’s descendant nodes, calling callback
+     * for each declaration node.
+     *
+     * If you pass a filter, iteration will only happen over declarations
+     * with matching properties.
+     *
+     * Like {@link Container#each}, this method is safe
+     * to use if you are mutating arrays during iteration.
+     *
+     * @param {string|RegExp} [prop]   - string or regular expression
+     *                                   to filter declarations by property name
+     * @param {childIterator} callback - iterator receives each node and index
+     *
+     * @return {false|undefined} returns `false` if iteration was broke
+     *
+     * @example
+     * root.walkDecls(decl => {
+     *   checkPropertySupport(decl.prop);
+     * });
+     *
+     * root.walkDecls('border-radius', decl => {
+     *   decl.remove();
+     * });
+     *
+     * root.walkDecls(/^background/, decl => {
+     *   decl.value = takeFirstColorFromGradient(decl.value);
+     * });
+     */
+
+
+    Container.prototype.walkDecls = function walkDecls(prop, callback) {
+        if (!callback) {
+            callback = prop;
+            return this.walk(function (child, i) {
+                if (child.type === 'decl') {
+                    return callback(child, i);
+                }
+            });
+        } else if (prop instanceof RegExp) {
+            return this.walk(function (child, i) {
+                if (child.type === 'decl' && prop.test(child.prop)) {
+                    return callback(child, i);
+                }
+            });
+        } else {
+            return this.walk(function (child, i) {
+                if (child.type === 'decl' && child.prop === prop) {
+                    return callback(child, i);
+                }
+            });
+        }
+    };
+
+    /**
+     * Traverses the container’s descendant nodes, calling callback
+     * for each rule node.
+     *
+     * If you pass a filter, iteration will only happen over rules
+     * with matching selectors.
+     *
+     * Like {@link Container#each}, this method is safe
+     * to use if you are mutating arrays during iteration.
+     *
+     * @param {string|RegExp} [selector] - string or regular expression
+     *                                     to filter rules by selector
+     * @param {childIterator} callback   - iterator receives each node and index
+     *
+     * @return {false|undefined} returns `false` if iteration was broke
+     *
+     * @example
+     * const selectors = [];
+     * root.walkRules(rule => {
+     *   selectors.push(rule.selector);
+     * });
+     * console.log(`Your CSS uses ${selectors.length} selectors`);
+     */
+
+
+    Container.prototype.walkRules = function walkRules(selector, callback) {
+        if (!callback) {
+            callback = selector;
+
+            return this.walk(function (child, i) {
+                if (child.type === 'rule') {
+                    return callback(child, i);
+                }
+            });
+        } else if (selector instanceof RegExp) {
+            return this.walk(function (child, i) {
+                if (child.type === 'rule' && selector.test(child.selector)) {
+                    return callback(child, i);
+                }
+            });
+        } else {
+            return this.walk(function (child, i) {
+                if (child.type === 'rule' && child.selector === selector) {
+                    return callback(child, i);
+                }
+            });
+        }
+    };
+
+    /**
+     * Traverses the container’s descendant nodes, calling callback
+     * for each at-rule node.
+     *
+     * If you pass a filter, iteration will only happen over at-rules
+     * that have matching names.
+     *
+     * Like {@link Container#each}, this method is safe
+     * to use if you are mutating arrays during iteration.
+     *
+     * @param {string|RegExp} [name]   - string or regular expression
+     *                                   to filter at-rules by name
+     * @param {childIterator} callback - iterator receives each node and index
+     *
+     * @return {false|undefined} returns `false` if iteration was broke
+     *
+     * @example
+     * root.walkAtRules(rule => {
+     *   if ( isOld(rule.name) ) rule.remove();
+     * });
+     *
+     * let first = false;
+     * root.walkAtRules('charset', rule => {
+     *   if ( !first ) {
+     *     first = true;
+     *   } else {
+     *     rule.remove();
+     *   }
+     * });
+     */
+
+
+    Container.prototype.walkAtRules = function walkAtRules(name, callback) {
+        if (!callback) {
+            callback = name;
+            return this.walk(function (child, i) {
+                if (child.type === 'atrule') {
+                    return callback(child, i);
+                }
+            });
+        } else if (name instanceof RegExp) {
+            return this.walk(function (child, i) {
+                if (child.type === 'atrule' && name.test(child.name)) {
+                    return callback(child, i);
+                }
+            });
+        } else {
+            return this.walk(function (child, i) {
+                if (child.type === 'atrule' && child.name === name) {
+                    return callback(child, i);
+                }
+            });
+        }
+    };
+
+    /**
+     * Traverses the container’s descendant nodes, calling callback
+     * for each comment node.
+     *
+     * Like {@link Container#each}, this method is safe
+     * to use if you are mutating arrays during iteration.
+     *
+     * @param {childIterator} callback - iterator receives each node and index
+     *
+     * @return {false|undefined} returns `false` if iteration was broke
+     *
+     * @example
+     * root.walkComments(comment => {
+     *   comment.remove();
+     * });
+     */
+
+
+    Container.prototype.walkComments = function walkComments(callback) {
+        return this.walk(function (child, i) {
+            if (child.type === 'comment') {
+                return callback(child, i);
+            }
+        });
+    };
+
+    /**
+     * Inserts new nodes to the end of the container.
+     *
+     * @param {...(Node|object|string|Node[])} children - new nodes
+     *
+     * @return {Node} this node for methods chain
+     *
+     * @example
+     * const decl1 = postcss.decl({ prop: 'color', value: 'black' });
+     * const decl2 = postcss.decl({ prop: 'background-color', value: 'white' });
+     * rule.append(decl1, decl2);
+     *
+     * root.append({ name: 'charset', params: '"UTF-8"' });  // at-rule
+     * root.append({ selector: 'a' });                       // rule
+     * rule.append({ prop: 'color', value: 'black' });       // declaration
+     * rule.append({ text: 'Comment' })                      // comment
+     *
+     * root.append('a {}');
+     * root.first.append('color: black; z-index: 1');
+     */
+
+
+    Container.prototype.append = function append() {
+        for (var _len = arguments.length, children = Array(_len), _key = 0; _key < _len; _key++) {
+            children[_key] = arguments[_key];
+        }
+
+        for (var _iterator = children, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+            var _ref;
+
+            if (_isArray) {
+                if (_i >= _iterator.length) break;
+                _ref = _iterator[_i++];
+            } else {
+                _i = _iterator.next();
+                if (_i.done) break;
+                _ref = _i.value;
+            }
+
+            var child = _ref;
+
+            var nodes = this.normalize(child, this.last);
+            for (var _iterator2 = nodes, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+                var _ref2;
+
+                if (_isArray2) {
+                    if (_i2 >= _iterator2.length) break;
+                    _ref2 = _iterator2[_i2++];
+                } else {
+                    _i2 = _iterator2.next();
+                    if (_i2.done) break;
+                    _ref2 = _i2.value;
+                }
+
+                var node = _ref2;
+                this.nodes.push(node);
+            }
+        }
+        return this;
+    };
+
+    /**
+     * Inserts new nodes to the start of the container.
+     *
+     * @param {...(Node|object|string|Node[])} children - new nodes
+     *
+     * @return {Node} this node for methods chain
+     *
+     * @example
+     * const decl1 = postcss.decl({ prop: 'color', value: 'black' });
+     * const decl2 = postcss.decl({ prop: 'background-color', value: 'white' });
+     * rule.prepend(decl1, decl2);
+     *
+     * root.append({ name: 'charset', params: '"UTF-8"' });  // at-rule
+     * root.append({ selector: 'a' });                       // rule
+     * rule.append({ prop: 'color', value: 'black' });       // declaration
+     * rule.append({ text: 'Comment' })                      // comment
+     *
+     * root.append('a {}');
+     * root.first.append('color: black; z-index: 1');
+     */
+
+
+    Container.prototype.prepend = function prepend() {
+        for (var _len2 = arguments.length, children = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            children[_key2] = arguments[_key2];
+        }
+
+        children = children.reverse();
+        for (var _iterator3 = children, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+            var _ref3;
+
+            if (_isArray3) {
+                if (_i3 >= _iterator3.length) break;
+                _ref3 = _iterator3[_i3++];
+            } else {
+                _i3 = _iterator3.next();
+                if (_i3.done) break;
+                _ref3 = _i3.value;
+            }
+
+            var child = _ref3;
+
+            var nodes = this.normalize(child, this.first, 'prepend').reverse();
+            for (var _iterator4 = nodes, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
+                var _ref4;
+
+                if (_isArray4) {
+                    if (_i4 >= _iterator4.length) break;
+                    _ref4 = _iterator4[_i4++];
+                } else {
+                    _i4 = _iterator4.next();
+                    if (_i4.done) break;
+                    _ref4 = _i4.value;
+                }
+
+                var node = _ref4;
+                this.nodes.unshift(node);
+            }for (var id in this.indexes) {
+                this.indexes[id] = this.indexes[id] + nodes.length;
+            }
+        }
+        return this;
+    };
+
+    Container.prototype.cleanRaws = function cleanRaws(keepBetween) {
+        _Node.prototype.cleanRaws.call(this, keepBetween);
+        if (this.nodes) {
+            for (var _iterator5 = this.nodes, _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
+                var _ref5;
+
+                if (_isArray5) {
+                    if (_i5 >= _iterator5.length) break;
+                    _ref5 = _iterator5[_i5++];
+                } else {
+                    _i5 = _iterator5.next();
+                    if (_i5.done) break;
+                    _ref5 = _i5.value;
+                }
+
+                var node = _ref5;
+                node.cleanRaws(keepBetween);
+            }
+        }
+    };
+
+    /**
+     * Insert new node before old node within the container.
+     *
+     * @param {Node|number} exist             - child or child’s index.
+     * @param {Node|object|string|Node[]} add - new node
+     *
+     * @return {Node} this node for methods chain
+     *
+     * @example
+     * rule.insertBefore(decl, decl.clone({ prop: '-webkit-' + decl.prop }));
+     */
+
+
+    Container.prototype.insertBefore = function insertBefore(exist, add) {
+        exist = this.index(exist);
+
+        var type = exist === 0 ? 'prepend' : false;
+        var nodes = this.normalize(add, this.nodes[exist], type).reverse();
+        for (var _iterator6 = nodes, _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator]();;) {
+            var _ref6;
+
+            if (_isArray6) {
+                if (_i6 >= _iterator6.length) break;
+                _ref6 = _iterator6[_i6++];
+            } else {
+                _i6 = _iterator6.next();
+                if (_i6.done) break;
+                _ref6 = _i6.value;
+            }
+
+            var node = _ref6;
+            this.nodes.splice(exist, 0, node);
+        }var index = void 0;
+        for (var id in this.indexes) {
+            index = this.indexes[id];
+            if (exist <= index) {
+                this.indexes[id] = index + nodes.length;
+            }
+        }
+
+        return this;
+    };
+
+    /**
+     * Insert new node after old node within the container.
+     *
+     * @param {Node|number} exist             - child or child’s index
+     * @param {Node|object|string|Node[]} add - new node
+     *
+     * @return {Node} this node for methods chain
+     */
+
+
+    Container.prototype.insertAfter = function insertAfter(exist, add) {
+        exist = this.index(exist);
+
+        var nodes = this.normalize(add, this.nodes[exist]).reverse();
+        for (var _iterator7 = nodes, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
+            var _ref7;
+
+            if (_isArray7) {
+                if (_i7 >= _iterator7.length) break;
+                _ref7 = _iterator7[_i7++];
+            } else {
+                _i7 = _iterator7.next();
+                if (_i7.done) break;
+                _ref7 = _i7.value;
+            }
+
+            var node = _ref7;
+            this.nodes.splice(exist + 1, 0, node);
+        }var index = void 0;
+        for (var id in this.indexes) {
+            index = this.indexes[id];
+            if (exist < index) {
+                this.indexes[id] = index + nodes.length;
+            }
+        }
+
+        return this;
+    };
+
+    /**
+     * Removes node from the container and cleans the parent properties
+     * from the node and its children.
+     *
+     * @param {Node|number} child - child or child’s index
+     *
+     * @return {Node} this node for methods chain
+     *
+     * @example
+     * rule.nodes.length  //=> 5
+     * rule.removeChild(decl);
+     * rule.nodes.length  //=> 4
+     * decl.parent        //=> undefined
+     */
+
+
+    Container.prototype.removeChild = function removeChild(child) {
+        child = this.index(child);
+        this.nodes[child].parent = undefined;
+        this.nodes.splice(child, 1);
+
+        var index = void 0;
+        for (var id in this.indexes) {
+            index = this.indexes[id];
+            if (index >= child) {
+                this.indexes[id] = index - 1;
+            }
+        }
+
+        return this;
+    };
+
+    /**
+     * Removes all children from the container
+     * and cleans their parent properties.
+     *
+     * @return {Node} this node for methods chain
+     *
+     * @example
+     * rule.removeAll();
+     * rule.nodes.length //=> 0
+     */
+
+
+    Container.prototype.removeAll = function removeAll() {
+        for (var _iterator8 = this.nodes, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
+            var _ref8;
+
+            if (_isArray8) {
+                if (_i8 >= _iterator8.length) break;
+                _ref8 = _iterator8[_i8++];
+            } else {
+                _i8 = _iterator8.next();
+                if (_i8.done) break;
+                _ref8 = _i8.value;
+            }
+
+            var node = _ref8;
+            node.parent = undefined;
+        }this.nodes = [];
+        return this;
+    };
+
+    /**
+     * Passes all declaration values within the container that match pattern
+     * through callback, replacing those values with the returned result
+     * of callback.
+     *
+     * This method is useful if you are using a custom unit or function
+     * and need to iterate through all values.
+     *
+     * @param {string|RegExp} pattern      - replace pattern
+     * @param {object} opts                - options to speed up the search
+     * @param {string|string[]} opts.props - an array of property names
+     * @param {string} opts.fast           - string that’s used
+     *                                       to narrow down values and speed up
+                                             the regexp search
+     * @param {function|string} callback   - string to replace pattern
+     *                                       or callback that returns a new
+     *                                       value.
+     *                                       The callback will receive
+     *                                       the same arguments as those
+     *                                       passed to a function parameter
+     *                                       of `String#replace`.
+     *
+     * @return {Node} this node for methods chain
+     *
+     * @example
+     * root.replaceValues(/\d+rem/, { fast: 'rem' }, string => {
+     *   return 15 * parseInt(string) + 'px';
+     * });
+     */
+
+
+    Container.prototype.replaceValues = function replaceValues(pattern, opts, callback) {
+        if (!callback) {
+            callback = opts;
+            opts = {};
+        }
+
+        this.walkDecls(function (decl) {
+            if (opts.props && opts.props.indexOf(decl.prop) === -1) return;
+            if (opts.fast && decl.value.indexOf(opts.fast) === -1) return;
+
+            decl.value = decl.value.replace(pattern, callback);
+        });
+
+        return this;
+    };
+
+    /**
+     * Returns `true` if callback returns `true`
+     * for all of the container’s children.
+     *
+     * @param {childCondition} condition - iterator returns true or false.
+     *
+     * @return {boolean} is every child pass condition
+     *
+     * @example
+     * const noPrefixes = rule.every(i => i.prop[0] !== '-');
+     */
+
+
+    Container.prototype.every = function every(condition) {
+        return this.nodes.every(condition);
+    };
+
+    /**
+     * Returns `true` if callback returns `true` for (at least) one
+     * of the container’s children.
+     *
+     * @param {childCondition} condition - iterator returns true or false.
+     *
+     * @return {boolean} is some child pass condition
+     *
+     * @example
+     * const hasPrefix = rule.some(i => i.prop[0] === '-');
+     */
+
+
+    Container.prototype.some = function some(condition) {
+        return this.nodes.some(condition);
+    };
+
+    /**
+     * Returns a `child`’s index within the {@link Container#nodes} array.
+     *
+     * @param {Node} child - child of the current container.
+     *
+     * @return {number} child index
+     *
+     * @example
+     * rule.index( rule.nodes[2] ) //=> 2
+     */
+
+
+    Container.prototype.index = function index(child) {
+        if (typeof child === 'number') {
+            return child;
+        } else {
+            return this.nodes.indexOf(child);
+        }
+    };
+
+    /**
+     * The container’s first child.
+     *
+     * @type {Node}
+     *
+     * @example
+     * rule.first == rules.nodes[0];
+     */
+
+
+    Container.prototype.normalize = function normalize(nodes, sample) {
+        var _this2 = this;
+
+        if (typeof nodes === 'string') {
+            var parse = require(484);
+            nodes = cleanSource(parse(nodes).nodes);
+        } else if (Array.isArray(nodes)) {
+            nodes = nodes.slice(0);
+            for (var _iterator9 = nodes, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
+                var _ref9;
+
+                if (_isArray9) {
+                    if (_i9 >= _iterator9.length) break;
+                    _ref9 = _iterator9[_i9++];
+                } else {
+                    _i9 = _iterator9.next();
+                    if (_i9.done) break;
+                    _ref9 = _i9.value;
+                }
+
+                var i = _ref9;
+
+                if (i.parent) i.parent.removeChild(i, 'ignore');
+            }
+        } else if (nodes.type === 'root') {
+            nodes = nodes.nodes.slice(0);
+            for (var _iterator10 = nodes, _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
+                var _ref10;
+
+                if (_isArray10) {
+                    if (_i11 >= _iterator10.length) break;
+                    _ref10 = _iterator10[_i11++];
+                } else {
+                    _i11 = _iterator10.next();
+                    if (_i11.done) break;
+                    _ref10 = _i11.value;
+                }
+
+                var _i10 = _ref10;
+
+                if (_i10.parent) _i10.parent.removeChild(_i10, 'ignore');
+            }
+        } else if (nodes.type) {
+            nodes = [nodes];
+        } else if (nodes.prop) {
+            if (typeof nodes.value === 'undefined') {
+                throw new Error('Value field is missed in node creation');
+            } else if (typeof nodes.value !== 'string') {
+                nodes.value = String(nodes.value);
+            }
+            nodes = [new _declaration2.default(nodes)];
+        } else if (nodes.selector) {
+            var Rule = require(485);
+            nodes = [new Rule(nodes)];
+        } else if (nodes.name) {
+            var AtRule = require(479);
+            nodes = [new AtRule(nodes)];
+        } else if (nodes.text) {
+            nodes = [new _comment2.default(nodes)];
+        } else {
+            throw new Error('Unknown node type in node creation');
+        }
+
+        var processed = nodes.map(function (i) {
+            if (typeof i.before !== 'function') i = _this2.rebuild(i);
+
+            if (i.parent) i.parent.removeChild(i);
+            if (typeof i.raws.before === 'undefined') {
+                if (sample && typeof sample.raws.before !== 'undefined') {
+                    i.raws.before = sample.raws.before.replace(/[^\s]/g, '');
+                }
+            }
+            i.parent = _this2;
+            return i;
+        });
+
+        return processed;
+    };
+
+    Container.prototype.rebuild = function rebuild(node, parent) {
+        var _this3 = this;
+
+        var fix = void 0;
+        if (node.type === 'root') {
+            var Root = require(486);
+            fix = new Root();
+        } else if (node.type === 'atrule') {
+            var AtRule = require(479);
+            fix = new AtRule();
+        } else if (node.type === 'rule') {
+            var Rule = require(485);
+            fix = new Rule();
+        } else if (node.type === 'decl') {
+            fix = new _declaration2.default();
+        } else if (node.type === 'comment') {
+            fix = new _comment2.default();
+        }
+
+        for (var i in node) {
+            if (i === 'nodes') {
+                fix.nodes = node.nodes.map(function (j) {
+                    return _this3.rebuild(j, fix);
+                });
+            } else if (i === 'parent' && parent) {
+                fix.parent = parent;
+            } else if (node.hasOwnProperty(i)) {
+                fix[i] = node[i];
+            }
+        }
+
+        return fix;
+    };
+
+    /**
+     * @memberof Container#
+     * @member {Node[]} nodes - an array containing the container’s children
+     *
+     * @example
+     * const root = postcss.parse('a { color: black }');
+     * root.nodes.length           //=> 1
+     * root.nodes[0].selector      //=> 'a'
+     * root.nodes[0].nodes[0].prop //=> 'color'
+     */
+
+    _createClass(Container, [{
+        key: 'first',
+        get: function get() {
+            if (!this.nodes) return undefined;
+            return this.nodes[0];
+        }
+
+        /**
+         * The container’s last child.
+         *
+         * @type {Node}
+         *
+         * @example
+         * rule.last == rule.nodes[rule.nodes.length - 1];
+         */
+
+    }, {
+        key: 'last',
+        get: function get() {
+            if (!this.nodes) return undefined;
+            return this.nodes[this.nodes.length - 1];
+        }
+    }]);
+
+    return Container;
+}(_node2.default);
+
+exports.default = Container;
+
+/**
+ * @callback childCondition
+ * @param {Node} node    - container child
+ * @param {number} index - child index
+ * @param {Node[]} nodes - all container children
+ * @return {boolean}
+ */
+
+/**
+ * @callback childIterator
+ * @param {Node} node    - container child
+ * @param {number} index - child index
+ * @return {false|undefined} returning `false` will break iteration
+ */
+
+module.exports = exports['default'];
+
+}, {"479":479,"481":481,"482":482,"483":483,"484":484,"485":485,"486":486}];
+window.modules["487"] = [function(require,module,exports){'use strict';
+
+exports.__esModule = true;
+
+var _supportsColor = require(19);
+
+var _supportsColor2 = _interopRequireDefault(_supportsColor);
+
+var _chalk = require(19);
+
+var _chalk2 = _interopRequireDefault(_chalk);
+
+var _terminalHighlight = require(488);
+
+var _terminalHighlight2 = _interopRequireDefault(_terminalHighlight);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * The CSS parser throws this error for broken CSS.
+ *
+ * Custom parsers can throw this error for broken custom syntax using
+ * the {@link Node#error} method.
+ *
+ * PostCSS will use the input source map to detect the original error location.
+ * If you wrote a Sass file, compiled it to CSS and then parsed it with PostCSS,
+ * PostCSS will show the original position in the Sass file.
+ *
+ * If you need the position in the PostCSS input
+ * (e.g., to debug the previous compiler), use `error.input.file`.
+ *
+ * @example
+ * // Catching and checking syntax error
+ * try {
+ *   postcss.parse('a{')
+ * } catch (error) {
+ *   if ( error.name === 'CssSyntaxError' ) {
+ *     error //=> CssSyntaxError
+ *   }
+ * }
+ *
+ * @example
+ * // Raising error from plugin
+ * throw node.error('Unknown variable', { plugin: 'postcss-vars' });
+ */
+var CssSyntaxError = function () {
+
+    /**
+     * @param {string} message  - error message
+     * @param {number} [line]   - source line of the error
+     * @param {number} [column] - source column of the error
+     * @param {string} [source] - source code of the broken file
+     * @param {string} [file]   - absolute path to the broken file
+     * @param {string} [plugin] - PostCSS plugin name, if error came from plugin
+     */
+    function CssSyntaxError(message, line, column, source, file, plugin) {
+        _classCallCheck(this, CssSyntaxError);
+
+        /**
+         * @member {string} - Always equal to `'CssSyntaxError'`. You should
+         *                    always check error type
+         *                    by `error.name === 'CssSyntaxError'` instead of
+         *                    `error instanceof CssSyntaxError`, because
+         *                    npm could have several PostCSS versions.
+         *
+         * @example
+         * if ( error.name === 'CssSyntaxError' ) {
+         *   error //=> CssSyntaxError
+         * }
+         */
+        this.name = 'CssSyntaxError';
+        /**
+         * @member {string} - Error message.
+         *
+         * @example
+         * error.message //=> 'Unclosed block'
+         */
+        this.reason = message;
+
+        if (file) {
+            /**
+             * @member {string} - Absolute path to the broken file.
+             *
+             * @example
+             * error.file       //=> 'a.sass'
+             * error.input.file //=> 'a.css'
+             */
+            this.file = file;
+        }
+        if (source) {
+            /**
+             * @member {string} - Source code of the broken file.
+             *
+             * @example
+             * error.source       //=> 'a { b {} }'
+             * error.input.column //=> 'a b { }'
+             */
+            this.source = source;
+        }
+        if (plugin) {
+            /**
+             * @member {string} - Plugin name, if error came from plugin.
+             *
+             * @example
+             * error.plugin //=> 'postcss-vars'
+             */
+            this.plugin = plugin;
+        }
+        if (typeof line !== 'undefined' && typeof column !== 'undefined') {
+            /**
+             * @member {number} - Source line of the error.
+             *
+             * @example
+             * error.line       //=> 2
+             * error.input.line //=> 4
+             */
+            this.line = line;
+            /**
+             * @member {number} - Source column of the error.
+             *
+             * @example
+             * error.column       //=> 1
+             * error.input.column //=> 4
+             */
+            this.column = column;
+        }
+
+        this.setMessage();
+
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, CssSyntaxError);
+        }
+    }
+
+    CssSyntaxError.prototype.setMessage = function setMessage() {
+        /**
+         * @member {string} - Full error text in the GNU error format
+         *                    with plugin, file, line and column.
+         *
+         * @example
+         * error.message //=> 'a.css:1:1: Unclosed block'
+         */
+        this.message = this.plugin ? this.plugin + ': ' : '';
+        this.message += this.file ? this.file : '<css input>';
+        if (typeof this.line !== 'undefined') {
+            this.message += ':' + this.line + ':' + this.column;
+        }
+        this.message += ': ' + this.reason;
+    };
+
+    /**
+     * Returns a few lines of CSS source that caused the error.
+     *
+     * If the CSS has an input source map without `sourceContent`,
+     * this method will return an empty string.
+     *
+     * @param {boolean} [color] whether arrow will be colored red by terminal
+     *                          color codes. By default, PostCSS will detect
+     *                          color support by `process.stdout.isTTY`
+     *                          and `window.process.env.NODE_DISABLE_COLORS`.
+     *
+     * @example
+     * error.showSourceCode() //=> "  4 | }
+     *                        //      5 | a {
+     *                        //    > 6 |   bad
+     *                        //        |   ^
+     *                        //      7 | }
+     *                        //      8 | b {"
+     *
+     * @return {string} few lines of CSS source that caused the error
+     */
+
+
+    CssSyntaxError.prototype.showSourceCode = function showSourceCode(color) {
+        var _this = this;
+
+        if (!this.source) return '';
+
+        var css = this.source;
+        if (typeof color === 'undefined') color = _supportsColor2.default.stdout;
+        if (color) css = (0, _terminalHighlight2.default)(css);
+
+        var lines = css.split(/\r?\n/);
+        var start = Math.max(this.line - 3, 0);
+        var end = Math.min(this.line + 2, lines.length);
+
+        var maxWidth = String(end).length;
+
+        function mark(text) {
+            if (color && _chalk2.default.red) {
+                return _chalk2.default.red.bold(text);
+            } else {
+                return text;
+            }
+        }
+        function aside(text) {
+            if (color && _chalk2.default.gray) {
+                return _chalk2.default.gray(text);
+            } else {
+                return text;
+            }
+        }
+
+        return lines.slice(start, end).map(function (line, index) {
+            var number = start + 1 + index;
+            var gutter = ' ' + (' ' + number).slice(-maxWidth) + ' | ';
+            if (number === _this.line) {
+                var spacing = aside(gutter.replace(/\d/g, ' ')) + line.slice(0, _this.column - 1).replace(/[^\t]/g, ' ');
+                return mark('>') + aside(gutter) + line + '\n ' + spacing + mark('^');
+            } else {
+                return ' ' + aside(gutter) + line;
+            }
+        }).join('\n');
+    };
+
+    /**
+     * Returns error position, message and source code of the broken part.
+     *
+     * @example
+     * error.toString() //=> "CssSyntaxError: app.css:1:1: Unclosed block
+     *                  //    > 1 | a {
+     *                  //        | ^"
+     *
+     * @return {string} error position, message and source code
+     */
+
+
+    CssSyntaxError.prototype.toString = function toString() {
+        var code = this.showSourceCode();
+        if (code) {
+            code = '\n\n' + code + '\n';
+        }
+        return this.name + ': ' + this.message + code;
+    };
+
+    /**
+     * @memberof CssSyntaxError#
+     * @member {Input} input - Input object with PostCSS internal information
+     *                         about input file. If input has source map
+     *                         from previous tool, PostCSS will use origin
+     *                         (for example, Sass) source. You can use this
+     *                         object to get PostCSS input source.
+     *
+     * @example
+     * error.input.file //=> 'a.css'
+     * error.file       //=> 'a.sass'
+     */
+
+    return CssSyntaxError;
+}();
+
+exports.default = CssSyntaxError;
+module.exports = exports['default'];
+
+}, {"19":19,"488":488}];
 window.modules["483"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _declaration = require(486);
-
-var _declaration2 = _interopRequireDefault(_declaration);
-
-var _comment = require(484);
-
-var _comment2 = _interopRequireDefault(_comment);
-
-var _node = require(485);
-
-var _node2 = _interopRequireDefault(_node);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function cleanSource(nodes) {
-    return nodes.map(function (i) {
-        if (i.nodes) i.nodes = cleanSource(i.nodes);
-        delete i.source;
-        return i;
-    });
-}
-
-/**
- * The {@link Root}, {@link AtRule}, and {@link Rule} container nodes
- * inherit some common methods to help work with their children.
- *
- * Note that all containers can store any content. If you write a rule inside
- * a rule, PostCSS will parse it.
- *
- * @extends Node
- * @abstract
- */
-
-var Container = function (_Node) {
-    _inherits(Container, _Node);
-
-    function Container() {
-        _classCallCheck(this, Container);
-
-        return _possibleConstructorReturn(this, _Node.apply(this, arguments));
-    }
-
-    Container.prototype.push = function push(child) {
-        child.parent = this;
-        this.nodes.push(child);
-        return this;
-    };
-
-    /**
-     * Iterates through the container’s immediate children,
-     * calling `callback` for each child.
-     *
-     * Returning `false` in the callback will break iteration.
-     *
-     * This method only iterates through the container’s immediate children.
-     * If you need to recursively iterate through all the container’s descendant
-     * nodes, use {@link Container#walk}.
-     *
-     * Unlike the for `{}`-cycle or `Array#forEach` this iterator is safe
-     * if you are mutating the array of child nodes during iteration.
-     * PostCSS will adjust the current index to match the mutations.
-     *
-     * @param {childIterator} callback - iterator receives each node and index
-     *
-     * @return {false|undefined} returns `false` if iteration was broke
-     *
-     * @example
-     * const root = postcss.parse('a { color: black; z-index: 1 }');
-     * const rule = root.first;
-     *
-     * for ( let decl of rule.nodes ) {
-     *     decl.cloneBefore({ prop: '-webkit-' + decl.prop });
-     *     // Cycle will be infinite, because cloneBefore moves the current node
-     *     // to the next index
-     * }
-     *
-     * rule.each(decl => {
-     *     decl.cloneBefore({ prop: '-webkit-' + decl.prop });
-     *     // Will be executed only for color and z-index
-     * });
-     */
-
-
-    Container.prototype.each = function each(callback) {
-        if (!this.lastEach) this.lastEach = 0;
-        if (!this.indexes) this.indexes = {};
-
-        this.lastEach += 1;
-        var id = this.lastEach;
-        this.indexes[id] = 0;
-
-        if (!this.nodes) return undefined;
-
-        var index = void 0,
-            result = void 0;
-        while (this.indexes[id] < this.nodes.length) {
-            index = this.indexes[id];
-            result = callback(this.nodes[index], index);
-            if (result === false) break;
-
-            this.indexes[id] += 1;
-        }
-
-        delete this.indexes[id];
-
-        return result;
-    };
-
-    /**
-     * Traverses the container’s descendant nodes, calling callback
-     * for each node.
-     *
-     * Like container.each(), this method is safe to use
-     * if you are mutating arrays during iteration.
-     *
-     * If you only need to iterate through the container’s immediate children,
-     * use {@link Container#each}.
-     *
-     * @param {childIterator} callback - iterator receives each node and index
-     *
-     * @return {false|undefined} returns `false` if iteration was broke
-     *
-     * @example
-     * root.walk(node => {
-     *   // Traverses all descendant nodes.
-     * });
-     */
-
-
-    Container.prototype.walk = function walk(callback) {
-        return this.each(function (child, i) {
-            var result = callback(child, i);
-            if (result !== false && child.walk) {
-                result = child.walk(callback);
-            }
-            return result;
-        });
-    };
-
-    /**
-     * Traverses the container’s descendant nodes, calling callback
-     * for each declaration node.
-     *
-     * If you pass a filter, iteration will only happen over declarations
-     * with matching properties.
-     *
-     * Like {@link Container#each}, this method is safe
-     * to use if you are mutating arrays during iteration.
-     *
-     * @param {string|RegExp} [prop]   - string or regular expression
-     *                                   to filter declarations by property name
-     * @param {childIterator} callback - iterator receives each node and index
-     *
-     * @return {false|undefined} returns `false` if iteration was broke
-     *
-     * @example
-     * root.walkDecls(decl => {
-     *   checkPropertySupport(decl.prop);
-     * });
-     *
-     * root.walkDecls('border-radius', decl => {
-     *   decl.remove();
-     * });
-     *
-     * root.walkDecls(/^background/, decl => {
-     *   decl.value = takeFirstColorFromGradient(decl.value);
-     * });
-     */
-
-
-    Container.prototype.walkDecls = function walkDecls(prop, callback) {
-        if (!callback) {
-            callback = prop;
-            return this.walk(function (child, i) {
-                if (child.type === 'decl') {
-                    return callback(child, i);
-                }
-            });
-        } else if (prop instanceof RegExp) {
-            return this.walk(function (child, i) {
-                if (child.type === 'decl' && prop.test(child.prop)) {
-                    return callback(child, i);
-                }
-            });
-        } else {
-            return this.walk(function (child, i) {
-                if (child.type === 'decl' && child.prop === prop) {
-                    return callback(child, i);
-                }
-            });
-        }
-    };
-
-    /**
-     * Traverses the container’s descendant nodes, calling callback
-     * for each rule node.
-     *
-     * If you pass a filter, iteration will only happen over rules
-     * with matching selectors.
-     *
-     * Like {@link Container#each}, this method is safe
-     * to use if you are mutating arrays during iteration.
-     *
-     * @param {string|RegExp} [selector] - string or regular expression
-     *                                     to filter rules by selector
-     * @param {childIterator} callback   - iterator receives each node and index
-     *
-     * @return {false|undefined} returns `false` if iteration was broke
-     *
-     * @example
-     * const selectors = [];
-     * root.walkRules(rule => {
-     *   selectors.push(rule.selector);
-     * });
-     * console.log(`Your CSS uses ${selectors.length} selectors`);
-     */
-
-
-    Container.prototype.walkRules = function walkRules(selector, callback) {
-        if (!callback) {
-            callback = selector;
-
-            return this.walk(function (child, i) {
-                if (child.type === 'rule') {
-                    return callback(child, i);
-                }
-            });
-        } else if (selector instanceof RegExp) {
-            return this.walk(function (child, i) {
-                if (child.type === 'rule' && selector.test(child.selector)) {
-                    return callback(child, i);
-                }
-            });
-        } else {
-            return this.walk(function (child, i) {
-                if (child.type === 'rule' && child.selector === selector) {
-                    return callback(child, i);
-                }
-            });
-        }
-    };
-
-    /**
-     * Traverses the container’s descendant nodes, calling callback
-     * for each at-rule node.
-     *
-     * If you pass a filter, iteration will only happen over at-rules
-     * that have matching names.
-     *
-     * Like {@link Container#each}, this method is safe
-     * to use if you are mutating arrays during iteration.
-     *
-     * @param {string|RegExp} [name]   - string or regular expression
-     *                                   to filter at-rules by name
-     * @param {childIterator} callback - iterator receives each node and index
-     *
-     * @return {false|undefined} returns `false` if iteration was broke
-     *
-     * @example
-     * root.walkAtRules(rule => {
-     *   if ( isOld(rule.name) ) rule.remove();
-     * });
-     *
-     * let first = false;
-     * root.walkAtRules('charset', rule => {
-     *   if ( !first ) {
-     *     first = true;
-     *   } else {
-     *     rule.remove();
-     *   }
-     * });
-     */
-
-
-    Container.prototype.walkAtRules = function walkAtRules(name, callback) {
-        if (!callback) {
-            callback = name;
-            return this.walk(function (child, i) {
-                if (child.type === 'atrule') {
-                    return callback(child, i);
-                }
-            });
-        } else if (name instanceof RegExp) {
-            return this.walk(function (child, i) {
-                if (child.type === 'atrule' && name.test(child.name)) {
-                    return callback(child, i);
-                }
-            });
-        } else {
-            return this.walk(function (child, i) {
-                if (child.type === 'atrule' && child.name === name) {
-                    return callback(child, i);
-                }
-            });
-        }
-    };
-
-    /**
-     * Traverses the container’s descendant nodes, calling callback
-     * for each comment node.
-     *
-     * Like {@link Container#each}, this method is safe
-     * to use if you are mutating arrays during iteration.
-     *
-     * @param {childIterator} callback - iterator receives each node and index
-     *
-     * @return {false|undefined} returns `false` if iteration was broke
-     *
-     * @example
-     * root.walkComments(comment => {
-     *   comment.remove();
-     * });
-     */
-
-
-    Container.prototype.walkComments = function walkComments(callback) {
-        return this.walk(function (child, i) {
-            if (child.type === 'comment') {
-                return callback(child, i);
-            }
-        });
-    };
-
-    /**
-     * Inserts new nodes to the end of the container.
-     *
-     * @param {...(Node|object|string|Node[])} children - new nodes
-     *
-     * @return {Node} this node for methods chain
-     *
-     * @example
-     * const decl1 = postcss.decl({ prop: 'color', value: 'black' });
-     * const decl2 = postcss.decl({ prop: 'background-color', value: 'white' });
-     * rule.append(decl1, decl2);
-     *
-     * root.append({ name: 'charset', params: '"UTF-8"' });  // at-rule
-     * root.append({ selector: 'a' });                       // rule
-     * rule.append({ prop: 'color', value: 'black' });       // declaration
-     * rule.append({ text: 'Comment' })                      // comment
-     *
-     * root.append('a {}');
-     * root.first.append('color: black; z-index: 1');
-     */
-
-
-    Container.prototype.append = function append() {
-        for (var _len = arguments.length, children = Array(_len), _key = 0; _key < _len; _key++) {
-            children[_key] = arguments[_key];
-        }
-
-        for (var _iterator = children, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref;
-
-            if (_isArray) {
-                if (_i >= _iterator.length) break;
-                _ref = _iterator[_i++];
-            } else {
-                _i = _iterator.next();
-                if (_i.done) break;
-                _ref = _i.value;
-            }
-
-            var child = _ref;
-
-            var nodes = this.normalize(child, this.last);
-            for (var _iterator2 = nodes, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-                var _ref2;
-
-                if (_isArray2) {
-                    if (_i2 >= _iterator2.length) break;
-                    _ref2 = _iterator2[_i2++];
-                } else {
-                    _i2 = _iterator2.next();
-                    if (_i2.done) break;
-                    _ref2 = _i2.value;
-                }
-
-                var node = _ref2;
-                this.nodes.push(node);
-            }
-        }
-        return this;
-    };
-
-    /**
-     * Inserts new nodes to the start of the container.
-     *
-     * @param {...(Node|object|string|Node[])} children - new nodes
-     *
-     * @return {Node} this node for methods chain
-     *
-     * @example
-     * const decl1 = postcss.decl({ prop: 'color', value: 'black' });
-     * const decl2 = postcss.decl({ prop: 'background-color', value: 'white' });
-     * rule.prepend(decl1, decl2);
-     *
-     * root.append({ name: 'charset', params: '"UTF-8"' });  // at-rule
-     * root.append({ selector: 'a' });                       // rule
-     * rule.append({ prop: 'color', value: 'black' });       // declaration
-     * rule.append({ text: 'Comment' })                      // comment
-     *
-     * root.append('a {}');
-     * root.first.append('color: black; z-index: 1');
-     */
-
-
-    Container.prototype.prepend = function prepend() {
-        for (var _len2 = arguments.length, children = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-            children[_key2] = arguments[_key2];
-        }
-
-        children = children.reverse();
-        for (var _iterator3 = children, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-            var _ref3;
-
-            if (_isArray3) {
-                if (_i3 >= _iterator3.length) break;
-                _ref3 = _iterator3[_i3++];
-            } else {
-                _i3 = _iterator3.next();
-                if (_i3.done) break;
-                _ref3 = _i3.value;
-            }
-
-            var child = _ref3;
-
-            var nodes = this.normalize(child, this.first, 'prepend').reverse();
-            for (var _iterator4 = nodes, _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-                var _ref4;
-
-                if (_isArray4) {
-                    if (_i4 >= _iterator4.length) break;
-                    _ref4 = _iterator4[_i4++];
-                } else {
-                    _i4 = _iterator4.next();
-                    if (_i4.done) break;
-                    _ref4 = _i4.value;
-                }
-
-                var node = _ref4;
-                this.nodes.unshift(node);
-            }for (var id in this.indexes) {
-                this.indexes[id] = this.indexes[id] + nodes.length;
-            }
-        }
-        return this;
-    };
-
-    Container.prototype.cleanRaws = function cleanRaws(keepBetween) {
-        _Node.prototype.cleanRaws.call(this, keepBetween);
-        if (this.nodes) {
-            for (var _iterator5 = this.nodes, _isArray5 = Array.isArray(_iterator5), _i5 = 0, _iterator5 = _isArray5 ? _iterator5 : _iterator5[Symbol.iterator]();;) {
-                var _ref5;
-
-                if (_isArray5) {
-                    if (_i5 >= _iterator5.length) break;
-                    _ref5 = _iterator5[_i5++];
-                } else {
-                    _i5 = _iterator5.next();
-                    if (_i5.done) break;
-                    _ref5 = _i5.value;
-                }
-
-                var node = _ref5;
-                node.cleanRaws(keepBetween);
-            }
-        }
-    };
-
-    /**
-     * Insert new node before old node within the container.
-     *
-     * @param {Node|number} exist             - child or child’s index.
-     * @param {Node|object|string|Node[]} add - new node
-     *
-     * @return {Node} this node for methods chain
-     *
-     * @example
-     * rule.insertBefore(decl, decl.clone({ prop: '-webkit-' + decl.prop }));
-     */
-
-
-    Container.prototype.insertBefore = function insertBefore(exist, add) {
-        exist = this.index(exist);
-
-        var type = exist === 0 ? 'prepend' : false;
-        var nodes = this.normalize(add, this.nodes[exist], type).reverse();
-        for (var _iterator6 = nodes, _isArray6 = Array.isArray(_iterator6), _i6 = 0, _iterator6 = _isArray6 ? _iterator6 : _iterator6[Symbol.iterator]();;) {
-            var _ref6;
-
-            if (_isArray6) {
-                if (_i6 >= _iterator6.length) break;
-                _ref6 = _iterator6[_i6++];
-            } else {
-                _i6 = _iterator6.next();
-                if (_i6.done) break;
-                _ref6 = _i6.value;
-            }
-
-            var node = _ref6;
-            this.nodes.splice(exist, 0, node);
-        }var index = void 0;
-        for (var id in this.indexes) {
-            index = this.indexes[id];
-            if (exist <= index) {
-                this.indexes[id] = index + nodes.length;
-            }
-        }
-
-        return this;
-    };
-
-    /**
-     * Insert new node after old node within the container.
-     *
-     * @param {Node|number} exist             - child or child’s index
-     * @param {Node|object|string|Node[]} add - new node
-     *
-     * @return {Node} this node for methods chain
-     */
-
-
-    Container.prototype.insertAfter = function insertAfter(exist, add) {
-        exist = this.index(exist);
-
-        var nodes = this.normalize(add, this.nodes[exist]).reverse();
-        for (var _iterator7 = nodes, _isArray7 = Array.isArray(_iterator7), _i7 = 0, _iterator7 = _isArray7 ? _iterator7 : _iterator7[Symbol.iterator]();;) {
-            var _ref7;
-
-            if (_isArray7) {
-                if (_i7 >= _iterator7.length) break;
-                _ref7 = _iterator7[_i7++];
-            } else {
-                _i7 = _iterator7.next();
-                if (_i7.done) break;
-                _ref7 = _i7.value;
-            }
-
-            var node = _ref7;
-            this.nodes.splice(exist + 1, 0, node);
-        }var index = void 0;
-        for (var id in this.indexes) {
-            index = this.indexes[id];
-            if (exist < index) {
-                this.indexes[id] = index + nodes.length;
-            }
-        }
-
-        return this;
-    };
-
-    /**
-     * Removes node from the container and cleans the parent properties
-     * from the node and its children.
-     *
-     * @param {Node|number} child - child or child’s index
-     *
-     * @return {Node} this node for methods chain
-     *
-     * @example
-     * rule.nodes.length  //=> 5
-     * rule.removeChild(decl);
-     * rule.nodes.length  //=> 4
-     * decl.parent        //=> undefined
-     */
-
-
-    Container.prototype.removeChild = function removeChild(child) {
-        child = this.index(child);
-        this.nodes[child].parent = undefined;
-        this.nodes.splice(child, 1);
-
-        var index = void 0;
-        for (var id in this.indexes) {
-            index = this.indexes[id];
-            if (index >= child) {
-                this.indexes[id] = index - 1;
-            }
-        }
-
-        return this;
-    };
-
-    /**
-     * Removes all children from the container
-     * and cleans their parent properties.
-     *
-     * @return {Node} this node for methods chain
-     *
-     * @example
-     * rule.removeAll();
-     * rule.nodes.length //=> 0
-     */
-
-
-    Container.prototype.removeAll = function removeAll() {
-        for (var _iterator8 = this.nodes, _isArray8 = Array.isArray(_iterator8), _i8 = 0, _iterator8 = _isArray8 ? _iterator8 : _iterator8[Symbol.iterator]();;) {
-            var _ref8;
-
-            if (_isArray8) {
-                if (_i8 >= _iterator8.length) break;
-                _ref8 = _iterator8[_i8++];
-            } else {
-                _i8 = _iterator8.next();
-                if (_i8.done) break;
-                _ref8 = _i8.value;
-            }
-
-            var node = _ref8;
-            node.parent = undefined;
-        }this.nodes = [];
-        return this;
-    };
-
-    /**
-     * Passes all declaration values within the container that match pattern
-     * through callback, replacing those values with the returned result
-     * of callback.
-     *
-     * This method is useful if you are using a custom unit or function
-     * and need to iterate through all values.
-     *
-     * @param {string|RegExp} pattern      - replace pattern
-     * @param {object} opts                - options to speed up the search
-     * @param {string|string[]} opts.props - an array of property names
-     * @param {string} opts.fast           - string that’s used
-     *                                       to narrow down values and speed up
-                                             the regexp search
-     * @param {function|string} callback   - string to replace pattern
-     *                                       or callback that returns a new
-     *                                       value.
-     *                                       The callback will receive
-     *                                       the same arguments as those
-     *                                       passed to a function parameter
-     *                                       of `String#replace`.
-     *
-     * @return {Node} this node for methods chain
-     *
-     * @example
-     * root.replaceValues(/\d+rem/, { fast: 'rem' }, string => {
-     *   return 15 * parseInt(string) + 'px';
-     * });
-     */
-
-
-    Container.prototype.replaceValues = function replaceValues(pattern, opts, callback) {
-        if (!callback) {
-            callback = opts;
-            opts = {};
-        }
-
-        this.walkDecls(function (decl) {
-            if (opts.props && opts.props.indexOf(decl.prop) === -1) return;
-            if (opts.fast && decl.value.indexOf(opts.fast) === -1) return;
-
-            decl.value = decl.value.replace(pattern, callback);
-        });
-
-        return this;
-    };
-
-    /**
-     * Returns `true` if callback returns `true`
-     * for all of the container’s children.
-     *
-     * @param {childCondition} condition - iterator returns true or false.
-     *
-     * @return {boolean} is every child pass condition
-     *
-     * @example
-     * const noPrefixes = rule.every(i => i.prop[0] !== '-');
-     */
-
-
-    Container.prototype.every = function every(condition) {
-        return this.nodes.every(condition);
-    };
-
-    /**
-     * Returns `true` if callback returns `true` for (at least) one
-     * of the container’s children.
-     *
-     * @param {childCondition} condition - iterator returns true or false.
-     *
-     * @return {boolean} is some child pass condition
-     *
-     * @example
-     * const hasPrefix = rule.some(i => i.prop[0] === '-');
-     */
-
-
-    Container.prototype.some = function some(condition) {
-        return this.nodes.some(condition);
-    };
-
-    /**
-     * Returns a `child`’s index within the {@link Container#nodes} array.
-     *
-     * @param {Node} child - child of the current container.
-     *
-     * @return {number} child index
-     *
-     * @example
-     * rule.index( rule.nodes[2] ) //=> 2
-     */
-
-
-    Container.prototype.index = function index(child) {
-        if (typeof child === 'number') {
-            return child;
-        } else {
-            return this.nodes.indexOf(child);
-        }
-    };
-
-    /**
-     * The container’s first child.
-     *
-     * @type {Node}
-     *
-     * @example
-     * rule.first == rules.nodes[0];
-     */
-
-
-    Container.prototype.normalize = function normalize(nodes, sample) {
-        var _this2 = this;
-
-        if (typeof nodes === 'string') {
-            var parse = require(487);
-            nodes = cleanSource(parse(nodes).nodes);
-        } else if (Array.isArray(nodes)) {
-            nodes = nodes.slice(0);
-            for (var _iterator9 = nodes, _isArray9 = Array.isArray(_iterator9), _i9 = 0, _iterator9 = _isArray9 ? _iterator9 : _iterator9[Symbol.iterator]();;) {
-                var _ref9;
-
-                if (_isArray9) {
-                    if (_i9 >= _iterator9.length) break;
-                    _ref9 = _iterator9[_i9++];
-                } else {
-                    _i9 = _iterator9.next();
-                    if (_i9.done) break;
-                    _ref9 = _i9.value;
-                }
-
-                var i = _ref9;
-
-                if (i.parent) i.parent.removeChild(i, 'ignore');
-            }
-        } else if (nodes.type === 'root') {
-            nodes = nodes.nodes.slice(0);
-            for (var _iterator10 = nodes, _isArray10 = Array.isArray(_iterator10), _i11 = 0, _iterator10 = _isArray10 ? _iterator10 : _iterator10[Symbol.iterator]();;) {
-                var _ref10;
-
-                if (_isArray10) {
-                    if (_i11 >= _iterator10.length) break;
-                    _ref10 = _iterator10[_i11++];
-                } else {
-                    _i11 = _iterator10.next();
-                    if (_i11.done) break;
-                    _ref10 = _i11.value;
-                }
-
-                var _i10 = _ref10;
-
-                if (_i10.parent) _i10.parent.removeChild(_i10, 'ignore');
-            }
-        } else if (nodes.type) {
-            nodes = [nodes];
-        } else if (nodes.prop) {
-            if (typeof nodes.value === 'undefined') {
-                throw new Error('Value field is missed in node creation');
-            } else if (typeof nodes.value !== 'string') {
-                nodes.value = String(nodes.value);
-            }
-            nodes = [new _declaration2.default(nodes)];
-        } else if (nodes.selector) {
-            var Rule = require(488);
-            nodes = [new Rule(nodes)];
-        } else if (nodes.name) {
-            var AtRule = require(482);
-            nodes = [new AtRule(nodes)];
-        } else if (nodes.text) {
-            nodes = [new _comment2.default(nodes)];
-        } else {
-            throw new Error('Unknown node type in node creation');
-        }
-
-        var processed = nodes.map(function (i) {
-            if (typeof i.before !== 'function') i = _this2.rebuild(i);
-
-            if (i.parent) i.parent.removeChild(i);
-            if (typeof i.raws.before === 'undefined') {
-                if (sample && typeof sample.raws.before !== 'undefined') {
-                    i.raws.before = sample.raws.before.replace(/[^\s]/g, '');
-                }
-            }
-            i.parent = _this2;
-            return i;
-        });
-
-        return processed;
-    };
-
-    Container.prototype.rebuild = function rebuild(node, parent) {
-        var _this3 = this;
-
-        var fix = void 0;
-        if (node.type === 'root') {
-            var Root = require(489);
-            fix = new Root();
-        } else if (node.type === 'atrule') {
-            var AtRule = require(482);
-            fix = new AtRule();
-        } else if (node.type === 'rule') {
-            var Rule = require(488);
-            fix = new Rule();
-        } else if (node.type === 'decl') {
-            fix = new _declaration2.default();
-        } else if (node.type === 'comment') {
-            fix = new _comment2.default();
-        }
-
-        for (var i in node) {
-            if (i === 'nodes') {
-                fix.nodes = node.nodes.map(function (j) {
-                    return _this3.rebuild(j, fix);
-                });
-            } else if (i === 'parent' && parent) {
-                fix.parent = parent;
-            } else if (node.hasOwnProperty(i)) {
-                fix[i] = node[i];
-            }
-        }
-
-        return fix;
-    };
-
-    /**
-     * @memberof Container#
-     * @member {Node[]} nodes - an array containing the container’s children
-     *
-     * @example
-     * const root = postcss.parse('a { color: black }');
-     * root.nodes.length           //=> 1
-     * root.nodes[0].selector      //=> 'a'
-     * root.nodes[0].nodes[0].prop //=> 'color'
-     */
-
-    _createClass(Container, [{
-        key: 'first',
-        get: function get() {
-            if (!this.nodes) return undefined;
-            return this.nodes[0];
-        }
-
-        /**
-         * The container’s last child.
-         *
-         * @type {Node}
-         *
-         * @example
-         * rule.last == rule.nodes[rule.nodes.length - 1];
-         */
-
-    }, {
-        key: 'last',
-        get: function get() {
-            if (!this.nodes) return undefined;
-            return this.nodes[this.nodes.length - 1];
-        }
-    }]);
-
-    return Container;
-}(_node2.default);
-
-exports.default = Container;
-
-/**
- * @callback childCondition
- * @param {Node} node    - container child
- * @param {number} index - child index
- * @param {Node[]} nodes - all container children
- * @return {boolean}
- */
-
-/**
- * @callback childIterator
- * @param {Node} node    - container child
- * @param {number} index - child index
- * @return {false|undefined} returning `false` will break iteration
- */
-
-module.exports = exports['default'];
-
-}, {"482":482,"484":484,"485":485,"486":486,"487":487,"488":488,"489":489}];
-window.modules["490"] = [function(require,module,exports){'use strict';
-
-exports.__esModule = true;
-
-var _supportsColor = require(2);
-
-var _supportsColor2 = _interopRequireDefault(_supportsColor);
-
-var _chalk = require(2);
-
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _terminalHighlight = require(491);
-
-var _terminalHighlight2 = _interopRequireDefault(_terminalHighlight);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * The CSS parser throws this error for broken CSS.
- *
- * Custom parsers can throw this error for broken custom syntax using
- * the {@link Node#error} method.
- *
- * PostCSS will use the input source map to detect the original error location.
- * If you wrote a Sass file, compiled it to CSS and then parsed it with PostCSS,
- * PostCSS will show the original position in the Sass file.
- *
- * If you need the position in the PostCSS input
- * (e.g., to debug the previous compiler), use `error.input.file`.
- *
- * @example
- * // Catching and checking syntax error
- * try {
- *   postcss.parse('a{')
- * } catch (error) {
- *   if ( error.name === 'CssSyntaxError' ) {
- *     error //=> CssSyntaxError
- *   }
- * }
- *
- * @example
- * // Raising error from plugin
- * throw node.error('Unknown variable', { plugin: 'postcss-vars' });
- */
-var CssSyntaxError = function () {
-
-    /**
-     * @param {string} message  - error message
-     * @param {number} [line]   - source line of the error
-     * @param {number} [column] - source column of the error
-     * @param {string} [source] - source code of the broken file
-     * @param {string} [file]   - absolute path to the broken file
-     * @param {string} [plugin] - PostCSS plugin name, if error came from plugin
-     */
-    function CssSyntaxError(message, line, column, source, file, plugin) {
-        _classCallCheck(this, CssSyntaxError);
-
-        /**
-         * @member {string} - Always equal to `'CssSyntaxError'`. You should
-         *                    always check error type
-         *                    by `error.name === 'CssSyntaxError'` instead of
-         *                    `error instanceof CssSyntaxError`, because
-         *                    npm could have several PostCSS versions.
-         *
-         * @example
-         * if ( error.name === 'CssSyntaxError' ) {
-         *   error //=> CssSyntaxError
-         * }
-         */
-        this.name = 'CssSyntaxError';
-        /**
-         * @member {string} - Error message.
-         *
-         * @example
-         * error.message //=> 'Unclosed block'
-         */
-        this.reason = message;
-
-        if (file) {
-            /**
-             * @member {string} - Absolute path to the broken file.
-             *
-             * @example
-             * error.file       //=> 'a.sass'
-             * error.input.file //=> 'a.css'
-             */
-            this.file = file;
-        }
-        if (source) {
-            /**
-             * @member {string} - Source code of the broken file.
-             *
-             * @example
-             * error.source       //=> 'a { b {} }'
-             * error.input.column //=> 'a b { }'
-             */
-            this.source = source;
-        }
-        if (plugin) {
-            /**
-             * @member {string} - Plugin name, if error came from plugin.
-             *
-             * @example
-             * error.plugin //=> 'postcss-vars'
-             */
-            this.plugin = plugin;
-        }
-        if (typeof line !== 'undefined' && typeof column !== 'undefined') {
-            /**
-             * @member {number} - Source line of the error.
-             *
-             * @example
-             * error.line       //=> 2
-             * error.input.line //=> 4
-             */
-            this.line = line;
-            /**
-             * @member {number} - Source column of the error.
-             *
-             * @example
-             * error.column       //=> 1
-             * error.input.column //=> 4
-             */
-            this.column = column;
-        }
-
-        this.setMessage();
-
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, CssSyntaxError);
-        }
-    }
-
-    CssSyntaxError.prototype.setMessage = function setMessage() {
-        /**
-         * @member {string} - Full error text in the GNU error format
-         *                    with plugin, file, line and column.
-         *
-         * @example
-         * error.message //=> 'a.css:1:1: Unclosed block'
-         */
-        this.message = this.plugin ? this.plugin + ': ' : '';
-        this.message += this.file ? this.file : '<css input>';
-        if (typeof this.line !== 'undefined') {
-            this.message += ':' + this.line + ':' + this.column;
-        }
-        this.message += ': ' + this.reason;
-    };
-
-    /**
-     * Returns a few lines of CSS source that caused the error.
-     *
-     * If the CSS has an input source map without `sourceContent`,
-     * this method will return an empty string.
-     *
-     * @param {boolean} [color] whether arrow will be colored red by terminal
-     *                          color codes. By default, PostCSS will detect
-     *                          color support by `process.stdout.isTTY`
-     *                          and `window.process.env.NODE_DISABLE_COLORS`.
-     *
-     * @example
-     * error.showSourceCode() //=> "  4 | }
-     *                        //      5 | a {
-     *                        //    > 6 |   bad
-     *                        //        |   ^
-     *                        //      7 | }
-     *                        //      8 | b {"
-     *
-     * @return {string} few lines of CSS source that caused the error
-     */
-
-
-    CssSyntaxError.prototype.showSourceCode = function showSourceCode(color) {
-        var _this = this;
-
-        if (!this.source) return '';
-
-        var css = this.source;
-        if (typeof color === 'undefined') color = _supportsColor2.default.stdout;
-        if (color) css = (0, _terminalHighlight2.default)(css);
-
-        var lines = css.split(/\r?\n/);
-        var start = Math.max(this.line - 3, 0);
-        var end = Math.min(this.line + 2, lines.length);
-
-        var maxWidth = String(end).length;
-
-        function mark(text) {
-            if (color && _chalk2.default.red) {
-                return _chalk2.default.red.bold(text);
-            } else {
-                return text;
-            }
-        }
-        function aside(text) {
-            if (color && _chalk2.default.gray) {
-                return _chalk2.default.gray(text);
-            } else {
-                return text;
-            }
-        }
-
-        return lines.slice(start, end).map(function (line, index) {
-            var number = start + 1 + index;
-            var gutter = ' ' + (' ' + number).slice(-maxWidth) + ' | ';
-            if (number === _this.line) {
-                var spacing = aside(gutter.replace(/\d/g, ' ')) + line.slice(0, _this.column - 1).replace(/[^\t]/g, ' ');
-                return mark('>') + aside(gutter) + line + '\n ' + spacing + mark('^');
-            } else {
-                return ' ' + aside(gutter) + line;
-            }
-        }).join('\n');
-    };
-
-    /**
-     * Returns error position, message and source code of the broken part.
-     *
-     * @example
-     * error.toString() //=> "CssSyntaxError: app.css:1:1: Unclosed block
-     *                  //    > 1 | a {
-     *                  //        | ^"
-     *
-     * @return {string} error position, message and source code
-     */
-
-
-    CssSyntaxError.prototype.toString = function toString() {
-        var code = this.showSourceCode();
-        if (code) {
-            code = '\n\n' + code + '\n';
-        }
-        return this.name + ': ' + this.message + code;
-    };
-
-    /**
-     * @memberof CssSyntaxError#
-     * @member {Input} input - Input object with PostCSS internal information
-     *                         about input file. If input has source map
-     *                         from previous tool, PostCSS will use origin
-     *                         (for example, Sass) source. You can use this
-     *                         object to get PostCSS input source.
-     *
-     * @example
-     * error.input.file //=> 'a.css'
-     * error.file       //=> 'a.sass'
-     */
-
-    return CssSyntaxError;
-}();
-
-exports.default = CssSyntaxError;
-module.exports = exports['default'];
-
-}, {"2":2,"491":491}];
-window.modules["486"] = [function(require,module,exports){'use strict';
-
-exports.__esModule = true;
-
-var _node = require(485);
+var _node = require(482);
 
 var _node2 = _interopRequireDefault(_node);
 
@@ -9032,12 +8847,12 @@ var Declaration = function (_Node) {
 exports.default = Declaration;
 module.exports = exports['default'];
 
-}, {"485":485}];
-window.modules["514"] = [function(require,module,exports){'use strict';
+}, {"482":482}];
+window.modules["511"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _container = require(515);
+var _container = require(512);
 
 var _container2 = _interopRequireDefault(_container);
 
@@ -9164,12 +8979,12 @@ var AtRule = function (_Container) {
 exports.default = AtRule;
 module.exports = exports['default'];
 
-}, {"515":515}];
-window.modules["516"] = [function(require,module,exports){'use strict';
+}, {"512":512}];
+window.modules["513"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(517);
+var _node = require(514);
 
 var _node2 = _interopRequireDefault(_node);
 
@@ -9226,22 +9041,22 @@ var Comment = function (_Node) {
 exports.default = Comment;
 module.exports = exports['default'];
 
-}, {"517":517}];
-window.modules["515"] = [function(require,module,exports){'use strict';
+}, {"514":514}];
+window.modules["512"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _declaration = require(518);
+var _declaration = require(516);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
-var _comment = require(516);
+var _comment = require(513);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _node = require(517);
+var _node = require(514);
 
 var _node2 = _interopRequireDefault(_node);
 
@@ -9968,7 +9783,7 @@ var Container = function (_Node) {
         var _this2 = this;
 
         if (typeof nodes === 'string') {
-            var parse = require(520);
+            var parse = require(517);
             nodes = cleanSource(parse(nodes).nodes);
         } else if (Array.isArray(nodes)) {
             nodes = nodes.slice(0);
@@ -10016,10 +9831,10 @@ var Container = function (_Node) {
             }
             nodes = [new _declaration2.default(nodes)];
         } else if (nodes.selector) {
-            var Rule = require(519);
+            var Rule = require(515);
             nodes = [new Rule(nodes)];
         } else if (nodes.name) {
-            var AtRule = require(514);
+            var AtRule = require(511);
             nodes = [new AtRule(nodes)];
         } else if (nodes.text) {
             nodes = [new _comment2.default(nodes)];
@@ -10048,13 +9863,13 @@ var Container = function (_Node) {
 
         var fix = void 0;
         if (node.type === 'root') {
-            var Root = require(521);
+            var Root = require(518);
             fix = new Root();
         } else if (node.type === 'atrule') {
-            var AtRule = require(514);
+            var AtRule = require(511);
             fix = new AtRule();
         } else if (node.type === 'rule') {
-            var Rule = require(519);
+            var Rule = require(515);
             fix = new Rule();
         } else if (node.type === 'decl') {
             fix = new _declaration2.default();
@@ -10134,20 +9949,20 @@ exports.default = Container;
 
 module.exports = exports['default'];
 
-}, {"514":514,"516":516,"517":517,"518":518,"519":519,"520":520,"521":521}];
-window.modules["522"] = [function(require,module,exports){'use strict';
+}, {"511":511,"513":513,"514":514,"515":515,"516":516,"517":517,"518":518}];
+window.modules["519"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _supportsColor = require(2);
+var _supportsColor = require(19);
 
 var _supportsColor2 = _interopRequireDefault(_supportsColor);
 
-var _chalk = require(2);
+var _chalk = require(19);
 
 var _chalk2 = _interopRequireDefault(_chalk);
 
-var _terminalHighlight = require(523);
+var _terminalHighlight = require(520);
 
 var _terminalHighlight2 = _interopRequireDefault(_terminalHighlight);
 
@@ -10391,12 +10206,12 @@ var CssSyntaxError = function () {
 exports.default = CssSyntaxError;
 module.exports = exports['default'];
 
-}, {"2":2,"523":523}];
-window.modules["518"] = [function(require,module,exports){'use strict';
+}, {"19":19,"520":520}];
+window.modules["516"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(517);
+var _node = require(514);
 
 var _node2 = _interopRequireDefault(_node);
 
@@ -10493,13 +10308,13 @@ var Declaration = function (_Node) {
 exports.default = Declaration;
 module.exports = exports['default'];
 
-}, {"517":517}];
-window.modules["538"] = [function(require,module,exports){"use strict";
+}, {"514":514}];
+window.modules["535"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _container = _interopRequireDefault(require(539));
+var _container = _interopRequireDefault(require(536));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -10623,13 +10438,13 @@ var _default = AtRule;
 exports.default = _default;
 module.exports = exports.default;
 
-}, {"539":539}];
-window.modules["510"] = [function(require,module,exports){"use strict";
+}, {"536":536}];
+window.modules["507"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _node = _interopRequireDefault(require(540));
+var _node = _interopRequireDefault(require(537));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -10681,17 +10496,17 @@ var _default = Comment;
 exports.default = _default;
 module.exports = exports.default;
 
-}, {"540":540}];
-window.modules["539"] = [function(require,module,exports){"use strict";
+}, {"537":537}];
+window.modules["536"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _declaration = _interopRequireDefault(require(543));
+var _declaration = _interopRequireDefault(require(538));
 
-var _comment = _interopRequireDefault(require(510));
+var _comment = _interopRequireDefault(require(507));
 
-var _node = _interopRequireDefault(require(540));
+var _node = _interopRequireDefault(require(537));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11417,7 +11232,7 @@ function (_Node) {
     var _this = this;
 
     if (typeof nodes === 'string') {
-      var parse = require(541);
+      var parse = require(539);
 
       nodes = cleanSource(parse(nodes).nodes);
     } else if (Array.isArray(nodes)) {
@@ -11467,11 +11282,11 @@ function (_Node) {
 
       nodes = [new _declaration.default(nodes)];
     } else if (nodes.selector) {
-      var Rule = require(542);
+      var Rule = require(540);
 
       nodes = [new Rule(nodes)];
     } else if (nodes.name) {
-      var AtRule = require(538);
+      var AtRule = require(535);
 
       nodes = [new AtRule(nodes)];
     } else if (nodes.text) {
@@ -11551,17 +11366,17 @@ var _default = Container;
 exports.default = _default;
 module.exports = exports.default;
 
-}, {"510":510,"538":538,"540":540,"541":541,"542":542,"543":543}];
-window.modules["544"] = [function(require,module,exports){"use strict";
+}, {"507":507,"535":535,"537":537,"538":538,"539":539,"540":540}];
+window.modules["541"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _supportsColor = _interopRequireDefault(require(2));
+var _supportsColor = _interopRequireDefault(require(19));
 
-var _chalk = _interopRequireDefault(require(2));
+var _chalk = _interopRequireDefault(require(19));
 
-var _terminalHighlight = _interopRequireDefault(require(2));
+var _terminalHighlight = _interopRequireDefault(require(19));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11852,13 +11667,13 @@ var _default = CssSyntaxError;
 exports.default = _default;
 module.exports = exports.default;
 
-}, {"2":2}];
-window.modules["543"] = [function(require,module,exports){"use strict";
+}, {"19":19}];
+window.modules["538"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _node = _interopRequireDefault(require(540));
+var _node = _interopRequireDefault(require(537));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11951,15 +11766,200 @@ var _default = Declaration;
 exports.default = _default;
 module.exports = exports.default;
 
-}, {"540":540}];
-window.modules["560"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+}, {"537":537}];
+window.modules["382"] = [function(require,module,exports){// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+}, {}];
+window.modules["558"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = require(561);
+var util = require(559);
 var has = Object.prototype.hasOwnProperty;
 var hasNativeMap = typeof Map !== "undefined";
 
@@ -12073,8 +12073,8 @@ ArraySet.prototype.toArray = function ArraySet_toArray() {
 };
 
 exports.ArraySet = ArraySet;
-}, {"561":561}];
-window.modules["562"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+}, {"559":559}];
+window.modules["560"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
@@ -12111,7 +12111,7 @@ window.modules["562"] = [function(require,module,exports){/* -*- Mode: js; js-in
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var base64 = require(563);
+var base64 = require(561);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -12214,8 +12214,8 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
   aOutParam.value = fromVLQSigned(result);
   aOutParam.rest = aIndex;
 };
-}, {"563":563}];
-window.modules["563"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+}, {"561":561}];
+window.modules["561"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
@@ -12283,7 +12283,7 @@ exports.decode = function (charCode) {
   return -1;
 };
 }, {}];
-window.modules["564"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
+window.modules["562"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE or:
@@ -12395,8 +12395,8 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
   return index;
 };
 }, {}];
-window.modules["574"] = [function(require,module,exports){var trim = require(576);
-var decap = require(575);
+window.modules["572"] = [function(require,module,exports){var trim = require(573);
+var decap = require(574);
 
 module.exports = function camelize(str, decapitalize) {
   str = trim(str).replace(/[-_\s]+(.)?/g, function(match, c) {
@@ -12409,8 +12409,8 @@ module.exports = function camelize(str, decapitalize) {
     return str;
   }
 };
-}, {"575":575,"576":576}];
-window.modules["577"] = [function(require,module,exports){var makeString = require(578);
+}, {"573":573,"574":574}];
+window.modules["575"] = [function(require,module,exports){var makeString = require(576);
 
 module.exports = function capitalize(str, lowercaseRest) {
   str = makeString(str);
@@ -12418,37 +12418,37 @@ module.exports = function capitalize(str, lowercaseRest) {
 
   return str.charAt(0).toUpperCase() + remainingChars;
 };
-}, {"578":578}];
-window.modules["579"] = [function(require,module,exports){var makeString = require(578);
+}, {"576":576}];
+window.modules["577"] = [function(require,module,exports){var makeString = require(576);
 
 module.exports = function chars(str) {
   return makeString(str).split('');
 };
-}, {"578":578}];
-window.modules["580"] = [function(require,module,exports){module.exports = function chop(str, step) {
+}, {"576":576}];
+window.modules["578"] = [function(require,module,exports){module.exports = function chop(str, step) {
   if (str == null) return [];
   str = String(str);
   step = ~~step;
   return step > 0 ? str.match(new RegExp('.{1,' + step + '}', 'g')) : [str];
 };
 }, {}];
-window.modules["581"] = [function(require,module,exports){var capitalize = require(577);
-var camelize = require(574);
-var makeString = require(578);
+window.modules["579"] = [function(require,module,exports){var capitalize = require(575);
+var camelize = require(572);
+var makeString = require(576);
 
 module.exports = function classify(str) {
   str = makeString(str);
   return capitalize(camelize(str.replace(/[\W_]/g, ' ')).replace(/\s/g, ''));
 };
-}, {"574":574,"577":577,"578":578}];
-window.modules["582"] = [function(require,module,exports){var trim = require(576);
+}, {"572":572,"575":575,"576":576}];
+window.modules["580"] = [function(require,module,exports){var trim = require(573);
 
 module.exports = function clean(str) {
   return trim(str).replace(/\s\s+/g, ' ');
 };
-}, {"576":576}];
-window.modules["583"] = [function(require,module,exports){
-var makeString = require(578);
+}, {"573":573}];
+window.modules["581"] = [function(require,module,exports){
+var makeString = require(576);
 
 var from  = 'ąàáäâãåæăćčĉęèéëêĝĥìíïîĵłľńňòóöőôõðøśșşšŝťțţŭùúüűûñÿýçżźž',
   to    = 'aaaaaaaaaccceeeeeghiiiijllnnoooooooossssstttuuuuuunyyczzz';
@@ -12469,8 +12469,8 @@ module.exports = function cleanDiacritics(str) {
     return index === -1 ? c : to[index];
   });
 };
-}, {"578":578}];
-window.modules["584"] = [function(require,module,exports){var makeString = require(578);
+}, {"576":576}];
+window.modules["582"] = [function(require,module,exports){var makeString = require(576);
 
 module.exports = function(str, substr) {
   str = makeString(str);
@@ -12480,21 +12480,21 @@ module.exports = function(str, substr) {
   
   return str.split(substr).length - 1;
 };
-}, {"578":578}];
-window.modules["585"] = [function(require,module,exports){var trim = require(576);
+}, {"576":576}];
+window.modules["583"] = [function(require,module,exports){var trim = require(573);
 
 module.exports = function dasherize(str) {
   return trim(str).replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
 };
-}, {"576":576}];
-window.modules["575"] = [function(require,module,exports){var makeString = require(578);
+}, {"573":573}];
+window.modules["574"] = [function(require,module,exports){var makeString = require(576);
 
 module.exports = function decapitalize(str) {
   str = makeString(str);
   return str.charAt(0).toLowerCase() + str.slice(1);
 };
-}, {"578":578}];
-window.modules["586"] = [function(require,module,exports){var makeString = require(578);
+}, {"576":576}];
+window.modules["584"] = [function(require,module,exports){var makeString = require(576);
 
 function getIndent(str) {
   var matches = str.match(/^[\s\\t]*/gm);
@@ -12522,8 +12522,8 @@ module.exports = function dedent(str, pattern) {
 
   return str.replace(reg, '');
 };
-}, {"578":578}];
-window.modules["592"] = [function(require,module,exports){var makeString = require(578);
+}, {"576":576}];
+window.modules["590"] = [function(require,module,exports){var makeString = require(576);
 
 module.exports = function adjacent(str, direction) {
   str = makeString(str);
@@ -12532,8 +12532,8 @@ module.exports = function adjacent(str, direction) {
   }
   return str.slice(0, -1) + String.fromCharCode(str.charCodeAt(str.length - 1) + direction);
 };
-}, {"578":578}];
-window.modules["593"] = [function(require,module,exports){var escapeRegExp = require(594);
+}, {"576":576}];
+window.modules["591"] = [function(require,module,exports){var escapeRegExp = require(592);
 
 module.exports = function defaultToWhiteSpace(characters) {
   if (characters == null)
@@ -12543,8 +12543,8 @@ module.exports = function defaultToWhiteSpace(characters) {
   else
     return '[' + escapeRegExp(characters) + ']';
 };
-}, {"594":594}];
-window.modules["643"] = [function(require,module,exports){(function (global){
+}, {"592":592}];
+window.modules["641"] = [function(require,module,exports){(function (global){
 
 /**
  * Module exports.
@@ -12614,9 +12614,9 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})}, {}];
-window.modules["648"] = [function(require,module,exports){'use strict';
+window.modules["647"] = [function(require,module,exports){'use strict';
 
-var moment = require(385);
+var moment = require(380);
 
 function getPrettyMonthAbrev(month) {
   switch (month) {
@@ -12656,13 +12656,13 @@ module.exports = function (date) {
     return "".concat(getPrettyMonthAbrev(mDate.format('MMM')), " ").concat(mDate.format('D, YYYY'));
   }
 };
-}, {"385":385}];
-window.modules["649"] = [function(require,module,exports){'use strict';
+}, {"380":380}];
+window.modules["648"] = [function(require,module,exports){'use strict';
 
-var _get = require(15),
-    _join = require(378),
-    _map = require(30),
-    _isObject = require(25);
+var _get = require(2),
+    _join = require(373),
+    _map = require(17),
+    _isObject = require(12);
 /**
  * Comma separate a list of author strings
  * or simple-list objects
@@ -12692,10 +12692,10 @@ function formatSimpleByline() {
 }
 
 module.exports = formatSimpleByline;
-}, {"15":15,"25":25,"30":30,"378":378}];
-window.modules["650"] = [function(require,module,exports){'use strict';
+}, {"2":2,"12":12,"17":17,"373":373}];
+window.modules["649"] = [function(require,module,exports){'use strict';
 
-var _includes = require(28);
+var _includes = require(15);
 
 function isVideo(contentData) {
   return contentData.featureTypes && (contentData.featureTypes['Video-Original'] || contentData.featureTypes['Video-Aggregation'] || contentData.featureTypes['Video-Original News']);
@@ -12718,4 +12718,4 @@ function getCalloutType(contentData) {
 }
 
 module.exports = getCalloutType;
-}, {"28":28}];
+}, {"15":15}];

@@ -1,31 +1,21 @@
-window.modules["325"] = [function(require,module,exports){var isPrototype = require(326),
-    nativeKeys = require(327);
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
+window.modules["325"] = [function(require,module,exports){/**
+ * A specialized version of `matchesProperty` for source values suitable
+ * for strict equality comparisons, i.e. `===`.
  *
  * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names.
+ * @param {string} key The key of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
  */
-function baseKeys(object) {
-  if (!isPrototype(object)) {
-    return nativeKeys(object);
-  }
-  var result = [];
-  for (var key in Object(object)) {
-    if (hasOwnProperty.call(object, key) && key != 'constructor') {
-      result.push(key);
+function matchesStrictComparable(key, srcValue) {
+  return function(object) {
+    if (object == null) {
+      return false;
     }
-  }
-  return result;
+    return object[key] === srcValue &&
+      (srcValue !== undefined || (key in Object(object)));
+  };
 }
 
-module.exports = baseKeys;
-}, {"326":326,"327":327}];
+module.exports = matchesStrictComparable;
+}, {}];
