@@ -1,6 +1,6 @@
 window.modules["309"] = [function(require,module,exports){var isFunction = require(310),
     isMasked = require(312),
-    isObject = require(12),
+    isObject = require(11),
     toSource = require(311);
 
 /**
@@ -45,4 +45,4 @@ function baseIsNative(value) {
 }
 
 module.exports = baseIsNative;
-}, {"12":12,"310":310,"311":311,"312":312}];
+}, {"11":11,"310":310,"311":311,"312":312}];

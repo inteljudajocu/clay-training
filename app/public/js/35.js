@@ -1,15 +1,15 @@
 window.modules["35"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(50);
+const getComponentName = require(40),
+  { strCheck } = require(50);
 
-/**
- * First test if argument is a String. If true, test if '@published' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
- */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
-  return uri.indexOf('@published') !== -1;
+module.exports = (page, componentName) => {
+  strCheck(componentName);
+
+  if (typeof page !== 'object') {
+    throw new Error(`Page argument must be an object, not ${typeof page}`);
+  }
+
+  return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
 };
-}, {"50":50}];
+}, {"40":40,"50":50}];

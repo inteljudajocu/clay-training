@@ -1,4 +1,4 @@
-window.modules["101"] = [function(require,module,exports){var CDC = require(75).TYPE.CDC;
+window.modules["101"] = [function(require,module,exports){var CDC = require(74).TYPE.CDC;
 
 module.exports = {
     name: 'CDC',
@@ -17,4 +17,4 @@ module.exports = {
         processChunk('-->');
     }
 };
-}, {"75":75}];
+}, {"74":74}];

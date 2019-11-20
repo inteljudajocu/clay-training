@@ -66,6 +66,8 @@ content:
       - code-sample
       - direcctions
       - title-ingridients
+      - explore
+      - recipe
 
 ledeUrl:
   _label: Lede Image URL

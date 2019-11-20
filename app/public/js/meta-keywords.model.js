@@ -1,8 +1,8 @@
 window.modules["meta-keywords.model"] = [function(require,module,exports){'use strict';
 
 var _isEmpty = require(13),
-    _isObject = require(12),
-    _head = require(11);
+    _isObject = require(11),
+    _head = require(12);
 
 module.exports.save = function (ref, data) {
   // convert array of {text: string} objects into regular array of strings

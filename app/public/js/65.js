@@ -1,516 +1,222 @@
 window.modules["65"] = [function(require,module,exports){'use strict';
 
-var names = require(60);
-var MULTIPLIER_DEFAULT = {
-    comma: false,
-    min: 1,
-    max: 1
+var names = require(61);
+
+// https://www.w3.org/TR/css-values-3/#lengths
+var LENGTH = {
+    // absolute length units
+    'px': true,
+    'mm': true,
+    'cm': true,
+    'in': true,
+    'pt': true,
+    'pc': true,
+    'q': true,
+
+    // relative length units
+    'em': true,
+    'ex': true,
+    'ch': true,
+    'rem': true,
+
+    // viewport-percentage lengths
+    'vh': true,
+    'vw': true,
+    'vmin': true,
+    'vmax': true,
+    'vm': true
 };
 
-function skipSpaces(node) {
-    while (node !== null && (node.data.type === 'WhiteSpace' || node.data.type === 'Comment')) {
-        node = node.next;
+var ANGLE = {
+    'deg': true,
+    'grad': true,
+    'rad': true,
+    'turn': true
+};
+
+var TIME = {
+    's': true,
+    'ms': true
+};
+
+var FREQUENCY = {
+    'hz': true,
+    'khz': true
+};
+
+// https://www.w3.org/TR/css-values-3/#resolution (https://drafts.csswg.org/css-values/#resolution)
+var RESOLUTION = {
+    'dpi': true,
+    'dpcm': true,
+    'dppx': true,
+    'x': true      // https://github.com/w3c/csswg-drafts/issues/461
+};
+
+// https://drafts.csswg.org/css-grid/#fr-unit
+var FLEX = {
+    'fr': true
+};
+
+// https://www.w3.org/TR/css3-speech/#mixing-props-voice-volume
+var DECIBEL = {
+    'db': true
+};
+
+// https://www.w3.org/TR/css3-speech/#voice-props-voice-pitch
+var SEMITONES = {
+    'st': true
+};
+
+// can be used wherever <length>, <frequency>, <angle>, <time>, <percentage>, <number>, or <integer> values are allowed
+// https://drafts.csswg.org/css-values/#calc-notation
+function isCalc(node) {
+    if (node.data.type !== 'Function') {
+        return false;
     }
 
-    return node;
-}
+    var keyword = names.keyword(node.data.name);
 
-function putResult(buffer, match) {
-    var type = match.type || match.syntax.type;
-
-    // ignore groups
-    if (type === 'Group') {
-        buffer.push.apply(buffer, match.match);
-    } else {
-        buffer.push(match);
+    if (keyword.name !== 'calc') {
+        return false;
     }
+
+    // there were some prefixed implementations
+    return keyword.vendor === '' ||
+           keyword.vendor === '-moz-' ||
+           keyword.vendor === '-webkit-';
 }
 
-function matchToJSON() {
-    return {
-        type: this.syntax.type,
-        name: this.syntax.name,
-        match: this.match,
-        node: this.node
+function astNode(type) {
+    return function(node) {
+        return node.data.type === type;
     };
 }
 
-function buildMatchNode(badNode, lastNode, next, match) {
-    if (badNode) {
-        return {
-            badNode: badNode,
-            lastNode: null,
-            next: null,
-            match: null
-        };
-    }
-
-    return {
-        badNode: null,
-        lastNode: lastNode,
-        next: next,
-        match: match
+function dimension(type) {
+    return function(node) {
+        return isCalc(node) ||
+               (node.data.type === 'Dimension' && type.hasOwnProperty(node.data.unit.toLowerCase()));
     };
 }
 
-function matchGroup(lexer, syntaxNode, node) {
-    var result = [];
-    var buffer;
-    var multiplier = syntaxNode.multiplier || MULTIPLIER_DEFAULT;
-    var min = multiplier.min;
-    var max = multiplier.max === 0 ? Infinity : multiplier.max;
-    var lastCommaTermCount;
-    var lastComma;
-    var matchCount = 0;
-    var lastNode = null;
-    var badNode = null;
-
-    mismatch:
-    while (matchCount < max) {
-        node = skipSpaces(node);
-        buffer = [];
-
-        switch (syntaxNode.combinator) {
-            case '|':
-                for (var i = 0; i < syntaxNode.terms.length; i++) {
-                    var term = syntaxNode.terms[i];
-                    var res = matchSyntax(lexer, term, node);
-
-                    if (res.match) {
-                        putResult(buffer, res.match);
-                        node = res.next;
-                        break;  // continue matching
-                    } else if (res.badNode) {
-                        badNode = res.badNode;
-                        break mismatch;
-                    } else if (res.lastNode) {
-                        lastNode = res.lastNode;
-                    }
-                }
-
-                if (buffer.length === 0) {
-                    break mismatch; // nothing found -> stop matching
-                }
-
-                break;
-
-            case ' ':
-                var beforeMatchNode = node;
-                var lastMatchedTerm = null;
-                var hasTailMatch = false;
-                var commaMissed = false;
-
-                for (var i = 0; i < syntaxNode.terms.length; i++) {
-                    var term = syntaxNode.terms[i];
-                    var res = matchSyntax(lexer, term, node);
-
-                    if (res.match) {
-                        if (term.type === 'Comma' && i !== 0 && !hasTailMatch) {
-                            // recover cursor to state before last match and stop matching
-                            lastNode = node && node.data;
-                            node = beforeMatchNode;
-                            break mismatch;
-                        }
-
-                        // non-empty match (res.next will refer to another node)
-                        if (res.next !== node) {
-                            // match should be preceded by a comma
-                            if (commaMissed) {
-                                lastNode = node && node.data;
-                                node = beforeMatchNode;
-                                break mismatch;
-                            }
-
-                            hasTailMatch = term.type !== 'Comma';
-                            lastMatchedTerm = term;
-                        }
-
-                        putResult(buffer, res.match);
-                        node = skipSpaces(res.next);
-                    } else if (res.badNode) {
-                        badNode = res.badNode;
-                        break mismatch;
-                    } else {
-                        if (res.lastNode) {
-                            lastNode = res.lastNode;
-                        }
-
-                        // it's ok when comma doesn't match when no matches yet
-                        // but only if comma is not first or last term
-                        if (term.type === 'Comma' && i !== 0 && i !== syntaxNode.terms.length - 1) {
-                            if (hasTailMatch) {
-                                commaMissed = true;
-                            }
-                            continue;
-                        }
-
-                        // recover cursor to state before last match and stop matching
-                        lastNode = res.lastNode || (node && node.data);
-                        node = beforeMatchNode;
-                        break mismatch;
-                    }
-                }
-
-                // don't allow empty match when [ ]!
-                if (!lastMatchedTerm && syntaxNode.disallowEmpty) {
-                    // empty match but shouldn't
-                    // recover cursor to state before last match and stop matching
-                    lastNode = node && node.data;
-                    node = beforeMatchNode;
-                    break mismatch;
-                }
-
-                // don't allow comma at the end but only if last term isn't a comma
-                if (lastMatchedTerm && lastMatchedTerm.type === 'Comma' && term.type !== 'Comma') {
-                    lastNode = node && node.data;
-                    node = beforeMatchNode;
-                    break mismatch;
-                }
-
-                break;
-
-            case '&&':
-                var beforeMatchNode = node;
-                var lastMatchedTerm = null;
-                var terms = syntaxNode.terms.slice();
-
-                while (terms.length) {
-                    var wasMatch = false;
-                    var emptyMatched = 0;
-
-                    for (var i = 0; i < terms.length; i++) {
-                        var term = terms[i];
-                        var res = matchSyntax(lexer, term, node);
-
-                        if (res.match) {
-                            // non-empty match (res.next will refer to another node)
-                            if (res.next !== node) {
-                                lastMatchedTerm = term;
-                            } else {
-                                emptyMatched++;
-                                continue;
-                            }
-
-                            wasMatch = true;
-                            terms.splice(i--, 1);
-                            putResult(buffer, res.match);
-                            node = skipSpaces(res.next);
-                            break;
-                        } else if (res.badNode) {
-                            badNode = res.badNode;
-                            break mismatch;
-                        } else if (res.lastNode) {
-                            lastNode = res.lastNode;
-                        }
-                    }
-
-                    if (!wasMatch) {
-                        // terms left, but they all are optional
-                        if (emptyMatched === terms.length) {
-                            break;
-                        }
-
-                        // not ok
-                        lastNode = node && node.data;
-                        node = beforeMatchNode;
-                        break mismatch;
-                    }
-                }
-
-                if (!lastMatchedTerm && syntaxNode.disallowEmpty) { // don't allow empty match when [ ]!
-                    // empty match but shouldn't
-                    // recover cursor to state before last match and stop matching
-                    lastNode = node && node.data;
-                    node = beforeMatchNode;
-                    break mismatch;
-                }
-
-                break;
-
-            case '||':
-                var beforeMatchNode = node;
-                var lastMatchedTerm = null;
-                var terms = syntaxNode.terms.slice();
-
-                while (terms.length) {
-                    var wasMatch = false;
-                    var emptyMatched = 0;
-
-                    for (var i = 0; i < terms.length; i++) {
-                        var term = terms[i];
-                        var res = matchSyntax(lexer, term, node);
-
-                        if (res.match) {
-                            // non-empty match (res.next will refer to another node)
-                            if (res.next !== node) {
-                                lastMatchedTerm = term;
-                            } else {
-                                emptyMatched++;
-                                continue;
-                            }
-
-                            wasMatch = true;
-                            terms.splice(i--, 1);
-                            putResult(buffer, res.match);
-                            node = skipSpaces(res.next);
-                            break;
-                        } else if (res.badNode) {
-                            badNode = res.badNode;
-                            break mismatch;
-                        } else if (res.lastNode) {
-                            lastNode = res.lastNode;
-                        }
-                    }
-
-                    if (!wasMatch) {
-                        break;
-                    }
-                }
-
-                // don't allow empty match
-                if (!lastMatchedTerm && (emptyMatched !== terms.length || syntaxNode.disallowEmpty)) {
-                    // empty match but shouldn't
-                    // recover cursor to state before last match and stop matching
-                    lastNode = node && node.data;
-                    node = beforeMatchNode;
-                    break mismatch;
-                }
-
-                break;
-        }
-
-        // flush buffer
-        result.push.apply(result, buffer);
-        matchCount++;
-
-        if (!node) {
-            break;
-        }
-
-        if (multiplier.comma) {
-            if (lastComma && lastCommaTermCount === result.length) {
-                // nothing match after comma
-                break mismatch;
-            }
-
-            node = skipSpaces(node);
-            if (node !== null && node.data.type === 'Operator' && node.data.value === ',') {
-                result.push({
-                    syntax: syntaxNode,
-                    match: [{
-                        type: 'ASTNode',
-                        node: node.data,
-                        childrenMatch: null
-                    }]
-                });
-                lastCommaTermCount = result.length;
-                lastComma = node;
-                node = node.next;
-            } else {
-                lastNode = node !== null ? node.data : null;
-                break mismatch;
-            }
-        }
-    }
-
-    // console.log(syntaxNode.type, badNode, lastNode);
-
-    if (lastComma && lastCommaTermCount === result.length) {
-        // nothing match after comma
-        node = lastComma;
-        result.pop();
-    }
-
-    return buildMatchNode(badNode, lastNode, node, matchCount < min ? null : {
-        syntax: syntaxNode,
-        match: result,
-        toJSON: matchToJSON
-    });
+function zeroUnitlessDimension(type) {
+    return function(node) {
+        return isCalc(node) ||
+               (node.data.type === 'Dimension' && type.hasOwnProperty(node.data.unit.toLowerCase())) ||
+               (node.data.type === 'Number' && Number(node.data.value) === 0);
+    };
 }
 
-function matchSyntax(lexer, syntaxNode, node) {
-    var badNode = null;
-    var lastNode = null;
-    var match = null;
+function attr(node) {
+    return node.data.type === 'Function' && node.data.name.toLowerCase() === 'attr';
+}
 
-    switch (syntaxNode.type) {
-        case 'Group':
-            return matchGroup(lexer, syntaxNode, node);
+function number(node) {
+    return isCalc(node) || node.data.type === 'Number';
+}
 
-        case 'Function':
-            // expect a function node
-            if (!node || node.data.type !== 'Function') {
-                break;
-            }
+function numberZeroOne(node) {
+    if (isCalc(node) || node.data.type === 'Number') {
+        var value = Number(node.data.value);
 
-            var keyword = names.keyword(node.data.name);
-            var name = syntaxNode.name.toLowerCase();
-
-            // check function name with vendor consideration
-            if (name !== keyword.vendor + keyword.name) {
-                break;
-            }
-
-            var res = matchSyntax(lexer, syntaxNode.children, node.data.children.head);
-            if (!res.match || res.next) {
-                badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;
-                break;
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: res.match.match
-            }];
-
-            // Use node.next instead of res.next here since syntax is matching
-            // for internal list and it should be completelly matched (res.next is null at this point).
-            // Therefore function is matched and we are going to next node
-            node = node.next;
-            break;
-
-        case 'Parentheses':
-            if (!node || node.data.type !== 'Parentheses') {
-                break;
-            }
-
-            var res = matchSyntax(lexer, syntaxNode.children, node.data.children.head);
-            if (!res.match || res.next) {
-                badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;  // TODO: case when res.next === null
-                break;
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: res.match.match
-            }];
-
-            node = res.next;
-            break;
-
-        case 'Type':
-            var typeSyntax = lexer.getType(syntaxNode.name);
-            if (!typeSyntax) {
-                throw new Error('Unknown syntax type `' + syntaxNode.name + '`');
-            }
-
-            var res = typeSyntax.match(node);
-            if (!res.match) {
-                badNode = res && res.badNode; // TODO: case when res.next === null
-                lastNode = (res && res.lastNode) || (node && node.data);
-                break;
-            }
-
-            node = res.next;
-            putResult(match = [], res.match);
-            if (match.length === 0) {
-                match = null;
-            }
-            break;
-
-        case 'Property':
-            var propertySyntax = lexer.getProperty(syntaxNode.name);
-            if (!propertySyntax) {
-                throw new Error('Unknown property `' + syntaxNode.name + '`');
-            }
-
-            var res = propertySyntax.match(node);
-            if (!res.match) {
-                badNode = res && res.badNode; // TODO: case when res.next === null
-                lastNode = (res && res.lastNode) || (node && node.data);
-                break;
-            }
-
-            node = res.next;
-            putResult(match = [], res.match);
-            if (match.length === 0) {
-                match = null;
-            }
-            break;
-
-        case 'Keyword':
-            if (!node) {
-                break;
-            }
-
-            if (node.data.type === 'Identifier') {
-                var keyword = names.keyword(node.data.name);
-                var keywordName = keyword.name;
-                var name = syntaxNode.name.toLowerCase();
-
-                // drop \0 and \9 hack from keyword name
-                if (keywordName.indexOf('\\') !== -1) {
-                    keywordName = keywordName.replace(/\\[09].*$/, '');
-                }
-
-                if (name !== keyword.vendor + keywordName) {
-                    break;
-                }
-            } else {
-                // keyword may to be a number (e.g. font-weight: 400 )
-                if (node.data.type !== 'Number' || node.data.value !== syntaxNode.name) {
-                    break;
-                }
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: null
-            }];
-            node = node.next;
-            break;
-
-        case 'Slash':
-        case 'Comma':
-            if (!node || node.data.type !== 'Operator' || node.data.value !== syntaxNode.value) {
-                break;
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: null
-            }];
-            node = node.next;
-            break;
-
-        case 'String':
-            if (!node || node.data.type !== 'String') {
-                break;
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: null
-            }];
-            node = node.next;
-            break;
-
-        case 'ASTNode':
-            if (node && syntaxNode.match(node)) {
-                match = {
-                    type: 'ASTNode',
-                    node: node.data,
-                    childrenMatch: null
-                };
-                node = node.next;
-            }
-            return buildMatchNode(badNode, lastNode, node, match);
-
-        default:
-            throw new Error('Not implemented yet node type: ' + syntaxNode.type);
+        return value >= 0 && value <= 1;
     }
 
-    return buildMatchNode(badNode, lastNode, node, match === null ? null : {
-        syntax: syntaxNode,
-        match: match,
-        toJSON: matchToJSON
-    });
+    return false;
+}
 
+function numberOneOrGreater(node) {
+    if (isCalc(node) || node.data.type === 'Number') {
+        return Number(node.data.value) >= 1;
+    }
+
+    return false;
+}
+
+// TODO: fail on 10e-2
+function integer(node) {
+    return isCalc(node) ||
+           (node.data.type === 'Number' && node.data.value.indexOf('.') === -1);
+}
+
+// TODO: fail on 10e-2
+function positiveInteger(node) {
+    return isCalc(node) ||
+           (node.data.type === 'Number' && node.data.value.indexOf('.') === -1 && node.data.value.charAt(0) !== '-');
+}
+
+function percentage(node) {
+    return isCalc(node) ||
+           node.data.type === 'Percentage';
+}
+
+function hexColor(node) {
+    if (node.data.type !== 'HexColor') {
+        return false;
+    }
+
+    var hex = node.data.value;
+
+    return /^[0-9a-fA-F]{3,8}$/.test(hex) &&
+           (hex.length === 3 || hex.length === 4 || hex.length === 6 || hex.length === 8);
+}
+
+function expression(node) {
+    return node.data.type === 'Function' && node.data.name.toLowerCase() === 'expression';
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/CSS/custom-ident
+// https://drafts.csswg.org/css-values-4/#identifier-value
+function customIdent(node) {
+    if (node.data.type !== 'Identifier') {
+        return false;
+    }
+
+    var name = node.data.name.toLowerCase();
+
+    // § 3.2. Author-defined Identifiers: the <custom-ident> type
+    // The CSS-wide keywords are not valid <custom-ident>s
+    if (name === 'unset' || name === 'initial' || name === 'inherit') {
+        return false;
+    }
+
+    // The default keyword is reserved and is also not a valid <custom-ident>
+    if (name === 'default') {
+        return false;
+    }
+
+    // TODO: ignore property specific keywords (as described https://developer.mozilla.org/en-US/docs/Web/CSS/custom-ident)
+
+    return true;
+}
+
+module.exports = {
+    'angle': zeroUnitlessDimension(ANGLE),
+    'attr()': attr,
+    'custom-ident': customIdent,
+    'decibel': dimension(DECIBEL),
+    'dimension': astNode('Dimension'),
+    'frequency': dimension(FREQUENCY),
+    'flex': dimension(FLEX),
+    'hex-color': hexColor,
+    'id-selector': astNode('IdSelector'), // element( <id-selector> )
+    'ident': astNode('Identifier'),
+    'integer': integer,
+    'length': zeroUnitlessDimension(LENGTH),
+    'number': number,
+    'number-zero-one': numberZeroOne,
+    'number-one-or-greater': numberOneOrGreater,
+    'percentage': percentage,
+    'positive-integer': positiveInteger,
+    'resolution': dimension(RESOLUTION),
+    'semitones': dimension(SEMITONES),
+    'string': astNode('String'),
+    'time': dimension(TIME),
+    'unicode-range': astNode('UnicodeRange'),
+    'url': astNode('Url'),
+
+    // old IE stuff
+    'progid': astNode('Raw'),
+    'expression': expression
 };
-
-module.exports = matchSyntax;
-}, {"60":60}];
+}, {"61":61}];

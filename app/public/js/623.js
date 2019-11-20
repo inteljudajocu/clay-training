@@ -1,28 +1,9 @@
-window.modules["623"] = [function(require,module,exports){/**
- * _s.prune: a more elegant version of truncate
- * prune extra chars, never leaving a half-chopped word.
- * @author github.com/rwz
- */
-var makeString = require(576);
-var rtrim = require(621);
+window.modules["623"] = [function(require,module,exports){var makeString = require(576);
 
-module.exports = function prune(str, length, pruneStr) {
+module.exports = function strRight(str, sep) {
   str = makeString(str);
-  length = ~~length;
-  pruneStr = pruneStr != null ? String(pruneStr) : '...';
-
-  if (str.length <= length) return str;
-
-  var tmpl = function(c) {
-      return c.toUpperCase() !== c.toLowerCase() ? 'A' : ' ';
-    },
-    template = str.slice(0, length + 1).replace(/.(?=\W*\w*$)/g, tmpl); // 'Hello, world' -> 'HellAA AAAAA'
-
-  if (template.slice(template.length - 2).match(/\w\w/))
-    template = template.replace(/\s*\S+$/, '');
-  else
-    template = rtrim(template.slice(0, template.length - 1));
-
-  return (template + pruneStr).length > str.length ? str : str.slice(0, template.length) + pruneStr;
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.indexOf(sep);
+  return~ pos ? str.slice(pos + sep.length, str.length) : str;
 };
-}, {"576":576,"621":621}];
+}, {"576":576}];

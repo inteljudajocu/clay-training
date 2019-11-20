@@ -1,10 +1,27 @@
 window.modules["634"] = [function(require,module,exports){var makeString = require(576);
-var toPositive = require(586);
+var strRepeat = require(594);
 
-module.exports = function startsWith(str, starts, position) {
+module.exports = function pad(str, length, padStr, type) {
   str = makeString(str);
-  starts = '' + starts;
-  position = position == null ? 0 : Math.min(toPositive(position), str.length);
-  return str.lastIndexOf(starts, position) === position;
+  length = ~~length;
+
+  var padlen = 0;
+
+  if (!padStr)
+    padStr = ' ';
+  else if (padStr.length > 1)
+    padStr = padStr.charAt(0);
+
+  switch (type) {
+  case 'right':
+    padlen = length - str.length;
+    return str + strRepeat(padStr, padlen);
+  case 'both':
+    padlen = length - str.length;
+    return strRepeat(padStr, Math.ceil(padlen / 2)) + str + strRepeat(padStr, Math.floor(padlen / 2));
+  default: // 'left'
+    padlen = length - str.length;
+    return strRepeat(padStr, padlen) + str;
+  }
 };
-}, {"576":576,"586":586}];
+}, {"576":576,"594":594}];

@@ -1,17 +1,10 @@
 window.modules["629"] = [function(require,module,exports){var makeString = require(576);
-var strRepeat = require(594);
 
-module.exports = function repeat(str, qty, separator) {
+module.exports = function(str, callback) {
   str = makeString(str);
 
-  qty = ~~qty;
+  if (str.length === 0 || typeof callback !== 'function') return str;
 
-  // using faster implementation if separator is not needed;
-  if (separator == null) return strRepeat(str, qty);
-
-  // this one is about 300x slower in Google Chrome
-  /*eslint no-empty: 0*/
-  for (var repeat = []; qty > 0; repeat[--qty] = str) {}
-  return repeat.join(separator);
+  return str.replace(/./g, callback);
 };
-}, {"576":576,"594":594}];
+}, {"576":576}];

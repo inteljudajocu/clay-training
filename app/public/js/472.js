@@ -2,9 +2,11 @@ window.modules["472"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _namespace = require(474);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _namespace2 = _interopRequireDefault(_namespace);
+var _container = require(477);
+
+var _container2 = _interopRequireDefault(_container);
 
 var _types = require(460);
 
@@ -16,20 +18,43 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Tag = function (_Namespace) {
-    _inherits(Tag, _Namespace);
+var Root = function (_Container) {
+    _inherits(Root, _Container);
 
-    function Tag(opts) {
-        _classCallCheck(this, Tag);
+    function Root(opts) {
+        _classCallCheck(this, Root);
 
-        var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
+        var _this = _possibleConstructorReturn(this, _Container.call(this, opts));
 
-        _this.type = _types.TAG;
+        _this.type = _types.ROOT;
         return _this;
     }
 
-    return Tag;
-}(_namespace2.default);
+    Root.prototype.toString = function toString() {
+        var str = this.reduce(function (memo, selector) {
+            var sel = String(selector);
+            return sel ? memo + sel + ',' : '';
+        }, '').slice(0, -1);
+        return this.trailingComma ? str + ',' : str;
+    };
 
-exports.default = Tag;
-module.exports = exports['default'];}, {"460":460,"474":474}];
+    Root.prototype.error = function error(message, options) {
+        if (this._error) {
+            return this._error(message, options);
+        } else {
+            return new Error(message);
+        }
+    };
+
+    _createClass(Root, [{
+        key: 'errorGenerator',
+        set: function set(handler) {
+            this._error = handler;
+        }
+    }]);
+
+    return Root;
+}(_container2.default);
+
+exports.default = Root;
+module.exports = exports['default'];}, {"460":460,"477":477}];

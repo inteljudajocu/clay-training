@@ -1,4 +1,4 @@
-window.modules["96"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+window.modules["96"] = [function(require,module,exports){var TYPE = require(74).TYPE;
 
 var ATRULE = TYPE.Atrule;
 var SEMICOLON = TYPE.Semicolon;
@@ -132,4 +132,4 @@ module.exports = {
     },
     walkContext: 'atrule'
 };
-}, {"75":75}];
+}, {"74":74}];

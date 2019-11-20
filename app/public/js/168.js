@@ -1,4 +1,4 @@
-window.modules["168"] = [function(require,module,exports){var parse = require(5)
+window.modules["168"] = [function(require,module,exports){var parse = require(2)
 
 /**
  * @category Day Helpers
@@ -23,4 +23,4 @@ function startOfDay (dirtyDate) {
 }
 
 module.exports = startOfDay
-}, {"5":5}];
+}, {"2":2}];

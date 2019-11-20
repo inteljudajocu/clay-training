@@ -1,7 +1,7 @@
 window.modules["198"] = [function(require,module,exports){var entityMap = require(200),
     legacyMap = require(199),
-    xmlMap = require(202),
-    decodeCodePoint = require(201);
+    xmlMap = require(201),
+    decodeCodePoint = require(202);
 
 var decodeXMLStrict = getStrictDecoder(xmlMap),
     decodeHTMLStrict = getStrictDecoder(entityMap);

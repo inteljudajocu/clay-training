@@ -1,5 +1,5 @@
 window.modules["319"] = [function(require,module,exports){var baseIsEqual = require(302),
-    get = require(2),
+    get = require(1),
     hasIn = require(329),
     isKey = require(327),
     isStrictComparable = require(328),
@@ -31,4 +31,4 @@ function baseMatchesProperty(path, srcValue) {
 }
 
 module.exports = baseMatchesProperty;
-}, {"2":2,"290":290,"302":302,"325":325,"327":327,"328":328,"329":329}];
+}, {"1":1,"290":290,"302":302,"325":325,"327":327,"328":328,"329":329}];

@@ -1,4 +1,4 @@
-window.modules["117"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
+window.modules["117"] = [function(require,module,exports){var NUMBER = require(74).TYPE.Number;
 
 module.exports = {
     name: 'Number',
@@ -16,4 +16,4 @@ module.exports = {
         processChunk(node.value);
     }
 };
-}, {"75":75}];
+}, {"74":74}];

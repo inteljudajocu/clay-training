@@ -4,7 +4,7 @@ var _map = require(17),
     _assign = require(16),
     _set = require(14),
     _includes = require(15),
-    _require = require(1),
+    _require = require(4),
     removeNonAlphanumericCharacters = _require.removeNonAlphanumericCharacters,
     invisibleTags = [];
 /**
@@ -58,4 +58,4 @@ module.exports.save = function (uri, data) {
   data.items = items;
   return data;
 };
-}, {"1":1,"14":14,"15":15,"16":16,"17":17}];
+}, {"4":4,"14":14,"15":15,"16":16,"17":17}];

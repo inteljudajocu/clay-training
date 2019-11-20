@@ -1,5 +1,5 @@
 window.modules["310"] = [function(require,module,exports){var baseGetTag = require(293),
-    isObject = require(12);
+    isObject = require(11);
 
 /** `Object#toString` result references. */
 var asyncTag = '[object AsyncFunction]',
@@ -35,4 +35,4 @@ function isFunction(value) {
 }
 
 module.exports = isFunction;
-}, {"12":12,"293":293}];
+}, {"11":11,"293":293}];

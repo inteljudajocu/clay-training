@@ -1,7 +1,7 @@
 window.modules["348"] = [function(require,module,exports){var eq = require(278),
     isArrayLike = require(324),
     isIndex = require(271),
-    isObject = require(12);
+    isObject = require(11);
 
 /**
  * Checks if the given arguments are from an iteratee call.
@@ -28,4 +28,4 @@ function isIterateeCall(value, index, object) {
 }
 
 module.exports = isIterateeCall;
-}, {"12":12,"271":271,"278":278,"324":324}];
+}, {"11":11,"271":271,"278":278,"324":324}];

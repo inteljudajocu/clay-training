@@ -3,28 +3,13 @@ window.modules["44"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(50);
 
 /**
- * Given stringified JSON, conver the site's slug
- * to the url-patterned site prefix
- *
- * @param  {Object} site
- * @param  {String} ref
- * @return {Function}
+ * First test if argument is a String. If true, test if '/_layouts/' is in the string.
+ * Otherwise, throw an error.
+ * @param  {string}  uri
+ * @return {Boolean}
  */
-module.exports = function (site, ref = false) {
-  return function (json) {
-    var { slug, host, path, prefix } = site,
-      prefixString, searchString, searchRegex;
-
-    isUriStringCheck.strCheck(json);
-
-    if (!prefix) {
-      prefix = path && path.length > 1 ? `${host}${path}` : host;
-    }
-
-    prefixString = `${ref ? '"_ref":' : '' }"${prefix}/_components/`;
-    searchString = `${ref ? '"_ref":' : '' }"${slug}/_components/`;
-    searchRegex = new RegExp(searchString, 'g');
-    return json.replace(searchRegex, prefixString);
-  };
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  return uri.toLowerCase().indexOf('/_layouts/') > -1;
 };
 }, {"50":50}];

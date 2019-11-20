@@ -1,4 +1,4 @@
-window.modules["170"] = [function(require,module,exports){var parse = require(5)
+window.modules["170"] = [function(require,module,exports){var parse = require(2)
 var startOfISOWeek = require(176)
 
 /**
@@ -43,4 +43,4 @@ function getISOYear (dirtyDate) {
 }
 
 module.exports = getISOYear
-}, {"5":5,"176":176}];
+}, {"2":2,"176":176}];

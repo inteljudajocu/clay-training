@@ -1,4 +1,4 @@
-window.modules["128"] = [function(require,module,exports){var STRING = require(75).TYPE.String;
+window.modules["128"] = [function(require,module,exports){var STRING = require(74).TYPE.String;
 
 module.exports = {
     name: 'String',
@@ -16,4 +16,4 @@ module.exports = {
         processChunk(node.value);
     }
 };
-}, {"75":75}];
+}, {"74":74}];

@@ -1,89 +1,77 @@
-window.modules["60"] = [function(require,module,exports){'use strict';
+window.modules["60"] = [function(require,module,exports){function getTrace(node) {
+    function hasMatch(matchNode) {
+        if (matchNode.type === 'ASTNode') {
+            if (matchNode.node === node) {
+                result = [];
+                return true;
+            }
 
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var keywords = Object.create(null);
-var properties = Object.create(null);
-var HYPHENMINUS = 45; // '-'.charCodeAt()
-
-function isCustomProperty(str, offset) {
-    return str.length - offset >= 2 &&
-           str.charCodeAt(offset) === HYPHENMINUS &&
-           str.charCodeAt(offset + 1) === HYPHENMINUS;
-}
-
-function getVendorPrefix(str, offset) {
-    if (str.charCodeAt(offset) === HYPHENMINUS) {
-        // vendor should contain at least one letter
-        var secondDashIndex = str.indexOf('-', offset + 2);
-
-        if (secondDashIndex !== -1) {
-            return str.substring(offset, secondDashIndex + 1);
+            if (matchNode.childrenMatch) {
+                // use for-loop for better perfomance
+                for (var i = 0; i < matchNode.childrenMatch.length; i++) {
+                    if (hasMatch(matchNode.childrenMatch[i])) {
+                        return true;
+                    }
+                }
+            }
+        } else {
+            // use for-loop for better perfomance
+            for (var i = 0; i < matchNode.match.length; i++) {
+                if (hasMatch(matchNode.match[i])) {
+                    if (matchNode.syntax.type === 'Type' ||
+                        matchNode.syntax.type === 'Property' ||
+                        matchNode.syntax.type === 'Keyword') {
+                        result.unshift(matchNode.syntax);
+                    }
+                    return true;
+                }
+            }
         }
+
+        return false;
     }
 
-    return '';
+    var result = null;
+
+    if (this.matched !== null) {
+        hasMatch(this.matched);
+    }
+
+    return result;
 }
 
-function getKeywordInfo(keyword) {
-    if (hasOwnProperty.call(keywords, keyword)) {
-        return keywords[keyword];
+function testNode(match, node, fn) {
+    var trace = getTrace.call(match, node);
+
+    if (trace === null) {
+        return false;
     }
 
-    var name = keyword.toLowerCase();
+    return trace.some(fn);
+}
 
-    if (hasOwnProperty.call(keywords, name)) {
-        return keywords[keyword] = keywords[name];
-    }
-
-    var vendor = !isCustomProperty(name, 0) ? getVendorPrefix(name, 0) : '';
-
-    return keywords[keyword] = Object.freeze({
-        vendor: vendor,
-        prefix: vendor,
-        name: name.substr(vendor.length)
+function isType(node, type) {
+    return testNode(this, node, function(matchNode) {
+        return matchNode.type === 'Type' && matchNode.name === type;
     });
 }
 
-function getPropertyInfo(property) {
-    if (hasOwnProperty.call(properties, property)) {
-        return properties[property];
-    }
+function isProperty(node, property) {
+    return testNode(this, node, function(matchNode) {
+        return matchNode.type === 'Property' && matchNode.name === property;
+    });
+}
 
-    var name = property;
-    var hack = property[0];
-
-    if (hack === '/') {
-        hack = property[1] === '/' ? '//' : '/';
-    } else if (hack !== '_' &&
-               hack !== '*' &&
-               hack !== '$' &&
-               hack !== '#' &&
-               hack !== '+') {
-        hack = '';
-    }
-
-    var custom = isCustomProperty(name, hack.length);
-
-    if (!custom) {
-        name = name.toLowerCase();
-        if (hasOwnProperty.call(properties, name)) {
-            return properties[property] = properties[name];
-        }
-    }
-
-    var vendor = !custom ? getVendorPrefix(name, hack.length) : '';
-
-    return properties[property] = Object.freeze({
-        hack: hack,
-        vendor: vendor,
-        prefix: hack + vendor,
-        name: name.substr(hack.length + vendor.length),
-        custom: custom
+function isKeyword(node) {
+    return testNode(this, node, function(matchNode) {
+        return matchNode.type === 'Keyword';
     });
 }
 
 module.exports = {
-    keyword: getKeywordInfo,
-    property: getPropertyInfo
+    getTrace: getTrace,
+    isType: isType,
+    isProperty: isProperty,
+    isKeyword: isKeyword
 };
 }, {}];

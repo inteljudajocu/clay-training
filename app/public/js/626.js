@@ -1,9 +1,9 @@
 window.modules["626"] = [function(require,module,exports){var makeString = require(576);
 
-module.exports = function strLeft(str, sep) {
+module.exports = function strLeftBack(str, sep) {
   str = makeString(str);
   sep = makeString(sep);
-  var pos = !sep ? -1 : str.indexOf(sep);
+  var pos = str.lastIndexOf(sep);
   return~ pos ? str.slice(0, pos) : str;
 };
 }, {"576":576}];

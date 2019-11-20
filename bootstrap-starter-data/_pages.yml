@@ -4,6 +4,9 @@ _pages:
     main:
       - /_components/article/instances/sample
     head: []
+    layout: /_layouts/layout/instances/article
+    maub:
+      - /components/article/instances/sample2
   new-standard:
     layout: /_layouts/layout/instances/article
     main:

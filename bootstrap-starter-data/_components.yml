@@ -1,5 +1,4 @@
 _components:
-  # meta components
   meta-title:
     instances:
       new:
@@ -89,8 +88,6 @@ _components:
         siteName: Clay Demo
         ogType: website
         pageType: Home Page
-
-  # layout components
   header:
     instances:
       claydemo:
@@ -187,30 +184,7 @@ _components:
   article:
     instances:
       new-standard:
-        # headline: ''
-        # feedImgUrl: ''
-        # ledeUrl: ''
-        # byline:
-        #   -
-        #     text: Clay
-        # ledeCaption: ''
-        # ledeCredit: ''
-        # slug: ''
-        # content:
-        #   -
-        #     _ref: /_components/paragraph/instances/new
-        # tags:
-        #   _ref: /_components/tags/instances/new
       sample:
-        # headline: 'Clay Starter Article'
-        # feedImgUrl: 'https://s.abcnews.com/images/Lifestyle/puppy-ht-3-er-170907_4x3_992.jpg'
-        # ledeUrl: 'https://s.abcnews.com/images/Lifestyle/puppy-ht-3-er-170907_4x3_992.jpg'
-        # byline:
-        #   -
-        #     text: Clay
-        # ledeCaption: 'A cute puppy'
-        # ledeCredit: ''
-        # slug: ''
         content:
           -
             _ref: /_components/recipe/instances/new

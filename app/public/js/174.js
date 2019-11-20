@@ -1,4 +1,4 @@
-window.modules["174"] = [function(require,module,exports){var parse = require(5)
+window.modules["174"] = [function(require,module,exports){var parse = require(2)
 
 /**
  * @category Year Helpers
@@ -25,4 +25,4 @@ function startOfYear (dirtyDate) {
 }
 
 module.exports = startOfYear
-}, {"5":5}];
+}, {"2":2}];

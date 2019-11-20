@@ -1,4 +1,4 @@
-window.modules["108"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
+window.modules["108"] = [function(require,module,exports){var NUMBER = require(74).TYPE.Number;
 
 // special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
 function readUnit(scanner) {
@@ -43,4 +43,4 @@ module.exports = {
         processChunk(node.unit);
     }
 };
-}, {"75":75}];
+}, {"74":74}];

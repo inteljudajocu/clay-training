@@ -2,11 +2,9 @@ window.modules["471"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _namespace = require(474);
 
-var _container = require(477);
-
-var _container2 = _interopRequireDefault(_container);
+var _namespace2 = _interopRequireDefault(_namespace);
 
 var _types = require(460);
 
@@ -18,43 +16,21 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Root = function (_Container) {
-    _inherits(Root, _Container);
+var Universal = function (_Namespace) {
+    _inherits(Universal, _Namespace);
 
-    function Root(opts) {
-        _classCallCheck(this, Root);
+    function Universal(opts) {
+        _classCallCheck(this, Universal);
 
-        var _this = _possibleConstructorReturn(this, _Container.call(this, opts));
+        var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
 
-        _this.type = _types.ROOT;
+        _this.type = _types.UNIVERSAL;
+        _this.value = '*';
         return _this;
     }
 
-    Root.prototype.toString = function toString() {
-        var str = this.reduce(function (memo, selector) {
-            var sel = String(selector);
-            return sel ? memo + sel + ',' : '';
-        }, '').slice(0, -1);
-        return this.trailingComma ? str + ',' : str;
-    };
+    return Universal;
+}(_namespace2.default);
 
-    Root.prototype.error = function error(message, options) {
-        if (this._error) {
-            return this._error(message, options);
-        } else {
-            return new Error(message);
-        }
-    };
-
-    _createClass(Root, [{
-        key: 'errorGenerator',
-        set: function set(handler) {
-            this._error = handler;
-        }
-    }]);
-
-    return Root;
-}(_container2.default);
-
-exports.default = Root;
-module.exports = exports['default'];}, {"460":460,"477":477}];
+exports.default = Universal;
+module.exports = exports['default'];}, {"460":460,"474":474}];
