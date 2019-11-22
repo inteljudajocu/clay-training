@@ -1,6 +1,6 @@
-window.modules["610"] = [function(require,module,exports){var pad = require(634);
-
-module.exports = function lrpad(str, length, padStr) {
-  return pad(str, length, padStr, 'both');
+window.modules["610"] = [function(require,module,exports){module.exports = function toNumber(num, precision) {
+  if (num == null) return 0;
+  var factor = Math.pow(10, isFinite(precision) ? precision : 0);
+  return Math.round(num * factor) / factor;
 };
-}, {"634":634}];
+}, {}];

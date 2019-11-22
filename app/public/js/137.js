@@ -1,10 +1,11 @@
-window.modules["137"] = [function(require,module,exports){var List = require(53);
+window.modules["137"] = [function(require,module,exports){var List = require(54);
+var ALLOW_OF_CLAUSE = true;
 
 module.exports = {
-    parse: function selectorList() {
+    parse: function() {
         return new List().appendData(
-            this.SelectorList()
+            this.Nth(ALLOW_OF_CLAUSE)
         );
     }
 };
-}, {"53":53}];
+}, {"54":54}];

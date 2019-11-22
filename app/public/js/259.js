@@ -1,15 +1,8 @@
-window.modules["259"] = [function(require,module,exports){/**
- * Checks if a stack value for `key` exists.
- *
- * @private
- * @name has
- * @memberOf Stack
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
- */
-function stackHas(key) {
-  return this.__data__.has(key);
-}
+window.modules["259"] = [function(require,module,exports){var getNative = require(238),
+    root = require(237);
 
-module.exports = stackHas;
-}, {}];
+/* Built-in method references that are verified to be native. */
+var Set = getNative(root, 'Set');
+
+module.exports = Set;
+}, {"237":237,"238":238}];

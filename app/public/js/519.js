@@ -1,257 +1,159 @@
-window.modules["519"] = [function(require,module,exports){'use strict';
+window.modules["519"] = [function(require,module,exports){var postcss = require(520);
 
-exports.__esModule = true;
+function definition(variables, node) {
+    var name = node.prop.slice(1);
+    variables[name] = node.value;
+    node.remove();
+}
 
-var _supportsColor = require(19);
-
-var _supportsColor2 = _interopRequireDefault(_supportsColor);
-
-var _chalk = require(19);
-
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _terminalHighlight = require(520);
-
-var _terminalHighlight2 = _interopRequireDefault(_terminalHighlight);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * The CSS parser throws this error for broken CSS.
- *
- * Custom parsers can throw this error for broken custom syntax using
- * the {@link Node#error} method.
- *
- * PostCSS will use the input source map to detect the original error location.
- * If you wrote a Sass file, compiled it to CSS and then parsed it with PostCSS,
- * PostCSS will show the original position in the Sass file.
- *
- * If you need the position in the PostCSS input
- * (e.g., to debug the previous compiler), use `error.input.file`.
- *
- * @example
- * // Catching and checking syntax error
- * try {
- *   postcss.parse('a{')
- * } catch (error) {
- *   if ( error.name === 'CssSyntaxError' ) {
- *     error //=> CssSyntaxError
- *   }
- * }
- *
- * @example
- * // Raising error from plugin
- * throw node.error('Unknown variable', { plugin: 'postcss-vars' });
- */
-var CssSyntaxError = function () {
-
-    /**
-     * @param {string} message  - error message
-     * @param {number} [line]   - source line of the error
-     * @param {number} [column] - source column of the error
-     * @param {string} [source] - source code of the broken file
-     * @param {string} [file]   - absolute path to the broken file
-     * @param {string} [plugin] - PostCSS plugin name, if error came from plugin
-     */
-    function CssSyntaxError(message, line, column, source, file, plugin) {
-        _classCallCheck(this, CssSyntaxError);
-
-        /**
-         * @member {string} - Always equal to `'CssSyntaxError'`. You should
-         *                    always check error type
-         *                    by `error.name === 'CssSyntaxError'` instead of
-         *                    `error instanceof CssSyntaxError`, because
-         *                    npm could have several PostCSS versions.
-         *
-         * @example
-         * if ( error.name === 'CssSyntaxError' ) {
-         *   error //=> CssSyntaxError
-         * }
-         */
-        this.name = 'CssSyntaxError';
-        /**
-         * @member {string} - Error message.
-         *
-         * @example
-         * error.message //=> 'Unclosed block'
-         */
-        this.reason = message;
-
-        if (file) {
-            /**
-             * @member {string} - Absolute path to the broken file.
-             *
-             * @example
-             * error.file       //=> 'a.sass'
-             * error.input.file //=> 'a.css'
-             */
-            this.file = file;
-        }
-        if (source) {
-            /**
-             * @member {string} - Source code of the broken file.
-             *
-             * @example
-             * error.source       //=> 'a { b {} }'
-             * error.input.column //=> 'a b { }'
-             */
-            this.source = source;
-        }
-        if (plugin) {
-            /**
-             * @member {string} - Plugin name, if error came from plugin.
-             *
-             * @example
-             * error.plugin //=> 'postcss-vars'
-             */
-            this.plugin = plugin;
-        }
-        if (typeof line !== 'undefined' && typeof column !== 'undefined') {
-            /**
-             * @member {number} - Source line of the error.
-             *
-             * @example
-             * error.line       //=> 2
-             * error.input.line //=> 4
-             */
-            this.line = line;
-            /**
-             * @member {number} - Source column of the error.
-             *
-             * @example
-             * error.column       //=> 1
-             * error.input.column //=> 4
-             */
-            this.column = column;
+function variable(variables, node, str, name, opts, result) {
+    if ( opts.only ) {
+        if ( typeof opts.only[name] !== 'undefined' ) {
+            return opts.only[name];
+        } else {
+            return str;
         }
 
-        this.setMessage();
+    } if ( typeof variables[name] !== 'undefined' ) {
+        return variables[name];
 
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, CssSyntaxError);
+    } else if ( opts.silent ) {
+        return str;
+
+    } else {
+        var fix = opts.unknown(node, name, result);
+        if ( fix ) {
+            return fix;
+        } else {
+            return str;
         }
     }
+}
 
-    CssSyntaxError.prototype.setMessage = function setMessage() {
-        /**
-         * @member {string} - Full error text in the GNU error format
-         *                    with plugin, file, line and column.
-         *
-         * @example
-         * error.message //=> 'a.css:1:1: Unclosed block'
-         */
-        this.message = this.plugin ? this.plugin + ': ' : '';
-        this.message += this.file ? this.file : '<css input>';
-        if (typeof this.line !== 'undefined') {
-            this.message += ':' + this.line + ':' + this.column;
+function simpleSyntax(variables, node, str, opts, result) {
+    return str.replace(/(^|[^\w])\$([\w\d-_]+)/g, function (_, bef, name) {
+        return bef + variable(variables, node, '$' + name, name, opts, result);
+    });
+}
+
+function inStringSyntax(variables, node, str, opts, result) {
+    return str.replace(/\$\(\s*([\w\d-_]+)\s*\)/g, function (all, name) {
+        return variable(variables, node, all, name, opts, result);
+    });
+}
+
+function bothSyntaxes(variables, node, str, opts, result) {
+    str = simpleSyntax(variables, node, str, opts, result);
+    str = inStringSyntax(variables, node, str, opts, result);
+    return str;
+}
+
+function repeat(value, callback) {
+    var oldValue;
+    var newValue = value;
+    do {
+        oldValue = newValue;
+        newValue = callback(oldValue);
+    } while (newValue !== oldValue && newValue.indexOf('$') !== -1);
+    return newValue;
+}
+
+function declValue(variables, node, opts, result) {
+    node.value = repeat(node.value, function (value) {
+        return bothSyntaxes(variables, node, value, opts, result);
+    });
+}
+
+function declProp(variables, node, opts, result) {
+    node.prop = repeat(node.prop, function (value) {
+        return inStringSyntax(variables, node, value, opts, result);
+    });
+}
+
+function ruleSelector(variables, node, opts, result) {
+    node.selector = repeat(node.selector, function (value) {
+        return bothSyntaxes(variables, node, value, opts, result);
+    });
+}
+
+function atruleParams(variables, node, opts, result) {
+    node.params = repeat(node.params, function (value) {
+        return bothSyntaxes(variables, node, value, opts, result);
+    });
+}
+
+function comment(variables, node, opts, result) {
+    node.text = node.text
+        .replace(/<<\$\(\s*([\w\d-_]+)\s*\)>>/g, function (all, name) {
+            return variable(variables, node, all, name, opts, result);
+        });
+}
+
+module.exports = postcss.plugin('postcss-simple-vars', function (opts) {
+    if ( typeof opts === 'undefined' ) opts = { };
+
+    if ( !opts.unknown ) {
+        opts.unknown = function (node, name) {
+            throw node.error('Undefined variable $' + name);
+        };
+    }
+
+    return function (css, result) {
+        var variables = { };
+        if ( typeof opts.variables === 'function' ) {
+            variables = opts.variables();
+        } else if ( typeof opts.variables === 'object' ) {
+            for ( var i in opts.variables ) variables[i] = opts.variables[i];
         }
-        this.message += ': ' + this.reason;
-    };
 
-    /**
-     * Returns a few lines of CSS source that caused the error.
-     *
-     * If the CSS has an input source map without `sourceContent`,
-     * this method will return an empty string.
-     *
-     * @param {boolean} [color] whether arrow will be colored red by terminal
-     *                          color codes. By default, PostCSS will detect
-     *                          color support by `process.stdout.isTTY`
-     *                          and `window.process.env.NODE_DISABLE_COLORS`.
-     *
-     * @example
-     * error.showSourceCode() //=> "  4 | }
-     *                        //      5 | a {
-     *                        //    > 6 |   bad
-     *                        //        |   ^
-     *                        //      7 | }
-     *                        //      8 | b {"
-     *
-     * @return {string} few lines of CSS source that caused the error
-     */
-
-
-    CssSyntaxError.prototype.showSourceCode = function showSourceCode(color) {
-        var _this = this;
-
-        if (!this.source) return '';
-
-        var css = this.source;
-        if (typeof color === 'undefined') color = _supportsColor2.default.stdout;
-        if (color) css = (0, _terminalHighlight2.default)(css);
-
-        var lines = css.split(/\r?\n/);
-        var start = Math.max(this.line - 3, 0);
-        var end = Math.min(this.line + 2, lines.length);
-
-        var maxWidth = String(end).length;
-
-        function mark(text) {
-            if (color && _chalk2.default.red) {
-                return _chalk2.default.red.bold(text);
-            } else {
-                return text;
+        for ( var name in variables ) {
+            if ( name[0] === '$' ) {
+                var fixed = name.slice(1);
+                variables[fixed] = variables[name];
+                delete variables[name];
             }
         }
-        function aside(text) {
-            if (color && _chalk2.default.gray) {
-                return _chalk2.default.gray(text);
-            } else {
-                return text;
+
+        css.walk(function (node) {
+
+            if ( node.type === 'decl' ) {
+                if ( node.value.toString().indexOf('$') !== -1 ) {
+                    declValue(variables, node, opts, result);
+                }
+                if ( node.prop.indexOf('$(') !== -1 ) {
+                    declProp(variables, node, opts, result);
+                } else if ( node.prop[0] === '$' ) {
+                    if ( !opts.only ) definition(variables, node);
+                }
+
+            } else if ( node.type === 'rule' ) {
+                if ( node.selector.indexOf('$') !== -1 ) {
+                    ruleSelector(variables, node, opts, result);
+                }
+
+            } else if ( node.type === 'atrule' ) {
+                if ( node.params && node.params.indexOf('$') !== -1 ) {
+                    atruleParams(variables, node, opts, result);
+                }
+            } else if ( node.type === 'comment' ) {
+                if ( node.text.indexOf('$') !== -1 ) {
+                    comment(variables, node, opts, result);
+                }
             }
+        });
+
+        Object.keys(variables).forEach(function (key) {
+            result.messages.push({
+                plugin: 'postcss-simple-vars',
+                type: 'variable',
+                name: key,
+                value: variables[key]
+            });
+        });
+
+        if ( opts.onVariables ) {
+            opts.onVariables(variables);
         }
-
-        return lines.slice(start, end).map(function (line, index) {
-            var number = start + 1 + index;
-            var gutter = ' ' + (' ' + number).slice(-maxWidth) + ' | ';
-            if (number === _this.line) {
-                var spacing = aside(gutter.replace(/\d/g, ' ')) + line.slice(0, _this.column - 1).replace(/[^\t]/g, ' ');
-                return mark('>') + aside(gutter) + line + '\n ' + spacing + mark('^');
-            } else {
-                return ' ' + aside(gutter) + line;
-            }
-        }).join('\n');
     };
-
-    /**
-     * Returns error position, message and source code of the broken part.
-     *
-     * @example
-     * error.toString() //=> "CssSyntaxError: app.css:1:1: Unclosed block
-     *                  //    > 1 | a {
-     *                  //        | ^"
-     *
-     * @return {string} error position, message and source code
-     */
-
-
-    CssSyntaxError.prototype.toString = function toString() {
-        var code = this.showSourceCode();
-        if (code) {
-            code = '\n\n' + code + '\n';
-        }
-        return this.name + ': ' + this.message + code;
-    };
-
-    /**
-     * @memberof CssSyntaxError#
-     * @member {Input} input - Input object with PostCSS internal information
-     *                         about input file. If input has source map
-     *                         from previous tool, PostCSS will use origin
-     *                         (for example, Sass) source. You can use this
-     *                         object to get PostCSS input source.
-     *
-     * @example
-     * error.input.file //=> 'a.css'
-     * error.file       //=> 'a.sass'
-     */
-
-    return CssSyntaxError;
-}();
-
-exports.default = CssSyntaxError;
-module.exports = exports['default'];
-
-}, {"19":19,"520":520}];
+});
+}, {"520":520}];

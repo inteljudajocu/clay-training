@@ -1,48 +1,35 @@
-window.modules["125"] = [function(require,module,exports){var TYPE = require(74).TYPE;
-
-var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
-
-function consumeRaw(startToken) {
-    return this.Raw(startToken, LEFTCURLYBRACKET, 0, false, true);
-}
-
-module.exports = {
-    name: 'Rule',
+window.modules["125"] = [function(require,module,exports){module.exports = {
+    name: 'Raw',
     structure: {
-        prelude: ['SelectorList', 'Raw'],
-        block: ['Block']
+        value: String
     },
-    parse: function() {
-        var startToken = this.scanner.currentToken;
-        var startOffset = this.scanner.tokenStart;
-        var prelude;
-        var block;
+    parse: function(startToken, endTokenType1, endTokenType2, includeTokenType2, excludeWhiteSpace) {
+        var startOffset = this.scanner.getTokenStart(startToken);
+        var endOffset;
 
-        if (this.parseRulePrelude) {
-            prelude = this.tolerantParse(this.SelectorList, consumeRaw);
+        this.scanner.skip(
+            this.scanner.getRawLength(
+                startToken,
+                endTokenType1,
+                endTokenType2,
+                includeTokenType2
+            )
+        );
 
-            if (this.tolerant && !this.scanner.eof) {
-                if (prelude.type !== 'Raw' && this.scanner.tokenType !== LEFTCURLYBRACKET) {
-                    prelude = consumeRaw.call(this, startToken);
-                }
-            }
+        if (excludeWhiteSpace && this.scanner.tokenStart > startOffset) {
+            endOffset = this.scanner.getOffsetExcludeWS();
         } else {
-            prelude = consumeRaw.call(this, startToken);
+            endOffset = this.scanner.tokenStart;
         }
 
-        block = this.Block(true);
-
         return {
-            type: 'Rule',
-            loc: this.getLocation(startOffset, this.scanner.tokenStart),
-            prelude: prelude,
-            block: block
+            type: 'Raw',
+            loc: this.getLocation(startOffset, endOffset),
+            value: this.scanner.source.substring(startOffset, endOffset)
         };
     },
     generate: function(processChunk, node) {
-        this.generate(processChunk, node.prelude);
-        this.generate(processChunk, node.block);
-    },
-    walkContext: 'rule'
+        processChunk(node.value);
+    }
 };
-}, {"74":74}];
+}, {}];

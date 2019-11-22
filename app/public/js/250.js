@@ -1,22 +1,27 @@
-window.modules["250"] = [function(require,module,exports){var Hash = require(232),
-    ListCache = require(238),
-    Map = require(244);
+window.modules["250"] = [function(require,module,exports){var assocIndexOf = require(287);
 
 /**
- * Removes all key-value entries from the map.
+ * Sets the list cache `key` to `value`.
  *
  * @private
- * @name clear
- * @memberOf MapCache
+ * @name set
+ * @memberOf ListCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the list cache instance.
  */
-function mapCacheClear() {
-  this.size = 0;
-  this.__data__ = {
-    'hash': new Hash,
-    'map': new (Map || ListCache),
-    'string': new Hash
-  };
+function listCacheSet(key, value) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  if (index < 0) {
+    ++this.size;
+    data.push([key, value]);
+  } else {
+    data[index][1] = value;
+  }
+  return this;
 }
 
-module.exports = mapCacheClear;
-}, {"232":232,"238":238,"244":244}];
+module.exports = listCacheSet;
+}, {"287":287}];

@@ -1,71 +1,83 @@
-window.modules["198"] = [function(require,module,exports){var entityMap = require(200),
-    legacyMap = require(199),
-    xmlMap = require(201),
-    decodeCodePoint = require(202);
+window.modules["198"] = [function(require,module,exports){var inverseXML = getInverseObj(require(201)),
+    xmlReplacer = getInverseReplacer(inverseXML);
 
-var decodeXMLStrict = getStrictDecoder(xmlMap),
-    decodeHTMLStrict = getStrictDecoder(entityMap);
+exports.XML = getInverse(inverseXML, xmlReplacer);
 
-function getStrictDecoder(map) {
-    var keys = Object.keys(map).join("|"),
-        replace = getReplacer(map);
+var inverseHTML = getInverseObj(require(200)),
+    htmlReplacer = getInverseReplacer(inverseHTML);
 
-    keys += "|#[xX][\\da-fA-F]+|#\\d+";
+exports.HTML = getInverse(inverseHTML, htmlReplacer);
 
-    var re = new RegExp("&(?:" + keys + ");", "g");
-
-    return function(str) {
-        return String(str).replace(re, replace);
-    };
+function getInverseObj(obj) {
+    return Object.keys(obj)
+        .sort()
+        .reduce(function(inverse, name) {
+            inverse[obj[name]] = "&" + name + ";";
+            return inverse;
+        }, {});
 }
 
-var decodeHTML = (function() {
-    var legacy = Object.keys(legacyMap).sort(sorter);
+function getInverseReplacer(inverse) {
+    var single = [],
+        multiple = [];
 
-    var keys = Object.keys(entityMap).sort(sorter);
-
-    for (var i = 0, j = 0; i < keys.length; i++) {
-        if (legacy[j] === keys[i]) {
-            keys[i] += ";?";
-            j++;
+    Object.keys(inverse).forEach(function(k) {
+        if (k.length === 1) {
+            single.push("\\" + k);
         } else {
-            keys[i] += ";";
+            multiple.push(k);
         }
-    }
+    });
 
-    var re = new RegExp("&(?:" + keys.join("|") + "|#[xX][\\da-fA-F]+;?|#\\d+;?)", "g"),
-        replace = getReplacer(entityMap);
+    //TODO add ranges
+    multiple.unshift("[" + single.join("") + "]");
 
-    function replacer(str) {
-        if (str.substr(-1) !== ";") str += ";";
-        return replace(str);
-    }
-
-    //TODO consider creating a merged map
-    return function(str) {
-        return String(str).replace(re, replacer);
-    };
-})();
-
-function sorter(a, b) {
-    return a < b ? 1 : -1;
+    return new RegExp(multiple.join("|"), "g");
 }
 
-function getReplacer(map) {
-    return function replace(str) {
-        if (str.charAt(1) === "#") {
-            if (str.charAt(2) === "X" || str.charAt(2) === "x") {
-                return decodeCodePoint(parseInt(str.substr(3), 16));
-            }
-            return decodeCodePoint(parseInt(str.substr(2), 10));
-        }
-        return map[str.slice(1, -1)];
+var re_nonASCII = /[^\0-\x7F]/g,
+    re_astralSymbols = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+
+function singleCharReplacer(c) {
+    return (
+        "&#x" +
+        c
+            .charCodeAt(0)
+            .toString(16)
+            .toUpperCase() +
+        ";"
+    );
+}
+
+function astralReplacer(c) {
+    // http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+    var high = c.charCodeAt(0);
+    var low = c.charCodeAt(1);
+    var codePoint = (high - 0xd800) * 0x400 + low - 0xdc00 + 0x10000;
+    return "&#x" + codePoint.toString(16).toUpperCase() + ";";
+}
+
+function getInverse(inverse, re) {
+    function func(name) {
+        return inverse[name];
+    }
+
+    return function(data) {
+        return data
+            .replace(re, func)
+            .replace(re_astralSymbols, astralReplacer)
+            .replace(re_nonASCII, singleCharReplacer);
     };
 }
 
-module.exports = {
-    XML: decodeXMLStrict,
-    HTML: decodeHTML,
-    HTMLStrict: decodeHTMLStrict
-};
-}, {"199":199,"200":200,"201":201,"202":202}];
+var re_xmlChars = getInverseReplacer(inverseXML);
+
+function escapeXML(data) {
+    return data
+        .replace(re_xmlChars, singleCharReplacer)
+        .replace(re_astralSymbols, astralReplacer)
+        .replace(re_nonASCII, singleCharReplacer);
+}
+
+exports.escape = escapeXML;
+}, {"200":200,"201":201}];

@@ -1,8 +1,6 @@
-window.modules["620"] = [function(require,module,exports){var makeString = require(576);
+window.modules["620"] = [function(require,module,exports){var pad = require(644);
 
-module.exports = function titleize(str) {
-  return makeString(str).toLowerCase().replace(/(?:^|\s|-)\S/g, function(c) {
-    return c.toUpperCase();
-  });
+module.exports = function lrpad(str, length, padStr) {
+  return pad(str, length, padStr, 'both');
 };
-}, {"576":576}];
+}, {"644":644}];

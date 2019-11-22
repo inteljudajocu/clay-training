@@ -1,39 +1,9 @@
-window.modules["454"] = [function(require,module,exports){"use strict";
-
-exports.__esModule = true;
-
-var _types = require(460);
-
-Object.keys(_types).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _types[key];
-    }
-  });
-});
-
-var _constructors = require(476);
-
-Object.keys(_constructors).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _constructors[key];
-    }
-  });
-});
-
-var _guards = require(478);
-
-Object.keys(_guards).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _guards[key];
-    }
-  });
-});}, {"460":460,"476":476,"478":478}];
+window.modules["454"] = [function(require,module,exports){/*
+ * Copyright 2009-2011 Mozilla Foundation and contributors
+ * Licensed under the New BSD license. See LICENSE.txt or:
+ * http://opensource.org/licenses/BSD-3-Clause
+ */
+exports.SourceMapGenerator = require(576).SourceMapGenerator;
+exports.SourceMapConsumer = require(575).SourceMapConsumer;
+exports.SourceNode = require(577).SourceNode;
+}, {"575":575,"576":576,"577":577}];

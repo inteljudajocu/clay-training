@@ -1,132 +1,140 @@
-window.modules["426"] = [function(require,module,exports){'use strict';
+window.modules["426"] = [function(require,module,exports){var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-exports.__esModule = true;
+function isEqualSelectors(a, b) {
+    var cursor1 = a.head;
+    var cursor2 = b.head;
 
-var _container = require(427);
-
-var _container2 = _interopRequireDefault(_container);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/**
- * Represents an at-rule.
- *
- * If it’s followed in the CSS by a {} block, this node will have
- * a nodes property representing its children.
- *
- * @extends Container
- *
- * @example
- * const root = postcss.parse('@charset "UTF-8"; @media print {}');
- *
- * const charset = root.first;
- * charset.type  //=> 'atrule'
- * charset.nodes //=> undefined
- *
- * const media = root.last;
- * media.nodes   //=> []
- */
-var AtRule = function (_Container) {
-  _inherits(AtRule, _Container);
-
-  function AtRule(defaults) {
-    _classCallCheck(this, AtRule);
-
-    var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
-
-    _this.type = 'atrule';
-    return _this;
-  }
-
-  AtRule.prototype.append = function append() {
-    var _Container$prototype$;
-
-    if (!this.nodes) this.nodes = [];
-
-    for (var _len = arguments.length, children = Array(_len), _key = 0; _key < _len; _key++) {
-      children[_key] = arguments[_key];
+    while (cursor1 !== null && cursor2 !== null && cursor1.data.id === cursor2.data.id) {
+        cursor1 = cursor1.next;
+        cursor2 = cursor2.next;
     }
 
-    return (_Container$prototype$ = _Container.prototype.append).call.apply(_Container$prototype$, [this].concat(children));
-  };
+    return cursor1 === null && cursor2 === null;
+}
 
-  AtRule.prototype.prepend = function prepend() {
-    var _Container$prototype$2;
+function isEqualDeclarations(a, b) {
+    var cursor1 = a.head;
+    var cursor2 = b.head;
 
-    if (!this.nodes) this.nodes = [];
-
-    for (var _len2 = arguments.length, children = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      children[_key2] = arguments[_key2];
+    while (cursor1 !== null && cursor2 !== null && cursor1.data.id === cursor2.data.id) {
+        cursor1 = cursor1.next;
+        cursor2 = cursor2.next;
     }
 
-    return (_Container$prototype$2 = _Container.prototype.prepend).call.apply(_Container$prototype$2, [this].concat(children));
-  };
+    return cursor1 === null && cursor2 === null;
+}
 
-  /**
-   * @memberof AtRule#
-   * @member {string} name - the at-rule’s name immediately follows the `@`
-   *
-   * @example
-   * const root  = postcss.parse('@media print {}');
-   * media.name //=> 'media'
-   * const media = root.first;
-   */
+function compareDeclarations(declarations1, declarations2) {
+    var result = {
+        eq: [],
+        ne1: [],
+        ne2: [],
+        ne2overrided: []
+    };
 
-  /**
-   * @memberof AtRule#
-   * @member {string} params - the at-rule’s parameters, the values
-   *                           that follow the at-rule’s name but precede
-   *                           any {} block
-   *
-   * @example
-   * const root  = postcss.parse('@media print, screen {}');
-   * const media = root.first;
-   * media.params //=> 'print, screen'
-   */
+    var fingerprints = Object.create(null);
+    var declarations2hash = Object.create(null);
 
-  /**
-   * @memberof AtRule#
-   * @member {object} raws - Information to generate byte-to-byte equal
-   *                         node string as it was in the origin input.
-   *
-   * Every parser saves its own properties,
-   * but the default CSS parser uses:
-   *
-   * * `before`: the space symbols before the node. It also stores `*`
-   *   and `_` symbols before the declaration (IE hack).
-   * * `after`: the space symbols after the last child of the node
-   *   to the end of the node.
-   * * `between`: the symbols between the property and value
-   *   for declarations, selector and `{` for rules, or last parameter
-   *   and `{` for at-rules.
-   * * `semicolon`: contains true if the last child has
-   *   an (optional) semicolon.
-   * * `afterName`: the space between the at-rule name and its parameters.
-   *
-   * PostCSS cleans at-rule parameters from comments and extra spaces,
-   * but it stores origin content in raws properties.
-   * As such, if you don’t change a declaration’s value,
-   * PostCSS will use the raw value with comments.
-   *
-   * @example
-   * const root = postcss.parse('  @media\nprint {\n}')
-   * root.first.first.raws //=> { before: '  ',
-   *                       //     between: ' ',
-   *                       //     afterName: '\n',
-   *                       //     after: '\n' }
-   */
+    for (var cursor = declarations2.head; cursor; cursor = cursor.next)  {
+        declarations2hash[cursor.data.id] = true;
+    }
 
+    for (var cursor = declarations1.head; cursor; cursor = cursor.next)  {
+        var data = cursor.data;
 
-  return AtRule;
-}(_container2.default);
+        if (data.fingerprint) {
+            fingerprints[data.fingerprint] = data.important;
+        }
 
-exports.default = AtRule;
-module.exports = exports['default'];
+        if (declarations2hash[data.id]) {
+            declarations2hash[data.id] = false;
+            result.eq.push(data);
+        } else {
+            result.ne1.push(data);
+        }
+    }
 
-}, {"427":427}];
+    for (var cursor = declarations2.head; cursor; cursor = cursor.next)  {
+        var data = cursor.data;
+
+        if (declarations2hash[data.id]) {
+            // if declarations1 has overriding declaration, this is not a difference
+            // but take in account !important - prev should be equal or greater than follow
+            if (hasOwnProperty.call(fingerprints, data.fingerprint) &&
+                Number(fingerprints[data.fingerprint]) >= Number(data.important)) {
+                result.ne2overrided.push(data);
+            } else {
+                result.ne2.push(data);
+            }
+        }
+    }
+
+    return result;
+}
+
+function addSelectors(dest, source) {
+    source.each(function(sourceData) {
+        var newStr = sourceData.id;
+        var cursor = dest.head;
+
+        while (cursor) {
+            var nextStr = cursor.data.id;
+
+            if (nextStr === newStr) {
+                return;
+            }
+
+            if (nextStr > newStr) {
+                break;
+            }
+
+            cursor = cursor.next;
+        }
+
+        dest.insert(dest.createItem(sourceData), cursor);
+    });
+
+    return dest;
+}
+
+// check if simpleselectors has no equal specificity and element selector
+function hasSimilarSelectors(selectors1, selectors2) {
+    return selectors1.some(function(a) {
+        return selectors2.some(function(b) {
+            return a.compareMarker === b.compareMarker;
+        });
+    });
+}
+
+// test node can't to be skipped
+function unsafeToSkipNode(node) {
+    switch (node.type) {
+        case 'Rule':
+            // unsafe skip ruleset with selector similarities
+            return hasSimilarSelectors(node.prelude.children, this);
+
+        case 'Atrule':
+            // can skip at-rules with blocks
+            if (node.block) {
+                // unsafe skip at-rule if block contains something unsafe to skip
+                return node.block.children.some(unsafeToSkipNode, this);
+            }
+            break;
+
+        case 'Declaration':
+            return false;
+    }
+
+    // unsafe by default
+    return true;
+}
+
+module.exports = {
+    isEqualSelectors: isEqualSelectors,
+    isEqualDeclarations: isEqualDeclarations,
+    compareDeclarations: compareDeclarations,
+    addSelectors: addSelectors,
+    hasSimilarSelectors: hasSimilarSelectors,
+    unsafeToSkipNode: unsafeToSkipNode
+};
+}, {}];

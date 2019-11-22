@@ -1,24 +1,19 @@
 window.modules["359"] = [function(require,module,exports){/**
- * This method returns a new empty array.
+ * Converts `set` to an array of its values.
  *
- * @static
- * @memberOf _
- * @since 4.13.0
- * @category Util
- * @returns {Array} Returns the new empty array.
- * @example
- *
- * var arrays = _.times(2, _.stubArray);
- *
- * console.log(arrays);
- * // => [[], []]
- *
- * console.log(arrays[0] === arrays[1]);
- * // => false
+ * @private
+ * @param {Object} set The set to convert.
+ * @returns {Array} Returns the values.
  */
-function stubArray() {
-  return [];
+function setToArray(set) {
+  var index = -1,
+      result = Array(set.size);
+
+  set.forEach(function(value) {
+    result[++index] = value;
+  });
+  return result;
 }
 
-module.exports = stubArray;
+module.exports = setToArray;
 }, {}];

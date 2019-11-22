@@ -1,25 +1,34 @@
-window.modules["326"] = [function(require,module,exports){var isStrictComparable = require(328),
-    keys = require(288);
+window.modules["326"] = [function(require,module,exports){var baseIsEqual = require(309),
+    get = require(3),
+    hasIn = require(338),
+    isKey = require(336),
+    isStrictComparable = require(337),
+    matchesStrictComparable = require(334),
+    toKey = require(297);
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
 
 /**
- * Gets the property names, values, and compare flags of `object`.
+ * The base implementation of `_.matchesProperty` which doesn't clone `srcValue`.
  *
  * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the match data of `object`.
+ * @param {string} path The path of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
  */
-function getMatchData(object) {
-  var result = keys(object),
-      length = result.length;
-
-  while (length--) {
-    var key = result[length],
-        value = object[key];
-
-    result[length] = [key, value, isStrictComparable(value)];
+function baseMatchesProperty(path, srcValue) {
+  if (isKey(path) && isStrictComparable(srcValue)) {
+    return matchesStrictComparable(toKey(path), srcValue);
   }
-  return result;
+  return function(object) {
+    var objValue = get(object, path);
+    return (objValue === undefined && objValue === srcValue)
+      ? hasIn(object, path)
+      : baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG);
+  };
 }
 
-module.exports = getMatchData;
-}, {"288":288,"328":328}];
+module.exports = baseMatchesProperty;
+}, {"3":3,"297":297,"309":309,"334":334,"336":336,"337":337,"338":338}];

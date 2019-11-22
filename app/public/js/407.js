@@ -1,34 +1,80 @@
-window.modules["407"] = [function(require,module,exports){var UNICODE = '\\\\[0-9a-f]{1,6}(\\r\\n|[ \\n\\r\\t\\f])?';
-var ESCAPE = '(' + UNICODE + '|\\\\[^\\n\\r\\f0-9a-fA-F])';
-var NONPRINTABLE = '\u0000\u0008\u000b\u000e-\u001f\u007f';
-var SAFE_URL = new RegExp('^(' + ESCAPE + '|[^\"\'\\(\\)\\\\\\s' + NONPRINTABLE + '])*$', 'i');
+window.modules["407"] = [function(require,module,exports){var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-module.exports = function(node) {
-    var value = node.value;
+function buildMap(list, caseInsensitive) {
+    var map = Object.create(null);
 
-    if (value.type !== 'String') {
-        return;
+    if (!Array.isArray(list)) {
+        return null;
     }
 
-    var quote = value.value[0];
-    var url = value.value.substr(1, value.value.length - 2);
+    for (var i = 0; i < list.length; i++) {
+        var name = list[i];
 
-    // convert `\\` to `/`
-    url = url.replace(/\\\\/g, '/');
+        if (caseInsensitive) {
+            name = name.toLowerCase();
+        }
 
-    // remove quotes when safe
-    // https://www.w3.org/TR/css-syntax-3/#url-unquoted-diagram
-    if (SAFE_URL.test(url)) {
-        node.value = {
-            type: 'Raw',
-            loc: node.value.loc,
-            value: url
-        };
-    } else {
-        // use double quotes if string has no double quotes
-        // otherwise use original quotes
-        // TODO: make better quote type selection
-        node.value.value = url.indexOf('"') === -1 ? '"' + url + '"' : quote + url + quote;
+        map[name] = true;
     }
+
+    return map;
+}
+
+function buildList(data) {
+    if (!data) {
+        return null;
+    }
+
+    var tags = buildMap(data.tags, true);
+    var ids = buildMap(data.ids);
+    var classes = buildMap(data.classes);
+
+    if (tags === null &&
+        ids === null &&
+        classes === null) {
+        return null;
+    }
+
+    return {
+        tags: tags,
+        ids: ids,
+        classes: classes
+    };
+}
+
+function buildIndex(data) {
+    var scopes = false;
+
+    if (data.scopes && Array.isArray(data.scopes)) {
+        scopes = Object.create(null);
+
+        for (var i = 0; i < data.scopes.length; i++) {
+            var list = data.scopes[i];
+
+            if (!list || !Array.isArray(list)) {
+                throw new Error('Wrong usage format');
+            }
+
+            for (var j = 0; j < list.length; j++) {
+                var name = list[j];
+
+                if (hasOwnProperty.call(scopes, name)) {
+                    throw new Error('Class can\'t be used for several scopes: ' + name);
+                }
+
+                scopes[name] = i + 1;
+            }
+        }
+    }
+
+    return {
+        whitelist: buildList(data),
+        blacklist: buildList(data.blacklist),
+        scopes: scopes
+    };
+}
+
+module.exports = {
+    buildIndex: buildIndex
 };
 }, {}];

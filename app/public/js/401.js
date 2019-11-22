@@ -1,10 +1,15 @@
-window.modules["401"] = [function(require,module,exports){var resolveKeyword = require(57).keyword;
-var compressKeyframes = require(402);
+window.modules["401"] = [function(require,module,exports){// remove white spaces around operators when safe
+module.exports = function cleanWhitespace(node, item, list) {
+    if (node.value === '+' || node.value === '-') {
+        return;
+    }
 
-module.exports = function(node) {
-    // compress @keyframe selectors
-    if (resolveKeyword(node.name).name === 'keyframes') {
-        compressKeyframes(node);
+    if (item.prev !== null && item.prev.data.type === 'WhiteSpace') {
+        list.remove(item.prev);
+    }
+
+    if (item.next !== null && item.next.data.type === 'WhiteSpace') {
+        list.remove(item.next);
     }
 };
-}, {"57":57,"402":402}];
+}, {}];

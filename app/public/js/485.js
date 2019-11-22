@@ -2,123 +2,94 @@ window.modules["485"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _container = require(480);
-
-var _container2 = _interopRequireDefault(_container);
-
-var _list = require(496);
-
-var _list2 = _interopRequireDefault(_list);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/**
- * Represents a CSS rule: a selector followed by a declaration block.
- *
- * @extends Container
- *
- * @example
- * const root = postcss.parse('a{}');
- * const rule = root.first;
- * rule.type       //=> 'rule'
- * rule.toString() //=> 'a{}'
- */
-var Rule = function (_Container) {
-  _inherits(Rule, _Container);
-
-  function Rule(defaults) {
-    _classCallCheck(this, Rule);
-
-    var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
-
-    _this.type = 'rule';
-    if (!_this.nodes) _this.nodes = [];
-    return _this;
-  }
-
-  /**
-   * An array containing the rule’s individual selectors.
-   * Groups of selectors are split at commas.
-   *
-   * @type {string[]}
-   *
-   * @example
-   * const root = postcss.parse('a, b { }');
-   * const rule = root.first;
-   *
-   * rule.selector  //=> 'a, b'
-   * rule.selectors //=> ['a', 'b']
-   *
-   * rule.selectors = ['a', 'strong'];
-   * rule.selector //=> 'a, strong'
-   */
-
-
-  _createClass(Rule, [{
-    key: 'selectors',
-    get: function get() {
-      return _list2.default.comma(this.selector);
-    },
-    set: function set(values) {
-      var match = this.selector ? this.selector.match(/,\s*/) : null;
-      var sep = match ? match[0] : ',' + this.raw('between', 'beforeOpen');
-      this.selector = values.join(sep);
+var cloneNode = function cloneNode(obj, parent) {
+    if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object') {
+        return obj;
     }
 
-    /**
-     * @memberof Rule#
-     * @member {string} selector - the rule’s full selector represented
-     *                             as a string
-     *
-     * @example
-     * const root = postcss.parse('a, b { }');
-     * const rule = root.first;
-     * rule.selector //=> 'a, b'
-     */
+    var cloned = new obj.constructor();
 
-    /**
-     * @memberof Rule#
-     * @member {object} raws - Information to generate byte-to-byte equal
-     *                         node string as it was in the origin input.
-     *
-     * Every parser saves its own properties,
-     * but the default CSS parser uses:
-     *
-     * * `before`: the space symbols before the node. It also stores `*`
-     *   and `_` symbols before the declaration (IE hack).
-     * * `after`: the space symbols after the last child of the node
-     *   to the end of the node.
-     * * `between`: the symbols between the property and value
-     *   for declarations, selector and `{` for rules, or last parameter
-     *   and `{` for at-rules.
-     * * `semicolon`: contains `true` if the last child has
-     *   an (optional) semicolon.
-     * * `ownSemicolon`: contains `true` if there is semicolon after rule.
-     *
-     * PostCSS cleans selectors from comments and extra spaces,
-     * but it stores origin content in raws properties.
-     * As such, if you don’t change a declaration’s value,
-     * PostCSS will use the raw value with comments.
-     *
-     * @example
-     * const root = postcss.parse('a {\n  color:black\n}')
-     * root.first.first.raws //=> { before: '', between: ' ', after: '\n' }
-     */
+    for (var i in obj) {
+        if (!obj.hasOwnProperty(i)) {
+            continue;
+        }
+        var value = obj[i];
+        var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
 
-  }]);
+        if (i === 'parent' && type === 'object') {
+            if (parent) {
+                cloned[i] = parent;
+            }
+        } else if (value instanceof Array) {
+            cloned[i] = value.map(function (j) {
+                return cloneNode(j, cloned);
+            });
+        } else {
+            cloned[i] = cloneNode(value, cloned);
+        }
+    }
 
-  return Rule;
-}(_container2.default);
+    return cloned;
+};
 
-exports.default = Rule;
-module.exports = exports['default'];
+var _class = function () {
+    function _class() {
+        var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-}, {"480":480,"496":496}];
+        _classCallCheck(this, _class);
+
+        Object.assign(this, opts);
+        this.spaces = this.spaces || {};
+        this.spaces.before = this.spaces.before || '';
+        this.spaces.after = this.spaces.after || '';
+    }
+
+    _class.prototype.remove = function remove() {
+        if (this.parent) {
+            this.parent.removeChild(this);
+        }
+        this.parent = undefined;
+        return this;
+    };
+
+    _class.prototype.replaceWith = function replaceWith() {
+        if (this.parent) {
+            for (var index in arguments) {
+                this.parent.insertBefore(this, arguments[index]);
+            }
+            this.remove();
+        }
+        return this;
+    };
+
+    _class.prototype.next = function next() {
+        return this.parent.at(this.parent.index(this) + 1);
+    };
+
+    _class.prototype.prev = function prev() {
+        return this.parent.at(this.parent.index(this) - 1);
+    };
+
+    _class.prototype.clone = function clone() {
+        var overrides = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        var cloned = cloneNode(this);
+        for (var name in overrides) {
+            cloned[name] = overrides[name];
+        }
+        return cloned;
+    };
+
+    _class.prototype.toString = function toString() {
+        return [this.spaces.before, String(this.value), this.spaces.after].join('');
+    };
+
+    return _class;
+}();
+
+exports.default = _class;
+module.exports = exports['default'];}, {}];

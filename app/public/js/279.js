@@ -1,26 +1,27 @@
-window.modules["279"] = [function(require,module,exports){var defineProperty = require(281);
-
-/**
- * The base implementation of `assignValue` and `assignMergeValue` without
- * value checks.
+window.modules["279"] = [function(require,module,exports){/**
+ * Checks if `value` is classified as an `Array` object.
  *
- * @private
- * @param {Object} object The object to modify.
- * @param {string} key The key of the property to assign.
- * @param {*} value The value to assign.
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
  */
-function baseAssignValue(object, key, value) {
-  if (key == '__proto__' && defineProperty) {
-    defineProperty(object, key, {
-      'configurable': true,
-      'enumerable': true,
-      'value': value,
-      'writable': true
-    });
-  } else {
-    object[key] = value;
-  }
-}
+var isArray = Array.isArray;
 
-module.exports = baseAssignValue;
-}, {"281":281}];
+module.exports = isArray;
+}, {}];

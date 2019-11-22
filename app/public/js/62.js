@@ -1,107 +1,89 @@
 window.modules["62"] = [function(require,module,exports){'use strict';
 
-function isNodeType(node, type) {
-    return node && node.type === type;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var keywords = Object.create(null);
+var properties = Object.create(null);
+var HYPHENMINUS = 45; // '-'.charCodeAt()
+
+function isCustomProperty(str, offset) {
+    return str.length - offset >= 2 &&
+           str.charCodeAt(offset) === HYPHENMINUS &&
+           str.charCodeAt(offset + 1) === HYPHENMINUS;
 }
 
-function serializeMultiplier(multiplier) {
-    if (multiplier.min === 0 && multiplier.max === 0) {
-        return '*';
+function getVendorPrefix(str, offset) {
+    if (str.charCodeAt(offset) === HYPHENMINUS) {
+        // vendor should contain at least one letter
+        var secondDashIndex = str.indexOf('-', offset + 2);
+
+        if (secondDashIndex !== -1) {
+            return str.substring(offset, secondDashIndex + 1);
+        }
     }
 
-    if (multiplier.min === 0 && multiplier.max === 1) {
-        return '?';
-    }
-
-    if (multiplier.min === 1 && multiplier.max === 0) {
-        return multiplier.comma ? '#' : '+';
-    }
-
-    if (multiplier.min === 1 && multiplier.max === 1) {
-        return '';
-    }
-
-    return (
-        (multiplier.comma ? '#' : '') +
-        '{' + multiplier.min + (multiplier.min !== multiplier.max ? ',' + (multiplier.max !== 0 ? multiplier.max : '') : '') + '}'
-    );
+    return '';
 }
 
-function translateSequence(node, forceBraces, decorate) {
-    var result = '';
-
-    if (node.explicit || forceBraces) {
-        result += '[' + (!isNodeType(node.terms[0], 'Comma') ? ' ' : '');
+function getKeywordInfo(keyword) {
+    if (hasOwnProperty.call(keywords, keyword)) {
+        return keywords[keyword];
     }
 
-    result += node.terms.map(function(term) {
-        return translate(term, forceBraces, decorate);
-    }).join(node.combinator === ' ' ? ' ' : ' ' + node.combinator + ' ');
+    var name = keyword.toLowerCase();
 
-    if (node.explicit || forceBraces) {
-        result += ' ]';
+    if (hasOwnProperty.call(keywords, name)) {
+        return keywords[keyword] = keywords[name];
     }
 
-    return result;
+    var vendor = !isCustomProperty(name, 0) ? getVendorPrefix(name, 0) : '';
+
+    return keywords[keyword] = Object.freeze({
+        vendor: vendor,
+        prefix: vendor,
+        name: name.substr(vendor.length)
+    });
 }
 
-function translateParentheses(group, forceBraces, decorate) {
-    if (!group.terms.length) {
-        return '()';
+function getPropertyInfo(property) {
+    if (hasOwnProperty.call(properties, property)) {
+        return properties[property];
     }
 
-    return '( ' + translateSequence(group, forceBraces, decorate) + ' )';
+    var name = property;
+    var hack = property[0];
+
+    if (hack === '/') {
+        hack = property[1] === '/' ? '//' : '/';
+    } else if (hack !== '_' &&
+               hack !== '*' &&
+               hack !== '$' &&
+               hack !== '#' &&
+               hack !== '+') {
+        hack = '';
+    }
+
+    var custom = isCustomProperty(name, hack.length);
+
+    if (!custom) {
+        name = name.toLowerCase();
+        if (hasOwnProperty.call(properties, name)) {
+            return properties[property] = properties[name];
+        }
+    }
+
+    var vendor = !custom ? getVendorPrefix(name, hack.length) : '';
+
+    return properties[property] = Object.freeze({
+        hack: hack,
+        vendor: vendor,
+        prefix: hack + vendor,
+        name: name.substr(hack.length + vendor.length),
+        custom: custom
+    });
 }
 
-function translate(node, forceBraces, decorate) {
-    var result;
-
-    switch (node.type) {
-        case 'Group':
-            result =
-                translateSequence(node, forceBraces, decorate) +
-                (node.disallowEmpty ? '!' : '') +
-                serializeMultiplier(node.multiplier);
-            break;
-
-        case 'Keyword':
-            result = node.name;
-            break;
-
-        case 'Function':
-            result = node.name + translateParentheses(node.children, forceBraces, decorate);
-            break;
-
-        case 'Parentheses': // replace for seq('(' seq(...node.children) ')')
-            result = translateParentheses(node.children, forceBraces, decorate);
-            break;
-
-        case 'Type':
-            result = '<' + node.name + '>';
-            break;
-
-        case 'Property':
-            result = '<\'' + node.name + '\'>';
-            break;
-
-        case 'Combinator': // remove?
-        case 'Slash':      // replace for String? '/'
-        case 'Percent':    // replace for String? '%'
-        case 'String':
-        case 'Comma':
-            result = node.value;
-            break;
-
-        default:
-            throw new Error('Unknown node type `' + node.type + '`');
-    }
-
-    if (typeof decorate === 'function') {
-        result = decorate(result, node);
-    }
-
-    return result;
-}
-
-module.exports = translate;
+module.exports = {
+    keyword: getKeywordInfo,
+    property: getPropertyInfo
+};
 }, {}];

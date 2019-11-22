@@ -1,611 +1,207 @@
-window.modules["537"] = [function(require,module,exports){(function (process){
-"use strict";
+window.modules["537"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.default = void 0;
 
-var _cssSyntaxError = _interopRequireDefault(require(541));
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _stringifier = _interopRequireDefault(require(549));
+var _warning = require(544);
 
-var _stringify = _interopRequireDefault(require(544));
+var _warning2 = _interopRequireDefault(_warning);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function cloneNode(obj, parent) {
-  var cloned = new obj.constructor();
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  for (var i in obj) {
-    if (!obj.hasOwnProperty(i)) continue;
-    var value = obj[i];
-    var type = typeof value;
-
-    if (i === 'parent' && type === 'object') {
-      if (parent) cloned[i] = parent;
-    } else if (i === 'source') {
-      cloned[i] = value;
-    } else if (value instanceof Array) {
-      cloned[i] = value.map(function (j) {
-        return cloneNode(j, cloned);
-      });
-    } else {
-      if (type === 'object' && value !== null) value = cloneNode(value);
-      cloned[i] = value;
-    }
-  }
-
-  return cloned;
-}
 /**
- * All node classes inherit the following common methods.
+ * Provides the result of the PostCSS transformations.
  *
- * @abstract
+ * A Result instance is returned by {@link LazyResult#then}
+ * or {@link Root#toResult} methods.
+ *
+ * @example
+ * postcss([cssnext]).process(css).then(function (result) {
+ *    console.log(result.css);
+ * });
+ *
+ * @example
+ * var result2 = postcss.parse(css).toResult();
  */
+var Result = function () {
 
-
-var Node =
-/*#__PURE__*/
-function () {
   /**
-   * @param {object} [defaults] Value for node properties.
+   * @param {Processor} processor - processor used for this transformation.
+   * @param {Root}      root      - Root node after all transformations.
+   * @param {processOptions} opts - options from the {@link Processor#process}
+   *                                or {@link Root#toResult}
    */
-  function Node(defaults) {
-    if (defaults === void 0) {
-      defaults = {};
-    }
+  function Result(processor, root, opts) {
+    _classCallCheck(this, Result);
 
-    this.raws = {};
+    /**
+     * @member {Processor} - The Processor instance used
+     *                       for this transformation.
+     *
+     * @example
+     * for ( let plugin of result.processor.plugins) {
+     *   if ( plugin.postcssPlugin === 'postcss-bad' ) {
+     *     throw 'postcss-good is incompatible with postcss-bad';
+     *   }
+     * });
+     */
+    this.processor = processor;
+    /**
+     * @member {Message[]} - Contains messages from plugins
+     *                       (e.g., warnings or custom messages).
+     *                       Each message should have type
+     *                       and plugin properties.
+     *
+     * @example
+     * postcss.plugin('postcss-min-browser', () => {
+     *   return (root, result) => {
+     *     var browsers = detectMinBrowsersByCanIUse(root);
+     *     result.messages.push({
+     *       type:    'min-browser',
+     *       plugin:  'postcss-min-browser',
+     *       browsers: browsers
+     *     });
+     *   };
+     * });
+     */
+    this.messages = [];
+    /**
+     * @member {Root} - Root node after all transformations.
+     *
+     * @example
+     * root.toResult().root == root;
+     */
+    this.root = root;
+    /**
+     * @member {processOptions} - Options from the {@link Processor#process}
+     *                            or {@link Root#toResult} call
+     *                            that produced this Result instance.
+     *
+     * @example
+     * root.toResult(opts).opts == opts;
+     */
+    this.opts = opts;
+    /**
+     * @member {string} - A CSS string representing of {@link Result#root}.
+     *
+     * @example
+     * postcss.parse('a{}').toResult().css //=> "a{}"
+     */
+    this.css = undefined;
+    /**
+     * @member {SourceMapGenerator} - An instance of `SourceMapGenerator`
+     *                                class from the `source-map` library,
+     *                                representing changes
+     *                                to the {@link Result#root} instance.
+     *
+     * @example
+     * result.map.toJSON() //=> { version: 3, file: 'a.css', … }
+     *
+     * @example
+     * if ( result.map ) {
+     *   fs.writeFileSync(result.opts.to + '.map', result.map.toString());
+     * }
+     */
+    this.map = undefined;
+  }
 
-    if (window.process.env.NODE_ENV !== 'production') {
-      if (typeof defaults !== 'object' && typeof defaults !== 'undefined') {
-        throw new Error('PostCSS nodes constructor accepts object, not ' + JSON.stringify(defaults));
+  /**
+   * Returns for @{link Result#css} content.
+   *
+   * @example
+   * result + '' === result.css
+   *
+   * @return {string} string representing of {@link Result#root}
+   */
+
+
+  Result.prototype.toString = function toString() {
+    return this.css;
+  };
+
+  /**
+   * Creates an instance of {@link Warning} and adds it
+   * to {@link Result#messages}.
+   *
+   * @param {string} text        - warning message
+   * @param {Object} [opts]      - warning options
+   * @param {Node}   opts.node   - CSS node that caused the warning
+   * @param {string} opts.word   - word in CSS source that caused the warning
+   * @param {number} opts.index  - index in CSS node string that caused
+   *                               the warning
+   * @param {string} opts.plugin - name of the plugin that created
+   *                               this warning. {@link Result#warn} fills
+   *                               this property automatically.
+   *
+   * @return {Warning} created warning
+   */
+
+
+  Result.prototype.warn = function warn(text) {
+    var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    if (!opts.plugin) {
+      if (this.lastPlugin && this.lastPlugin.postcssPlugin) {
+        opts.plugin = this.lastPlugin.postcssPlugin;
       }
     }
 
-    for (var name in defaults) {
-      this[name] = defaults[name];
-    }
-  }
+    var warning = new _warning2.default(text, opts);
+    this.messages.push(warning);
+
+    return warning;
+  };
+
   /**
-   * Returns a `CssSyntaxError` instance containing the original position
-   * of the node in the source, showing line and column numbers and also
-   * a small excerpt to facilitate debugging.
-   *
-   * If present, an input source map will be used to get the original position
-   * of the source, even from a previous compilation step
-   * (e.g., from Sass compilation).
-   *
-   * This method produces very useful error messages.
-   *
-   * @param {string} message     Error description.
-   * @param {object} [opts]      Options.
-   * @param {string} opts.plugin Plugin name that created this error.
-   *                             PostCSS will set it automatically.
-   * @param {string} opts.word   A word inside a node’s string that should
-   *                             be highlighted as the source of the error.
-   * @param {number} opts.index  An index inside a node’s string that should
-   *                             be highlighted as the source of the error.
-   *
-   * @return {CssSyntaxError} Error object to throw it.
+   * Returns warnings from plugins. Filters {@link Warning} instances
+   * from {@link Result#messages}.
    *
    * @example
-   * if (!variables[name]) {
-   *   throw decl.error('Unknown variable ' + name, { word: name })
-   *   // CssSyntaxError: postcss-vars:a.sass:4:3: Unknown variable $black
-   *   //   color: $black
-   *   // a
-   *   //          ^
-   *   //   background: white
-   * }
+   * result.warnings().forEach(warn => {
+   *   console.warn(warn.toString());
+   * });
+   *
+   * @return {Warning[]} warnings from plugins
    */
 
 
-  var _proto = Node.prototype;
-
-  _proto.error = function error(message, opts) {
-    if (opts === void 0) {
-      opts = {};
-    }
-
-    if (this.source) {
-      var pos = this.positionBy(opts);
-      return this.source.input.error(message, pos.line, pos.column, opts);
-    }
-
-    return new _cssSyntaxError.default(message);
-  }
-  /**
-   * This method is provided as a convenience wrapper for {@link Result#warn}.
-   *
-   * @param {Result} result      The {@link Result} instance
-   *                             that will receive the warning.
-   * @param {string} text        Warning message.
-   * @param {object} [opts]      Options
-   * @param {string} opts.plugin Plugin name that created this warning.
-   *                             PostCSS will set it automatically.
-   * @param {string} opts.word   A word inside a node’s string that should
-   *                             be highlighted as the source of the warning.
-   * @param {number} opts.index  An index inside a node’s string that should
-   *                             be highlighted as the source of the warning.
-   *
-   * @return {Warning} Created warning object.
-   *
-   * @example
-   * const plugin = postcss.plugin('postcss-deprecated', () => {
-   *   return (root, result) => {
-   *     root.walkDecls('bad', decl => {
-   *       decl.warn(result, 'Deprecated property bad')
-   *     })
-   *   }
-   * })
-   */
-  ;
-
-  _proto.warn = function warn(result, text, opts) {
-    var data = {
-      node: this
-    };
-
-    for (var i in opts) {
-      data[i] = opts[i];
-    }
-
-    return result.warn(text, data);
-  }
-  /**
-   * Removes the node from its parent and cleans the parent properties
-   * from the node and its children.
-   *
-   * @example
-   * if (decl.prop.match(/^-webkit-/)) {
-   *   decl.remove()
-   * }
-   *
-   * @return {Node} Node to make calls chain.
-   */
-  ;
-
-  _proto.remove = function remove() {
-    if (this.parent) {
-      this.parent.removeChild(this);
-    }
-
-    this.parent = undefined;
-    return this;
-  }
-  /**
-   * Returns a CSS string representing the node.
-   *
-   * @param {stringifier|syntax} [stringifier] A syntax to use
-   *                                           in string generation.
-   *
-   * @return {string} CSS string of this node.
-   *
-   * @example
-   * postcss.rule({ selector: 'a' }).toString() //=> "a {}"
-   */
-  ;
-
-  _proto.toString = function toString(stringifier) {
-    if (stringifier === void 0) {
-      stringifier = _stringify.default;
-    }
-
-    if (stringifier.stringify) stringifier = stringifier.stringify;
-    var result = '';
-    stringifier(this, function (i) {
-      result += i;
+  Result.prototype.warnings = function warnings() {
+    return this.messages.filter(function (i) {
+      return i.type === 'warning';
     });
-    return result;
-  }
-  /**
-   * Returns an exact clone of the node.
-   *
-   * The resulting cloned node and its (cloned) children will retain
-   * code style properties.
-   *
-   * @param {object} [overrides] New properties to override in the clone.
-   *
-   * @example
-   * decl.raws.before    //=> "\n  "
-   * const cloned = decl.clone({ prop: '-moz-' + decl.prop })
-   * cloned.raws.before  //=> "\n  "
-   * cloned.toString()   //=> -moz-transform: scale(0)
-   *
-   * @return {Node} Clone of the node.
-   */
-  ;
-
-  _proto.clone = function clone(overrides) {
-    if (overrides === void 0) {
-      overrides = {};
-    }
-
-    var cloned = cloneNode(this);
-
-    for (var name in overrides) {
-      cloned[name] = overrides[name];
-    }
-
-    return cloned;
-  }
-  /**
-   * Shortcut to clone the node and insert the resulting cloned node
-   * before the current node.
-   *
-   * @param {object} [overrides] Mew properties to override in the clone.
-   *
-   * @example
-   * decl.cloneBefore({ prop: '-moz-' + decl.prop })
-   *
-   * @return {Node} New node
-   */
-  ;
-
-  _proto.cloneBefore = function cloneBefore(overrides) {
-    if (overrides === void 0) {
-      overrides = {};
-    }
-
-    var cloned = this.clone(overrides);
-    this.parent.insertBefore(this, cloned);
-    return cloned;
-  }
-  /**
-   * Shortcut to clone the node and insert the resulting cloned node
-   * after the current node.
-   *
-   * @param {object} [overrides] New properties to override in the clone.
-   *
-   * @return {Node} New node.
-   */
-  ;
-
-  _proto.cloneAfter = function cloneAfter(overrides) {
-    if (overrides === void 0) {
-      overrides = {};
-    }
-
-    var cloned = this.clone(overrides);
-    this.parent.insertAfter(this, cloned);
-    return cloned;
-  }
-  /**
-   * Inserts node(s) before the current node and removes the current node.
-   *
-   * @param {...Node} nodes Mode(s) to replace current one.
-   *
-   * @example
-   * if (atrule.name === 'mixin') {
-   *   atrule.replaceWith(mixinRules[atrule.params])
-   * }
-   *
-   * @return {Node} Current node to methods chain.
-   */
-  ;
-
-  _proto.replaceWith = function replaceWith() {
-    if (this.parent) {
-      for (var _len = arguments.length, nodes = new Array(_len), _key = 0; _key < _len; _key++) {
-        nodes[_key] = arguments[_key];
-      }
-
-      for (var _i = 0; _i < nodes.length; _i++) {
-        var node = nodes[_i];
-        this.parent.insertBefore(this, node);
-      }
-
-      this.remove();
-    }
-
-    return this;
-  }
-  /**
-   * Returns the next child of the node’s parent.
-   * Returns `undefined` if the current node is the last child.
-   *
-   * @return {Node|undefined} Next node.
-   *
-   * @example
-   * if (comment.text === 'delete next') {
-   *   const next = comment.next()
-   *   if (next) {
-   *     next.remove()
-   *   }
-   * }
-   */
-  ;
-
-  _proto.next = function next() {
-    if (!this.parent) return undefined;
-    var index = this.parent.index(this);
-    return this.parent.nodes[index + 1];
-  }
-  /**
-   * Returns the previous child of the node’s parent.
-   * Returns `undefined` if the current node is the first child.
-   *
-   * @return {Node|undefined} Previous node.
-   *
-   * @example
-   * const annotation = decl.prev()
-   * if (annotation.type === 'comment') {
-   *   readAnnotation(annotation.text)
-   * }
-   */
-  ;
-
-  _proto.prev = function prev() {
-    if (!this.parent) return undefined;
-    var index = this.parent.index(this);
-    return this.parent.nodes[index - 1];
-  }
-  /**
-   * Insert new node before current node to current node’s parent.
-   *
-   * Just alias for `node.parent.insertBefore(node, add)`.
-   *
-   * @param {Node|object|string|Node[]} add New node.
-   *
-   * @return {Node} This node for methods chain.
-   *
-   * @example
-   * decl.before('content: ""')
-   */
-  ;
-
-  _proto.before = function before(add) {
-    this.parent.insertBefore(this, add);
-    return this;
-  }
-  /**
-   * Insert new node after current node to current node’s parent.
-   *
-   * Just alias for `node.parent.insertAfter(node, add)`.
-   *
-   * @param {Node|object|string|Node[]} add New node.
-   *
-   * @return {Node} This node for methods chain.
-   *
-   * @example
-   * decl.after('color: black')
-   */
-  ;
-
-  _proto.after = function after(add) {
-    this.parent.insertAfter(this, add);
-    return this;
   };
 
-  _proto.toJSON = function toJSON() {
-    var fixed = {};
+  /**
+   * An alias for the {@link Result#css} property.
+   * Use it with syntaxes that generate non-CSS output.
+   * @type {string}
+   *
+   * @example
+   * result.css === result.content;
+   */
 
-    for (var name in this) {
-      if (!this.hasOwnProperty(name)) continue;
-      if (name === 'parent') continue;
-      var value = this[name];
 
-      if (value instanceof Array) {
-        fixed[name] = value.map(function (i) {
-          if (typeof i === 'object' && i.toJSON) {
-            return i.toJSON();
-          } else {
-            return i;
-          }
-        });
-      } else if (typeof value === 'object' && value.toJSON) {
-        fixed[name] = value.toJSON();
-      } else {
-        fixed[name] = value;
-      }
+  _createClass(Result, [{
+    key: 'content',
+    get: function get() {
+      return this.css;
     }
+  }]);
 
-    return fixed;
-  }
-  /**
-   * Returns a {@link Node#raws} value. If the node is missing
-   * the code style property (because the node was manually built or cloned),
-   * PostCSS will try to autodetect the code style property by looking
-   * at other nodes in the tree.
-   *
-   * @param {string} prop          Name of code style property.
-   * @param {string} [defaultType] Name of default value, it can be missed
-   *                               if the value is the same as prop.
-   *
-   * @example
-   * const root = postcss.parse('a { background: white }')
-   * root.nodes[0].append({ prop: 'color', value: 'black' })
-   * root.nodes[0].nodes[1].raws.before   //=> undefined
-   * root.nodes[0].nodes[1].raw('before') //=> ' '
-   *
-   * @return {string} Code style value.
-   */
-  ;
-
-  _proto.raw = function raw(prop, defaultType) {
-    var str = new _stringifier.default();
-    return str.raw(this, prop, defaultType);
-  }
-  /**
-   * Finds the Root instance of the node’s tree.
-   *
-   * @example
-   * root.nodes[0].nodes[0].root() === root
-   *
-   * @return {Root} Root parent.
-   */
-  ;
-
-  _proto.root = function root() {
-    var result = this;
-
-    while (result.parent) {
-      result = result.parent;
-    }
-
-    return result;
-  }
-  /**
-   * Clear the code style properties for the node and its children.
-   *
-   * @param {boolean} [keepBetween] Keep the raws.between symbols.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * node.raws.before  //=> ' '
-   * node.cleanRaws()
-   * node.raws.before  //=> undefined
-   */
-  ;
-
-  _proto.cleanRaws = function cleanRaws(keepBetween) {
-    delete this.raws.before;
-    delete this.raws.after;
-    if (!keepBetween) delete this.raws.between;
-  };
-
-  _proto.positionInside = function positionInside(index) {
-    var string = this.toString();
-    var column = this.source.start.column;
-    var line = this.source.start.line;
-
-    for (var i = 0; i < index; i++) {
-      if (string[i] === '\n') {
-        column = 1;
-        line += 1;
-      } else {
-        column += 1;
-      }
-    }
-
-    return {
-      line: line,
-      column: column
-    };
-  };
-
-  _proto.positionBy = function positionBy(opts) {
-    var pos = this.source.start;
-
-    if (opts.index) {
-      pos = this.positionInside(opts.index);
-    } else if (opts.word) {
-      var index = this.toString().indexOf(opts.word);
-      if (index !== -1) pos = this.positionInside(index);
-    }
-
-    return pos;
-  }
-  /**
-   * @memberof Node#
-   * @member {string} type String representing the node’s type.
-   *                       Possible values are `root`, `atrule`, `rule`,
-   *                       `decl`, or `comment`.
-   *
-   * @example
-   * postcss.decl({ prop: 'color', value: 'black' }).type //=> 'decl'
-   */
-
-  /**
-   * @memberof Node#
-   * @member {Container} parent The node’s parent node.
-   *
-   * @example
-   * root.nodes[0].parent === root
-   */
-
-  /**
-   * @memberof Node#
-   * @member {source} source The input source of the node.
-   *
-   * The property is used in source map generation.
-   *
-   * If you create a node manually (e.g., with `postcss.decl()`),
-   * that node will not have a `source` property and will be absent
-   * from the source map. For this reason, the plugin developer should
-   * consider cloning nodes to create new ones (in which case the new node’s
-   * source will reference the original, cloned node) or setting
-   * the `source` property manually.
-   *
-   * ```js
-   * // Bad
-   * const prefixed = postcss.decl({
-   *   prop: '-moz-' + decl.prop,
-   *   value: decl.value
-   * })
-   *
-   * // Good
-   * const prefixed = decl.clone({ prop: '-moz-' + decl.prop })
-   * ```
-   *
-   * ```js
-   * if (atrule.name === 'add-link') {
-   *   const rule = postcss.rule({ selector: 'a', source: atrule.source })
-   *   atrule.parent.insertBefore(atrule, rule)
-   * }
-   * ```
-   *
-   * @example
-   * decl.source.input.from //=> '/home/ai/a.sass'
-   * decl.source.start      //=> { line: 10, column: 2 }
-   * decl.source.end        //=> { line: 10, column: 12 }
-   */
-
-  /**
-   * @memberof Node#
-   * @member {object} raws Information to generate byte-to-byte equal
-   *                       node string as it was in the origin input.
-   *
-   * Every parser saves its own properties,
-   * but the default CSS parser uses:
-   *
-   * * `before`: the space symbols before the node. It also stores `*`
-   *   and `_` symbols before the declaration (IE hack).
-   * * `after`: the space symbols after the last child of the node
-   *   to the end of the node.
-   * * `between`: the symbols between the property and value
-   *   for declarations, selector and `{` for rules, or last parameter
-   *   and `{` for at-rules.
-   * * `semicolon`: contains true if the last child has
-   *   an (optional) semicolon.
-   * * `afterName`: the space between the at-rule name and its parameters.
-   * * `left`: the space symbols between `/*` and the comment’s text.
-   * * `right`: the space symbols between the comment’s text
-   *   and <code>*&#47;</code>.
-   * * `important`: the content of the important statement,
-   *   if it is not just `!important`.
-   *
-   * PostCSS cleans selectors, declaration values and at-rule parameters
-   * from comments and extra spaces, but it stores origin content in raws
-   * properties. As such, if you don’t change a declaration’s value,
-   * PostCSS will use the raw value with comments.
-   *
-   * @example
-   * const root = postcss.parse('a {\n  color:black\n}')
-   * root.first.first.raws //=> { before: '\n  ', between: ':' }
-   */
-  ;
-
-  return Node;
+  return Result;
 }();
 
-var _default = Node;
-/**
- * @typedef {object} position
- * @property {number} line   Source line in file.
- * @property {number} column Source column in file.
- */
+exports.default = Result;
 
 /**
- * @typedef {object} source
- * @property {Input} input    {@link Input} with input file
- * @property {position} start The starting position of the node’s source.
- * @property {position} end   The ending position of the node’s source.
+ * @typedef  {object} Message
+ * @property {string} type   - message type
+ * @property {string} plugin - source PostCSS plugin name
  */
 
-exports.default = _default;
-module.exports = exports.default;
+module.exports = exports['default'];
 
-
-}).call(this,require(382))}, {"382":382,"541":541,"544":544,"549":549}];
+}, {"544":544}];

@@ -1,46 +1,44 @@
-window.modules["108"] = [function(require,module,exports){var NUMBER = require(74).TYPE.Number;
+window.modules["108"] = [function(require,module,exports){var List = require(54);
+var TYPE = require(75).TYPE;
 
-// special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
-function readUnit(scanner) {
-    var unit = scanner.getTokenValue();
-    var backSlashPos = unit.indexOf('\\');
+var WHITESPACE = TYPE.WhiteSpace;
+var COMMENT = TYPE.Comment;
+var SEMICOLON = TYPE.Semicolon;
 
-    if (backSlashPos > 0) {
-        // patch token offset
-        scanner.tokenStart += backSlashPos;
-
-        // return part before backslash
-        return unit.substring(0, backSlashPos);
-    }
-
-    // no backslash in unit name
-    scanner.next();
-
-    return unit;
+function consumeRaw(startToken) {
+    return this.Raw(startToken, 0, SEMICOLON, true, true);
 }
 
-// number ident
 module.exports = {
-    name: 'Dimension',
+    name: 'DeclarationList',
     structure: {
-        value: String,
-        unit: String
+        children: [['Declaration']]
     },
     parse: function() {
-        var start = this.scanner.tokenStart;
-        var value = this.scanner.consume(NUMBER);
-        var unit = readUnit(this.scanner);
+        var children = new List();
+
+        scan:
+        while (!this.scanner.eof) {
+            switch (this.scanner.tokenType) {
+                case WHITESPACE:
+                case COMMENT:
+                case SEMICOLON:
+                    this.scanner.next();
+                    break;
+
+                default:
+                    children.appendData(this.tolerantParse(this.Declaration, consumeRaw));
+            }
+        }
 
         return {
-            type: 'Dimension',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            value: value,
-            unit: unit
+            type: 'DeclarationList',
+            loc: this.getLocationFromList(children),
+            children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.value);
-        processChunk(node.unit);
+        this.each(processChunk, node);
     }
 };
-}, {"74":74}];
+}, {"54":54,"75":75}];

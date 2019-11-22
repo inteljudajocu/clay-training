@@ -1,21 +1,23 @@
-window.modules["408"] = [function(require,module,exports){var resolveName = require(57).property;
+window.modules["408"] = [function(require,module,exports){var walk = require(58).walkUp;
 var handlers = {
-    'font': require(409),
-    'font-weight': require(411),
-    'background': require(412),
-    'border': require(410),
-    'outline': require(410)
+    Atrule: require(411),
+    AttributeSelector: require(413),
+    Value: require(418),
+    Dimension: require(414),
+    Percentage: require(415),
+    Number: require(415),
+    String: require(416),
+    Url: require(417),
+    HexColor: require(423).compressHex,
+    Identifier: require(423).compressIdent,
+    Function: require(423).compressFunction
 };
 
-module.exports = function compressValue(node) {
-    if (!this.declaration) {
-        return;
-    }
-
-    var property = resolveName(this.declaration.property);
-
-    if (handlers.hasOwnProperty(property.name)) {
-        handlers[property.name](node);
-    }
+module.exports = function(ast) {
+    walk(ast, function(node, item, list) {
+        if (handlers.hasOwnProperty(node.type)) {
+            handlers[node.type].call(this, node, item, list);
+        }
+    });
 };
-}, {"57":57,"409":409,"410":410,"411":411,"412":412}];
+}, {"58":58,"411":411,"413":413,"414":414,"415":415,"416":416,"417":417,"418":418,"423":423}];

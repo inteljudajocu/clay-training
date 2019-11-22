@@ -1,25 +1,20 @@
-window.modules["103"] = [function(require,module,exports){var TYPE = require(74).TYPE;
-var IDENTIFIER = TYPE.Identifier;
-var FULLSTOP = TYPE.FullStop;
+window.modules["103"] = [function(require,module,exports){var CDO = require(75).TYPE.CDO;
 
-// '.' ident
 module.exports = {
-    name: 'ClassSelector',
-    structure: {
-        name: String
-    },
+    name: 'CDO',
+    structure: [],
     parse: function() {
-        this.scanner.eat(FULLSTOP);
+        var start = this.scanner.tokenStart;
+
+        this.scanner.eat(CDO); // <!--
 
         return {
-            type: 'ClassSelector',
-            loc: this.getLocation(this.scanner.tokenStart - 1, this.scanner.tokenEnd),
-            name: this.scanner.consume(IDENTIFIER)
+            type: 'CDO',
+            loc: this.getLocation(start, this.scanner.tokenStart)
         };
     },
-    generate: function(processChunk, node) {
-        processChunk('.');
-        processChunk(node.name);
+    generate: function(processChunk) {
+        processChunk('<!--');
     }
 };
-}, {"74":74}];
+}, {"75":75}];

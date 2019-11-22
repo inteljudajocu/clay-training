@@ -1,16 +1,15 @@
 window.modules["503"] = [function(require,module,exports){'use strict';
 
-var Input = require(504);
+exports.__esModule = true;
+exports.default = warnOnce;
+var printed = {};
 
-var SafeParser = require(505);
+function warnOnce(message) {
+    if (printed[message]) return;
+    printed[message] = true;
 
-module.exports = function safeParse(css, opts) {
-  var input = new Input(css, opts);
+    if (typeof console !== 'undefined' && console.warn) console.warn(message);
+}
+module.exports = exports['default'];
 
-  var parser = new SafeParser(input);
-  parser.parse();
-
-  return parser.root;
-};
-
-}, {"504":504,"505":505}];
+}, {}];

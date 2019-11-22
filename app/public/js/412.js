@@ -1,70 +1,22 @@
-window.modules["412"] = [function(require,module,exports){var List = require(57).List;
-
-module.exports = function compressBackground(node) {
-    function lastType() {
-        if (buffer.length) {
-            return buffer[buffer.length - 1].type;
-        }
-    }
-
-    function flush() {
-        if (lastType() === 'WhiteSpace') {
-            buffer.pop();
-        }
-
-        if (!buffer.length) {
-            buffer.unshift(
-                {
-                    type: 'Number',
-                    loc: null,
-                    value: '0'
-                },
-                {
-                    type: 'WhiteSpace',
-                    value: ' '
-                },
-                {
-                    type: 'Number',
-                    loc: null,
-                    value: '0'
+window.modules["412"] = [function(require,module,exports){module.exports = function(node) {
+    node.block.children.each(function(rule) {
+        rule.prelude.children.each(function(simpleselector) {
+            simpleselector.children.each(function(data, item) {
+                if (data.type === 'Percentage' && data.value === '100') {
+                    item.data = {
+                        type: 'TypeSelector',
+                        loc: data.loc,
+                        name: 'to'
+                    };
+                } else if (data.type === 'TypeSelector' && data.name === 'from') {
+                    item.data = {
+                        type: 'Percentage',
+                        loc: data.loc,
+                        value: '0'
+                    };
                 }
-            );
-        }
-
-        newValue.push.apply(newValue, buffer);
-
-        buffer = [];
-    }
-
-    var newValue = [];
-    var buffer = [];
-
-    node.children.each(function(node) {
-        if (node.type === 'Operator' && node.value === ',') {
-            flush();
-            newValue.push(node);
-            return;
-        }
-
-        // remove defaults
-        if (node.type === 'Identifier') {
-            if (node.name === 'transparent' ||
-                node.name === 'none' ||
-                node.name === 'repeat' ||
-                node.name === 'scroll') {
-                return;
-            }
-        }
-
-        // don't add redundant spaces
-        if (node.type === 'WhiteSpace' && (!buffer.length || lastType() === 'WhiteSpace')) {
-            return;
-        }
-
-        buffer.push(node);
+            });
+        });
     });
-
-    flush();
-    node.children = new List().fromArray(newValue);
 };
-}, {"57":57}];
+}, {}];

@@ -1,258 +1,197 @@
-window.modules["210"] = [function(require,module,exports){var _ = require(212);
-var _s = require(213);
-var he = require(206);
+window.modules["210"] = [function(require,module,exports){var fs = require(21);
+var util = require(215);
 
-var helper = require(211);
+var _ = require(213);
+var _s = require(214);
+var htmlparser = require(216);
 
-function formatText(elem, options) {
-  var text = elem.data || "";
-  text = he.decode(text, options.decodeOptions);
+var helper = require(212);
+var defaultFormat = require(211);
 
-  if (options.isInPre) {
-    return text;
-  } else {
-    return helper.wordwrap(elem.trimLeadingSpace ? _s.lstrip(text) : text, options);
-  }
-}
+// Which type of tags should not be parsed
+var SKIP_TYPES = [
+  'style',
+  'script'
+];
 
-function formatImage(elem, options) {
-  if (options.ignoreImage) {
-    return '';
-  }
-
-  var result = '', attribs = elem.attribs || {};
-  if (attribs.alt) {
-    result += he.decode(attribs.alt, options.decodeOptions);
-    if (attribs.src) {
-      result += ' ';
+function htmlToText(html, options) {
+  options = options || {};
+  _.defaults(options, {
+    wordwrap: 80,
+    tables: [],
+    preserveNewlines: false,
+    uppercaseHeadings: true,
+    singleNewLineParagraphs: false,
+    hideLinkHrefIfSameAsText: false,
+    linkHrefBaseUrl: null,
+    noLinkBrackets: false,
+    noAnchorUrl: true,
+    baseElement: 'body',
+    returnDomByDefault: true,
+    format: {},
+    decodeOptions: {
+      isAttributeValue: false,
+      strict: false
+    },
+    longWordSplit: {
+      wrapCharacters: [],
+      forceWrapOnLimit: false
     }
+  });
+
+  var handler = new htmlparser.DefaultHandler(function (error, dom) {
+
+  }, {
+    verbose: true
+  });
+  new htmlparser.Parser(handler).parseComplete(html);
+
+  options.lineCharCount = 0;
+
+  var result = '';
+  var baseElements = Array.isArray(options.baseElement) ? options.baseElement : [options.baseElement];
+  for (var idx = 0; idx < baseElements.length; ++idx) {
+    result += walk(filterBody(handler.dom, options, baseElements[idx]), options);
   }
-  if (attribs.src) {
-    result += '[' + attribs.src + ']';
-  }
-  return (result);
+  return _s.strip(result);
 }
 
-function formatLineBreak(elem, fn, options) {
-  return '\n' + fn(elem.children, options);
-}
+function filterBody(dom, options, baseElement) {
+  var result = null;
 
-function formatParagraph(elem, fn, options) {
-  var paragraph = fn(elem.children, options)
-  if (options.singleNewLineParagraphs) {
-    return paragraph + '\n'
-  } else {
-    return paragraph + '\n\n'
-  }
-}
+  var splitTag = helper.splitCssSearchTag(baseElement);
 
-function formatHeading(elem, fn, options) {
-  var heading = fn(elem.children, options);
-  if (options.uppercaseHeadings) {
-    heading = heading.toUpperCase();
-  }
-  return heading + '\n';
-}
+  function walk(dom) {
+    if (result) return;
+    _.each(dom, function(elem) {
+      if (result) return;
+      if (elem.name === splitTag.element) {
+        var documentClasses = elem.attribs && elem.attribs.class ? elem.attribs.class.split(" ") : [];
+        var documentIds = elem.attribs && elem.attribs.id ? elem.attribs.id.split(" ") : [];
 
-// If we have both href and anchor text, format it in a useful manner:
-// - "anchor text [href]"
-// Otherwise if we have only anchor text or an href, we return the part we have:
-// - "anchor text" or
-// - "href"
-function formatAnchor(elem, fn, options) {
-  var href = '';
-  // Always get the anchor text
-  var storedCharCount = options.lineCharCount;
-  var text = fn(elem.children || [], options);
-  if (!text) {
-    text = '';
-  }
-
-  var result = elem.trimLeadingSpace ? _s.lstrip(text) : text;
-
-  if (!options.ignoreHref) {
-    // Get the href, if present
-    if (elem.attribs && elem.attribs.href) {
-      href = elem.attribs.href.replace(/^mailto\:/, '');
-    }
-    if (href) {
-      if ((!options.noAnchorUrl) || (options.noAnchorUrl && href.indexOf('#') === -1)) {
-        if (options.linkHrefBaseUrl && href.indexOf('/') === 0) {
-          href = options.linkHrefBaseUrl + href;
-        }
-        if (!options.hideLinkHrefIfSameAsText || href !== _s.replaceAll(result, '\n', '')) {
-          if (!options.noLinkBrackets) {
-            result += ' [' + href + ']';
-          } else {
-            result += ' ' + href;
-          }
+        if ((splitTag.classes.every(function (val) { return documentClasses.indexOf(val) >= 0 })) &&
+          (splitTag.ids.every(function (val) { return documentIds.indexOf(val) >= 0 }))) {
+          result = [elem];
+          return;
         }
       }
-    }
-  }
-
-  options.lineCharCount = storedCharCount;
-
-  return formatText({ data: result || href, trimLeadingSpace: elem.trimLeadingSpace }, options);
-}
-
-function formatHorizontalLine(elem, fn, options) {
-  return '\n' + _s.repeat('-', options.wordwrap) + '\n\n';
-}
-
-function formatListItem(prefix, elem, fn, options) {
-  options = _.clone(options);
-  // Reduce the wordwrap for sub elements.
-  if (options.wordwrap) {
-    options.wordwrap -= prefix.length;
-  }
-  // Process sub elements.
-  var text = fn(elem.children, options);
-  // Replace all line breaks with line break + prefix spacing.
-  text = text.replace(/\n/g, '\n' + _s.repeat(' ', prefix.length));
-  // Add first prefix and line break at the end.
-  return prefix + text + '\n';
-}
-
-var whiteSpaceRegex = /^\s*$/;
-
-function formatUnorderedList(elem, fn, options) {
-  var result = '';
-  var nonWhiteSpaceChildren = (elem.children || []).filter(function(child) {
-    return child.type !== 'text' || !whiteSpaceRegex.test(child.data);
-  });
-  _.each(nonWhiteSpaceChildren, function(elem) {
-    result += formatListItem(' * ', elem, fn, options);
-  });
-  return result + '\n';
-}
-
-function formatOrderedList(elem, fn, options) {
-  var result = '';
-  var nonWhiteSpaceChildren = (elem.children || []).filter(function(child) {
-    return child.type !== 'text' || !whiteSpaceRegex.test(child.data);
-  });
-  // Return different functions for different OL types
-  var typeFunction = (function() {
-    // Determine type
-    var olType = elem.attribs.type || '1';
-    // TODO Imeplement the other valid types
-    //   Fallback to type '1' function for other valid types
-    switch(olType) {
-      case 'a': return function(start, i) { return String.fromCharCode(i + start + 97)};
-      case 'A': return function(start, i) { return String.fromCharCode(i + start + 65)};
-      case '1':
-      default: return function(start, i) { return i + 1 + start};
-    }
-  }())
-  // Make sure there are list items present
-  if (nonWhiteSpaceChildren.length) {
-    // Calculate initial start from ol attribute
-    var start = Number(elem.attribs.start || '1') - 1;
-    // Calculate the maximum length to i.
-    var maxLength = (nonWhiteSpaceChildren.length + start).toString().length;
-    _.each(nonWhiteSpaceChildren, function(elem, i) {
-      // Use different function depending on type
-      var index = typeFunction(start, i);
-      // Calculate the needed spacing for nice indentation.
-      var spacing = maxLength - index.toString().length;
-      var prefix = ' ' + index + '. ' + _s.repeat(' ', spacing);
-      result += formatListItem(prefix, elem, fn, options);
+      if (elem.children) walk(elem.children);
     });
   }
-  return result + '\n';
+  walk(dom);
+  return options.returnDomByDefault ? result || dom : result;
 }
 
-function tableToString(table) {
-  // Determine space width per column
-  // Convert all rows to lengths
-  var widths = _.map(table, function(row) {
-    return _.map(row, function(col) {
-      return col.length;
-    });
-  });
-  // Invert rows with colums
-  widths = helper.arrayZip(widths);
-  // Determine the max values for each column
-  widths = _.map(widths, function(col) {
-    return _.max(col);
-  });
+function containsTable(attr, tables) {
+  if (tables === true) return true;
 
-  // Build the table
-  var text = '';
-  _.each(table, function(row) {
-    var i = 0;
-    _.each(row, function(col) {
-      text += _s.rpad(_s.strip(col), widths[i++], ' ') + '   ';
-    });
-    text += '\n';
-  });
-  return text + '\n';
+  function removePrefix(key) {
+    return key.substr(1);
+  }
+  function checkPrefix(prefix) {
+    return function(key) {
+      return _s.startsWith(key, prefix);
+    };
+  }
+  function filterByPrefix(tables, prefix) {
+    return _(tables).chain()
+      .filter(checkPrefix(prefix))
+      .map(removePrefix)
+      .value();
+  }
+  var classes = filterByPrefix(tables, '.');
+  var ids = filterByPrefix(tables, '#');
+  return attr && (_.include(classes, attr['class']) || _.include(ids, attr['id']));
 }
 
-function formatTable(elem, fn, options) {
-  var table = [];
-  _.each(elem.children, tryParseRows);
-  return tableToString(table);
+function walk(dom, options, result) {
+  if (arguments.length < 3) {
+    result = '';
+  }
+  var whiteSpaceRegex = /\s$/;
+  var format = _.assign({}, defaultFormat, options.format);
 
-  function tryParseRows(elem) {
-    if (elem.type !== 'tag') {
-      return;
-    }
-    switch (elem.name.toLowerCase()) {
-      case "thead":
-      case "tbody":
-      case "tfoot":
-      case "center":
-        _.each(elem.children, tryParseRows);
-        return;
-
-      case 'tr':
-        var rows = [];
-        _.each(elem.children, function(elem) {
-          var tokens, times;
-          if (elem.type === 'tag') {
-            switch (elem.name.toLowerCase()) {
-              case 'th':
-                tokens = formatHeading(elem, fn, options).split('\n');
-                rows.push(_.compact(tokens));
-                break;
-
-              case 'td':
-                tokens = fn(elem.children, options).split('\n');
-                rows.push(_.compact(tokens));
-                // Fill colspans with empty values
-                if (elem.attribs && elem.attribs.colspan) {
-                  times = elem.attribs.colspan - 1 || 0;
-                  _.times(times, function() {
-                    rows.push(['']);
-                  });
-                }
-                break;
-            }
-          }
-        });
-        rows = helper.arrayZip(rows);
-        _.each(rows, function(row) {
-          row = _.map(row, function(col) {
-            return col || '';
-          });
-          table.push(row);
-        });
+  _.each(dom, function(elem) {
+    switch(elem.type) {
+      case 'tag':
+        switch(elem.name.toLowerCase()) {
+          case 'img':
+            result += format.image(elem, options);
+            break;
+          case 'a':
+            // Inline element needs its leading space to be trimmed if `result`
+            // currently ends with whitespace
+            elem.trimLeadingSpace = whiteSpaceRegex.test(result);
+            result += format.anchor(elem, walk, options);
+            break;
+          case 'p':
+            result += format.paragraph(elem, walk, options);
+            break;
+          case 'h1':
+          case 'h2':
+          case 'h3':
+          case 'h4':
+          case 'h5':
+          case 'h6':
+            result += format.heading(elem, walk, options);
+            break;
+          case 'br':
+            result += format.lineBreak(elem, walk, options);
+            break;
+          case 'hr':
+            result += format.horizontalLine(elem, walk, options);
+            break;
+          case 'ul':
+            result += format.unorderedList(elem, walk, options);
+            break;
+          case 'ol':
+            result += format.orderedList(elem, walk, options);
+            break;
+          case 'pre':
+            var newOptions = _(options).clone();
+            newOptions.isInPre = true;
+            result += format.paragraph(elem, walk, newOptions);
+            break;
+          case 'table':
+            result = containsTable(elem.attribs, options.tables)
+              ? result + format.table(elem, walk, options)
+              : walk(elem.children || [], options, result);
+            break;
+          default:
+            result = walk(elem.children || [], options, result);
+        }
         break;
+      case 'text':
+        if (elem.data !== '\r\n') {
+          // Text needs its leading space to be trimmed if `result`
+          // currently ends with whitespace
+          elem.trimLeadingSpace = whiteSpaceRegex.test(result);
+          result += format.text(elem, options);
+        }
+        break;
+      default:
+        if (!_.include(SKIP_TYPES, elem.type)) {
+          result = walk(elem.children || [], options, result);
+        }
     }
-  }
+
+    options.lineCharCount = result.length - (result.lastIndexOf('\n') + 1);
+  });
+  return result;
 }
 
-exports.text = formatText;
-exports.image = formatImage;
-exports.lineBreak = formatLineBreak;
-exports.paragraph = formatParagraph;
-exports.anchor = formatAnchor;
-exports.heading = formatHeading;
-exports.table = formatTable;
-exports.orderedList = formatOrderedList;
-exports.unorderedList = formatUnorderedList;
-exports.listItem = formatListItem;
-exports.horizontalLine = formatHorizontalLine;
-}, {"206":206,"211":211,"212":212,"213":213}];
+exports.fromFile = function(file, options, callback) {
+  if (!callback) {
+    callback = options;
+    options = {};
+  }
+  fs.readFile(file, 'utf8', function (err, str) {
+    if (err) return callback(err);
+    return callback(null, htmlToText(str, options));
+  });
+};
+
+exports.fromString = function(str, options) {
+  return htmlToText(str, options || {});
+};
+}, {"21":21,"211":211,"212":212,"213":213,"214":214,"215":215,"216":216}];

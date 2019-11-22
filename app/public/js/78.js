@@ -1,8 +1,40 @@
-window.modules["78"] = [function(require,module,exports){module.exports = {
-    'font-face': require(76),
-    'import': require(77),
-    'media': require(79),
-    'page': require(80),
-    'supports': require(81)
+window.modules["78"] = [function(require,module,exports){var List = require(54);
+var TYPE = require(75).TYPE;
+
+var STRING = TYPE.String;
+var IDENTIFIER = TYPE.Identifier;
+var URL = TYPE.Url;
+var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+
+module.exports = {
+    parse: {
+        prelude: function() {
+            var children = new List();
+
+            this.scanner.skipSC();
+
+            switch (this.scanner.tokenType) {
+                case STRING:
+                    children.appendData(this.String());
+                    break;
+
+                case URL:
+                    children.appendData(this.Url());
+                    break;
+
+                default:
+                    this.scanner.error('String or url() is expected');
+            }
+
+            if (this.scanner.lookupNonWSType(0) === IDENTIFIER ||
+                this.scanner.lookupNonWSType(0) === LEFTPARENTHESIS) {
+                children.appendData(this.WhiteSpace());
+                children.appendData(this.MediaQueryList());
+            }
+
+            return children;
+        },
+        block: null
+    }
 };
-}, {"76":76,"77":77,"79":79,"80":80,"81":81}];
+}, {"54":54,"75":75}];

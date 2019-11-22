@@ -1,6 +1,17 @@
-window.modules["638"] = [function(require,module,exports){var adjacent = require(590);
+window.modules["638"] = [function(require,module,exports){var makeString = require(586);
+var strRepeat = require(604);
 
-module.exports = function succ(str) {
-  return adjacent(str, 1);
+module.exports = function repeat(str, qty, separator) {
+  str = makeString(str);
+
+  qty = ~~qty;
+
+  // using faster implementation if separator is not needed;
+  if (separator == null) return strRepeat(str, qty);
+
+  // this one is about 300x slower in Google Chrome
+  /*eslint no-empty: 0*/
+  for (var repeat = []; qty > 0; repeat[--qty] = str) {}
+  return repeat.join(separator);
 };
-}, {"590":590}];
+}, {"586":586,"604":604}];

@@ -1,9 +1,13 @@
-window.modules["623"] = [function(require,module,exports){var makeString = require(576);
+window.modules["623"] = [function(require,module,exports){var rtrim = require(646);
 
-module.exports = function strRight(str, sep) {
-  str = makeString(str);
-  sep = makeString(sep);
-  var pos = !sep ? -1 : str.indexOf(sep);
-  return~ pos ? str.slice(pos + sep.length, str.length) : str;
+module.exports = function toSentence(array, separator, lastSeparator, serial) {
+  separator = separator || ', ';
+  lastSeparator = lastSeparator || ' and ';
+  var a = array.slice(),
+    lastMember = a.pop();
+
+  if (array.length > 2 && serial) lastSeparator = rtrim(separator) + lastSeparator;
+
+  return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
 };
-}, {"576":576}];
+}, {"646":646}];

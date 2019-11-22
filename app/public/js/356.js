@@ -1,14 +1,38 @@
-window.modules["356"] = [function(require,module,exports){/**
- * Gets the value at `key` of `object`.
+window.modules["356"] = [function(require,module,exports){var baseRest = require(341),
+    isIterateeCall = require(357);
+
+/**
+ * Creates a function like `_.assign`.
  *
  * @private
- * @param {Object} [object] The object to query.
- * @param {string} key The key of the property to get.
- * @returns {*} Returns the property value.
+ * @param {Function} assigner The function to assign values.
+ * @returns {Function} Returns the new assigner function.
  */
-function getValue(object, key) {
-  return object == null ? undefined : object[key];
+function createAssigner(assigner) {
+  return baseRest(function(object, sources) {
+    var index = -1,
+        length = sources.length,
+        customizer = length > 1 ? sources[length - 1] : undefined,
+        guard = length > 2 ? sources[2] : undefined;
+
+    customizer = (assigner.length > 3 && typeof customizer == 'function')
+      ? (length--, customizer)
+      : undefined;
+
+    if (guard && isIterateeCall(sources[0], sources[1], guard)) {
+      customizer = length < 3 ? undefined : customizer;
+      length = 1;
+    }
+    object = Object(object);
+    while (++index < length) {
+      var source = sources[index];
+      if (source) {
+        assigner(object, source, index, customizer);
+      }
+    }
+    return object;
+  });
 }
 
-module.exports = getValue;
-}, {}];
+module.exports = createAssigner;
+}, {"341":341,"357":357}];

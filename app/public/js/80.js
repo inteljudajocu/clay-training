@@ -1,15 +1,15 @@
-window.modules["80"] = [function(require,module,exports){var List = require(53);
+window.modules["80"] = [function(require,module,exports){var List = require(54);
 
 module.exports = {
     parse: {
         prelude: function() {
             return new List().appendData(
-                this.SelectorList()
+                this.MediaQueryList()
             );
         },
         block: function() {
-            return this.Block(true);
+            return this.Block(false);
         }
     }
 };
-}, {"53":53}];
+}, {"54":54}];

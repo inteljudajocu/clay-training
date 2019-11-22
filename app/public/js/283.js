@@ -1,17 +1,24 @@
-window.modules["283"] = [function(require,module,exports){var baseFor = require(286),
-    keys = require(288);
-
-/**
- * The base implementation of `_.forOwn` without support for iteratee shorthands.
+window.modules["283"] = [function(require,module,exports){/**
+ * A specialized version of `_.some` for arrays without support for iteratee
+ * shorthands.
  *
  * @private
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Object} Returns `object`.
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} predicate The function invoked per iteration.
+ * @returns {boolean} Returns `true` if any element passes the predicate check,
+ *  else `false`.
  */
-function baseForOwn(object, iteratee) {
-  return object && baseFor(object, iteratee, keys);
+function arraySome(array, predicate) {
+  var index = -1,
+      length = array == null ? 0 : array.length;
+
+  while (++index < length) {
+    if (predicate(array[index], index, array)) {
+      return true;
+    }
+  }
+  return false;
 }
 
-module.exports = baseForOwn;
-}, {"286":286,"288":288}];
+module.exports = arraySome;
+}, {}];

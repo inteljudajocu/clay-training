@@ -1,58 +1,63 @@
-window.modules["123"] = [function(require,module,exports){var isNumber = require(74).isNumber;
-var TYPE = require(74).TYPE;
-var NUMBER = TYPE.Number;
-var SOLIDUS = TYPE.Solidus;
-var FULLSTOP = TYPE.FullStop;
+window.modules["123"] = [function(require,module,exports){var List = require(54);
+var TYPE = require(75).TYPE;
 
-// Terms of <ratio> should to be a positive number (not zero or negative)
-// (see https://drafts.csswg.org/mediaqueries-3/#values)
-// However, -o-min-device-pixel-ratio takes fractional values as a ratio's term
-// and this is using by various sites. Therefore we relax checking on parse
-// to test a term is unsigned number without exponent part.
-// Additional checks may to be applied on lexer validation.
-function consumeNumber(scanner) {
-    var value = scanner.consumeNonWS(NUMBER);
+var IDENTIFIER = TYPE.Identifier;
+var FUNCTION = TYPE.Function;
+var COLON = TYPE.Colon;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 
-    for (var i = 0; i < value.length; i++) {
-        var code = value.charCodeAt(i);
-        if (!isNumber(code) && code !== FULLSTOP) {
-            scanner.error('Unsigned number is expected', scanner.tokenStart - value.length + i);
-        }
-    }
-
-    if (Number(value) === 0) {
-        scanner.error('Zero number is not allowed', scanner.tokenStart - value.length);
-    }
-
-    return value;
-}
-
-// <positive-integer> S* '/' S* <positive-integer>
+// :: ident [ '(' .. ')' ]?
 module.exports = {
-    name: 'Ratio',
+    name: 'PseudoElementSelector',
     structure: {
-        left: String,
-        right: String
+        name: String,
+        children: [['Raw'], null]
     },
     parse: function() {
         var start = this.scanner.tokenStart;
-        var left = consumeNumber(this.scanner);
-        var right;
+        var children = null;
+        var name;
+        var nameLowerCase;
 
-        this.scanner.eatNonWS(SOLIDUS);
-        right = consumeNumber(this.scanner);
+        this.scanner.eat(COLON);
+        this.scanner.eat(COLON);
+
+        if (this.scanner.tokenType === FUNCTION) {
+            name = this.scanner.consumeFunctionName();
+            nameLowerCase = name.toLowerCase();
+
+            if (this.pseudo.hasOwnProperty(nameLowerCase)) {
+                this.scanner.skipSC();
+                children = this.pseudo[nameLowerCase].call(this);
+                this.scanner.skipSC();
+            } else {
+                children = new List().appendData(
+                    this.Raw(this.scanner.currentToken, 0, 0, false, false)
+                );
+            }
+
+            this.scanner.eat(RIGHTPARENTHESIS);
+        } else {
+            name = this.scanner.consume(IDENTIFIER);
+        }
 
         return {
-            type: 'Ratio',
+            type: 'PseudoElementSelector',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            left: left,
-            right: right
+            name: name,
+            children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.left);
-        processChunk('/');
-        processChunk(node.right);
-    }
+        processChunk('::');
+        processChunk(node.name);
+
+        if (node.children !== null) {
+            processChunk('(');
+            this.each(processChunk, node);
+            processChunk(')');
+        }
+    },
+    walkContext: 'function'
 };
-}, {"74":74}];
+}, {"54":54,"75":75}];

@@ -1,6 +1,6 @@
-window.modules["173"] = [function(require,module,exports){var parse = require(2)
-var startOfYear = require(174)
-var differenceInCalendarDays = require(167)
+window.modules["173"] = [function(require,module,exports){var parse = require(5)
+var startOfYear = require(175)
+var differenceInCalendarDays = require(168)
 
 /**
  * @category Day Helpers
@@ -25,4 +25,4 @@ function getDayOfYear (dirtyDate) {
 }
 
 module.exports = getDayOfYear
-}, {"2":2,"167":167,"174":174}];
+}, {"5":5,"168":168,"175":175}];

@@ -2,9 +2,11 @@ window.modules["481"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(482);
+var _namespace = require(484);
 
-var _node2 = _interopRequireDefault(_node);
+var _namespace2 = _interopRequireDefault(_namespace);
+
+var _types = require(470);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -14,49 +16,24 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/**
- * Represents a comment between declarations or statements (rule and at-rules).
- *
- * Comments inside selectors, at-rule parameters, or declaration values
- * will be stored in the `raws` properties explained above.
- *
- * @extends Node
- */
-var Comment = function (_Node) {
-  _inherits(Comment, _Node);
+var ClassName = function (_Namespace) {
+    _inherits(ClassName, _Namespace);
 
-  function Comment(defaults) {
-    _classCallCheck(this, Comment);
+    function ClassName(opts) {
+        _classCallCheck(this, ClassName);
 
-    var _this = _possibleConstructorReturn(this, _Node.call(this, defaults));
+        var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
 
-    _this.type = 'comment';
-    return _this;
-  }
+        _this.type = _types.CLASS;
+        return _this;
+    }
 
-  /**
-   * @memberof Comment#
-   * @member {string} text - the comment’s text
-   */
+    ClassName.prototype.toString = function toString() {
+        return [this.spaces.before, this.ns, String('.' + this.value), this.spaces.after].join('');
+    };
 
-  /**
-   * @memberof Comment#
-   * @member {object} raws - Information to generate byte-to-byte equal
-   *                         node string as it was in the origin input.
-   *
-   * Every parser saves its own properties,
-   * but the default CSS parser uses:
-   *
-   * * `before`: the space symbols before the node.
-   * * `left`: the space symbols between `/*` and the comment’s text.
-   * * `right`: the space symbols between the comment’s text.
-   */
+    return ClassName;
+}(_namespace2.default);
 
-
-  return Comment;
-}(_node2.default);
-
-exports.default = Comment;
-module.exports = exports['default'];
-
-}, {"482":482}];
+exports.default = ClassName;
+module.exports = exports['default'];}, {"470":470,"484":484}];

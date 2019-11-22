@@ -1,154 +1,236 @@
 window.modules["4"] = [function(require,module,exports){'use strict';
 
-var speakingurl = require(568),
-    he = require(206),
-    typogr = require(571),
-    headQuotes = require(207),
-    striptags = require(3),
-    _isString = require(366),
-    _isPlainObject = require(371),
-    _isArray = require(272),
-    _mapValues = require(374),
-    _toLower = require(377),
-    _require = require(205),
-    fold = _require.fold,
-    NON_ALPHANUMERIC_RE = /[_\W]/g;
-/**
- * smarten headlines, curling quotes and replacing dashes and ellipses
- * @param {string} text
- * @returns {string}
- */
+(function (global) {
 
+    // minimal symbol polyfill for IE11 and others
+    if (typeof Symbol !== 'function') {
+        var Symbol = function(name) {
+            return name;
+        }
 
-function toSmartHeadline(text) {
-  return headQuotes(he.decode(text)).replace('---', '—') // em-dash first
-  .replace('--', '–').replace('...', '…');
-}
-/**
- * run typogr's smartypants on text, curling quotes and replacing dashes and ellipses
- * note: this is used for body text and teasers, NOT headlines
- * note: we have to decode quotes, then curl them, then decode them again
- * @param {string} text
- * @returns {string}
- */
-
-
-function toSmartText(text) {
-  return he.decode(typogr(he.decode(text)).chain().smartypants().value());
-}
-/**
- * Removes all unicode from string
- * @param {string} str
- * @returns {string}
- */
-
-
-function stripUnicode(str) {
-  return str.replace(/[^A-Za-z 0-9\.,\?!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]~]*/g, '');
-}
-/**
- * remove all html stuff from a string
- * @param {string} str
- * @returns {string}
- */
-
-
-function toPlainText(str) {
-  // coerce all text into a string. Undefined stuff is just an empty string
-  if (!_isString(str)) {
-    return '';
-  }
-
-  return he.decode(striptags(str.replace(/&nbsp;/g, ' ')));
-}
-/**
- * remove EVERYTHING from the slug, then run it through speakingurl
- * @param {string} str
- * @returns {string}
- */
-
-
-function cleanSlug(str) {
-  return speakingurl(toPlainText(stripUnicode(str)), {
-    custom: {
-      _: '-' // convert underscores to hyphens
-
+        Symbol.nonNative = true;
     }
-  });
-}
-/**
- * remove empty tags and rando whitespace
- * used when saving wysiwyg content
- * @param {string} str
- * @returns {string}
- */
 
+    const STATE_PLAINTEXT = Symbol('plaintext');
+    const STATE_HTML      = Symbol('html');
+    const STATE_COMMENT   = Symbol('comment');
 
-function validateTagContent(str) {
-  var noTags = striptags(str); // if a string ONLY contains tags, return emptystring.
-  // this fixes some issues where browsers insert tags into empty
-  // contenteditable elements, as well as some unrecoverable states where
-  // users added rich text and then deleted it in a specific way that
-  // preserved the tag, e.g. '<strong> </strong>'
+    const ALLOWED_TAGS_REGEX  = /<(\w*)>/g;
+    const NORMALIZE_TAG_REGEX = /<\/?([^\s\/>]+)/;
 
-  if (noTags === '' || noTags.match(/^\s+$/)) {
-    return '';
-  } else {
-    return str; // otherwise return the string with all tags and everything
-  }
-}
-/**
- * Strip paragraph and line seperators from component data
- * @param {object|array|string} data
- * @returns {object|array|string} sanitized data
- */
+    function striptags(html, allowable_tags, tag_replacement) {
+        html            = html || '';
+        allowable_tags  = allowable_tags || [];
+        tag_replacement = tag_replacement || '';
 
+        let context = init_context(allowable_tags, tag_replacement);
 
-function recursivelyStripSeperators(data) {
-  if (_isPlainObject(data)) {
-    return _mapValues(data, recursivelyStripSeperators);
-  } else if (_isArray(data)) {
-    return data.map(recursivelyStripSeperators);
-  } else if (_isString(data)) {
-    return data.replace(/(\u2028|\u2029)/g, '');
-  }
+        return striptags_internal(html, context);
+    }
 
-  return data;
-}
-/**
- * Removes all non alphanumeric characters from a string
- * @param   {string} str
- * @returns {string}
- */
+    function init_striptags_stream(allowable_tags, tag_replacement) {
+        allowable_tags  = allowable_tags || [];
+        tag_replacement = tag_replacement || '';
 
+        let context = init_context(allowable_tags, tag_replacement);
 
-function removeNonAlphanumericCharacters() {
-  var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-  return str.replace(NON_ALPHANUMERIC_RE, '');
-}
-/**
- * normalizeName
- *
- * lowercases and converts alphabetic, numeric, and symbolic Unicode characters
- * which are not in the first 127 ASCII characters (the "Basic Latin" Unicode block)
- * into their ASCII equivalents
- *
- * @param {String} name a string to normalize
- * @returns {String}
- */
+        return function striptags_stream(html) {
+            return striptags_internal(html || '', context);
+        };
+    }
 
+    striptags.init_streaming_mode = init_striptags_stream;
 
-function normalizeName(name) {
-  return fold(_toLower(name.trim()));
-}
+    function init_context(allowable_tags, tag_replacement) {
+        allowable_tags = parse_allowable_tags(allowable_tags);
 
-module.exports.toSmartHeadline = toSmartHeadline;
-module.exports.toSmartText = toSmartText;
-module.exports.stripUnicode = stripUnicode;
-module.exports.toPlainText = toPlainText;
-module.exports.cleanSlug = cleanSlug;
-module.exports.validateTagContent = validateTagContent;
-module.exports.recursivelyStripSeperators = recursivelyStripSeperators;
-module.exports.removeNonAlphanumericCharacters = removeNonAlphanumericCharacters;
-module.exports.normalizeName = normalizeName;
-}, {"3":3,"205":205,"206":206,"207":207,"272":272,"366":366,"371":371,"374":374,"377":377,"568":568,"571":571}];
+        return {
+            allowable_tags : allowable_tags,
+            tag_replacement: tag_replacement,
+
+            state         : STATE_PLAINTEXT,
+            tag_buffer    : '',
+            depth         : 0,
+            in_quote_char : ''
+        };
+    }
+
+    function striptags_internal(html, context) {
+        let allowable_tags  = context.allowable_tags;
+        let tag_replacement = context.tag_replacement;
+
+        let state         = context.state;
+        let tag_buffer    = context.tag_buffer;
+        let depth         = context.depth;
+        let in_quote_char = context.in_quote_char;
+        let output        = '';
+
+        for (let idx = 0, length = html.length; idx < length; idx++) {
+            let char = html[idx];
+
+            if (state === STATE_PLAINTEXT) {
+                switch (char) {
+                    case '<':
+                        state       = STATE_HTML;
+                        tag_buffer += char;
+                        break;
+
+                    default:
+                        output += char;
+                        break;
+                }
+            }
+
+            else if (state === STATE_HTML) {
+                switch (char) {
+                    case '<':
+                        // ignore '<' if inside a quote
+                        if (in_quote_char) {
+                            break;
+                        }
+
+                        // we're seeing a nested '<'
+                        depth++;
+                        break;
+
+                    case '>':
+                        // ignore '>' if inside a quote
+                        if (in_quote_char) {
+                            break;
+                        }
+
+                        // something like this is happening: '<<>>'
+                        if (depth) {
+                            depth--;
+
+                            break;
+                        }
+
+                        // this is closing the tag in tag_buffer
+                        in_quote_char = '';
+                        state         = STATE_PLAINTEXT;
+                        tag_buffer   += '>';
+
+                        if (allowable_tags.has(normalize_tag(tag_buffer))) {
+                            output += tag_buffer;
+                        } else {
+                            output += tag_replacement;
+                        }
+
+                        tag_buffer = '';
+                        break;
+
+                    case '"':
+                    case '\'':
+                        // catch both single and double quotes
+
+                        if (char === in_quote_char) {
+                            in_quote_char = '';
+                        } else {
+                            in_quote_char = in_quote_char || char;
+                        }
+
+                        tag_buffer += char;
+                        break;
+
+                    case '-':
+                        if (tag_buffer === '<!-') {
+                            state = STATE_COMMENT;
+                        }
+
+                        tag_buffer += char;
+                        break;
+
+                    case ' ':
+                    case '\n':
+                        if (tag_buffer === '<') {
+                            state      = STATE_PLAINTEXT;
+                            output    += '< ';
+                            tag_buffer = '';
+
+                            break;
+                        }
+
+                        tag_buffer += char;
+                        break;
+
+                    default:
+                        tag_buffer += char;
+                        break;
+                }
+            }
+
+            else if (state === STATE_COMMENT) {
+                switch (char) {
+                    case '>':
+                        if (tag_buffer.slice(-2) == '--') {
+                            // close the comment
+                            state = STATE_PLAINTEXT;
+                        }
+
+                        tag_buffer = '';
+                        break;
+
+                    default:
+                        tag_buffer += char;
+                        break;
+                }
+            }
+        }
+
+        // save the context for future iterations
+        context.state         = state;
+        context.tag_buffer    = tag_buffer;
+        context.depth         = depth;
+        context.in_quote_char = in_quote_char;
+
+        return output;
+    }
+
+    function parse_allowable_tags(allowable_tags) {
+        let tag_set = new Set();
+
+        if (typeof allowable_tags === 'string') {
+            let match;
+
+            while ((match = ALLOWED_TAGS_REGEX.exec(allowable_tags))) {
+                tag_set.add(match[1]);
+            }
+        }
+
+        else if (!Symbol.nonNative &&
+                 typeof allowable_tags[Symbol.iterator] === 'function') {
+
+            tag_set = new Set(allowable_tags);
+        }
+
+        else if (typeof allowable_tags.forEach === 'function') {
+            // IE11 compatible
+            allowable_tags.forEach(tag_set.add, tag_set);
+        }
+
+        return tag_set;
+    }
+
+    function normalize_tag(tag_buffer) {
+        let match = NORMALIZE_TAG_REGEX.exec(tag_buffer);
+
+        return match ? match[1].toLowerCase() : null;
+    }
+
+    if (typeof define === 'function' && define.amd) {
+        // AMD
+        define(function module_factory() { return striptags; });
+    }
+
+    else if (typeof module === 'object' && module.exports) {
+        // Node
+        module.exports = striptags;
+    }
+
+    else {
+        // Browser
+        global.striptags = striptags;
+    }
+}(this));
+}, {}];

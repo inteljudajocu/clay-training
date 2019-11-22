@@ -1,26 +1,22 @@
-window.modules["287"] = [function(require,module,exports){/**
- * Creates a base function for methods like `_.forIn` and `_.forOwn`.
+window.modules["287"] = [function(require,module,exports){var eq = require(285);
+
+/**
+ * Gets the index at which the `key` is found in `array` of key-value pairs.
  *
  * @private
- * @param {boolean} [fromRight] Specify iterating from right to left.
- * @returns {Function} Returns the new base function.
+ * @param {Array} array The array to inspect.
+ * @param {*} key The key to search for.
+ * @returns {number} Returns the index of the matched value, else `-1`.
  */
-function createBaseFor(fromRight) {
-  return function(object, iteratee, keysFunc) {
-    var index = -1,
-        iterable = Object(object),
-        props = keysFunc(object),
-        length = props.length;
-
-    while (length--) {
-      var key = props[fromRight ? length : ++index];
-      if (iteratee(iterable[key], key, iterable) === false) {
-        break;
-      }
+function assocIndexOf(array, key) {
+  var length = array.length;
+  while (length--) {
+    if (eq(array[length][0], key)) {
+      return length;
     }
-    return object;
-  };
+  }
+  return -1;
 }
 
-module.exports = createBaseFor;
-}, {}];
+module.exports = assocIndexOf;
+}, {"285":285}];

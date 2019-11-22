@@ -1,79 +1,162 @@
 window.modules["55"] = [function(require,module,exports){'use strict';
 
-var SourceMapGenerator = require(56).SourceMapGenerator;
-var trackNodes = {
-    Atrule: true,
-    Selector: true,
-    Declaration: true
-};
+var sourceMapGenerator = require(56);
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var noop = function() {};
 
-module.exports = function generateSourceMap(generator, ast) {
-    var map = new SourceMapGenerator();
-    var generated = {
-        line: 1,
-        column: 0
-    };
-    var original = {
-        line: 0, // should be zero to add first mapping
-        column: 0
-    };
-    var sourceMappingActive = false;
-    var activatedGenerated = {
-        line: 1,
-        column: 0
-    };
-    var activatedMapping = {
-        generated: activatedGenerated
-    };
+function each(processChunk, node) {
+    var list = node.children;
+    var cursor = list.head;
 
-    var css = generator(ast, function(node, buffer, line, column) {
-        if (!node.loc ||
-            !node.loc.start ||
-            !trackNodes.hasOwnProperty(node.type)) {
-            return;
+    while (cursor !== null) {
+        this.generate(processChunk, cursor.data, cursor, list);
+        cursor = cursor.next;
+    }
+}
+
+function eachComma(processChunk, node) {
+    var list = node.children;
+    var cursor = list.head;
+
+    while (cursor !== null) {
+        if (cursor.prev) {
+            processChunk(',');
         }
 
-        var nodeLine = node.loc.start.line;
-        var nodeColumn = node.loc.start.column - 1;
+        this.generate(processChunk, cursor.data, cursor, list);
+        cursor = cursor.next;
+    }
+}
 
-        if (original.line !== nodeLine ||
-            original.column !== nodeColumn) {
-            original.line = nodeLine;
-            original.column = nodeColumn;
+function createGenerator(types) {
+    var context = {
+        generate: function(processChunk, node, item, list) {
+            if (hasOwnProperty.call(types, node.type)) {
+                types[node.type].call(this, processChunk, node, item, list);
+            } else {
+                throw new Error('Unknown node type: ' + node.type);
+            }
+        },
+        each: each,
+        eachComma: eachComma
+    };
 
-            generated.line = line;
-            generated.column = column;
+    return function(node, fn) {
+        if (typeof fn !== 'function') {
+            // default generator concats all chunks in a single string
+            var buffer = [];
+            context.generate(function(chunk) {
+                buffer.push(chunk);
+            }, node);
+            return buffer.join('');
+        }
+        context.generate(fn, node);
+    };
+}
 
-            if (sourceMappingActive) {
-                sourceMappingActive = false;
-                if (generated.line !== activatedGenerated.line ||
-                    generated.column !== activatedGenerated.column) {
-                    map.addMapping(activatedMapping);
+function createMarkupGenerator(types) {
+    var context = {
+        generate: function(processChunk, node, item, list) {
+            if (hasOwnProperty.call(types, node.type)) {
+                var nodeBuffer = [];
+                types[node.type].call(this, function(chunk) {
+                    nodeBuffer.push(chunk);
+                }, node, item, list);
+                processChunk({
+                    node: node,
+                    value: nodeBuffer
+                });
+            } else {
+                throw new Error('Unknown node type: ' + node.type);
+            }
+        },
+        each: each,
+        eachComma: eachComma
+    };
+
+    return function(node, enter, leave) {
+        function updatePos(str) {
+            for (var i = 0; i < str.length; i++) {
+                if (str.charCodeAt(i) === 10) { // \n
+                    line++;
+                    column = 0;
+                } else {
+                    column++;
                 }
             }
 
-            sourceMappingActive = true;
-            map.addMapping({
-                source: node.loc.source,
-                original: original,
-                generated: generated
-            });
+            return str;
         }
 
-    }, function(node, buffer, line, column) {
-        if (sourceMappingActive && trackNodes.hasOwnProperty(node.type)) {
-            activatedGenerated.line = line;
-            activatedGenerated.column = column;
-        }
-    });
+        function walk(node, buffer) {
+            var value = node.value;
 
-    if (sourceMappingActive) {
-        map.addMapping(activatedMapping);
+            enter(node.node, buffer, line, column);
+
+            if (typeof value === 'string') {
+                buffer += updatePos(value);
+            } else {
+                for (var i = 0; i < value.length; i++) {
+                    if (typeof value[i] === 'string') {
+                        buffer += updatePos(value[i]);
+                    } else {
+                        buffer = walk(value[i], buffer);
+                    }
+                }
+            }
+
+            leave(node.node, buffer, line, column);
+
+            return buffer;
+        }
+
+        if (typeof enter !== 'function') {
+            enter = noop;
+        }
+        if (typeof leave !== 'function') {
+            leave = noop;
+        }
+
+        var buffer = [];
+        var line = 1;
+        var column = 0;
+
+        context.generate(function() {
+            buffer.push.apply(buffer, arguments);
+        }, node);
+
+        return walk(buffer[0], '');
+    };
+}
+
+function getTypesFromConfig(config) {
+    var types = {};
+
+    if (config.node) {
+        for (var name in config.node) {
+            var nodeType = config.node[name];
+
+            types[name] = nodeType.generate;
+        }
     }
 
+    return types;
+}
+
+module.exports = function(config) {
+    var types = getTypesFromConfig(config);
+    var markupGenerator = createMarkupGenerator(types);
+
     return {
-        css: css,
-        map: map
+        translate: createGenerator(types),
+        translateWithSourceMap: function(node) {
+            return sourceMapGenerator(markupGenerator, node);
+        },
+        translateMarkup: markupGenerator
     };
 };
+
+module.exports.createGenerator = createGenerator;
+module.exports.createMarkupGenerator = createMarkupGenerator;
+module.exports.sourceMap = require(56);
 }, {"56":56}];

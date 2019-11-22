@@ -1,11 +1,11 @@
-window.modules["136"] = [function(require,module,exports){var List = require(53);
-var ALLOW_OF_CLAUSE = true;
+window.modules["136"] = [function(require,module,exports){var List = require(54);
+var DISALLOW_OF_CLAUSE = false;
 
 module.exports = {
-    parse: function() {
+    parse: function nth() {
         return new List().appendData(
-            this.Nth(ALLOW_OF_CLAUSE)
+            this.Nth(DISALLOW_OF_CLAUSE)
         );
     }
 };
-}, {"53":53}];
+}, {"54":54}];

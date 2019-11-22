@@ -1,96 +1,130 @@
 window.modules["528"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
+
+var _container = require(522);
+
+var _container2 = _interopRequireDefault(_container);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 /**
- * Contains helpers for safely splitting lists of CSS values,
- * preserving parentheses and quotes.
+ * Represents a CSS file and contains all its parsed nodes.
+ *
+ * @extends Container
  *
  * @example
- * const list = postcss.list;
- *
- * @namespace list
+ * const root = postcss.parse('a{color:black} b{z-index:2}');
+ * root.type         //=> 'root'
+ * root.nodes.length //=> 2
  */
-var list = {
-    split: function split(string, separators, last) {
-        var array = [];
-        var current = '';
-        var split = false;
+var Root = function (_Container) {
+    _inherits(Root, _Container);
 
-        var func = 0;
-        var quote = false;
-        var escape = false;
+    function Root(defaults) {
+        _classCallCheck(this, Root);
 
-        for (var i = 0; i < string.length; i++) {
-            var letter = string[i];
+        var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
 
-            if (quote) {
-                if (escape) {
-                    escape = false;
-                } else if (letter === '\\') {
-                    escape = true;
-                } else if (letter === quote) {
-                    quote = false;
+        _this.type = 'root';
+        if (!_this.nodes) _this.nodes = [];
+        return _this;
+    }
+
+    Root.prototype.removeChild = function removeChild(child, ignore) {
+        var index = this.index(child);
+
+        if (!ignore && index === 0 && this.nodes.length > 1) {
+            this.nodes[1].raws.before = this.nodes[index].raws.before;
+        }
+
+        return _Container.prototype.removeChild.call(this, child);
+    };
+
+    Root.prototype.normalize = function normalize(child, sample, type) {
+        var nodes = _Container.prototype.normalize.call(this, child);
+
+        if (sample) {
+            if (type === 'prepend') {
+                if (this.nodes.length > 1) {
+                    sample.raws.before = this.nodes[1].raws.before;
+                } else {
+                    delete sample.raws.before;
                 }
-            } else if (letter === '"' || letter === '\'') {
-                quote = letter;
-            } else if (letter === '(') {
-                func += 1;
-            } else if (letter === ')') {
-                if (func > 0) func -= 1;
-            } else if (func === 0) {
-                if (separators.indexOf(letter) !== -1) split = true;
-            }
+            } else if (this.first !== sample) {
+                for (var _iterator = nodes, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+                    var _ref;
 
-            if (split) {
-                if (current !== '') array.push(current.trim());
-                current = '';
-                split = false;
-            } else {
-                current += letter;
+                    if (_isArray) {
+                        if (_i >= _iterator.length) break;
+                        _ref = _iterator[_i++];
+                    } else {
+                        _i = _iterator.next();
+                        if (_i.done) break;
+                        _ref = _i.value;
+                    }
+
+                    var node = _ref;
+
+                    node.raws.before = sample.raws.before;
+                }
             }
         }
 
-        if (last || current !== '') array.push(current.trim());
-        return array;
-    },
-
+        return nodes;
+    };
 
     /**
-     * Safely splits space-separated values (such as those for `background`,
-     * `border-radius`, and other shorthand properties).
+     * Returns a {@link Result} instance representing the root’s CSS.
      *
-     * @param {string} string - space-separated values
+     * @param {processOptions} [opts] - options with only `to` and `map` keys
      *
-     * @return {string[]} split values
+     * @return {Result} result with current root’s CSS
      *
      * @example
-     * postcss.list.space('1px calc(10% + 1px)') //=> ['1px', 'calc(10% + 1px)']
+     * const root1 = postcss.parse(css1, { from: 'a.css' });
+     * const root2 = postcss.parse(css2, { from: 'b.css' });
+     * root1.append(root2);
+     * const result = root1.toResult({ to: 'all.css', map: true });
      */
-    space: function space(string) {
-        var spaces = [' ', '\n', '\t'];
-        return list.split(string, spaces);
-    },
 
+
+    Root.prototype.toResult = function toResult() {
+        var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        var LazyResult = require(533);
+        var Processor = require(543);
+
+        var lazy = new LazyResult(new Processor(), this, opts);
+        return lazy.stringify();
+    };
 
     /**
-     * Safely splits comma-separated values (such as those for `transition-*`
-     * and `background` properties).
+     * @memberof Root#
+     * @member {object} raws - Information to generate byte-to-byte equal
+     *                         node string as it was in the origin input.
      *
-     * @param {string} string - comma-separated values
+     * Every parser saves its own properties,
+     * but the default CSS parser uses:
      *
-     * @return {string[]} split values
+     * * `after`: the space symbols after the last child to the end of file.
+     * * `semicolon`: is the last child has an (optional) semicolon.
      *
      * @example
-     * postcss.list.comma('black, linear-gradient(white, black)')
-     * //=> ['black', 'linear-gradient(white, black)']
+     * postcss.parse('a {}\n').raws //=> { after: '\n' }
+     * postcss.parse('a {}').raws   //=> { after: '' }
      */
-    comma: function comma(string) {
-        var comma = ',';
-        return list.split(string, [comma], true);
-    }
-};
 
-exports.default = list;
+    return Root;
+}(_container2.default);
+
+exports.default = Root;
 module.exports = exports['default'];
 
-}, {}];
+}, {"522":522,"533":533,"543":543}];

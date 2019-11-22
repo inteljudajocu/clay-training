@@ -1,99 +1,96 @@
-window.modules["538"] = [function(require,module,exports){"use strict";
+window.modules["538"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.default = void 0;
-
-var _node = _interopRequireDefault(require(537));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
-
 /**
- * Represents a CSS declaration.
- *
- * @extends Node
+ * Contains helpers for safely splitting lists of CSS values,
+ * preserving parentheses and quotes.
  *
  * @example
- * const root = postcss.parse('a { color: black }')
- * const decl = root.first.first
- * decl.type       //=> 'decl'
- * decl.toString() //=> ' color: black'
+ * const list = postcss.list;
+ *
+ * @namespace list
  */
-var Declaration =
-/*#__PURE__*/
-function (_Node) {
-  _inheritsLoose(Declaration, _Node);
+var list = {
+    split: function split(string, separators, last) {
+        var array = [];
+        var current = '';
+        var split = false;
 
-  function Declaration(defaults) {
-    var _this;
+        var func = 0;
+        var quote = false;
+        var escape = false;
 
-    _this = _Node.call(this, defaults) || this;
-    _this.type = 'decl';
-    return _this;
-  }
-  /**
-   * @memberof Declaration#
-   * @member {string} prop The declaration’s property name.
-   *
-   * @example
-   * const root = postcss.parse('a { color: black }')
-   * const decl = root.first.first
-   * decl.prop //=> 'color'
-   */
+        for (var i = 0; i < string.length; i++) {
+            var letter = string[i];
 
-  /**
-   * @memberof Declaration#
-   * @member {string} value The declaration’s value.
-   *
-   * @example
-   * const root = postcss.parse('a { color: black }')
-   * const decl = root.first.first
-   * decl.value //=> 'black'
-   */
+            if (quote) {
+                if (escape) {
+                    escape = false;
+                } else if (letter === '\\') {
+                    escape = true;
+                } else if (letter === quote) {
+                    quote = false;
+                }
+            } else if (letter === '"' || letter === '\'') {
+                quote = letter;
+            } else if (letter === '(') {
+                func += 1;
+            } else if (letter === ')') {
+                if (func > 0) func -= 1;
+            } else if (func === 0) {
+                if (separators.indexOf(letter) !== -1) split = true;
+            }
 
-  /**
-   * @memberof Declaration#
-   * @member {boolean} important `true` if the declaration
-   *                             has an !important annotation.
-   *
-   * @example
-   * const root = postcss.parse('a { color: black !important; color: red }')
-   * root.first.first.important //=> true
-   * root.first.last.important  //=> undefined
-   */
+            if (split) {
+                if (current !== '') array.push(current.trim());
+                current = '';
+                split = false;
+            } else {
+                current += letter;
+            }
+        }
 
-  /**
-   * @memberof Declaration#
-   * @member {object} raws Information to generate byte-to-byte equal
-   *                       node string as it was in the origin input.
-   *
-   * Every parser saves its own properties,
-   * but the default CSS parser uses:
-   *
-   * * `before`: the space symbols before the node. It also stores `*`
-   *   and `_` symbols before the declaration (IE hack).
-   * * `between`: the symbols between the property and value
-   *   for declarations.
-   * * `important`: the content of the important statement,
-   *   if it is not just `!important`.
-   *
-   * PostCSS cleans declaration from comments and extra spaces,
-   * but it stores origin content in raws properties.
-   * As such, if you don’t change a declaration’s value,
-   * PostCSS will use the raw value with comments.
-   *
-   * @example
-   * const root = postcss.parse('a {\n  color:black\n}')
-   * root.first.first.raws //=> { before: '\n  ', between: ':' }
-   */
+        if (last || current !== '') array.push(current.trim());
+        return array;
+    },
 
 
-  return Declaration;
-}(_node.default);
+    /**
+     * Safely splits space-separated values (such as those for `background`,
+     * `border-radius`, and other shorthand properties).
+     *
+     * @param {string} string - space-separated values
+     *
+     * @return {string[]} split values
+     *
+     * @example
+     * postcss.list.space('1px calc(10% + 1px)') //=> ['1px', 'calc(10% + 1px)']
+     */
+    space: function space(string) {
+        var spaces = [' ', '\n', '\t'];
+        return list.split(string, spaces);
+    },
 
-var _default = Declaration;
-exports.default = _default;
-module.exports = exports.default;
 
-}, {"537":537}];
+    /**
+     * Safely splits comma-separated values (such as those for `transition-*`
+     * and `background` properties).
+     *
+     * @param {string} string - comma-separated values
+     *
+     * @return {string[]} split values
+     *
+     * @example
+     * postcss.list.comma('black, linear-gradient(white, black)')
+     * //=> ['black', 'linear-gradient(white, black)']
+     */
+    comma: function comma(string) {
+        var comma = ',';
+        return list.split(string, [comma], true);
+    }
+};
+
+exports.default = list;
+module.exports = exports['default'];
+
+}, {}];

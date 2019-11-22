@@ -1,10 +1,6 @@
-window.modules["590"] = [function(require,module,exports){var makeString = require(576);
+window.modules["590"] = [function(require,module,exports){var trim = require(583);
 
-module.exports = function adjacent(str, direction) {
-  str = makeString(str);
-  if (str.length === 0) {
-    return '';
-  }
-  return str.slice(0, -1) + String.fromCharCode(str.charCodeAt(str.length - 1) + direction);
+module.exports = function clean(str) {
+  return trim(str).replace(/\s\s+/g, ' ');
 };
-}, {"576":576}];
+}, {"583":583}];

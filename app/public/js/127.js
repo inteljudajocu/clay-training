@@ -1,36 +1,33 @@
-window.modules["127"] = [function(require,module,exports){var List = require(53);
-var TYPE = require(74).TYPE;
-
-var COMMA = TYPE.Comma;
-
-module.exports = {
-    name: 'SelectorList',
+window.modules["127"] = [function(require,module,exports){module.exports = {
+    name: 'Selector',
     structure: {
-        children: [['Selector', 'Raw']]
+        children: [[
+            'TypeSelector',
+            'IdSelector',
+            'ClassSelector',
+            'AttributeSelector',
+            'PseudoClassSelector',
+            'PseudoElementSelector',
+            'Combinator',
+            'WhiteSpace'
+        ]]
     },
     parse: function() {
-        var children = new List();
+        var children = this.readSequence(this.scope.Selector);
 
-        while (!this.scanner.eof) {
-            children.appendData(this.Selector());
-
-            if (this.scanner.tokenType === COMMA) {
-                this.scanner.next();
-                continue;
-            }
-
-            break;
+        // nothing were consumed
+        if (children.isEmpty()) {
+            this.scanner.error('Selector is expected');
         }
 
         return {
-            type: 'SelectorList',
+            type: 'Selector',
             loc: this.getLocationFromList(children),
             children: children
         };
     },
     generate: function(processChunk, node) {
-        this.eachComma(processChunk, node);
-    },
-    walkContext: 'selector'
+        this.each(processChunk, node);
+    }
 };
-}, {"53":53,"74":74}];
+}, {}];

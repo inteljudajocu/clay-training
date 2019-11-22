@@ -1,207 +1,42 @@
 window.modules["442"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
+exports.default = parse;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _parser = require(456);
 
-var _warning = require(450);
+var _parser2 = _interopRequireDefault(_parser);
 
-var _warning2 = _interopRequireDefault(_warning);
+var _input = require(446);
+
+var _input2 = _interopRequireDefault(_input);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * Provides the result of the PostCSS transformations.
- *
- * A Result instance is returned by {@link LazyResult#then}
- * or {@link Root#toResult} methods.
- *
- * @example
- * postcss([cssnext]).process(css).then(function (result) {
- *    console.log(result.css);
- * });
- *
- * @example
- * var result2 = postcss.parse(css).toResult();
- */
-var Result = function () {
-
-  /**
-   * @param {Processor} processor - processor used for this transformation.
-   * @param {Root}      root      - Root node after all transformations.
-   * @param {processOptions} opts - options from the {@link Processor#process}
-   *                                or {@link Root#toResult}
-   */
-  function Result(processor, root, opts) {
-    _classCallCheck(this, Result);
-
-    /**
-     * @member {Processor} - The Processor instance used
-     *                       for this transformation.
-     *
-     * @example
-     * for ( let plugin of result.processor.plugins) {
-     *   if ( plugin.postcssPlugin === 'postcss-bad' ) {
-     *     throw 'postcss-good is incompatible with postcss-bad';
-     *   }
-     * });
-     */
-    this.processor = processor;
-    /**
-     * @member {Message[]} - Contains messages from plugins
-     *                       (e.g., warnings or custom messages).
-     *                       Each message should have type
-     *                       and plugin properties.
-     *
-     * @example
-     * postcss.plugin('postcss-min-browser', () => {
-     *   return (root, result) => {
-     *     var browsers = detectMinBrowsersByCanIUse(root);
-     *     result.messages.push({
-     *       type:    'min-browser',
-     *       plugin:  'postcss-min-browser',
-     *       browsers: browsers
-     *     });
-     *   };
-     * });
-     */
-    this.messages = [];
-    /**
-     * @member {Root} - Root node after all transformations.
-     *
-     * @example
-     * root.toResult().root == root;
-     */
-    this.root = root;
-    /**
-     * @member {processOptions} - Options from the {@link Processor#process}
-     *                            or {@link Root#toResult} call
-     *                            that produced this Result instance.
-     *
-     * @example
-     * root.toResult(opts).opts == opts;
-     */
-    this.opts = opts;
-    /**
-     * @member {string} - A CSS string representing of {@link Result#root}.
-     *
-     * @example
-     * postcss.parse('a{}').toResult().css //=> "a{}"
-     */
-    this.css = undefined;
-    /**
-     * @member {SourceMapGenerator} - An instance of `SourceMapGenerator`
-     *                                class from the `source-map` library,
-     *                                representing changes
-     *                                to the {@link Result#root} instance.
-     *
-     * @example
-     * result.map.toJSON() //=> { version: 3, file: 'a.css', … }
-     *
-     * @example
-     * if ( result.map ) {
-     *   fs.writeFileSync(result.opts.to + '.map', result.map.toString());
-     * }
-     */
-    this.map = undefined;
-  }
-
-  /**
-   * Returns for @{link Result#css} content.
-   *
-   * @example
-   * result + '' === result.css
-   *
-   * @return {string} string representing of {@link Result#root}
-   */
-
-
-  Result.prototype.toString = function toString() {
-    return this.css;
-  };
-
-  /**
-   * Creates an instance of {@link Warning} and adds it
-   * to {@link Result#messages}.
-   *
-   * @param {string} text        - warning message
-   * @param {Object} [opts]      - warning options
-   * @param {Node}   opts.node   - CSS node that caused the warning
-   * @param {string} opts.word   - word in CSS source that caused the warning
-   * @param {number} opts.index  - index in CSS node string that caused
-   *                               the warning
-   * @param {string} opts.plugin - name of the plugin that created
-   *                               this warning. {@link Result#warn} fills
-   *                               this property automatically.
-   *
-   * @return {Warning} created warning
-   */
-
-
-  Result.prototype.warn = function warn(text) {
-    var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    if (!opts.plugin) {
-      if (this.lastPlugin && this.lastPlugin.postcssPlugin) {
-        opts.plugin = this.lastPlugin.postcssPlugin;
-      }
+function parse(css, opts) {
+    if (opts && opts.safe) {
+        throw new Error('Option safe was removed. ' + 'Use parser: require("postcss-safe-parser")');
     }
 
-    var warning = new _warning2.default(text, opts);
-    this.messages.push(warning);
-
-    return warning;
-  };
-
-  /**
-   * Returns warnings from plugins. Filters {@link Warning} instances
-   * from {@link Result#messages}.
-   *
-   * @example
-   * result.warnings().forEach(warn => {
-   *   console.warn(warn.toString());
-   * });
-   *
-   * @return {Warning[]} warnings from plugins
-   */
-
-
-  Result.prototype.warnings = function warnings() {
-    return this.messages.filter(function (i) {
-      return i.type === 'warning';
-    });
-  };
-
-  /**
-   * An alias for the {@link Result#css} property.
-   * Use it with syntaxes that generate non-CSS output.
-   * @type {string}
-   *
-   * @example
-   * result.css === result.content;
-   */
-
-
-  _createClass(Result, [{
-    key: 'content',
-    get: function get() {
-      return this.css;
+    var input = new _input2.default(css, opts);
+    var parser = new _parser2.default(input);
+    try {
+        parser.parse();
+    } catch (e) {
+        if (e.name === 'CssSyntaxError' && opts && opts.from) {
+            if (/\.scss$/i.test(opts.from)) {
+                e.message += '\nYou tried to parse SCSS with ' + 'the standard CSS parser; ' + 'try again with the postcss-scss parser';
+            } else if (/\.sass/i.test(opts.from)) {
+                e.message += '\nYou tried to parse Sass with ' + 'the standard CSS parser; ' + 'try again with the postcss-sass parser';
+            } else if (/\.less$/i.test(opts.from)) {
+                e.message += '\nYou tried to parse Less with ' + 'the standard CSS parser; ' + 'try again with the postcss-less parser';
+            }
+        }
+        throw e;
     }
-  }]);
 
-  return Result;
-}();
-
-exports.default = Result;
-
-/**
- * @typedef  {object} Message
- * @property {string} type   - message type
- * @property {string} plugin - source PostCSS plugin name
- */
-
+    return parser.root;
+}
 module.exports = exports['default'];
 
-}, {"450":450}];
+}, {"446":446,"456":456}];

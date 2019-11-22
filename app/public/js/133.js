@@ -1,62 +1,50 @@
-window.modules["133"] = [function(require,module,exports){var endsWith = require(74).endsWith;
-var TYPE = require(74).TYPE;
+window.modules["133"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
-var WHITESPACE = TYPE.WhiteSpace;
-var COMMENT = TYPE.Comment;
-var FUNCTION = TYPE.Function;
-var COLON = TYPE.Colon;
-var SEMICOLON = TYPE.Semicolon;
-var EXCLAMATIONMARK = TYPE.ExclamationMark;
+var STRING = TYPE.String;
+var URL = TYPE.Url;
+var RAW = TYPE.Raw;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 
-// 'progid:' ws* 'DXImageTransform.Microsoft.' ident ws* '(' .* ')'
-function checkProgid(scanner) {
-    var offset = 0;
-
-    for (var type; type = scanner.lookupType(offset); offset++) {
-        if (type !== WHITESPACE && type !== COMMENT) {
-            break;
-        }
-    }
-
-    if (scanner.lookupValue(offset, 'alpha(') ||
-        scanner.lookupValue(offset, 'chroma(') ||
-        scanner.lookupValue(offset, 'dropshadow(')) {
-        if (scanner.lookupType(offset) !== FUNCTION) {
-            return false;
-        }
-    } else {
-        if (scanner.lookupValue(offset, 'progid') === false ||
-            scanner.lookupType(offset + 1) !== COLON) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
+// url '(' S* (string | raw) S* ')'
 module.exports = {
-    name: 'Value',
+    name: 'Url',
     structure: {
-        children: [[]]
+        value: ['String', 'Raw']
     },
-    parse: function(property) {
-        // special parser for filter property since it can contains non-standart syntax for old IE
-        if (property !== null && endsWith(property, 'filter') && checkProgid(this.scanner)) {
-            this.scanner.skipSC();
-            return this.Raw(this.scanner.currentToken, EXCLAMATIONMARK, SEMICOLON, false, false);
+    parse: function() {
+        var start = this.scanner.tokenStart;
+        var value;
+
+        this.scanner.eat(URL);
+        this.scanner.skipSC();
+
+        switch (this.scanner.tokenType) {
+            case STRING:
+                value = this.String();
+                break;
+
+            case RAW:
+                value = this.Raw(this.scanner.currentToken, 0, RAW, true, false);
+                break;
+
+            default:
+                this.scanner.error('String or Raw is expected');
         }
 
-        var start = this.scanner.tokenStart;
-        var children = this.readSequence(this.scope.Value);
+        this.scanner.skipSC();
+        this.scanner.eat(RIGHTPARENTHESIS);
 
         return {
-            type: 'Value',
+            type: 'Url',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            children: children
+            value: value
         };
     },
     generate: function(processChunk, node) {
-        this.each(processChunk, node);
+        processChunk('url');
+        processChunk('(');
+        this.generate(processChunk, node.value);
+        processChunk(')');
     }
 };
-}, {"74":74}];
+}, {"75":75}];

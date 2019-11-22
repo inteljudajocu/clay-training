@@ -1,11 +1,9 @@
-window.modules["589"] = [function(require,module,exports){module.exports = function() {
-  var result = {};
+window.modules["589"] = [function(require,module,exports){var capitalize = require(585);
+var camelize = require(582);
+var makeString = require(586);
 
-  for (var prop in this) {
-    if (!this.hasOwnProperty(prop) || prop.match(/^(?:include|contains|reverse|join|map|wrap)$/)) continue;
-    result[prop] = this[prop];
-  }
-
-  return result;
+module.exports = function classify(str) {
+  str = makeString(str);
+  return capitalize(camelize(str.replace(/[\W_]/g, ' ')).replace(/\s/g, ''));
 };
-}, {}];
+}, {"582":582,"585":585,"586":586}];

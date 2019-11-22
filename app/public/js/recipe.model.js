@@ -1,6 +1,6 @@
 window.modules["recipe.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(1),
+var _get = require(3),
     defaultWidth = 'inline';
 
 module.exports.render = function (uri, data) {
@@ -26,4 +26,4 @@ module.exports.save = function (uri, data) {
 
   return Object.assign(data, image);
 };
-}, {"1":1}];
+}, {"3":3}];

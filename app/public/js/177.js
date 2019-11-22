@@ -1,21 +1,26 @@
-window.modules["177"] = [function(require,module,exports){/**
- * @category Common Helpers
- * @summary Is the given argument an instance of Date?
+window.modules["177"] = [function(require,module,exports){var startOfWeek = require(182)
+
+/**
+ * @category ISO Week Helpers
+ * @summary Return the start of an ISO week for the given date.
  *
  * @description
- * Is the given argument an instance of Date?
+ * Return the start of an ISO week for the given date.
+ * The result will be in the local timezone.
  *
- * @param {*} argument - the argument to check
- * @returns {Boolean} the given argument is an instance of Date
+ * ISO week-numbering year: http://en.wikipedia.org/wiki/ISO_week_date
+ *
+ * @param {Date|String|Number} date - the original date
+ * @returns {Date} the start of an ISO week
  *
  * @example
- * // Is 'mayonnaise' a Date?
- * var result = isDate('mayonnaise')
- * //=> false
+ * // The start of an ISO week for 2 September 2014 11:55:00:
+ * var result = startOfISOWeek(new Date(2014, 8, 2, 11, 55, 0))
+ * //=> Mon Sep 01 2014 00:00:00
  */
-function isDate (argument) {
-  return argument instanceof Date
+function startOfISOWeek (dirtyDate) {
+  return startOfWeek(dirtyDate, {weekStartsOn: 1})
 }
 
-module.exports = isDate
-}, {}];
+module.exports = startOfISOWeek
+}, {"182":182}];

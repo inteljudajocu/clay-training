@@ -1,15 +1,21 @@
 window.modules["26"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(50);
+const isUriStringCheck = require(51);
 
 /**
- * First test if argument is a String. If true, test if '/_pages/' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
+ * replace version in uri
+ * @param  {string} uri
+ * @param  {string} [version] defaults to latest
+ * @return {string}
  */
-module.exports = function (uri) {
+module.exports = function (uri, version) {
   isUriStringCheck.strCheck(uri);
-  return uri.toLowerCase().indexOf('/_pages/') > -1;
+
+  if (version) {
+    return uri.split('@')[0] + '@' + version;
+  } else {
+    // no version is still a kind of version
+    return uri.split('@')[0];
+  }
 };
-}, {"50":50}];
+}, {"51":51}];

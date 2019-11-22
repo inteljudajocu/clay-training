@@ -1,26 +1,36 @@
 window.modules["226"] = [function(require,module,exports){module.exports = Stream;
 
-var Parser = require(222);
-var WritableStream = require(19).Writable;
-var StringDecoder = require(227).StringDecoder;
-var Buffer = require(21).Buffer;
+var Parser = require(227);
 
-function Stream(cbs, options) {
-    var parser = (this._parser = new Parser(cbs, options));
-    var decoder = (this._decoder = new StringDecoder());
-
-    WritableStream.call(this, { decodeStrings: false });
-
-    this.once("finish", function() {
-        parser.end(decoder.end());
-    });
+function Stream(options) {
+    Parser.call(this, new Cbs(this), options);
 }
 
-require(221)(Stream, WritableStream);
+require(222)(Stream, Parser);
 
-Stream.prototype._write = function(chunk, encoding, cb) {
-    if (chunk instanceof Buffer) chunk = this._decoder.write(chunk);
-    this._parser.write(chunk);
-    cb();
-};
-}, {"19":19,"21":21,"221":221,"222":222,"227":227}];
+Stream.prototype.readable = true;
+
+function Cbs(scope) {
+    this.scope = scope;
+}
+
+var EVENTS = require(216).EVENTS;
+
+Object.keys(EVENTS).forEach(function(name) {
+    if (EVENTS[name] === 0) {
+        Cbs.prototype["on" + name] = function() {
+            this.scope.emit(name);
+        };
+    } else if (EVENTS[name] === 1) {
+        Cbs.prototype["on" + name] = function(a) {
+            this.scope.emit(name, a);
+        };
+    } else if (EVENTS[name] === 2) {
+        Cbs.prototype["on" + name] = function(a, b) {
+            this.scope.emit(name, a, b);
+        };
+    } else {
+        throw Error("wrong number of arguments!");
+    }
+});
+}, {"216":216,"222":222,"227":227}];

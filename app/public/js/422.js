@@ -1,46 +1,70 @@
-window.modules["422"] = [function(require,module,exports){var resolveKeyword = require(57).keyword;
-var walkRules = require(57).walkRules;
-var translate = require(57).translate;
-var createDeclarationIndexer = require(423);
-var processSelector = require(424);
+window.modules["422"] = [function(require,module,exports){var List = require(58).List;
 
-function walk(node, markDeclaration, options) {
-    switch (node.type) {
-        case 'Rule':
-            node.block.children.each(markDeclaration);
-            processSelector(node, options.usage);
-            break;
-
-        case 'Atrule':
-            if (node.prelude) {
-                node.prelude.id = null; // pre-init property to avoid multiple hidden class for translate
-                node.prelude.id = translate(node.prelude);
-            }
-
-            // compare keyframe selectors by its values
-            // NOTE: still no clarification about problems with keyframes selector grouping (issue #197)
-            if (resolveKeyword(node.name).name === 'keyframes') {
-                node.block.avoidRulesMerge = true;  /* probably we don't need to prevent those merges for @keyframes
-                                                       TODO: need to be checked */
-                node.block.children.each(function(rule) {
-                    rule.prelude.children.each(function(simpleselector) {
-                        simpleselector.compareMarker = simpleselector.id;
-                    });
-                });
-            }
-            break;
+module.exports = function compressBackground(node) {
+    function lastType() {
+        if (buffer.length) {
+            return buffer[buffer.length - 1].type;
+        }
     }
-}
 
-module.exports = function prepare(ast, options) {
-    var markDeclaration = createDeclarationIndexer();
+    function flush() {
+        if (lastType() === 'WhiteSpace') {
+            buffer.pop();
+        }
 
-    walkRules(ast, function(node) {
-        walk(node, markDeclaration, options);
+        if (!buffer.length) {
+            buffer.unshift(
+                {
+                    type: 'Number',
+                    loc: null,
+                    value: '0'
+                },
+                {
+                    type: 'WhiteSpace',
+                    value: ' '
+                },
+                {
+                    type: 'Number',
+                    loc: null,
+                    value: '0'
+                }
+            );
+        }
+
+        newValue.push.apply(newValue, buffer);
+
+        buffer = [];
+    }
+
+    var newValue = [];
+    var buffer = [];
+
+    node.children.each(function(node) {
+        if (node.type === 'Operator' && node.value === ',') {
+            flush();
+            newValue.push(node);
+            return;
+        }
+
+        // remove defaults
+        if (node.type === 'Identifier') {
+            if (node.name === 'transparent' ||
+                node.name === 'none' ||
+                node.name === 'repeat' ||
+                node.name === 'scroll') {
+                return;
+            }
+        }
+
+        // don't add redundant spaces
+        if (node.type === 'WhiteSpace' && (!buffer.length || lastType() === 'WhiteSpace')) {
+            return;
+        }
+
+        buffer.push(node);
     });
 
-    return {
-        declaration: markDeclaration
-    };
+    flush();
+    node.children = new List().fromArray(newValue);
 };
-}, {"57":57,"423":423,"424":424}];
+}, {"58":58}];

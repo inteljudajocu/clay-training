@@ -1,29 +1,31 @@
-window.modules["377"] = [function(require,module,exports){var toString = require(343);
+window.modules["377"] = [function(require,module,exports){var baseGetTag = require(300),
+    isArray = require(279),
+    isObjectLike = require(308);
+
+/** `Object#toString` result references. */
+var stringTag = '[object String]';
 
 /**
- * Converts `string`, as a whole, to lower case just like
- * [String#toLowerCase](https://mdn.io/toLowerCase).
+ * Checks if `value` is classified as a `String` primitive or object.
  *
  * @static
+ * @since 0.1.0
  * @memberOf _
- * @since 4.0.0
- * @category String
- * @param {string} [string=''] The string to convert.
- * @returns {string} Returns the lower cased string.
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a string, else `false`.
  * @example
  *
- * _.toLower('--Foo-Bar--');
- * // => '--foo-bar--'
+ * _.isString('abc');
+ * // => true
  *
- * _.toLower('fooBar');
- * // => 'foobar'
- *
- * _.toLower('__FOO_BAR__');
- * // => '__foo_bar__'
+ * _.isString(1);
+ * // => false
  */
-function toLower(value) {
-  return toString(value).toLowerCase();
+function isString(value) {
+  return typeof value == 'string' ||
+    (!isArray(value) && isObjectLike(value) && baseGetTag(value) == stringTag);
 }
 
-module.exports = toLower;
-}, {"343":343}];
+module.exports = isString;
+}, {"279":279,"300":300,"308":308}];

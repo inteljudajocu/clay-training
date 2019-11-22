@@ -1,9 +1,6 @@
-window.modules["624"] = [function(require,module,exports){var makeString = require(576);
+window.modules["624"] = [function(require,module,exports){var surround = require(611);
 
-module.exports = function strRightBack(str, sep) {
-  str = makeString(str);
-  sep = makeString(sep);
-  var pos = !sep ? -1 : str.lastIndexOf(sep);
-  return~ pos ? str.slice(pos + sep.length, str.length) : str;
+module.exports = function quote(str, quoteChar) {
+  return surround(str, quoteChar || '"');
 };
-}, {"576":576}];
+}, {"611":611}];

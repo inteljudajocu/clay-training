@@ -1,122 +1,94 @@
-window.modules["558"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
-/*
- * Copyright 2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE or:
- * http://opensource.org/licenses/BSD-3-Clause
- */
+window.modules["558"] = [function(require,module,exports){"use strict";
 
-var util = require(559);
-var has = Object.prototype.hasOwnProperty;
-var hasNativeMap = typeof Map !== "undefined";
+exports.__esModule = true;
+exports.default = void 0;
 
 /**
- * A data structure which is a combination of an array and a set. Adding a new
- * member is O(1), testing for membership is O(1), and finding the index of an
- * element is O(1). Removing elements from the set is not supported. Only
- * strings are supported for membership.
- */
-function ArraySet() {
-  this._array = [];
-  this._set = hasNativeMap ? new Map() : Object.create(null);
-}
-
-/**
- * Static method for creating ArraySet instances from an existing array.
- */
-ArraySet.fromArray = function ArraySet_fromArray(aArray, aAllowDuplicates) {
-  var set = new ArraySet();
-  for (var i = 0, len = aArray.length; i < len; i++) {
-    set.add(aArray[i], aAllowDuplicates);
-  }
-  return set;
-};
-
-/**
- * Return how many unique items are in this ArraySet. If duplicates have been
- * added, than those do not count towards the size.
+ * Contains helpers for safely splitting lists of CSS values,
+ * preserving parentheses and quotes.
  *
- * @returns Number
- */
-ArraySet.prototype.size = function ArraySet_size() {
-  return hasNativeMap ? this._set.size : Object.getOwnPropertyNames(this._set).length;
-};
-
-/**
- * Add the given string to this set.
+ * @example
+ * const list = postcss.list
  *
- * @param String aStr
+ * @namespace list
  */
-ArraySet.prototype.add = function ArraySet_add(aStr, aAllowDuplicates) {
-  var sStr = hasNativeMap ? aStr : util.toSetString(aStr);
-  var isDuplicate = hasNativeMap ? this.has(aStr) : has.call(this._set, sStr);
-  var idx = this._array.length;
-  if (!isDuplicate || aAllowDuplicates) {
-    this._array.push(aStr);
-  }
-  if (!isDuplicate) {
-    if (hasNativeMap) {
-      this._set.set(aStr, idx);
-    } else {
-      this._set[sStr] = idx;
+var list = {
+  split: function split(string, separators, last) {
+    var array = [];
+    var current = '';
+    var split = false;
+    var func = 0;
+    var quote = false;
+    var escape = false;
+
+    for (var i = 0; i < string.length; i++) {
+      var letter = string[i];
+
+      if (quote) {
+        if (escape) {
+          escape = false;
+        } else if (letter === '\\') {
+          escape = true;
+        } else if (letter === quote) {
+          quote = false;
+        }
+      } else if (letter === '"' || letter === '\'') {
+        quote = letter;
+      } else if (letter === '(') {
+        func += 1;
+      } else if (letter === ')') {
+        if (func > 0) func -= 1;
+      } else if (func === 0) {
+        if (separators.indexOf(letter) !== -1) split = true;
+      }
+
+      if (split) {
+        if (current !== '') array.push(current.trim());
+        current = '';
+        split = false;
+      } else {
+        current += letter;
+      }
     }
+
+    if (last || current !== '') array.push(current.trim());
+    return array;
+  },
+
+  /**
+   * Safely splits space-separated values (such as those for `background`,
+   * `border-radius`, and other shorthand properties).
+   *
+   * @param {string} string Space-separated values.
+   *
+   * @return {string[]} Split values.
+   *
+   * @example
+   * postcss.list.space('1px calc(10% + 1px)') //=> ['1px', 'calc(10% + 1px)']
+   */
+  space: function space(string) {
+    var spaces = [' ', '\n', '\t'];
+    return list.split(string, spaces);
+  },
+
+  /**
+   * Safely splits comma-separated values (such as those for `transition-*`
+   * and `background` properties).
+   *
+   * @param {string} string Comma-separated values.
+   *
+   * @return {string[]} Split values.
+   *
+   * @example
+   * postcss.list.comma('black, linear-gradient(white, black)')
+   * //=> ['black', 'linear-gradient(white, black)']
+   */
+  comma: function comma(string) {
+    return list.split(string, [','], true);
   }
 };
+var _default = list;
+exports.default = _default;
+module.exports = exports.default;
 
-/**
- * Is the given string a member of this set?
- *
- * @param String aStr
- */
-ArraySet.prototype.has = function ArraySet_has(aStr) {
-  if (hasNativeMap) {
-    return this._set.has(aStr);
-  } else {
-    var sStr = util.toSetString(aStr);
-    return has.call(this._set, sStr);
-  }
-};
-
-/**
- * What is the index of the given string in the array?
- *
- * @param String aStr
- */
-ArraySet.prototype.indexOf = function ArraySet_indexOf(aStr) {
-  if (hasNativeMap) {
-    var idx = this._set.get(aStr);
-    if (idx >= 0) {
-        return idx;
-    }
-  } else {
-    var sStr = util.toSetString(aStr);
-    if (has.call(this._set, sStr)) {
-      return this._set[sStr];
-    }
-  }
-
-  throw new Error('"' + aStr + '" is not in the set.');
-};
-
-/**
- * What is the element at the given index?
- *
- * @param Number aIdx
- */
-ArraySet.prototype.at = function ArraySet_at(aIdx) {
-  if (aIdx >= 0 && aIdx < this._array.length) {
-    return this._array[aIdx];
-  }
-  throw new Error('No element indexed by ' + aIdx);
-};
-
-/**
- * Returns the array representation of this set (which has the proper indices
- * indicated by indexOf). Note that this is a copy of the internal array used
- * for storing the members so that no one can mess with internal state.
- */
-ArraySet.prototype.toArray = function ArraySet_toArray() {
-  return this._array.slice();
-};
-
-exports.ArraySet = ArraySet;
-}, {"559":559}];
+}, {}];

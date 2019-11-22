@@ -1,33 +1,80 @@
-window.modules["100"] = [function(require,module,exports){var TYPE = require(74).TYPE;
-var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
-var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
+window.modules["100"] = [function(require,module,exports){var List = require(54);
+var TYPE = require(75).TYPE;
 
-// currently only Grid Layout uses square brackets, but left it universal
-// https://drafts.csswg.org/css-grid/#track-sizing
-// [ ident* ]
+var WHITESPACE = TYPE.WhiteSpace;
+var COMMENT = TYPE.Comment;
+var SEMICOLON = TYPE.Semicolon;
+var ATRULE = TYPE.Atrule;
+var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
+
+function consumeRaw(startToken) {
+    return this.Raw(startToken, 0, 0, false, true);
+}
+function consumeRule() {
+    return this.tolerantParse(this.Rule, consumeRaw);
+}
+function consumeRawDeclaration(startToken) {
+    return this.Raw(startToken, 0, SEMICOLON, true, true);
+}
+function consumeDeclaration() {
+    var node = this.tolerantParse(this.Declaration, consumeRawDeclaration);
+
+    if (this.scanner.tokenType === SEMICOLON) {
+        this.scanner.next();
+    }
+
+    return node;
+}
+
 module.exports = {
-    name: 'Brackets',
+    name: 'Block',
     structure: {
-        children: [[]]
+        children: [['Atrule', 'Rule', 'Declaration']]
     },
-    parse: function(readSequence, recognizer) {
-        var start = this.scanner.tokenStart;
-        var children = null;
+    parse: function(isDeclaration) {
+        var consumer = isDeclaration ? consumeDeclaration : consumeRule;
 
-        this.scanner.eat(LEFTSQUAREBRACKET);
-        children = readSequence.call(this, recognizer);
-        this.scanner.eat(RIGHTSQUAREBRACKET);
+        var start = this.scanner.tokenStart;
+        var children = new List();
+
+        this.scanner.eat(LEFTCURLYBRACKET);
+
+        scan:
+        while (!this.scanner.eof) {
+            switch (this.scanner.tokenType) {
+                case RIGHTCURLYBRACKET:
+                    break scan;
+
+                case WHITESPACE:
+                case COMMENT:
+                    this.scanner.next();
+                    break;
+
+                case ATRULE:
+                    children.appendData(this.tolerantParse(this.Atrule, consumeRaw));
+                    break;
+
+                default:
+                    children.appendData(consumer.call(this));
+            }
+        }
+
+        if (!this.tolerant || !this.scanner.eof) {
+            this.scanner.eat(RIGHTCURLYBRACKET);
+        }
 
         return {
-            type: 'Brackets',
+            type: 'Block',
             loc: this.getLocation(start, this.scanner.tokenStart),
             children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk('[');
+        processChunk('{');
         this.each(processChunk, node);
-        processChunk(']');
-    }
+        processChunk('}');
+    },
+    walkContext: 'block'
 };
-}, {"74":74}];
+}, {"54":54,"75":75}];

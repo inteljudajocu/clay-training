@@ -1,91 +1,39 @@
 window.modules["476"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.universal = exports.tag = exports.string = exports.selector = exports.root = exports.pseudo = exports.nesting = exports.id = exports.comment = exports.combinator = exports.className = exports.attribute = undefined;
 
-var _attribute = require(465);
+var _namespace = require(484);
 
-var _attribute2 = _interopRequireDefault(_attribute);
+var _namespace2 = _interopRequireDefault(_namespace);
 
-var _className = require(466);
-
-var _className2 = _interopRequireDefault(_className);
-
-var _combinator = require(462);
-
-var _combinator2 = _interopRequireDefault(_combinator);
-
-var _comment = require(464);
-
-var _comment2 = _interopRequireDefault(_comment);
-
-var _id = require(469);
-
-var _id2 = _interopRequireDefault(_id);
-
-var _nesting = require(463);
-
-var _nesting2 = _interopRequireDefault(_nesting);
-
-var _pseudo = require(468);
-
-var _pseudo2 = _interopRequireDefault(_pseudo);
-
-var _root = require(472);
-
-var _root2 = _interopRequireDefault(_root);
-
-var _selector = require(470);
-
-var _selector2 = _interopRequireDefault(_selector);
-
-var _string = require(461);
-
-var _string2 = _interopRequireDefault(_string);
-
-var _tag = require(467);
-
-var _tag2 = _interopRequireDefault(_tag);
-
-var _universal = require(471);
-
-var _universal2 = _interopRequireDefault(_universal);
+var _types = require(470);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var attribute = exports.attribute = function attribute(opts) {
-  return new _attribute2.default(opts);
-};
-var className = exports.className = function className(opts) {
-  return new _className2.default(opts);
-};
-var combinator = exports.combinator = function combinator(opts) {
-  return new _combinator2.default(opts);
-};
-var comment = exports.comment = function comment(opts) {
-  return new _comment2.default(opts);
-};
-var id = exports.id = function id(opts) {
-  return new _id2.default(opts);
-};
-var nesting = exports.nesting = function nesting(opts) {
-  return new _nesting2.default(opts);
-};
-var pseudo = exports.pseudo = function pseudo(opts) {
-  return new _pseudo2.default(opts);
-};
-var root = exports.root = function root(opts) {
-  return new _root2.default(opts);
-};
-var selector = exports.selector = function selector(opts) {
-  return new _selector2.default(opts);
-};
-var string = exports.string = function string(opts) {
-  return new _string2.default(opts);
-};
-var tag = exports.tag = function tag(opts) {
-  return new _tag2.default(opts);
-};
-var universal = exports.universal = function universal(opts) {
-  return new _universal2.default(opts);
-};}, {"461":461,"462":462,"463":463,"464":464,"465":465,"466":466,"467":467,"468":468,"469":469,"470":470,"471":471,"472":472}];
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ID = function (_Namespace) {
+    _inherits(ID, _Namespace);
+
+    function ID(opts) {
+        _classCallCheck(this, ID);
+
+        var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
+
+        _this.type = _types.ID;
+        return _this;
+    }
+
+    ID.prototype.toString = function toString() {
+        return [this.spaces.before, this.ns, String('#' + this.value), this.spaces.after].join('');
+    };
+
+    return ID;
+}(_namespace2.default);
+
+exports.default = ID;
+module.exports = exports['default'];}, {"470":470,"484":484}];

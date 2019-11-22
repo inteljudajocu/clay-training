@@ -1,27 +1,16 @@
-window.modules["337"] = [function(require,module,exports){/**
- * Creates a function that returns `value`.
+window.modules["337"] = [function(require,module,exports){var isObject = require(12);
+
+/**
+ * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
  *
- * @static
- * @memberOf _
- * @since 2.4.0
- * @category Util
- * @param {*} value The value to return from the new function.
- * @returns {Function} Returns the new constant function.
- * @example
- *
- * var objects = _.times(2, _.constant({ 'a': 1 }));
- *
- * console.log(objects);
- * // => [{ 'a': 1 }, { 'a': 1 }]
- *
- * console.log(objects[0] === objects[1]);
- * // => true
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` if suitable for strict
+ *  equality comparisons, else `false`.
  */
-function constant(value) {
-  return function() {
-    return value;
-  };
+function isStrictComparable(value) {
+  return value === value && !isObject(value);
 }
 
-module.exports = constant;
-}, {}];
+module.exports = isStrictComparable;
+}, {"12":12}];

@@ -1,10 +1,10 @@
-window.modules["629"] = [function(require,module,exports){var makeString = require(576);
+window.modules["629"] = [function(require,module,exports){var makeString = require(586);
+var slice = [].slice;
 
-module.exports = function(str, callback) {
-  str = makeString(str);
+module.exports = function join() {
+  var args = slice.call(arguments),
+    separator = args.shift();
 
-  if (str.length === 0 || typeof callback !== 'function') return str;
-
-  return str.replace(/./g, callback);
+  return args.join(makeString(separator));
 };
-}, {"576":576}];
+}, {"586":586}];

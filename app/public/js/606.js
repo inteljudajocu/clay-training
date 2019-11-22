@@ -1,6 +1,6 @@
-window.modules["606"] = [function(require,module,exports){var chars = require(577);
+window.modules["606"] = [function(require,module,exports){var trim = require(583);
 
-module.exports = function reverse(str) {
-  return chars(str).reverse().join('');
+module.exports = function underscored(str) {
+  return trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[-\s]+/g, '_').toLowerCase();
 };
-}, {"577":577}];
+}, {"583":583}];

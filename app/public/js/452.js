@@ -1,293 +1,326 @@
-window.modules["452"] = [function(require,module,exports){'use strict';
+window.modules["452"] = [function(require,module,exports){(function (Buffer){
+'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(483);
+var _sourceMap = require(454);
 
-var _declaration2 = _interopRequireDefault(_declaration);
+var _sourceMap2 = _interopRequireDefault(_sourceMap);
 
-var _processor = require(501);
+var _path = require(392);
 
-var _processor2 = _interopRequireDefault(_processor);
-
-var _stringify = require(492);
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-var _comment = require(481);
-
-var _comment2 = _interopRequireDefault(_comment);
-
-var _atRule = require(479);
-
-var _atRule2 = _interopRequireDefault(_atRule);
-
-var _vendor = require(500);
-
-var _vendor2 = _interopRequireDefault(_vendor);
-
-var _parse = require(484);
-
-var _parse2 = _interopRequireDefault(_parse);
-
-var _list = require(496);
-
-var _list2 = _interopRequireDefault(_list);
-
-var _rule = require(485);
-
-var _rule2 = _interopRequireDefault(_rule);
-
-var _root = require(486);
-
-var _root2 = _interopRequireDefault(_root);
+var _path2 = _interopRequireDefault(_path);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/**
- * Create a new {@link Processor} instance that will apply `plugins`
- * as CSS processors.
- *
- * @param {Array.<Plugin|pluginFunction>|Processor} plugins - PostCSS
- *        plugins. See {@link Processor#use} for plugin format.
- *
- * @return {Processor} Processor to process multiple CSS
- *
- * @example
- * import postcss from 'postcss';
- *
- * postcss(plugins).process(css, { from, to }).then(result => {
- *   console.log(result.css);
- * });
- *
- * @namespace postcss
- */
-function postcss() {
-  for (var _len = arguments.length, plugins = Array(_len), _key = 0; _key < _len; _key++) {
-    plugins[_key] = arguments[_key];
-  }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  if (plugins.length === 1 && Array.isArray(plugins[0])) {
-    plugins = plugins[0];
-  }
-  return new _processor2.default(plugins);
-}
+var MapGenerator = function () {
+    function MapGenerator(stringify, root, opts) {
+        _classCallCheck(this, MapGenerator);
 
-/**
- * Creates a PostCSS plugin with a standard API.
- *
- * The newly-wrapped function will provide both the name and PostCSS
- * version of the plugin.
- *
- * ```js
- *  const processor = postcss([replace]);
- *  processor.plugins[0].postcssPlugin  //=> 'postcss-replace'
- *  processor.plugins[0].postcssVersion //=> '5.1.0'
- * ```
- *
- * The plugin function receives 2 arguments: {@link Root}
- * and {@link Result} instance. The function should mutate the provided
- * `Root` node. Alternatively, you can create a new `Root` node
- * and override the `result.root` property.
- *
- * ```js
- * const cleaner = postcss.plugin('postcss-cleaner', () => {
- *   return (root, result) => {
- *     result.root = postcss.root();
- *   };
- * });
- * ```
- *
- * As a convenience, plugins also expose a `process` method so that you can use
- * them as standalone tools.
- *
- * ```js
- * cleaner.process(css, processOpts, pluginOpts);
- * // This is equivalent to:
- * postcss([ cleaner(pluginOpts) ]).process(css, processOpts);
- * ```
- *
- * Asynchronous plugins should return a `Promise` instance.
- *
- * ```js
- * postcss.plugin('postcss-import', () => {
- *   return (root, result) => {
- *     return new Promise( (resolve, reject) => {
- *       fs.readFile('base.css', (base) => {
- *         root.prepend(base);
- *         resolve();
- *       });
- *     });
- *   };
- * });
- * ```
- *
- * Add warnings using the {@link Node#warn} method.
- * Send data to other plugins using the {@link Result#messages} array.
- *
- * ```js
- * postcss.plugin('postcss-caniuse-test', () => {
- *   return (root, result) => {
- *     root.walkDecls(decl => {
- *       if ( !caniuse.support(decl.prop) ) {
- *         decl.warn(result, 'Some browsers do not support ' + decl.prop);
- *       }
- *     });
- *   };
- * });
- * ```
- *
- * @param {string} name          - PostCSS plugin name. Same as in `name`
- *                                 property in `package.json`. It will be saved
- *                                 in `plugin.postcssPlugin` property.
- * @param {function} initializer - will receive plugin options
- *                                 and should return {@link pluginFunction}
- *
- * @return {Plugin} PostCSS plugin
- */
-postcss.plugin = function plugin(name, initializer) {
-  var creator = function creator() {
-    var transformer = initializer.apply(undefined, arguments);
-    transformer.postcssPlugin = name;
-    transformer.postcssVersion = new _processor2.default().version;
-    return transformer;
-  };
-
-  var cache = void 0;
-  Object.defineProperty(creator, 'postcss', {
-    get: function get() {
-      if (!cache) cache = creator();
-      return cache;
+        this.stringify = stringify;
+        this.mapOpts = opts.map || {};
+        this.root = root;
+        this.opts = opts;
     }
-  });
 
-  creator.process = function (css, processOpts, pluginOpts) {
-    return postcss([creator(pluginOpts)]).process(css, processOpts);
-  };
+    MapGenerator.prototype.isMap = function isMap() {
+        if (typeof this.opts.map !== 'undefined') {
+            return !!this.opts.map;
+        } else {
+            return this.previous().length > 0;
+        }
+    };
 
-  return creator;
-};
+    MapGenerator.prototype.previous = function previous() {
+        var _this = this;
 
-/**
- * Default function to convert a node tree into a CSS string.
- *
- * @param {Node} node       - start node for stringifing. Usually {@link Root}.
- * @param {builder} builder - function to concatenate CSS from node’s parts
- *                            or generate string and source map
- *
- * @return {void}
- *
- * @function
- */
-postcss.stringify = _stringify2.default;
+        if (!this.previousMaps) {
+            this.previousMaps = [];
+            this.root.walk(function (node) {
+                if (node.source && node.source.input.map) {
+                    var map = node.source.input.map;
+                    if (_this.previousMaps.indexOf(map) === -1) {
+                        _this.previousMaps.push(map);
+                    }
+                }
+            });
+        }
 
-/**
- * Parses source css and returns a new {@link Root} node,
- * which contains the source CSS nodes.
- *
- * @param {string|toString} css   - string with input CSS or any object
- *                                  with toString() method, like a Buffer
- * @param {processOptions} [opts] - options with only `from` and `map` keys
- *
- * @return {Root} PostCSS AST
- *
- * @example
- * // Simple CSS concatenation with source map support
- * const root1 = postcss.parse(css1, { from: file1 });
- * const root2 = postcss.parse(css2, { from: file2 });
- * root1.append(root2).toResult().css;
- *
- * @function
- */
-postcss.parse = _parse2.default;
+        return this.previousMaps;
+    };
 
-/**
- * @member {vendor} - Contains the {@link vendor} module.
- *
- * @example
- * postcss.vendor.unprefixed('-moz-tab') //=> ['tab']
- */
-postcss.vendor = _vendor2.default;
+    MapGenerator.prototype.isInline = function isInline() {
+        if (typeof this.mapOpts.inline !== 'undefined') {
+            return this.mapOpts.inline;
+        }
 
-/**
- * @member {list} - Contains the {@link list} module.
- *
- * @example
- * postcss.list.space('5px calc(10% + 5px)') //=> ['5px', 'calc(10% + 5px)']
- */
-postcss.list = _list2.default;
+        var annotation = this.mapOpts.annotation;
+        if (typeof annotation !== 'undefined' && annotation !== true) {
+            return false;
+        }
 
-/**
- * Creates a new {@link Comment} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {Comment} new Comment node
- *
- * @example
- * postcss.comment({ text: 'test' })
- */
-postcss.comment = function (defaults) {
-  return new _comment2.default(defaults);
-};
+        if (this.previous().length) {
+            return this.previous().some(function (i) {
+                return i.inline;
+            });
+        } else {
+            return true;
+        }
+    };
 
-/**
- * Creates a new {@link AtRule} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {AtRule} new AtRule node
- *
- * @example
- * postcss.atRule({ name: 'charset' }).toString() //=> "@charset"
- */
-postcss.atRule = function (defaults) {
-  return new _atRule2.default(defaults);
-};
+    MapGenerator.prototype.isSourcesContent = function isSourcesContent() {
+        if (typeof this.mapOpts.sourcesContent !== 'undefined') {
+            return this.mapOpts.sourcesContent;
+        }
+        if (this.previous().length) {
+            return this.previous().some(function (i) {
+                return i.withContent();
+            });
+        } else {
+            return true;
+        }
+    };
 
-/**
- * Creates a new {@link Declaration} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {Declaration} new Declaration node
- *
- * @example
- * postcss.decl({ prop: 'color', value: 'red' }).toString() //=> "color: red"
- */
-postcss.decl = function (defaults) {
-  return new _declaration2.default(defaults);
-};
+    MapGenerator.prototype.clearAnnotation = function clearAnnotation() {
+        if (this.mapOpts.annotation === false) return;
 
-/**
- * Creates a new {@link Rule} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {Rule} new Rule node
- *
- * @example
- * postcss.rule({ selector: 'a' }).toString() //=> "a {\n}"
- */
-postcss.rule = function (defaults) {
-  return new _rule2.default(defaults);
-};
+        var node = void 0;
+        for (var i = this.root.nodes.length - 1; i >= 0; i--) {
+            node = this.root.nodes[i];
+            if (node.type !== 'comment') continue;
+            if (node.text.indexOf('# sourceMappingURL=') === 0) {
+                this.root.removeChild(i);
+            }
+        }
+    };
 
-/**
- * Creates a new {@link Root} node.
- *
- * @param {object} [defaults] - properties for the new node.
- *
- * @return {Root} new Root node
- *
- * @example
- * postcss.root({ after: '\n' }).toString() //=> "\n"
- */
-postcss.root = function (defaults) {
-  return new _root2.default(defaults);
-};
+    MapGenerator.prototype.setSourcesContent = function setSourcesContent() {
+        var _this2 = this;
 
-exports.default = postcss;
+        var already = {};
+        this.root.walk(function (node) {
+            if (node.source) {
+                var from = node.source.input.from;
+                if (from && !already[from]) {
+                    already[from] = true;
+                    var relative = _this2.relative(from);
+                    _this2.map.setSourceContent(relative, node.source.input.css);
+                }
+            }
+        });
+    };
+
+    MapGenerator.prototype.applyPrevMaps = function applyPrevMaps() {
+        for (var _iterator = this.previous(), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+            var _ref;
+
+            if (_isArray) {
+                if (_i >= _iterator.length) break;
+                _ref = _iterator[_i++];
+            } else {
+                _i = _iterator.next();
+                if (_i.done) break;
+                _ref = _i.value;
+            }
+
+            var prev = _ref;
+
+            var from = this.relative(prev.file);
+            var root = prev.root || _path2.default.dirname(prev.file);
+            var map = void 0;
+
+            if (this.mapOpts.sourcesContent === false) {
+                map = new _sourceMap2.default.SourceMapConsumer(prev.text);
+                if (map.sourcesContent) {
+                    map.sourcesContent = map.sourcesContent.map(function () {
+                        return null;
+                    });
+                }
+            } else {
+                map = prev.consumer();
+            }
+
+            this.map.applySourceMap(map, from, this.relative(root));
+        }
+    };
+
+    MapGenerator.prototype.isAnnotation = function isAnnotation() {
+        if (this.isInline()) {
+            return true;
+        } else if (typeof this.mapOpts.annotation !== 'undefined') {
+            return this.mapOpts.annotation;
+        } else if (this.previous().length) {
+            return this.previous().some(function (i) {
+                return i.annotation;
+            });
+        } else {
+            return true;
+        }
+    };
+
+    MapGenerator.prototype.toBase64 = function toBase64(str) {
+        if (Buffer) {
+            if (Buffer.from && Buffer.from !== Uint8Array.from) {
+                return Buffer.from(str).toString('base64');
+            } else {
+                return new Buffer(str).toString('base64');
+            }
+        } else {
+            return window.btoa(unescape(encodeURIComponent(str)));
+        }
+    };
+
+    MapGenerator.prototype.addAnnotation = function addAnnotation() {
+        var content = void 0;
+
+        if (this.isInline()) {
+
+            content = 'data:application/json;base64,' + this.toBase64(this.map.toString());
+        } else if (typeof this.mapOpts.annotation === 'string') {
+            content = this.mapOpts.annotation;
+        } else {
+            content = this.outputFile() + '.map';
+        }
+
+        var eol = '\n';
+        if (this.css.indexOf('\r\n') !== -1) eol = '\r\n';
+
+        this.css += eol + '/*# sourceMappingURL=' + content + ' */';
+    };
+
+    MapGenerator.prototype.outputFile = function outputFile() {
+        if (this.opts.to) {
+            return this.relative(this.opts.to);
+        } else if (this.opts.from) {
+            return this.relative(this.opts.from);
+        } else {
+            return 'to.css';
+        }
+    };
+
+    MapGenerator.prototype.generateMap = function generateMap() {
+        this.generateString();
+        if (this.isSourcesContent()) this.setSourcesContent();
+        if (this.previous().length > 0) this.applyPrevMaps();
+        if (this.isAnnotation()) this.addAnnotation();
+
+        if (this.isInline()) {
+            return [this.css];
+        } else {
+            return [this.css, this.map];
+        }
+    };
+
+    MapGenerator.prototype.relative = function relative(file) {
+        if (file.indexOf('<') === 0) return file;
+        if (/^\w+:\/\//.test(file)) return file;
+
+        var from = this.opts.to ? _path2.default.dirname(this.opts.to) : '.';
+
+        if (typeof this.mapOpts.annotation === 'string') {
+            from = _path2.default.dirname(_path2.default.resolve(from, this.mapOpts.annotation));
+        }
+
+        file = _path2.default.relative(from, file);
+        if (_path2.default.sep === '\\') {
+            return file.replace(/\\/g, '/');
+        } else {
+            return file;
+        }
+    };
+
+    MapGenerator.prototype.sourcePath = function sourcePath(node) {
+        if (this.mapOpts.from) {
+            return this.mapOpts.from;
+        } else {
+            return this.relative(node.source.input.from);
+        }
+    };
+
+    MapGenerator.prototype.generateString = function generateString() {
+        var _this3 = this;
+
+        this.css = '';
+        this.map = new _sourceMap2.default.SourceMapGenerator({ file: this.outputFile() });
+
+        var line = 1;
+        var column = 1;
+
+        var lines = void 0,
+            last = void 0;
+        this.stringify(this.root, function (str, node, type) {
+            _this3.css += str;
+
+            if (node && type !== 'end') {
+                if (node.source && node.source.start) {
+                    _this3.map.addMapping({
+                        source: _this3.sourcePath(node),
+                        generated: { line: line, column: column - 1 },
+                        original: {
+                            line: node.source.start.line,
+                            column: node.source.start.column - 1
+                        }
+                    });
+                } else {
+                    _this3.map.addMapping({
+                        source: '<no source>',
+                        original: { line: 1, column: 0 },
+                        generated: { line: line, column: column - 1 }
+                    });
+                }
+            }
+
+            lines = str.match(/\n/g);
+            if (lines) {
+                line += lines.length;
+                last = str.lastIndexOf('\n');
+                column = str.length - last;
+            } else {
+                column += str.length;
+            }
+
+            if (node && type !== 'start') {
+                if (node.source && node.source.end) {
+                    _this3.map.addMapping({
+                        source: _this3.sourcePath(node),
+                        generated: { line: line, column: column - 1 },
+                        original: {
+                            line: node.source.end.line,
+                            column: node.source.end.column
+                        }
+                    });
+                } else {
+                    _this3.map.addMapping({
+                        source: '<no source>',
+                        original: { line: 1, column: 0 },
+                        generated: { line: line, column: column - 1 }
+                    });
+                }
+            }
+        });
+    };
+
+    MapGenerator.prototype.generate = function generate() {
+        this.clearAnnotation();
+
+        if (this.isMap()) {
+            return this.generateMap();
+        } else {
+            var result = '';
+            this.stringify(this.root, function (i) {
+                result += i;
+            });
+            return [result];
+        }
+    };
+
+    return MapGenerator;
+}();
+
+exports.default = MapGenerator;
 module.exports = exports['default'];
 
-}, {"479":479,"481":481,"483":483,"484":484,"485":485,"486":486,"492":492,"496":496,"500":500,"501":501}];
+
+}).call(this,require(22).Buffer)}, {"22":22,"392":392,"454":454}];

@@ -1,19 +1,14 @@
-window.modules["246"] = [function(require,module,exports){var getMapData = require(354);
-
-/**
- * Removes `key` and its value from the map.
+window.modules["246"] = [function(require,module,exports){/**
+ * Removes all key-value entries from the list cache.
  *
  * @private
- * @name delete
- * @memberOf MapCache
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ * @name clear
+ * @memberOf ListCache
  */
-function mapCacheDelete(key) {
-  var result = getMapData(this, key)['delete'](key);
-  this.size -= result ? 1 : 0;
-  return result;
+function listCacheClear() {
+  this.__data__ = [];
+  this.size = 0;
 }
 
-module.exports = mapCacheDelete;
-}, {"354":354}];
+module.exports = listCacheClear;
+}, {}];

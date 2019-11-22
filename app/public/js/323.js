@@ -1,23 +1,22 @@
-window.modules["323"] = [function(require,module,exports){var baseEach = require(282),
-    isArrayLike = require(324);
-
-/**
- * The base implementation of `_.map` without support for iteratee shorthands.
+window.modules["323"] = [function(require,module,exports){/**
+ * This method returns the first argument it receives.
  *
- * @private
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the new mapped array.
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Util
+ * @param {*} value Any value.
+ * @returns {*} Returns `value`.
+ * @example
+ *
+ * var object = { 'a': 1 };
+ *
+ * console.log(_.identity(object) === object);
+ * // => true
  */
-function baseMap(collection, iteratee) {
-  var index = -1,
-      result = isArrayLike(collection) ? Array(collection.length) : [];
-
-  baseEach(collection, function(value, key, collection) {
-    result[++index] = iteratee(value, key, collection);
-  });
-  return result;
+function identity(value) {
+  return value;
 }
 
-module.exports = baseMap;
-}, {"282":282,"324":324}];
+module.exports = identity;
+}, {}];

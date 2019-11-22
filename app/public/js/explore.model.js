@@ -1,29 +1,25 @@
 window.modules["explore.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(1),
-    defaultWidth = 'inline';
+var _require = require(10),
+    search = _require.search,
+    query = {
+  query: {
+    match_all: {}
+  }
+};
 
 module.exports.render = function (uri, data) {
-  return data;
+  return search('local_recipes', query).then(function (_ref) {
+    var hits = _ref.hits;
+    return hits.hits;
+  }).then(function (hits) {
+    return hits.map(function (_ref2) {
+      var _source = _ref2._source;
+      return _source;
+    });
+  }).then(function (res) {
+    data.recipes = res;
+    return data;
+  });
 };
-
-module.exports.save = function (uri, data) {
-  var imageAspectRatio = _get(data, 'imageAspectRatio', null),
-      imageAspectRatioFlexOverride = _get(data, 'imageAspectRatioFlexOverride', false),
-      imageCaption = _get(data, 'imageCaption', null),
-      imageCreditOverride = _get(data, 'imageCreditOverride', null),
-      imageUrl = _get(data, 'imageUrl', null),
-      imageWidth = _get(data, 'imageWidth', null) || defaultWidth,
-      image = {
-    imageAspectRatio: imageAspectRatio,
-    imageAspectRatioFlexOverride: imageAspectRatioFlexOverride,
-    imageCaption: imageCaption,
-    imageCredit: imageCreditOverride,
-    imageType: 'Photo',
-    imageUrl: imageUrl,
-    imageWidth: imageWidth
-  };
-
-  return Object.assign(data, image);
-};
-}, {"1":1}];
+}, {"10":10}];

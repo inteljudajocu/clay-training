@@ -1,54 +1,76 @@
-window.modules["130"] = [function(require,module,exports){var TYPE = require(74).TYPE;
+window.modules["130"] = [function(require,module,exports){var List = require(54);
+var TYPE = require(75).TYPE;
 
-var IDENTIFIER = TYPE.Identifier;
-var ASTERISK = TYPE.Asterisk;
-var VERTICALLINE = TYPE.VerticalLine;
+var WHITESPACE = TYPE.WhiteSpace;
+var COMMENT = TYPE.Comment;
+var EXCLAMATIONMARK = TYPE.ExclamationMark;
+var ATRULE = TYPE.Atrule;
+var CDO = TYPE.CDO;
+var CDC = TYPE.CDC;
 
-function eatIdentifierOrAsterisk() {
-    if (this.scanner.tokenType !== IDENTIFIER &&
-        this.scanner.tokenType !== ASTERISK) {
-        this.scanner.error('Identifier or asterisk is expected');
-    }
-
-    this.scanner.next();
+function consumeRaw(startToken) {
+    return this.Raw(startToken, 0, 0, false, false);
 }
 
-// ident
-// ident|ident
-// ident|*
-// *
-// *|ident
-// *|*
-// |ident
-// |*
 module.exports = {
-    name: 'TypeSelector',
+    name: 'StyleSheet',
     structure: {
-        name: String
+        children: [['Comment', 'Atrule', 'Rule', 'Raw']]
     },
     parse: function() {
         var start = this.scanner.tokenStart;
+        var children = new List();
+        var child;
 
-        if (this.scanner.tokenType === VERTICALLINE) {
-            this.scanner.next();
-            eatIdentifierOrAsterisk.call(this);
-        } else {
-            eatIdentifierOrAsterisk.call(this);
+        scan:
+        while (!this.scanner.eof) {
+            switch (this.scanner.tokenType) {
+                case WHITESPACE:
+                    this.scanner.next();
+                    continue;
 
-            if (this.scanner.tokenType === VERTICALLINE) {
-                this.scanner.next();
-                eatIdentifierOrAsterisk.call(this);
+                case COMMENT:
+                    // ignore comments except exclamation comments (i.e. /*! .. */) on top level
+                    if (this.scanner.source.charCodeAt(this.scanner.tokenStart + 2) !== EXCLAMATIONMARK) {
+                        this.scanner.next();
+                        continue;
+                    }
+
+                    child = this.Comment();
+                    break;
+
+                case CDO: // <!--
+                    child = this.CDO();
+                    break;
+
+                case CDC: // -->
+                    child = this.CDC();
+                    break;
+
+                // CSS Syntax Module Level 3
+                // §2.2 Error handling
+                // At the "top level" of a stylesheet, an <at-keyword-token> starts an at-rule.
+                case ATRULE:
+                    child = this.Atrule();
+                    break;
+
+                // Anything else starts a qualified rule ...
+                default:
+                    child = this.tolerantParse(this.Rule, consumeRaw);
             }
+
+            children.appendData(child);
         }
 
         return {
-            type: 'TypeSelector',
+            type: 'StyleSheet',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            name: this.scanner.substrToCursor(start)
+            children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.name);
-    }
+        this.each(processChunk, node);
+    },
+    walkContext: 'stylesheet'
 };
-}, {"74":74}];
+}, {"54":54,"75":75}];

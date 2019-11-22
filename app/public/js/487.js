@@ -2,256 +2,343 @@ window.modules["487"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _supportsColor = require(19);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _supportsColor2 = _interopRequireDefault(_supportsColor);
+var _node = require(485);
 
-var _chalk = require(19);
+var _node2 = _interopRequireDefault(_node);
 
-var _chalk2 = _interopRequireDefault(_chalk);
+var _types = require(470);
 
-var _terminalHighlight = require(488);
+var types = _interopRequireWildcard(_types);
 
-var _terminalHighlight2 = _interopRequireDefault(_terminalHighlight);
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/**
- * The CSS parser throws this error for broken CSS.
- *
- * Custom parsers can throw this error for broken custom syntax using
- * the {@link Node#error} method.
- *
- * PostCSS will use the input source map to detect the original error location.
- * If you wrote a Sass file, compiled it to CSS and then parsed it with PostCSS,
- * PostCSS will show the original position in the Sass file.
- *
- * If you need the position in the PostCSS input
- * (e.g., to debug the previous compiler), use `error.input.file`.
- *
- * @example
- * // Catching and checking syntax error
- * try {
- *   postcss.parse('a{')
- * } catch (error) {
- *   if ( error.name === 'CssSyntaxError' ) {
- *     error //=> CssSyntaxError
- *   }
- * }
- *
- * @example
- * // Raising error from plugin
- * throw node.error('Unknown variable', { plugin: 'postcss-vars' });
- */
-var CssSyntaxError = function () {
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-    /**
-     * @param {string} message  - error message
-     * @param {number} [line]   - source line of the error
-     * @param {number} [column] - source column of the error
-     * @param {string} [source] - source code of the broken file
-     * @param {string} [file]   - absolute path to the broken file
-     * @param {string} [plugin] - PostCSS plugin name, if error came from plugin
-     */
-    function CssSyntaxError(message, line, column, source, file, plugin) {
-        _classCallCheck(this, CssSyntaxError);
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-        /**
-         * @member {string} - Always equal to `'CssSyntaxError'`. You should
-         *                    always check error type
-         *                    by `error.name === 'CssSyntaxError'` instead of
-         *                    `error instanceof CssSyntaxError`, because
-         *                    npm could have several PostCSS versions.
-         *
-         * @example
-         * if ( error.name === 'CssSyntaxError' ) {
-         *   error //=> CssSyntaxError
-         * }
-         */
-        this.name = 'CssSyntaxError';
-        /**
-         * @member {string} - Error message.
-         *
-         * @example
-         * error.message //=> 'Unclosed block'
-         */
-        this.reason = message;
+var Container = function (_Node) {
+    _inherits(Container, _Node);
 
-        if (file) {
-            /**
-             * @member {string} - Absolute path to the broken file.
-             *
-             * @example
-             * error.file       //=> 'a.sass'
-             * error.input.file //=> 'a.css'
-             */
-            this.file = file;
-        }
-        if (source) {
-            /**
-             * @member {string} - Source code of the broken file.
-             *
-             * @example
-             * error.source       //=> 'a { b {} }'
-             * error.input.column //=> 'a b { }'
-             */
-            this.source = source;
-        }
-        if (plugin) {
-            /**
-             * @member {string} - Plugin name, if error came from plugin.
-             *
-             * @example
-             * error.plugin //=> 'postcss-vars'
-             */
-            this.plugin = plugin;
-        }
-        if (typeof line !== 'undefined' && typeof column !== 'undefined') {
-            /**
-             * @member {number} - Source line of the error.
-             *
-             * @example
-             * error.line       //=> 2
-             * error.input.line //=> 4
-             */
-            this.line = line;
-            /**
-             * @member {number} - Source column of the error.
-             *
-             * @example
-             * error.column       //=> 1
-             * error.input.column //=> 4
-             */
-            this.column = column;
-        }
+    function Container(opts) {
+        _classCallCheck(this, Container);
 
-        this.setMessage();
+        var _this = _possibleConstructorReturn(this, _Node.call(this, opts));
 
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, CssSyntaxError);
+        if (!_this.nodes) {
+            _this.nodes = [];
         }
+        return _this;
     }
 
-    CssSyntaxError.prototype.setMessage = function setMessage() {
-        /**
-         * @member {string} - Full error text in the GNU error format
-         *                    with plugin, file, line and column.
-         *
-         * @example
-         * error.message //=> 'a.css:1:1: Unclosed block'
-         */
-        this.message = this.plugin ? this.plugin + ': ' : '';
-        this.message += this.file ? this.file : '<css input>';
-        if (typeof this.line !== 'undefined') {
-            this.message += ':' + this.line + ':' + this.column;
-        }
-        this.message += ': ' + this.reason;
+    Container.prototype.append = function append(selector) {
+        selector.parent = this;
+        this.nodes.push(selector);
+        return this;
     };
 
-    /**
-     * Returns a few lines of CSS source that caused the error.
-     *
-     * If the CSS has an input source map without `sourceContent`,
-     * this method will return an empty string.
-     *
-     * @param {boolean} [color] whether arrow will be colored red by terminal
-     *                          color codes. By default, PostCSS will detect
-     *                          color support by `process.stdout.isTTY`
-     *                          and `window.process.env.NODE_DISABLE_COLORS`.
-     *
-     * @example
-     * error.showSourceCode() //=> "  4 | }
-     *                        //      5 | a {
-     *                        //    > 6 |   bad
-     *                        //        |   ^
-     *                        //      7 | }
-     *                        //      8 | b {"
-     *
-     * @return {string} few lines of CSS source that caused the error
-     */
+    Container.prototype.prepend = function prepend(selector) {
+        selector.parent = this;
+        this.nodes.unshift(selector);
+        return this;
+    };
 
+    Container.prototype.at = function at(index) {
+        return this.nodes[index];
+    };
 
-    CssSyntaxError.prototype.showSourceCode = function showSourceCode(color) {
-        var _this = this;
-
-        if (!this.source) return '';
-
-        var css = this.source;
-        if (typeof color === 'undefined') color = _supportsColor2.default.stdout;
-        if (color) css = (0, _terminalHighlight2.default)(css);
-
-        var lines = css.split(/\r?\n/);
-        var start = Math.max(this.line - 3, 0);
-        var end = Math.min(this.line + 2, lines.length);
-
-        var maxWidth = String(end).length;
-
-        function mark(text) {
-            if (color && _chalk2.default.red) {
-                return _chalk2.default.red.bold(text);
-            } else {
-                return text;
-            }
+    Container.prototype.index = function index(child) {
+        if (typeof child === 'number') {
+            return child;
         }
-        function aside(text) {
-            if (color && _chalk2.default.gray) {
-                return _chalk2.default.gray(text);
-            } else {
-                return text;
+        return this.nodes.indexOf(child);
+    };
+
+    Container.prototype.removeChild = function removeChild(child) {
+        child = this.index(child);
+        this.at(child).parent = undefined;
+        this.nodes.splice(child, 1);
+
+        var index = void 0;
+        for (var id in this.indexes) {
+            index = this.indexes[id];
+            if (index >= child) {
+                this.indexes[id] = index - 1;
             }
         }
 
-        return lines.slice(start, end).map(function (line, index) {
-            var number = start + 1 + index;
-            var gutter = ' ' + (' ' + number).slice(-maxWidth) + ' | ';
-            if (number === _this.line) {
-                var spacing = aside(gutter.replace(/\d/g, ' ')) + line.slice(0, _this.column - 1).replace(/[^\t]/g, ' ');
-                return mark('>') + aside(gutter) + line + '\n ' + spacing + mark('^');
+        return this;
+    };
+
+    Container.prototype.removeAll = function removeAll() {
+        for (var _iterator = this.nodes, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+            var _ref;
+
+            if (_isArray) {
+                if (_i >= _iterator.length) break;
+                _ref = _iterator[_i++];
             } else {
-                return ' ' + aside(gutter) + line;
+                _i = _iterator.next();
+                if (_i.done) break;
+                _ref = _i.value;
             }
-        }).join('\n');
-    };
 
-    /**
-     * Returns error position, message and source code of the broken part.
-     *
-     * @example
-     * error.toString() //=> "CssSyntaxError: app.css:1:1: Unclosed block
-     *                  //    > 1 | a {
-     *                  //        | ^"
-     *
-     * @return {string} error position, message and source code
-     */
+            var node = _ref;
 
-
-    CssSyntaxError.prototype.toString = function toString() {
-        var code = this.showSourceCode();
-        if (code) {
-            code = '\n\n' + code + '\n';
+            node.parent = undefined;
         }
-        return this.name + ': ' + this.message + code;
+        this.nodes = [];
+        return this;
     };
 
-    /**
-     * @memberof CssSyntaxError#
-     * @member {Input} input - Input object with PostCSS internal information
-     *                         about input file. If input has source map
-     *                         from previous tool, PostCSS will use origin
-     *                         (for example, Sass) source. You can use this
-     *                         object to get PostCSS input source.
-     *
-     * @example
-     * error.input.file //=> 'a.css'
-     * error.file       //=> 'a.sass'
-     */
+    Container.prototype.empty = function empty() {
+        return this.removeAll();
+    };
 
-    return CssSyntaxError;
-}();
+    Container.prototype.insertAfter = function insertAfter(oldNode, newNode) {
+        newNode.parent = this;
+        var oldIndex = this.index(oldNode);
+        this.nodes.splice(oldIndex + 1, 0, newNode);
 
-exports.default = CssSyntaxError;
-module.exports = exports['default'];
+        newNode.parent = this;
 
-}, {"19":19,"488":488}];
+        var index = void 0;
+        for (var id in this.indexes) {
+            index = this.indexes[id];
+            if (oldIndex <= index) {
+                this.indexes[id] = index + 1;
+            }
+        }
+
+        return this;
+    };
+
+    Container.prototype.insertBefore = function insertBefore(oldNode, newNode) {
+        newNode.parent = this;
+        var oldIndex = this.index(oldNode);
+        this.nodes.splice(oldIndex, 0, newNode);
+
+        newNode.parent = this;
+
+        var index = void 0;
+        for (var id in this.indexes) {
+            index = this.indexes[id];
+            if (index <= oldIndex) {
+                this.indexes[id] = index + 1;
+            }
+        }
+
+        return this;
+    };
+
+    Container.prototype.each = function each(callback) {
+        if (!this.lastEach) {
+            this.lastEach = 0;
+        }
+        if (!this.indexes) {
+            this.indexes = {};
+        }
+
+        this.lastEach++;
+        var id = this.lastEach;
+        this.indexes[id] = 0;
+
+        if (!this.length) {
+            return undefined;
+        }
+
+        var index = void 0,
+            result = void 0;
+        while (this.indexes[id] < this.length) {
+            index = this.indexes[id];
+            result = callback(this.at(index), index);
+            if (result === false) {
+                break;
+            }
+
+            this.indexes[id] += 1;
+        }
+
+        delete this.indexes[id];
+
+        if (result === false) {
+            return false;
+        }
+    };
+
+    Container.prototype.walk = function walk(callback) {
+        return this.each(function (node, i) {
+            var result = callback(node, i);
+
+            if (result !== false && node.length) {
+                result = node.walk(callback);
+            }
+
+            if (result === false) {
+                return false;
+            }
+        });
+    };
+
+    Container.prototype.walkAttributes = function walkAttributes(callback) {
+        var _this2 = this;
+
+        return this.walk(function (selector) {
+            if (selector.type === types.ATTRIBUTE) {
+                return callback.call(_this2, selector);
+            }
+        });
+    };
+
+    Container.prototype.walkClasses = function walkClasses(callback) {
+        var _this3 = this;
+
+        return this.walk(function (selector) {
+            if (selector.type === types.CLASS) {
+                return callback.call(_this3, selector);
+            }
+        });
+    };
+
+    Container.prototype.walkCombinators = function walkCombinators(callback) {
+        var _this4 = this;
+
+        return this.walk(function (selector) {
+            if (selector.type === types.COMBINATOR) {
+                return callback.call(_this4, selector);
+            }
+        });
+    };
+
+    Container.prototype.walkComments = function walkComments(callback) {
+        var _this5 = this;
+
+        return this.walk(function (selector) {
+            if (selector.type === types.COMMENT) {
+                return callback.call(_this5, selector);
+            }
+        });
+    };
+
+    Container.prototype.walkIds = function walkIds(callback) {
+        var _this6 = this;
+
+        return this.walk(function (selector) {
+            if (selector.type === types.ID) {
+                return callback.call(_this6, selector);
+            }
+        });
+    };
+
+    Container.prototype.walkNesting = function walkNesting(callback) {
+        var _this7 = this;
+
+        return this.walk(function (selector) {
+            if (selector.type === types.NESTING) {
+                return callback.call(_this7, selector);
+            }
+        });
+    };
+
+    Container.prototype.walkPseudos = function walkPseudos(callback) {
+        var _this8 = this;
+
+        return this.walk(function (selector) {
+            if (selector.type === types.PSEUDO) {
+                return callback.call(_this8, selector);
+            }
+        });
+    };
+
+    Container.prototype.walkTags = function walkTags(callback) {
+        var _this9 = this;
+
+        return this.walk(function (selector) {
+            if (selector.type === types.TAG) {
+                return callback.call(_this9, selector);
+            }
+        });
+    };
+
+    Container.prototype.walkUniversals = function walkUniversals(callback) {
+        var _this10 = this;
+
+        return this.walk(function (selector) {
+            if (selector.type === types.UNIVERSAL) {
+                return callback.call(_this10, selector);
+            }
+        });
+    };
+
+    Container.prototype.split = function split(callback) {
+        var _this11 = this;
+
+        var current = [];
+        return this.reduce(function (memo, node, index) {
+            var split = callback.call(_this11, node);
+            current.push(node);
+            if (split) {
+                memo.push(current);
+                current = [];
+            } else if (index === _this11.length - 1) {
+                memo.push(current);
+            }
+            return memo;
+        }, []);
+    };
+
+    Container.prototype.map = function map(callback) {
+        return this.nodes.map(callback);
+    };
+
+    Container.prototype.reduce = function reduce(callback, memo) {
+        return this.nodes.reduce(callback, memo);
+    };
+
+    Container.prototype.every = function every(callback) {
+        return this.nodes.every(callback);
+    };
+
+    Container.prototype.some = function some(callback) {
+        return this.nodes.some(callback);
+    };
+
+    Container.prototype.filter = function filter(callback) {
+        return this.nodes.filter(callback);
+    };
+
+    Container.prototype.sort = function sort(callback) {
+        return this.nodes.sort(callback);
+    };
+
+    Container.prototype.toString = function toString() {
+        return this.map(String).join('');
+    };
+
+    _createClass(Container, [{
+        key: 'first',
+        get: function get() {
+            return this.at(0);
+        }
+    }, {
+        key: 'last',
+        get: function get() {
+            return this.at(this.length - 1);
+        }
+    }, {
+        key: 'length',
+        get: function get() {
+            return this.nodes.length;
+        }
+    }]);
+
+    return Container;
+}(_node2.default);
+
+exports.default = Container;
+module.exports = exports['default'];}, {"470":470,"485":485}];

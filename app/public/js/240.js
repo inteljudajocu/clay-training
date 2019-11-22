@@ -1,17 +1,18 @@
-window.modules["240"] = [function(require,module,exports){var assocIndexOf = require(280);
-
-/**
- * Checks if a list cache value for `key` exists.
+window.modules["240"] = [function(require,module,exports){/**
+ * Removes `key` and its value from the hash.
  *
  * @private
- * @name has
- * @memberOf ListCache
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ * @name delete
+ * @memberOf Hash
+ * @param {Object} hash The hash to modify.
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
  */
-function listCacheHas(key) {
-  return assocIndexOf(this.__data__, key) > -1;
+function hashDelete(key) {
+  var result = this.has(key) && delete this.__data__[key];
+  this.size -= result ? 1 : 0;
+  return result;
 }
 
-module.exports = listCacheHas;
-}, {"280":280}];
+module.exports = hashDelete;
+}, {}];

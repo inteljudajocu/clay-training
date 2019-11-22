@@ -1,22 +1,19 @@
-window.modules["118"] = [function(require,module,exports){// '/' | '*' | ',' | ':' | '+' | '-'
+window.modules["118"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
+
 module.exports = {
-    name: 'Operator',
+    name: 'Number',
     structure: {
         value: String
     },
     parse: function() {
-        var start = this.scanner.tokenStart;
-
-        this.scanner.next();
-
         return {
-            type: 'Operator',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            value: this.scanner.substrToCursor(start)
+            type: 'Number',
+            loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+            value: this.scanner.consume(NUMBER)
         };
     },
     generate: function(processChunk, node) {
         processChunk(node.value);
     }
 };
-}, {}];
+}, {"75":75}];

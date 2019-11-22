@@ -1,23 +1,27 @@
-window.modules["318"] = [function(require,module,exports){var baseIsMatch = require(308),
-    getMatchData = require(326),
-    matchesStrictComparable = require(325);
+window.modules["318"] = [function(require,module,exports){/** Used for built-in method references. */
+var funcProto = Function.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
 
 /**
- * The base implementation of `_.matches` which doesn't clone `source`.
+ * Converts `func` to its source code.
  *
  * @private
- * @param {Object} source The object of property values to match.
- * @returns {Function} Returns the new spec function.
+ * @param {Function} func The function to convert.
+ * @returns {string} Returns the source code.
  */
-function baseMatches(source) {
-  var matchData = getMatchData(source);
-  if (matchData.length == 1 && matchData[0][2]) {
-    return matchesStrictComparable(matchData[0][0], matchData[0][1]);
+function toSource(func) {
+  if (func != null) {
+    try {
+      return funcToString.call(func);
+    } catch (e) {}
+    try {
+      return (func + '');
+    } catch (e) {}
   }
-  return function(object) {
-    return object === source || baseIsMatch(object, source, matchData);
-  };
+  return '';
 }
 
-module.exports = baseMatches;
-}, {"308":308,"325":325,"326":326}];
+module.exports = toSource;
+}, {}];

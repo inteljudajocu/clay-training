@@ -1,141 +1,130 @@
-window.modules["560"] = [function(require,module,exports){/* -*- Mode: js; js-indent-level: 2; -*- */
-/*
- * Copyright 2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE or:
- * http://opensource.org/licenses/BSD-3-Clause
- *
- * Based on the Base 64 VLQ implementation in Closure Compiler:
- * https://code.google.com/p/closure-compiler/source/browse/trunk/src/com/google/debugging/sourcemap/Base64VLQ.java
- *
- * Copyright 2011 The Closure Compiler Authors. All rights reserved.
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *
- *  * Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above
- *    copyright notice, this list of conditions and the following
- *    disclaimer in the documentation and/or other materials provided
- *    with the distribution.
- *  * Neither the name of Google Inc. nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+window.modules["560"] = [function(require,module,exports){"use strict";
 
-var base64 = require(561);
+exports.__esModule = true;
+exports.default = void 0;
 
-// A single base 64 digit can contain 6 bits of data. For the base 64 variable
-// length quantities we use in the source map spec, the first bit is the sign,
-// the next four bits are the actual value, and the 6th bit is the
-// continuation bit. The continuation bit tells us whether there are more
-// digits in this value following this digit.
-//
-//   Continuation
-//   |    Sign
-//   |    |
-//   V    V
-//   101011
+var _container = _interopRequireDefault(require(546));
 
-var VLQ_BASE_SHIFT = 5;
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// binary: 100000
-var VLQ_BASE = 1 << VLQ_BASE_SHIFT;
-
-// binary: 011111
-var VLQ_BASE_MASK = VLQ_BASE - 1;
-
-// binary: 100000
-var VLQ_CONTINUATION_BIT = VLQ_BASE;
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
 /**
- * Converts from a two-complement value to a value where the sign bit is
- * placed in the least significant bit.  For example, as decimals:
- *   1 becomes 2 (10 binary), -1 becomes 3 (11 binary)
- *   2 becomes 4 (100 binary), -2 becomes 5 (101 binary)
+ * Represents a CSS file and contains all its parsed nodes.
+ *
+ * @extends Container
+ *
+ * @example
+ * const root = postcss.parse('a{color:black} b{z-index:2}')
+ * root.type         //=> 'root'
+ * root.nodes.length //=> 2
  */
-function toVLQSigned(aValue) {
-  return aValue < 0
-    ? ((-aValue) << 1) + 1
-    : (aValue << 1) + 0;
-}
+var Root =
+/*#__PURE__*/
+function (_Container) {
+  _inheritsLoose(Root, _Container);
 
-/**
- * Converts to a two-complement value from a value where the sign bit is
- * placed in the least significant bit.  For example, as decimals:
- *   2 (10 binary) becomes 1, 3 (11 binary) becomes -1
- *   4 (100 binary) becomes 2, 5 (101 binary) becomes -2
- */
-function fromVLQSigned(aValue) {
-  var isNegative = (aValue & 1) === 1;
-  var shifted = aValue >> 1;
-  return isNegative
-    ? -shifted
-    : shifted;
-}
+  function Root(defaults) {
+    var _this;
 
-/**
- * Returns the base 64 VLQ encoded value.
- */
-exports.encode = function base64VLQ_encode(aValue) {
-  var encoded = "";
-  var digit;
+    _this = _Container.call(this, defaults) || this;
+    _this.type = 'root';
+    if (!_this.nodes) _this.nodes = [];
+    return _this;
+  }
 
-  var vlq = toVLQSigned(aValue);
+  var _proto = Root.prototype;
 
-  do {
-    digit = vlq & VLQ_BASE_MASK;
-    vlq >>>= VLQ_BASE_SHIFT;
-    if (vlq > 0) {
-      // There are still more digits in this value, so we must make sure the
-      // continuation bit is marked.
-      digit |= VLQ_CONTINUATION_BIT;
-    }
-    encoded += base64.encode(digit);
-  } while (vlq > 0);
+  _proto.removeChild = function removeChild(child, ignore) {
+    var index = this.index(child);
 
-  return encoded;
-};
-
-/**
- * Decodes the next base 64 VLQ value from the given string and returns the
- * value and the rest of the string via the out parameter.
- */
-exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
-  var strLen = aStr.length;
-  var result = 0;
-  var shift = 0;
-  var continuation, digit;
-
-  do {
-    if (aIndex >= strLen) {
-      throw new Error("Expected more digits in base 64 VLQ value.");
+    if (!ignore && index === 0 && this.nodes.length > 1) {
+      this.nodes[1].raws.before = this.nodes[index].raws.before;
     }
 
-    digit = base64.decode(aStr.charCodeAt(aIndex++));
-    if (digit === -1) {
-      throw new Error("Invalid base64 digit: " + aStr.charAt(aIndex - 1));
+    return _Container.prototype.removeChild.call(this, child);
+  };
+
+  _proto.normalize = function normalize(child, sample, type) {
+    var nodes = _Container.prototype.normalize.call(this, child);
+
+    if (sample) {
+      if (type === 'prepend') {
+        if (this.nodes.length > 1) {
+          sample.raws.before = this.nodes[1].raws.before;
+        } else {
+          delete sample.raws.before;
+        }
+      } else if (this.first !== sample) {
+        for (var _iterator = nodes, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+          var _ref;
+
+          if (_isArray) {
+            if (_i >= _iterator.length) break;
+            _ref = _iterator[_i++];
+          } else {
+            _i = _iterator.next();
+            if (_i.done) break;
+            _ref = _i.value;
+          }
+
+          var node = _ref;
+          node.raws.before = sample.raws.before;
+        }
+      }
     }
 
-    continuation = !!(digit & VLQ_CONTINUATION_BIT);
-    digit &= VLQ_BASE_MASK;
-    result = result + (digit << shift);
-    shift += VLQ_BASE_SHIFT;
-  } while (continuation);
+    return nodes;
+  }
+  /**
+   * Returns a {@link Result} instance representing the root’s CSS.
+   *
+   * @param {processOptions} [opts] Options with only `to` and `map` keys.
+   *
+   * @return {Result} Result with current root’s CSS.
+   *
+   * @example
+   * const root1 = postcss.parse(css1, { from: 'a.css' })
+   * const root2 = postcss.parse(css2, { from: 'b.css' })
+   * root1.append(root2)
+   * const result = root1.toResult({ to: 'all.css', map: true })
+   */
+  ;
 
-  aOutParam.value = fromVLQSigned(result);
-  aOutParam.rest = aIndex;
-};
-}, {"561":561}];
+  _proto.toResult = function toResult(opts) {
+    if (opts === void 0) {
+      opts = {};
+    }
+
+    var LazyResult = require(553);
+
+    var Processor = require(563);
+
+    var lazy = new LazyResult(new Processor(), this, opts);
+    return lazy.stringify();
+  }
+  /**
+   * @memberof Root#
+   * @member {object} raws Information to generate byte-to-byte equal
+   *                       node string as it was in the origin input.
+   *
+   * Every parser saves its own properties,
+   * but the default CSS parser uses:
+   *
+   * * `after`: the space symbols after the last child to the end of file.
+   * * `semicolon`: is the last child has an (optional) semicolon.
+   *
+   * @example
+   * postcss.parse('a {}\n').raws //=> { after: '\n' }
+   * postcss.parse('a {}').raws   //=> { after: '' }
+   */
+  ;
+
+  return Root;
+}(_container.default);
+
+var _default = Root;
+exports.default = _default;
+module.exports = exports.default;
+
+}, {"546":546,"553":553,"563":563}];

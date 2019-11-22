@@ -1,27 +1,31 @@
-window.modules["362"] = [function(require,module,exports){var memoize = require(363);
+window.modules["362"] = [function(require,module,exports){var arrayFilter = require(273),
+    stubArray = require(368);
 
-/** Used as the maximum memoize cache size. */
-var MAX_MEMOIZE_SIZE = 500;
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Built-in value references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeGetSymbols = Object.getOwnPropertySymbols;
 
 /**
- * A specialized version of `_.memoize` which clears the memoized function's
- * cache when it exceeds `MAX_MEMOIZE_SIZE`.
+ * Creates an array of the own enumerable symbols of `object`.
  *
  * @private
- * @param {Function} func The function to have its output memoized.
- * @returns {Function} Returns the new memoized function.
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of symbols.
  */
-function memoizeCapped(func) {
-  var result = memoize(func, function(key) {
-    if (cache.size === MAX_MEMOIZE_SIZE) {
-      cache.clear();
-    }
-    return key;
+var getSymbols = !nativeGetSymbols ? stubArray : function(object) {
+  if (object == null) {
+    return [];
+  }
+  object = Object(object);
+  return arrayFilter(nativeGetSymbols(object), function(symbol) {
+    return propertyIsEnumerable.call(object, symbol);
   });
+};
 
-  var cache = result.cache;
-  return result;
-}
-
-module.exports = memoizeCapped;
-}, {"363":363}];
+module.exports = getSymbols;
+}, {"273":273,"368":368}];

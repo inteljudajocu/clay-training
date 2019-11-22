@@ -1,66 +1,29 @@
-window.modules["388"] = [function(require,module,exports){var resolveKeyword = require(57).keyword;
+window.modules["388"] = [function(require,module,exports){var toString = require(352);
 
-module.exports = function cleanAtrule(node, item, list) {
-    if (node.block) {
-        // otherwise removed at-rule don't prevent @import for removal
-        if (this.stylesheet !== null) {
-            this.stylesheet.firstAtrulesAllowed = false;
-        }
+/**
+ * Converts `string`, as a whole, to lower case just like
+ * [String#toLowerCase](https://mdn.io/toLowerCase).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category String
+ * @param {string} [string=''] The string to convert.
+ * @returns {string} Returns the lower cased string.
+ * @example
+ *
+ * _.toLower('--Foo-Bar--');
+ * // => '--foo-bar--'
+ *
+ * _.toLower('fooBar');
+ * // => 'foobar'
+ *
+ * _.toLower('__FOO_BAR__');
+ * // => '__foo_bar__'
+ */
+function toLower(value) {
+  return toString(value).toLowerCase();
+}
 
-        if (node.block.children.isEmpty()) {
-            list.remove(item);
-            return;
-        }
-    }
-
-    switch (node.name) {
-        case 'charset':
-            if (!node.prelude || node.prelude.children.isEmpty()) {
-                list.remove(item);
-                return;
-            }
-
-            // if there is any rule before @charset -> remove it
-            if (item.prev) {
-                list.remove(item);
-                return;
-            }
-
-            break;
-
-        case 'import':
-            if (this.stylesheet === null || !this.stylesheet.firstAtrulesAllowed) {
-                list.remove(item);
-                return;
-            }
-
-            // if there are some rules that not an @import or @charset before @import
-            // remove it
-            list.prevUntil(item.prev, function(rule) {
-                if (rule.type === 'Atrule') {
-                    if (rule.name === 'import' || rule.name === 'charset') {
-                        return;
-                    }
-                }
-
-                this.root.firstAtrulesAllowed = false;
-                list.remove(item);
-                return true;
-            }, this);
-
-            break;
-
-        default:
-            var keyword = resolveKeyword(node.name);
-            if (keyword.name === 'keyframes' ||
-                keyword.name === 'media' ||
-                keyword.name === 'supports') {
-
-                // drop at-rule with no prelude
-                if (!node.prelude || node.prelude.children.isEmpty()) {
-                    list.remove(item);
-                }
-            }
-    }
-};
-}, {"57":57}];
+module.exports = toLower;
+}, {"352":352}];

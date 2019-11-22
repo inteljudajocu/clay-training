@@ -1,31 +1,30 @@
-window.modules["348"] = [function(require,module,exports){var eq = require(278),
-    isArrayLike = require(324),
-    isIndex = require(271),
-    isObject = require(11);
+window.modules["348"] = [function(require,module,exports){var baseGetTag = require(300),
+    isObjectLike = require(308);
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
 
 /**
- * Checks if the given arguments are from an iteratee call.
+ * Checks if `value` is classified as a `Symbol` primitive or object.
  *
- * @private
- * @param {*} value The potential iteratee value argument.
- * @param {*} index The potential iteratee index or key argument.
- * @param {*} object The potential iteratee object argument.
- * @returns {boolean} Returns `true` if the arguments are from an iteratee call,
- *  else `false`.
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
  */
-function isIterateeCall(value, index, object) {
-  if (!isObject(object)) {
-    return false;
-  }
-  var type = typeof index;
-  if (type == 'number'
-        ? (isArrayLike(object) && isIndex(index, object.length))
-        : (type == 'string' && index in object)
-      ) {
-    return eq(object[index], value);
-  }
-  return false;
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && baseGetTag(value) == symbolTag);
 }
 
-module.exports = isIterateeCall;
-}, {"11":11,"271":271,"278":278,"324":324}];
+module.exports = isSymbol;
+}, {"300":300,"308":308}];

@@ -1,21 +1,23 @@
-window.modules["325"] = [function(require,module,exports){/**
- * A specialized version of `matchesProperty` for source values suitable
- * for strict equality comparisons, i.e. `===`.
+window.modules["325"] = [function(require,module,exports){var baseIsMatch = require(315),
+    getMatchData = require(335),
+    matchesStrictComparable = require(334);
+
+/**
+ * The base implementation of `_.matches` which doesn't clone `source`.
  *
  * @private
- * @param {string} key The key of the property to get.
- * @param {*} srcValue The value to match.
+ * @param {Object} source The object of property values to match.
  * @returns {Function} Returns the new spec function.
  */
-function matchesStrictComparable(key, srcValue) {
+function baseMatches(source) {
+  var matchData = getMatchData(source);
+  if (matchData.length == 1 && matchData[0][2]) {
+    return matchesStrictComparable(matchData[0][0], matchData[0][1]);
+  }
   return function(object) {
-    if (object == null) {
-      return false;
-    }
-    return object[key] === srcValue &&
-      (srcValue !== undefined || (key in Object(object)));
+    return object === source || baseIsMatch(object, source, matchData);
   };
 }
 
-module.exports = matchesStrictComparable;
-}, {}];
+module.exports = baseMatches;
+}, {"315":315,"334":334,"335":335}];

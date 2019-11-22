@@ -1,6 +1,6 @@
 window.modules["meta-authors.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(1);
+var _get = require(3);
 
 module.exports.save = function (ref, data) {
   data.authors = data.authors || []; // Normalize "authors" value; if saved from a Kiln form, it will be of the form
@@ -22,12 +22,12 @@ module.exports.render = function (ref, data) {
   });
   return data;
 };
-}, {"1":1}];
+}, {"3":3}];
 window.modules["meta-keywords.model"] = [function(require,module,exports){'use strict';
 
-var _isEmpty = require(13),
-    _isObject = require(11),
-    _head = require(12);
+var _isEmpty = require(14),
+    _isObject = require(12),
+    _head = require(13);
 
 module.exports.save = function (ref, data) {
   // convert array of {text: string} objects into regular array of strings
@@ -39,10 +39,10 @@ module.exports.save = function (ref, data) {
 
   return data;
 };
-}, {"11":11,"12":12,"13":13}];
+}, {"12":12,"13":13,"14":14}];
 window.modules["meta-title.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(4);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data = sanitize.recursivelyStripSeperators(data);
@@ -56,7 +56,7 @@ module.exports.save = function (ref, data) {
 
   return data;
 };
-}, {"4":4}];
+}, {"1":1}];
 window.modules["meta-url.model"] = [function(require,module,exports){'use strict';
 /**
  * set component canonical url and date if they're passed in through the locals
@@ -81,10 +81,10 @@ module.exports.save = function (ref, data, locals) {
 }, {}];
 window.modules["paragraph.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(4);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   return data;
 };
-}, {"4":4}];
+}, {"1":1}];

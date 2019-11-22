@@ -1,16 +1,19 @@
-window.modules["328"] = [function(require,module,exports){var isObject = require(11);
+window.modules["328"] = [function(require,module,exports){/** Used for built-in method references. */
+var objectProto = Object.prototype;
 
 /**
- * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
+ * Checks if `value` is likely a prototype object.
  *
  * @private
  * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` if suitable for strict
- *  equality comparisons, else `false`.
+ * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
  */
-function isStrictComparable(value) {
-  return value === value && !isObject(value);
+function isPrototype(value) {
+  var Ctor = value && value.constructor,
+      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
+
+  return value === proto;
 }
 
-module.exports = isStrictComparable;
-}, {"11":11}];
+module.exports = isPrototype;
+}, {}];

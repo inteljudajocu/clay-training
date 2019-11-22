@@ -1,19 +1,20 @@
-window.modules["350"] = [function(require,module,exports){/**
- * Converts `set` to an array of its values.
+window.modules["350"] = [function(require,module,exports){var arrayMap = require(281);
+
+/**
+ * The base implementation of `_.values` and `_.valuesIn` which creates an
+ * array of `object` property values corresponding to the property names
+ * of `props`.
  *
  * @private
- * @param {Object} set The set to convert.
- * @returns {Array} Returns the values.
+ * @param {Object} object The object to query.
+ * @param {Array} props The property names to get values for.
+ * @returns {Object} Returns the array of property values.
  */
-function setToArray(set) {
-  var index = -1,
-      result = Array(set.size);
-
-  set.forEach(function(value) {
-    result[++index] = value;
+function baseValues(object, props) {
+  return arrayMap(props, function(key) {
+    return object[key];
   });
-  return result;
 }
 
-module.exports = setToArray;
-}, {}];
+module.exports = baseValues;
+}, {"281":281}];

@@ -1,26 +1,5 @@
-window.modules["649"] = [function(require,module,exports){'use strict';
+window.modules["649"] = [function(require,module,exports){var deprecate = require(651);
 
-var _includes = require(15);
-
-function isVideo(contentData) {
-  return contentData.featureTypes && (contentData.featureTypes['Video-Original'] || contentData.featureTypes['Video-Aggregation'] || contentData.featureTypes['Video-Original News']);
-}
-
-function isGallery(contentData) {
-  return contentData.tags && _includes(contentData.tags, 'gallery');
-}
-
-function getCalloutType(contentData) {
-  if (isVideo(contentData)) {
-    return 'video';
-  }
-
-  if (isGallery(contentData)) {
-    return 'gallery';
-  }
-
-  return '';
-}
-
-module.exports = getCalloutType;
-}, {"15":15}];
+module.exports = deprecate(require(580).sprintf,
+  'sprintf() will be removed in the next major release, use the sprintf-js package instead.');
+}, {"580":580,"651":651}];

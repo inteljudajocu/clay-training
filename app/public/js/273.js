@@ -1,21 +1,26 @@
 window.modules["273"] = [function(require,module,exports){/**
- * The base implementation of `_.times` without support for iteratee shorthands
- * or max array length checks.
+ * A specialized version of `_.filter` for arrays without support for
+ * iteratee shorthands.
  *
  * @private
- * @param {number} n The number of times to invoke `iteratee`.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the array of results.
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} predicate The function invoked per iteration.
+ * @returns {Array} Returns the new filtered array.
  */
-function baseTimes(n, iteratee) {
+function arrayFilter(array, predicate) {
   var index = -1,
-      result = Array(n);
+      length = array == null ? 0 : array.length,
+      resIndex = 0,
+      result = [];
 
-  while (++index < n) {
-    result[index] = iteratee(index);
+  while (++index < length) {
+    var value = array[index];
+    if (predicate(value, index, array)) {
+      result[resIndex++] = value;
+    }
   }
   return result;
 }
 
-module.exports = baseTimes;
+module.exports = arrayFilter;
 }, {}];

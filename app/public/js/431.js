@@ -1,124 +1,158 @@
-window.modules["431"] = [function(require,module,exports){'use strict';
+window.modules["431"] = [function(require,module,exports){var List = require(58).List;
+var walkRulesRight = require(58).walkRulesRight;
+var utils = require(426);
 
-exports.__esModule = true;
+function calcSelectorLength(list) {
+    var length = 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+    list.each(function(data) {
+        length += data.id.length + 1;
+    });
 
-var _container = require(427);
+    return length - 1;
+}
 
-var _container2 = _interopRequireDefault(_container);
+function calcDeclarationsLength(tokens) {
+    var length = 0;
 
-var _list = require(443);
-
-var _list2 = _interopRequireDefault(_list);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/**
- * Represents a CSS rule: a selector followed by a declaration block.
- *
- * @extends Container
- *
- * @example
- * const root = postcss.parse('a{}');
- * const rule = root.first;
- * rule.type       //=> 'rule'
- * rule.toString() //=> 'a{}'
- */
-var Rule = function (_Container) {
-  _inherits(Rule, _Container);
-
-  function Rule(defaults) {
-    _classCallCheck(this, Rule);
-
-    var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
-
-    _this.type = 'rule';
-    if (!_this.nodes) _this.nodes = [];
-    return _this;
-  }
-
-  /**
-   * An array containing the rule’s individual selectors.
-   * Groups of selectors are split at commas.
-   *
-   * @type {string[]}
-   *
-   * @example
-   * const root = postcss.parse('a, b { }');
-   * const rule = root.first;
-   *
-   * rule.selector  //=> 'a, b'
-   * rule.selectors //=> ['a', 'b']
-   *
-   * rule.selectors = ['a', 'strong'];
-   * rule.selector //=> 'a, strong'
-   */
-
-
-  _createClass(Rule, [{
-    key: 'selectors',
-    get: function get() {
-      return _list2.default.comma(this.selector);
-    },
-    set: function set(values) {
-      var match = this.selector ? this.selector.match(/,\s*/) : null;
-      var sep = match ? match[0] : ',' + this.raw('between', 'beforeOpen');
-      this.selector = values.join(sep);
+    for (var i = 0; i < tokens.length; i++) {
+        length += tokens[i].length;
     }
 
-    /**
-     * @memberof Rule#
-     * @member {string} selector - the rule’s full selector represented
-     *                             as a string
-     *
-     * @example
-     * const root = postcss.parse('a, b { }');
-     * const rule = root.first;
-     * rule.selector //=> 'a, b'
-     */
+    return (
+        length +          // declarations
+        tokens.length - 1 // delimeters
+    );
+}
 
-    /**
-     * @memberof Rule#
-     * @member {object} raws - Information to generate byte-to-byte equal
-     *                         node string as it was in the origin input.
-     *
-     * Every parser saves its own properties,
-     * but the default CSS parser uses:
-     *
-     * * `before`: the space symbols before the node. It also stores `*`
-     *   and `_` symbols before the declaration (IE hack).
-     * * `after`: the space symbols after the last child of the node
-     *   to the end of the node.
-     * * `between`: the symbols between the property and value
-     *   for declarations, selector and `{` for rules, or last parameter
-     *   and `{` for at-rules.
-     * * `semicolon`: contains `true` if the last child has
-     *   an (optional) semicolon.
-     * * `ownSemicolon`: contains `true` if there is semicolon after rule.
-     *
-     * PostCSS cleans selectors from comments and extra spaces,
-     * but it stores origin content in raws properties.
-     * As such, if you don’t change a declaration’s value,
-     * PostCSS will use the raw value with comments.
-     *
-     * @example
-     * const root = postcss.parse('a {\n  color:black\n}')
-     * root.first.first.raws //=> { before: '', between: ' ', after: '\n' }
-     */
+function processRule(node, item, list) {
+    var avoidRulesMerge = this.block !== null ? this.block.avoidRulesMerge : false;
+    var selectors = node.prelude.children;
+    var block = node.block;
+    var disallowDownMarkers = Object.create(null);
+    var allowMergeUp = true;
+    var allowMergeDown = true;
 
-  }]);
+    list.prevUntil(item.prev, function(prev, prevItem) {
+        // skip non-ruleset node if safe
+        if (prev.type !== 'Rule') {
+            return utils.unsafeToSkipNode.call(selectors, prev);
+        }
 
-  return Rule;
-}(_container2.default);
+        var prevSelectors = prev.prelude.children;
+        var prevBlock = prev.block;
 
-exports.default = Rule;
-module.exports = exports['default'];
+        if (node.pseudoSignature !== prev.pseudoSignature) {
+            return true;
+        }
 
-}, {"427":427,"443":443}];
+        allowMergeDown = !prevSelectors.some(function(selector) {
+            return selector.compareMarker in disallowDownMarkers;
+        });
+
+        // try prev ruleset if simpleselectors has no equal specifity and element selector
+        if (!allowMergeDown && !allowMergeUp) {
+            return true;
+        }
+
+        // try to join by selectors
+        if (allowMergeUp && utils.isEqualSelectors(prevSelectors, selectors)) {
+            prevBlock.children.appendList(block.children);
+            list.remove(item);
+            return true;
+        }
+
+        // try to join by properties
+        var diff = utils.compareDeclarations(block.children, prevBlock.children);
+
+        // console.log(diff.eq, diff.ne1, diff.ne2);
+
+        if (diff.eq.length) {
+            if (!diff.ne1.length && !diff.ne2.length) {
+                // equal blocks
+                if (allowMergeDown) {
+                    utils.addSelectors(selectors, prevSelectors);
+                    list.remove(prevItem);
+                }
+
+                return true;
+            } else if (!avoidRulesMerge) { /* probably we don't need to prevent those merges for @keyframes
+                                              TODO: need to be checked */
+
+                if (diff.ne1.length && !diff.ne2.length) {
+                    // prevBlock is subset block
+                    var selectorLength = calcSelectorLength(selectors);
+                    var blockLength = calcDeclarationsLength(diff.eq); // declarations length
+
+                    if (allowMergeUp && selectorLength < blockLength) {
+                        utils.addSelectors(prevSelectors, selectors);
+                        block.children = new List().fromArray(diff.ne1);
+                    }
+                } else if (!diff.ne1.length && diff.ne2.length) {
+                    // node is subset of prevBlock
+                    var selectorLength = calcSelectorLength(prevSelectors);
+                    var blockLength = calcDeclarationsLength(diff.eq); // declarations length
+
+                    if (allowMergeDown && selectorLength < blockLength) {
+                        utils.addSelectors(selectors, prevSelectors);
+                        prevBlock.children = new List().fromArray(diff.ne2);
+                    }
+                } else {
+                    // diff.ne1.length && diff.ne2.length
+                    // extract equal block
+                    var newSelector = {
+                        type: 'SelectorList',
+                        loc: null,
+                        children: utils.addSelectors(prevSelectors.copy(), selectors)
+                    };
+                    var newBlockLength = calcSelectorLength(newSelector.children) + 2; // selectors length + curly braces length
+                    var blockLength = calcDeclarationsLength(diff.eq); // declarations length
+
+                    // create new ruleset if declarations length greater than
+                    // ruleset description overhead
+                    if (allowMergeDown && blockLength >= newBlockLength) {
+                        var newRule = {
+                            type: 'Rule',
+                            loc: null,
+                            prelude: newSelector,
+                            block: {
+                                type: 'Block',
+                                loc: null,
+                                children: new List().fromArray(diff.eq)
+                            },
+                            pseudoSignature: node.pseudoSignature
+                        };
+
+                        block.children = new List().fromArray(diff.ne1);
+                        prevBlock.children = new List().fromArray(diff.ne2.concat(diff.ne2overrided));
+                        list.insert(list.createItem(newRule), prevItem);
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (allowMergeUp) {
+            // TODO: disallow up merge only if any property interception only (i.e. diff.ne2overrided.length > 0);
+            // await property families to find property interception correctly
+            allowMergeUp = !prevSelectors.some(function(prevSelector) {
+                return selectors.some(function(selector) {
+                    return selector.compareMarker === prevSelector.compareMarker;
+                });
+            });
+        }
+
+        prevSelectors.each(function(data) {
+            disallowDownMarkers[data.compareMarker] = true;
+        });
+    });
+}
+
+module.exports = function restructRule(ast) {
+    walkRulesRight(ast, function(node, item, list) {
+        if (node.type === 'Rule') {
+            processRule.call(this, node, item, list);
+        }
+    });
+};
+}, {"58":58,"426":426}];

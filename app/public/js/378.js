@@ -1,18 +1,35 @@
-window.modules["378"] = [function(require,module,exports){/*!
- * match-words <https://github.com/jonschlinkert/match-words>
+window.modules["378"] = [function(require,module,exports){var baseValues = require(350),
+    keys = require(295);
+
+/**
+ * Creates an array of the own enumerable string keyed property values of `object`.
  *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
+ * **Note:** Non-object values are coerced to objects.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property values.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.values(new Foo);
+ * // => [1, 2] (iteration order is not guaranteed)
+ *
+ * _.values('hi');
+ * // => ['h', 'i']
  */
+function values(object) {
+  return object == null ? [] : baseValues(object, keys(object));
+}
 
-'use strict';
-
-var regex = require(379);
-
-module.exports = function(str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('expected a string');
-  }
-  return str.match(regex());
-};
-}, {"379":379}];
+module.exports = values;
+}, {"295":295,"350":350}];

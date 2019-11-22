@@ -1,20 +1,20 @@
-window.modules["102"] = [function(require,module,exports){var CDO = require(74).TYPE.CDO;
+window.modules["102"] = [function(require,module,exports){var CDC = require(75).TYPE.CDC;
 
 module.exports = {
-    name: 'CDO',
+    name: 'CDC',
     structure: [],
     parse: function() {
         var start = this.scanner.tokenStart;
 
-        this.scanner.eat(CDO); // <!--
+        this.scanner.eat(CDC); // -->
 
         return {
-            type: 'CDO',
+            type: 'CDC',
             loc: this.getLocation(start, this.scanner.tokenStart)
         };
     },
     generate: function(processChunk) {
-        processChunk('<!--');
+        processChunk('-->');
     }
 };
-}, {"74":74}];
+}, {"75":75}];

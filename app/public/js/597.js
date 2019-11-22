@@ -1,7 +1,18 @@
-window.modules["597"] = [function(require,module,exports){var makeString = require(576);
+window.modules["597"] = [function(require,module,exports){var makeString = require(586);
+var escapeChars = require(598);
 
-module.exports = function include(str, needle) {
-  if (needle === '') return true;
-  return makeString(str).indexOf(needle) !== -1;
+var regexString = '[';
+for(var key in escapeChars) {
+  regexString += key;
+}
+regexString += ']';
+
+var regex = new RegExp( regexString, 'g');
+
+module.exports = function escapeHTML(str) {
+
+  return makeString(str).replace(regex, function(m) {
+    return '&' + escapeChars[m] + ';';
+  });
 };
-}, {"576":576}];
+}, {"586":586,"598":598}];

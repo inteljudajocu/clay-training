@@ -1,135 +1,181 @@
-window.modules["96"] = [function(require,module,exports){var TYPE = require(74).TYPE;
+window.modules["96"] = [function(require,module,exports){var cmpChar = require(75).cmpChar;
+var isNumber = require(75).isNumber;
+var TYPE = require(75).TYPE;
 
-var ATRULE = TYPE.Atrule;
-var SEMICOLON = TYPE.Semicolon;
-var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
-var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
+var IDENTIFIER = TYPE.Identifier;
+var NUMBER = TYPE.Number;
+var PLUSSIGN = TYPE.PlusSign;
+var HYPHENMINUS = TYPE.HyphenMinus;
+var N = 110; // 'n'.charCodeAt(0)
+var DISALLOW_SIGN = true;
+var ALLOW_SIGN = false;
 
-function consumeRaw(startToken) {
-    return this.Raw(startToken, SEMICOLON, LEFTCURLYBRACKET, false, true);
-}
+function checkTokenIsInteger(scanner, disallowSign) {
+    var pos = scanner.tokenStart;
 
-function isDeclarationBlockAtrule() {
-    for (var offset = 1, type; type = this.scanner.lookupType(offset); offset++) {
-        if (type === RIGHTCURLYBRACKET) {
-            return true;
+    if (scanner.source.charCodeAt(pos) === PLUSSIGN ||
+        scanner.source.charCodeAt(pos) === HYPHENMINUS) {
+        if (disallowSign) {
+            scanner.error();
         }
-
-        if (type === LEFTCURLYBRACKET ||
-            type === ATRULE) {
-            return false;
-        }
+        pos++;
     }
 
-    if (this.tolerant) {
-        return false;
+    for (; pos < scanner.tokenEnd; pos++) {
+        if (!isNumber(scanner.source.charCodeAt(pos))) {
+            scanner.error('Unexpected input', pos);
+        }
     }
-
-    this.scanner.skip(offset);
-    this.scanner.eat(RIGHTCURLYBRACKET);
 }
 
+// An+B microsyntax https://www.w3.org/TR/css-syntax-3/#anb
 module.exports = {
-    name: 'Atrule',
+    name: 'AnPlusB',
     structure: {
-        name: String,
-        prelude: ['AtrulePrelude', 'Raw', null],
-        block: ['Block', null]
+        a: [String, null],
+        b: [String, null]
     },
     parse: function() {
         var start = this.scanner.tokenStart;
-        var name;
-        var nameLowerCase;
-        var prelude = null;
-        var block = null;
+        var end = start;
+        var prefix = '';
+        var a = null;
+        var b = null;
 
-        this.scanner.eat(ATRULE);
-
-        name = this.scanner.substrToCursor(start + 1);
-        nameLowerCase = name.toLowerCase();
-        this.scanner.skipSC();
-
-        // parse prelude
-        if (this.scanner.eof === false &&
-            this.scanner.tokenType !== LEFTCURLYBRACKET &&
-            this.scanner.tokenType !== SEMICOLON) {
-            if (this.parseAtrulePrelude) {
-                var preludeStartToken = this.scanner.currentToken;
-                prelude = this.tolerantParse(this.AtrulePrelude.bind(this, name), consumeRaw);
-
-                if (this.tolerant && !this.scanner.eof) {
-                    if (prelude.type !== 'Raw' &&
-                        this.scanner.tokenType !== LEFTCURLYBRACKET &&
-                        this.scanner.tokenType !== SEMICOLON) {
-                        prelude = consumeRaw.call(this, preludeStartToken);
-                    }
-                }
-
-                // turn empty AtrulePrelude into null
-                if (prelude.type === 'AtrulePrelude' && prelude.children.head === null) {
-                    prelude = null;
-                }
-            } else {
-                prelude = consumeRaw.call(this, this.scanner.currentToken);
-            }
-
-            this.scanner.skipSC();
+        if (this.scanner.tokenType === NUMBER ||
+            this.scanner.tokenType === PLUSSIGN) {
+            checkTokenIsInteger(this.scanner, ALLOW_SIGN);
+            prefix = this.scanner.getTokenValue();
+            this.scanner.next();
+            end = this.scanner.tokenStart;
         }
 
-        if (this.atrule.hasOwnProperty(nameLowerCase)) {
-            if (typeof this.atrule[nameLowerCase].block === 'function') {
-                if (this.scanner.tokenType !== LEFTCURLYBRACKET) {
-                    // FIXME: make tolerant
-                    this.scanner.error('Curly bracket is expected');
+        if (this.scanner.tokenType === IDENTIFIER) {
+            var bStart = this.scanner.tokenStart;
+
+            if (cmpChar(this.scanner.source, bStart, HYPHENMINUS)) {
+                if (prefix === '') {
+                    prefix = '-';
+                    bStart++;
+                } else {
+                    this.scanner.error('Unexpected hyphen minus');
+                }
+            }
+
+            if (!cmpChar(this.scanner.source, bStart, N)) {
+                this.scanner.error();
+            }
+
+            a = prefix === ''  ? '1'  :
+                prefix === '+' ? '+1' :
+                prefix === '-' ? '-1' :
+                prefix;
+
+            var len = this.scanner.tokenEnd - bStart;
+            if (len > 1) {
+                // ..n-..
+                if (this.scanner.source.charCodeAt(bStart + 1) !== HYPHENMINUS) {
+                    this.scanner.error('Unexpected input', bStart + 1);
                 }
 
-                block = this.atrule[nameLowerCase].block.call(this);
+                if (len > 2) {
+                    // ..n-{number}..
+                    this.scanner.tokenStart = bStart + 2;
+                } else {
+                    // ..n- {number}
+                    this.scanner.next();
+                    this.scanner.skipSC();
+                }
+
+                checkTokenIsInteger(this.scanner, DISALLOW_SIGN);
+                b = '-' + this.scanner.getTokenValue();
+                this.scanner.next();
+                end = this.scanner.tokenStart;
             } else {
-                if (!this.tolerant || !this.scanner.eof) {
-                    this.scanner.eat(SEMICOLON);
+                prefix = '';
+                this.scanner.next();
+                end = this.scanner.tokenStart;
+                this.scanner.skipSC();
+
+                if (this.scanner.tokenType === HYPHENMINUS ||
+                    this.scanner.tokenType === PLUSSIGN) {
+                    prefix = this.scanner.getTokenValue();
+                    this.scanner.next();
+                    this.scanner.skipSC();
+                }
+
+                if (this.scanner.tokenType === NUMBER) {
+                    checkTokenIsInteger(this.scanner, prefix !== '');
+
+                    if (!isNumber(this.scanner.source.charCodeAt(this.scanner.tokenStart))) {
+                        prefix = this.scanner.source.charAt(this.scanner.tokenStart);
+                        this.scanner.tokenStart++;
+                    }
+
+                    if (prefix === '') {
+                        // should be an operator before number
+                        this.scanner.error();
+                    } else if (prefix === '+') {
+                        // plus is using by default
+                        prefix = '';
+                    }
+
+                    b = prefix + this.scanner.getTokenValue();
+
+                    this.scanner.next();
+                    end = this.scanner.tokenStart;
+                } else {
+                    if (prefix) {
+                        this.scanner.eat(NUMBER);
+                    }
                 }
             }
         } else {
-            switch (this.scanner.tokenType) {
-                case SEMICOLON:
-                    this.scanner.next();
-                    break;
-
-                case LEFTCURLYBRACKET:
-                    // TODO: should consume block content as Raw?
-                    block = this.Block(isDeclarationBlockAtrule.call(this));
-                    break;
-
-                default:
-                    if (!this.tolerant) {
-                        this.scanner.error('Semicolon or block is expected');
-                    }
+            if (prefix === '' || prefix === '+') { // no number
+                this.scanner.error(
+                    'Number or identifier is expected',
+                    this.scanner.tokenStart + (
+                        this.scanner.tokenType === PLUSSIGN ||
+                        this.scanner.tokenType === HYPHENMINUS
+                    )
+                );
             }
+
+            b = prefix;
         }
 
         return {
-            type: 'Atrule',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            name: name,
-            prelude: prelude,
-            block: block
+            type: 'AnPlusB',
+            loc: this.getLocation(start, end),
+            a: a,
+            b: b
         };
     },
     generate: function(processChunk, node) {
-        processChunk('@');
-        processChunk(node.name);
+        var a = node.a !== null && node.a !== undefined;
+        var b = node.b !== null && node.b !== undefined;
 
-        if (node.prelude !== null) {
-            processChunk(' ');
-            this.generate(processChunk, node.prelude);
-        }
+        if (a) {
+            processChunk(
+                node.a === '+1' ? '+n' :
+                node.a ===  '1' ?  'n' :
+                node.a === '-1' ? '-n' :
+                node.a + 'n'
+            );
 
-        if (node.block) {
-            this.generate(processChunk, node.block);
+            if (b) {
+                b = String(node.b);
+                if (b.charAt(0) === '-' || b.charAt(0) === '+') {
+                    processChunk(b.charAt(0));
+                    processChunk(b.substr(1));
+                } else {
+                    processChunk('+');
+                    processChunk(b);
+                }
+            }
         } else {
-            processChunk(';');
+            processChunk(String(node.b));
         }
-    },
-    walkContext: 'atrule'
+    }
 };
-}, {"74":74}];
+}, {"75":75}];

@@ -10,12 +10,11 @@ const h = require('highland'),
     createFilter,
     getMainComponentRef,
     uriToPublished,
-    getComponentByName,
-    getComponentContent
+    getComponentByName
   } = require('../utils'),
   index = helpers.indexWithPrefix(getIndexFromFilename(__filename)),
   filter = createFilter({
-    components: ['explore', 'recipe', 'article'],
+    components: ['recipe'],
     includePage: true
   }),
   log = require('../../services/universal/log').setup({ file: __filename });
@@ -66,13 +65,14 @@ function putToElastic(obj) {
 
 function parseComponent(ops) {
   const mainComponent = getMainComponentRef(ops),
-    { canonicalUrl } = mainComponent.value,
+    { canonicalUrl, date } = mainComponent.value,
     { title, reviews, imageUrl } = getComponentByName(ops, 'recipe').value;
 
   return {
     key: mainComponent.key,
     source: {
       url: canonicalUrl,
+      date,
       title,
       reviews,
       imageUrl

@@ -1,21 +1,28 @@
-window.modules["632"] = [function(require,module,exports){var makeString = require(576);
-var htmlEntities = require(593);
+window.modules["632"] = [function(require,module,exports){/**
+ * _s.prune: a more elegant version of truncate
+ * prune extra chars, never leaving a half-chopped word.
+ * @author github.com/rwz
+ */
+var makeString = require(586);
+var rtrim = require(646);
 
-module.exports = function unescapeHTML(str) {
-  return makeString(str).replace(/\&([^;]{1,10});/g, function(entity, entityCode) {
-    var match;
+module.exports = function prune(str, length, pruneStr) {
+  str = makeString(str);
+  length = ~~length;
+  pruneStr = pruneStr != null ? String(pruneStr) : '...';
 
-    if (entityCode in htmlEntities) {
-      return htmlEntities[entityCode];
-    /*eslint no-cond-assign: 0*/
-    } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
-      return String.fromCharCode(parseInt(match[1], 16));
-    /*eslint no-cond-assign: 0*/
-    } else if (match = entityCode.match(/^#(\d+)$/)) {
-      return String.fromCharCode(~~match[1]);
-    } else {
-      return entity;
-    }
-  });
+  if (str.length <= length) return str;
+
+  var tmpl = function(c) {
+      return c.toUpperCase() !== c.toLowerCase() ? 'A' : ' ';
+    },
+    template = str.slice(0, length + 1).replace(/.(?=\W*\w*$)/g, tmpl); // 'Hello, world' -> 'HellAA AAAAA'
+
+  if (template.slice(template.length - 2).match(/\w\w/))
+    template = template.replace(/\s*\S+$/, '');
+  else
+    template = rtrim(template.slice(0, template.length - 1));
+
+  return (template + pruneStr).length > str.length ? str : str.slice(0, template.length) + pruneStr;
 };
-}, {"576":576,"593":593}];
+}, {"586":586,"646":646}];

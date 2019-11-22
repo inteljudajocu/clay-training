@@ -1,80 +1,88 @@
-window.modules["397"] = [function(require,module,exports){var hasOwnProperty = Object.prototype.hasOwnProperty;
+window.modules["397"] = [function(require,module,exports){var parse = require(394).syntax.parse;
 
-function buildMap(list, caseInsensitive) {
-    var map = Object.create(null);
-
-    if (!Array.isArray(list)) {
-        return null;
-    }
-
-    for (var i = 0; i < list.length; i++) {
-        var name = list[i];
-
-        if (caseInsensitive) {
-            name = name.toLowerCase();
-        }
-
-        map[name] = true;
-    }
-
-    return map;
-}
-
-function buildList(data) {
-    if (!data) {
-        return null;
-    }
-
-    var tags = buildMap(data.tags, true);
-    var ids = buildMap(data.ids);
-    var classes = buildMap(data.classes);
-
-    if (tags === null &&
-        ids === null &&
-        classes === null) {
-        return null;
-    }
-
+function getInfo(postcssNode) {
     return {
-        tags: tags,
-        ids: ids,
-        classes: classes
+        postcssNode: postcssNode
     };
 }
 
-function buildIndex(data) {
-    var scopes = false;
-
-    if (data.scopes && Array.isArray(data.scopes)) {
-        scopes = Object.create(null);
-
-        for (var i = 0; i < data.scopes.length; i++) {
-            var list = data.scopes[i];
-
-            if (!list || !Array.isArray(list)) {
-                throw new Error('Wrong usage format');
-            }
-
-            for (var j = 0; j < list.length; j++) {
-                var name = list[j];
-
-                if (hasOwnProperty.call(scopes, name)) {
-                    throw new Error('Class can\'t be used for several scopes: ' + name);
-                }
-
-                scopes[name] = i + 1;
-            }
-        }
-    }
-
-    return {
-        whitelist: buildList(data),
-        blacklist: buildList(data.blacklist),
-        scopes: scopes
-    };
+function appendChildren(cssoNode, nodes) {
+    cssoNode.children.fromArray(nodes.map(postcssToCsso));
+    return cssoNode;
 }
 
-module.exports = {
-    buildIndex: buildIndex
-};
-}, {}];
+function parseToCsso(css, config, postcssNode) {
+    var cssoNode;
+
+    try {
+        cssoNode = parse(css || '', config);
+    } catch (e) {
+        if (e.name === 'CssSyntaxError') {
+            throw postcssNode.error(e.message, { index: e.offset });
+        }
+
+        throw e;
+    }
+
+    cssoNode.loc = getInfo(postcssNode);
+
+    return cssoNode;
+}
+
+function postcssToCsso(node) {
+    switch (node.type) {
+        case 'root':
+            return appendChildren(
+                parseToCsso('', { context: 'stylesheet' }, node),
+                node.nodes
+            );
+
+        case 'rule':
+            return {
+                type: 'Rule',
+                loc: getInfo(node),
+                prelude: parseToCsso(node.selector, { context: 'selectorList' }, node),
+                block: appendChildren(
+                    parseToCsso('{}', { context: 'block' }, node),
+                    node.nodes
+                )
+            };
+
+        case 'atrule':
+            var cssoNode = {
+                type: 'Atrule',
+                loc: getInfo(node),
+                name: node.name,
+                prelude: node.params
+                    ? parseToCsso(node.params, { context: 'atrulePrelude', atrule: node.name }, node)
+                    : null,
+                block: null
+            };
+
+            if (node.nodes) {
+                cssoNode.block = appendChildren(
+                    parseToCsso('{}', { context: 'block' }, node),
+                    node.nodes
+                );
+            }
+
+            return cssoNode;
+
+        case 'decl':
+            return parseToCsso(
+                (node.raws.before || '').trimLeft() + node.toString(),
+                { context: 'declaration' },
+                node
+            );
+
+        case 'comment':
+            return {
+                type: 'Comment',
+                loc: getInfo(node),
+                value: node.raws.left + node.text + node.raws.right
+            };
+    }
+}
+
+module.exports = postcssToCsso;
+}, {"394":394}];

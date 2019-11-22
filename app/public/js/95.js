@@ -1,181 +1,42 @@
-window.modules["95"] = [function(require,module,exports){var cmpChar = require(74).cmpChar;
-var isNumber = require(74).isNumber;
-var TYPE = require(74).TYPE;
+window.modules["95"] = [function(require,module,exports){var List = require(54);
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
-var NUMBER = TYPE.Number;
-var PLUSSIGN = TYPE.PlusSign;
+var COMMA = TYPE.Comma;
+var SEMICOLON = TYPE.Semicolon;
 var HYPHENMINUS = TYPE.HyphenMinus;
-var N = 110; // 'n'.charCodeAt(0)
-var DISALLOW_SIGN = true;
-var ALLOW_SIGN = false;
+var EXCLAMATIONMARK = TYPE.ExclamationMark;
 
-function checkTokenIsInteger(scanner, disallowSign) {
-    var pos = scanner.tokenStart;
+// var '(' ident (',' <value>? )? ')'
+module.exports = function() {
+    var children = new List();
 
-    if (scanner.source.charCodeAt(pos) === PLUSSIGN ||
-        scanner.source.charCodeAt(pos) === HYPHENMINUS) {
-        if (disallowSign) {
-            scanner.error();
-        }
-        pos++;
+    this.scanner.skipSC();
+
+    var identStart = this.scanner.tokenStart;
+
+    this.scanner.eat(HYPHENMINUS);
+    if (this.scanner.source.charCodeAt(this.scanner.tokenStart) !== HYPHENMINUS) {
+        this.scanner.error('HyphenMinus is expected');
+    }
+    this.scanner.eat(IDENTIFIER);
+
+    children.appendData({
+        type: 'Identifier',
+        loc: this.getLocation(identStart, this.scanner.tokenStart),
+        name: this.scanner.substrToCursor(identStart)
+    });
+
+    this.scanner.skipSC();
+
+    if (this.scanner.tokenType === COMMA) {
+        children.appendData(this.Operator());
+        children.appendData(this.parseCustomProperty
+            ? this.Value(null)
+            : this.Raw(this.scanner.currentToken, EXCLAMATIONMARK, SEMICOLON, false, false)
+        );
     }
 
-    for (; pos < scanner.tokenEnd; pos++) {
-        if (!isNumber(scanner.source.charCodeAt(pos))) {
-            scanner.error('Unexpected input', pos);
-        }
-    }
-}
-
-// An+B microsyntax https://www.w3.org/TR/css-syntax-3/#anb
-module.exports = {
-    name: 'AnPlusB',
-    structure: {
-        a: [String, null],
-        b: [String, null]
-    },
-    parse: function() {
-        var start = this.scanner.tokenStart;
-        var end = start;
-        var prefix = '';
-        var a = null;
-        var b = null;
-
-        if (this.scanner.tokenType === NUMBER ||
-            this.scanner.tokenType === PLUSSIGN) {
-            checkTokenIsInteger(this.scanner, ALLOW_SIGN);
-            prefix = this.scanner.getTokenValue();
-            this.scanner.next();
-            end = this.scanner.tokenStart;
-        }
-
-        if (this.scanner.tokenType === IDENTIFIER) {
-            var bStart = this.scanner.tokenStart;
-
-            if (cmpChar(this.scanner.source, bStart, HYPHENMINUS)) {
-                if (prefix === '') {
-                    prefix = '-';
-                    bStart++;
-                } else {
-                    this.scanner.error('Unexpected hyphen minus');
-                }
-            }
-
-            if (!cmpChar(this.scanner.source, bStart, N)) {
-                this.scanner.error();
-            }
-
-            a = prefix === ''  ? '1'  :
-                prefix === '+' ? '+1' :
-                prefix === '-' ? '-1' :
-                prefix;
-
-            var len = this.scanner.tokenEnd - bStart;
-            if (len > 1) {
-                // ..n-..
-                if (this.scanner.source.charCodeAt(bStart + 1) !== HYPHENMINUS) {
-                    this.scanner.error('Unexpected input', bStart + 1);
-                }
-
-                if (len > 2) {
-                    // ..n-{number}..
-                    this.scanner.tokenStart = bStart + 2;
-                } else {
-                    // ..n- {number}
-                    this.scanner.next();
-                    this.scanner.skipSC();
-                }
-
-                checkTokenIsInteger(this.scanner, DISALLOW_SIGN);
-                b = '-' + this.scanner.getTokenValue();
-                this.scanner.next();
-                end = this.scanner.tokenStart;
-            } else {
-                prefix = '';
-                this.scanner.next();
-                end = this.scanner.tokenStart;
-                this.scanner.skipSC();
-
-                if (this.scanner.tokenType === HYPHENMINUS ||
-                    this.scanner.tokenType === PLUSSIGN) {
-                    prefix = this.scanner.getTokenValue();
-                    this.scanner.next();
-                    this.scanner.skipSC();
-                }
-
-                if (this.scanner.tokenType === NUMBER) {
-                    checkTokenIsInteger(this.scanner, prefix !== '');
-
-                    if (!isNumber(this.scanner.source.charCodeAt(this.scanner.tokenStart))) {
-                        prefix = this.scanner.source.charAt(this.scanner.tokenStart);
-                        this.scanner.tokenStart++;
-                    }
-
-                    if (prefix === '') {
-                        // should be an operator before number
-                        this.scanner.error();
-                    } else if (prefix === '+') {
-                        // plus is using by default
-                        prefix = '';
-                    }
-
-                    b = prefix + this.scanner.getTokenValue();
-
-                    this.scanner.next();
-                    end = this.scanner.tokenStart;
-                } else {
-                    if (prefix) {
-                        this.scanner.eat(NUMBER);
-                    }
-                }
-            }
-        } else {
-            if (prefix === '' || prefix === '+') { // no number
-                this.scanner.error(
-                    'Number or identifier is expected',
-                    this.scanner.tokenStart + (
-                        this.scanner.tokenType === PLUSSIGN ||
-                        this.scanner.tokenType === HYPHENMINUS
-                    )
-                );
-            }
-
-            b = prefix;
-        }
-
-        return {
-            type: 'AnPlusB',
-            loc: this.getLocation(start, end),
-            a: a,
-            b: b
-        };
-    },
-    generate: function(processChunk, node) {
-        var a = node.a !== null && node.a !== undefined;
-        var b = node.b !== null && node.b !== undefined;
-
-        if (a) {
-            processChunk(
-                node.a === '+1' ? '+n' :
-                node.a ===  '1' ?  'n' :
-                node.a === '-1' ? '-n' :
-                node.a + 'n'
-            );
-
-            if (b) {
-                b = String(node.b);
-                if (b.charAt(0) === '-' || b.charAt(0) === '+') {
-                    processChunk(b.charAt(0));
-                    processChunk(b.substr(1));
-                } else {
-                    processChunk('+');
-                    processChunk(b);
-                }
-            }
-        } else {
-            processChunk(String(node.b));
-        }
-    }
+    return children;
 };
-}, {"74":74}];
+}, {"54":54,"75":75}];

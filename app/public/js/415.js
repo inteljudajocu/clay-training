@@ -1,49 +1,40 @@
-window.modules["415"] = [function(require,module,exports){var walkRules = require(57).walkRules;
-var utils = require(416);
+window.modules["415"] = [function(require,module,exports){var OMIT_PLUSSIGN = /^(?:\+|(-))?0*(\d*)(?:\.0*|(\.\d*?)0*)?$/;
+var KEEP_PLUSSIGN = /^([\+\-])?0*(\d*)(?:\.0*|(\.\d*?)0*)?$/;
+var unsafeToRemovePlusSignAfter = {
+    Dimension: true,
+    HexColor: true,
+    Identifier: true,
+    Number: true,
+    Raw: true,
+    UnicodeRange: true
+};
 
-function processRule(node, item, list) {
-    var selectors = node.prelude.children;
-    var declarations = node.block.children;
+function packNumber(value, item) {
+    // omit plus sign only if no prev or prev is safe type
+    var regexp = item && item.prev !== null && unsafeToRemovePlusSignAfter.hasOwnProperty(item.prev.data.type)
+        ? KEEP_PLUSSIGN
+        : OMIT_PLUSSIGN;
 
-    list.prevUntil(item.prev, function(prev) {
-        // skip non-ruleset node if safe
-        if (prev.type !== 'Rule') {
-            return utils.unsafeToSkipNode.call(selectors, prev);
-        }
+    // 100 -> '100'
+    // 00100 -> '100'
+    // +100 -> '100' (only when safe, e.g. omitting plus sign for 1px+1px leads to single dimension instead of two)
+    // -100 -> '-100'
+    // 0.123 -> '.123'
+    // 0.12300 -> '.123'
+    // 0.0 -> ''
+    // 0 -> ''
+    // -0 -> '-'
+    value = String(value).replace(regexp, '$1$2$3');
 
-        var prevSelectors = prev.prelude.children;
-        var prevDeclarations = prev.block.children;
+    if (value === '' || value === '-') {
+        value = '0';
+    }
 
-        // try to join rulesets with equal pseudo signature
-        if (node.pseudoSignature === prev.pseudoSignature) {
-            // try to join by selectors
-            if (utils.isEqualSelectors(prevSelectors, selectors)) {
-                prevDeclarations.appendList(declarations);
-                list.remove(item);
-                return true;
-            }
-
-            // try to join by declarations
-            if (utils.isEqualDeclarations(declarations, prevDeclarations)) {
-                utils.addSelectors(prevSelectors, selectors);
-                list.remove(item);
-                return true;
-            }
-        }
-
-        // go to prev ruleset if has no selector similarities
-        return utils.hasSimilarSelectors(selectors, prevSelectors);
-    });
+    return value;
 }
 
-// NOTE: direction should be left to right, since rulesets merge to left
-// ruleset. When direction right to left unmerged rulesets may prevent lookup
-// TODO: remove initial merge
-module.exports = function initialMergeRule(ast) {
-    walkRules(ast, function(node, item, list) {
-        if (node.type === 'Rule') {
-            processRule(node, item, list);
-        }
-    });
+module.exports = function(node, item) {
+    node.value = packNumber(node.value, item);
 };
-}, {"57":57,"416":416}];
+module.exports.pack = packNumber;
+}, {}];

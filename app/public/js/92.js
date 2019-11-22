@@ -1,16 +1,26 @@
-window.modules["92"] = [function(require,module,exports){var List = require(53);
+window.modules["92"] = [function(require,module,exports){'use strict';
 
-// https://drafts.csswg.org/css-images-4/#element-notation
-// https://developer.mozilla.org/en-US/docs/Web/CSS/element
-module.exports = function() {
-    this.scanner.skipSC();
+var List = require(54);
 
-    var id = this.IdSelector();
+module.exports = function clone(node) {
+    var result = {};
 
-    this.scanner.skipSC();
+    for (var key in node) {
+        var value = node[key];
 
-    return new List().appendData(
-        id
-    );
+        if (value) {
+            if (Array.isArray(value)) {
+                value = value.slice(0);
+            } else if (value instanceof List) {
+                value = new List().fromArray(value.map(clone));
+            } else if (value.constructor === Object) {
+                value = clone(value);
+            }
+        }
+
+        result[key] = value;
+    }
+
+    return result;
 };
-}, {"53":53}];
+}, {"54":54}];

@@ -1,193 +1,293 @@
-window.modules["396"] = [function(require,module,exports){var List = require(57).List;
-var clone = require(57).clone;
-var usageUtils = require(397);
-var clean = require(395);
-var replace = require(398);
-var restructure = require(399);
-var walkRules = require(57).walkRules;
+window.modules["396"] = [function(require,module,exports){'use strict';
 
-function readChunk(children, specialComments) {
-    var buffer = new List();
-    var nonSpaceTokenInBuffer = false;
-    var protectedComment;
+exports.__esModule = true;
 
-    children.nextUntil(children.head, function(node, item, list) {
-        if (node.type === 'Comment') {
-            if (!specialComments || node.value.charAt(0) !== '!') {
-                list.remove(item);
-                return;
-            }
+var _declaration = require(440);
 
-            if (nonSpaceTokenInBuffer || protectedComment) {
-                return true;
-            }
+var _declaration2 = _interopRequireDefault(_declaration);
 
-            list.remove(item);
-            protectedComment = node;
-            return;
-        }
+var _processor = require(459);
 
-        if (node.type !== 'WhiteSpace') {
-            nonSpaceTokenInBuffer = true;
-        }
+var _processor2 = _interopRequireDefault(_processor);
 
-        buffer.insert(list.remove(item));
-    });
+var _stringify = require(449);
 
-    return {
-        comment: protectedComment,
-        stylesheet: {
-            type: 'StyleSheet',
-            loc: null,
-            children: buffer
-        }
-    };
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _comment = require(438);
+
+var _comment2 = _interopRequireDefault(_comment);
+
+var _atRule = require(436);
+
+var _atRule2 = _interopRequireDefault(_atRule);
+
+var _vendor = require(458);
+
+var _vendor2 = _interopRequireDefault(_vendor);
+
+var _parse = require(442);
+
+var _parse2 = _interopRequireDefault(_parse);
+
+var _list = require(453);
+
+var _list2 = _interopRequireDefault(_list);
+
+var _rule = require(441);
+
+var _rule2 = _interopRequireDefault(_rule);
+
+var _root = require(443);
+
+var _root2 = _interopRequireDefault(_root);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Create a new {@link Processor} instance that will apply `plugins`
+ * as CSS processors.
+ *
+ * @param {Array.<Plugin|pluginFunction>|Processor} plugins - PostCSS
+ *        plugins. See {@link Processor#use} for plugin format.
+ *
+ * @return {Processor} Processor to process multiple CSS
+ *
+ * @example
+ * import postcss from 'postcss';
+ *
+ * postcss(plugins).process(css, { from, to }).then(result => {
+ *   console.log(result.css);
+ * });
+ *
+ * @namespace postcss
+ */
+function postcss() {
+  for (var _len = arguments.length, plugins = Array(_len), _key = 0; _key < _len; _key++) {
+    plugins[_key] = arguments[_key];
+  }
+
+  if (plugins.length === 1 && Array.isArray(plugins[0])) {
+    plugins = plugins[0];
+  }
+  return new _processor2.default(plugins);
 }
 
-function compressChunk(ast, firstAtrulesAllowed, num, options) {
-    options.logger('Compress block #' + num, null, true);
+/**
+ * Creates a PostCSS plugin with a standard API.
+ *
+ * The newly-wrapped function will provide both the name and PostCSS
+ * version of the plugin.
+ *
+ * ```js
+ *  const processor = postcss([replace]);
+ *  processor.plugins[0].postcssPlugin  //=> 'postcss-replace'
+ *  processor.plugins[0].postcssVersion //=> '5.1.0'
+ * ```
+ *
+ * The plugin function receives 2 arguments: {@link Root}
+ * and {@link Result} instance. The function should mutate the provided
+ * `Root` node. Alternatively, you can create a new `Root` node
+ * and override the `result.root` property.
+ *
+ * ```js
+ * const cleaner = postcss.plugin('postcss-cleaner', () => {
+ *   return (root, result) => {
+ *     result.root = postcss.root();
+ *   };
+ * });
+ * ```
+ *
+ * As a convenience, plugins also expose a `process` method so that you can use
+ * them as standalone tools.
+ *
+ * ```js
+ * cleaner.process(css, processOpts, pluginOpts);
+ * // This is equivalent to:
+ * postcss([ cleaner(pluginOpts) ]).process(css, processOpts);
+ * ```
+ *
+ * Asynchronous plugins should return a `Promise` instance.
+ *
+ * ```js
+ * postcss.plugin('postcss-import', () => {
+ *   return (root, result) => {
+ *     return new Promise( (resolve, reject) => {
+ *       fs.readFile('base.css', (base) => {
+ *         root.prepend(base);
+ *         resolve();
+ *       });
+ *     });
+ *   };
+ * });
+ * ```
+ *
+ * Add warnings using the {@link Node#warn} method.
+ * Send data to other plugins using the {@link Result#messages} array.
+ *
+ * ```js
+ * postcss.plugin('postcss-caniuse-test', () => {
+ *   return (root, result) => {
+ *     root.walkDecls(decl => {
+ *       if ( !caniuse.support(decl.prop) ) {
+ *         decl.warn(result, 'Some browsers do not support ' + decl.prop);
+ *       }
+ *     });
+ *   };
+ * });
+ * ```
+ *
+ * @param {string} name          - PostCSS plugin name. Same as in `name`
+ *                                 property in `package.json`. It will be saved
+ *                                 in `plugin.postcssPlugin` property.
+ * @param {function} initializer - will receive plugin options
+ *                                 and should return {@link pluginFunction}
+ *
+ * @return {Plugin} PostCSS plugin
+ */
+postcss.plugin = function plugin(name, initializer) {
+  var creator = function creator() {
+    var transformer = initializer.apply(undefined, arguments);
+    transformer.postcssPlugin = name;
+    transformer.postcssVersion = new _processor2.default().version;
+    return transformer;
+  };
 
-    var seed = 1;
-
-    if (ast.type === 'StyleSheet') {
-        ast.firstAtrulesAllowed = firstAtrulesAllowed;
-        ast.id = seed++;
+  var cache = void 0;
+  Object.defineProperty(creator, 'postcss', {
+    get: function get() {
+      if (!cache) cache = creator();
+      return cache;
     }
+  });
 
-    walkRules(ast, function markScopes(node) {
-        if (node.type === 'Atrule' && node.block !== null) {
-            node.block.id = seed++;
-        }
-    });
-    options.logger('init', ast);
+  creator.process = function (css, processOpts, pluginOpts) {
+    return postcss([creator(pluginOpts)]).process(css, processOpts);
+  };
 
-    // remove redundant
-    clean(ast, options);
-    options.logger('clean', ast);
-
-    // replace nodes for shortened forms
-    replace(ast, options);
-    options.logger('replace', ast);
-
-    // structure optimisations
-    if (options.restructuring) {
-        restructure(ast, options);
-    }
-
-    return ast;
-}
-
-function getCommentsOption(options) {
-    var comments = 'comments' in options ? options.comments : 'exclamation';
-
-    if (typeof comments === 'boolean') {
-        comments = comments ? 'exclamation' : false;
-    } else if (comments !== 'exclamation' && comments !== 'first-exclamation') {
-        comments = false;
-    }
-
-    return comments;
-}
-
-function getRestructureOption(options) {
-    return 'restructure' in options ? options.restructure :
-           'restructuring' in options ? options.restructuring :
-           true;
-}
-
-function wrapBlock(block) {
-    return new List().appendData({
-        type: 'Rule',
-        loc: null,
-        prelude: {
-            type: 'SelectorList',
-            loc: null,
-            children: new List().appendData({
-                type: 'Selector',
-                loc: null,
-                children: new List().appendData({
-                    type: 'TypeSelector',
-                    loc: null,
-                    name: 'x'
-                })
-            })
-        },
-        block: block
-    });
-}
-
-module.exports = function compress(ast, options) {
-    ast = ast || { type: 'StyleSheet', loc: null, children: new List() };
-    options = options || {};
-
-    var compressOptions = {
-        logger: typeof options.logger === 'function' ? options.logger : function() {},
-        restructuring: getRestructureOption(options),
-        forceMediaMerge: Boolean(options.forceMediaMerge),
-        usage: options.usage ? usageUtils.buildIndex(options.usage) : false
-    };
-    var specialComments = getCommentsOption(options);
-    var firstAtrulesAllowed = true;
-    var input;
-    var output = new List();
-    var chunk;
-    var chunkNum = 1;
-    var chunkChildren;
-
-    if (options.clone) {
-        ast = clone(ast);
-    }
-
-    if (ast.type === 'StyleSheet') {
-        input = ast.children;
-        ast.children = output;
-    } else {
-        input = wrapBlock(ast);
-    }
-
-    do {
-        chunk = readChunk(input, Boolean(specialComments));
-        compressChunk(chunk.stylesheet, firstAtrulesAllowed, chunkNum++, compressOptions);
-        chunkChildren = chunk.stylesheet.children;
-
-        if (chunk.comment) {
-            // add \n before comment if there is another content in output
-            if (!output.isEmpty()) {
-                output.insert(List.createItem({
-                    type: 'Raw',
-                    value: '\n'
-                }));
-            }
-
-            output.insert(List.createItem(chunk.comment));
-
-            // add \n after comment if chunk is not empty
-            if (!chunkChildren.isEmpty()) {
-                output.insert(List.createItem({
-                    type: 'Raw',
-                    value: '\n'
-                }));
-            }
-        }
-
-        if (firstAtrulesAllowed && !chunkChildren.isEmpty()) {
-            var lastRule = chunkChildren.last();
-
-            if (lastRule.type !== 'Atrule' ||
-               (lastRule.name !== 'import' && lastRule.name !== 'charset')) {
-                firstAtrulesAllowed = false;
-            }
-        }
-
-        if (specialComments !== 'exclamation') {
-            specialComments = false;
-        }
-
-        output.appendList(chunkChildren);
-    } while (!input.isEmpty());
-
-    return {
-        ast: ast
-    };
+  return creator;
 };
-}, {"57":57,"395":395,"397":397,"398":398,"399":399}];
+
+/**
+ * Default function to convert a node tree into a CSS string.
+ *
+ * @param {Node} node       - start node for stringifing. Usually {@link Root}.
+ * @param {builder} builder - function to concatenate CSS from node’s parts
+ *                            or generate string and source map
+ *
+ * @return {void}
+ *
+ * @function
+ */
+postcss.stringify = _stringify2.default;
+
+/**
+ * Parses source css and returns a new {@link Root} node,
+ * which contains the source CSS nodes.
+ *
+ * @param {string|toString} css   - string with input CSS or any object
+ *                                  with toString() method, like a Buffer
+ * @param {processOptions} [opts] - options with only `from` and `map` keys
+ *
+ * @return {Root} PostCSS AST
+ *
+ * @example
+ * // Simple CSS concatenation with source map support
+ * const root1 = postcss.parse(css1, { from: file1 });
+ * const root2 = postcss.parse(css2, { from: file2 });
+ * root1.append(root2).toResult().css;
+ *
+ * @function
+ */
+postcss.parse = _parse2.default;
+
+/**
+ * @member {vendor} - Contains the {@link vendor} module.
+ *
+ * @example
+ * postcss.vendor.unprefixed('-moz-tab') //=> ['tab']
+ */
+postcss.vendor = _vendor2.default;
+
+/**
+ * @member {list} - Contains the {@link list} module.
+ *
+ * @example
+ * postcss.list.space('5px calc(10% + 5px)') //=> ['5px', 'calc(10% + 5px)']
+ */
+postcss.list = _list2.default;
+
+/**
+ * Creates a new {@link Comment} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Comment} new Comment node
+ *
+ * @example
+ * postcss.comment({ text: 'test' })
+ */
+postcss.comment = function (defaults) {
+  return new _comment2.default(defaults);
+};
+
+/**
+ * Creates a new {@link AtRule} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {AtRule} new AtRule node
+ *
+ * @example
+ * postcss.atRule({ name: 'charset' }).toString() //=> "@charset"
+ */
+postcss.atRule = function (defaults) {
+  return new _atRule2.default(defaults);
+};
+
+/**
+ * Creates a new {@link Declaration} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Declaration} new Declaration node
+ *
+ * @example
+ * postcss.decl({ prop: 'color', value: 'red' }).toString() //=> "color: red"
+ */
+postcss.decl = function (defaults) {
+  return new _declaration2.default(defaults);
+};
+
+/**
+ * Creates a new {@link Rule} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Rule} new Rule node
+ *
+ * @example
+ * postcss.rule({ selector: 'a' }).toString() //=> "a {\n}"
+ */
+postcss.rule = function (defaults) {
+  return new _rule2.default(defaults);
+};
+
+/**
+ * Creates a new {@link Root} node.
+ *
+ * @param {object} [defaults] - properties for the new node.
+ *
+ * @return {Root} new Root node
+ *
+ * @example
+ * postcss.root({ after: '\n' }).toString() //=> "\n"
+ */
+postcss.root = function (defaults) {
+  return new _root2.default(defaults);
+};
+
+exports.default = postcss;
+module.exports = exports['default'];
+
+}, {"436":436,"438":438,"440":440,"441":441,"442":442,"443":443,"449":449,"453":453,"458":458,"459":459}];

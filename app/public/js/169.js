@@ -1,36 +1,26 @@
-window.modules["169"] = [function(require,module,exports){var isDate = require(177)
+window.modules["169"] = [function(require,module,exports){var parse = require(5)
 
 /**
- * @category Common Helpers
- * @summary Is the given date valid?
+ * @category Day Helpers
+ * @summary Return the start of a day for the given date.
  *
  * @description
- * Returns false if argument is Invalid Date and true otherwise.
- * Invalid Date is a Date, whose time value is NaN.
+ * Return the start of a day for the given date.
+ * The result will be in the local timezone.
  *
- * Time value of Date: http://es5.github.io/#x15.9.1.1
- *
- * @param {Date} date - the date to check
- * @returns {Boolean} the date is valid
- * @throws {TypeError} argument must be an instance of Date
+ * @param {Date|String|Number} date - the original date
+ * @returns {Date} the start of a day
  *
  * @example
- * // For the valid date:
- * var result = isValid(new Date(2014, 1, 31))
- * //=> true
- *
- * @example
- * // For the invalid date:
- * var result = isValid(new Date(''))
- * //=> false
+ * // The start of a day for 2 September 2014 11:55:00:
+ * var result = startOfDay(new Date(2014, 8, 2, 11, 55, 0))
+ * //=> Tue Sep 02 2014 00:00:00
  */
-function isValid (dirtyDate) {
-  if (isDate(dirtyDate)) {
-    return !isNaN(dirtyDate)
-  } else {
-    throw new TypeError(toString.call(dirtyDate) + ' is not an instance of Date')
-  }
+function startOfDay (dirtyDate) {
+  var date = parse(dirtyDate)
+  date.setHours(0, 0, 0, 0)
+  return date
 }
 
-module.exports = isValid
-}, {"177":177}];
+module.exports = startOfDay
+}, {"5":5}];

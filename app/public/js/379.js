@@ -1,14 +1,37 @@
-window.modules["379"] = [function(require,module,exports){/*!
- * word-regex <https://github.com/jonschlinkert/word-regex>
+window.modules["379"] = [function(require,module,exports){var toFinite = require(386);
+
+/**
+ * Converts `value` to an integer.
  *
- * Copyright (c) 2015 Jon Schlinkert.
- * Licensed under the MIT license.
+ * **Note:** This method is loosely based on
+ * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted integer.
+ * @example
+ *
+ * _.toInteger(3.2);
+ * // => 3
+ *
+ * _.toInteger(Number.MIN_VALUE);
+ * // => 0
+ *
+ * _.toInteger(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toInteger('3.2');
+ * // => 3
  */
+function toInteger(value) {
+  var result = toFinite(value),
+      remainder = result % 1;
 
-'use strict';
+  return result === result ? (remainder ? result - remainder : result) : 0;
+}
 
-// Modified from: https://github.com/lepture/editor/blob/master/src/intro.js#L343
-module.exports = function () {
-  return /[a-zA-Z0-9_\u0392-\u03c9\u0400-\u04FF]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af\u0400-\u04FF]+|[\u00E4\u00C4\u00E5\u00C5\u00F6\u00D6]+|\w+/g;
-};
-}, {}];
+module.exports = toInteger;
+}, {"386":386}];

@@ -1,31 +1,28 @@
-window.modules["353"] = [function(require,module,exports){var arrayFilter = require(266),
-    stubArray = require(359);
+window.modules["353"] = [function(require,module,exports){var memoizeCapped = require(371);
 
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
+/** Used to match property names within property paths. */
+var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
 
-/** Built-in value references. */
-var propertyIsEnumerable = objectProto.propertyIsEnumerable;
-
-/* Built-in method references for those with the same name as other `lodash` methods. */
-var nativeGetSymbols = Object.getOwnPropertySymbols;
+/** Used to match backslashes in property paths. */
+var reEscapeChar = /\\(\\)?/g;
 
 /**
- * Creates an array of the own enumerable symbols of `object`.
+ * Converts `string` to a property path array.
  *
  * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of symbols.
+ * @param {string} string The string to convert.
+ * @returns {Array} Returns the property path array.
  */
-var getSymbols = !nativeGetSymbols ? stubArray : function(object) {
-  if (object == null) {
-    return [];
+var stringToPath = memoizeCapped(function(string) {
+  var result = [];
+  if (string.charCodeAt(0) === 46 /* . */) {
+    result.push('');
   }
-  object = Object(object);
-  return arrayFilter(nativeGetSymbols(object), function(symbol) {
-    return propertyIsEnumerable.call(object, symbol);
+  string.replace(rePropName, function(match, number, quote, subString) {
+    result.push(quote ? subString.replace(reEscapeChar, '$1') : (number || match));
   });
-};
+  return result;
+});
 
-module.exports = getSymbols;
-}, {"266":266,"359":359}];
+module.exports = stringToPath;
+}, {"371":371}];

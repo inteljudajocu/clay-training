@@ -1,15 +1,21 @@
-window.modules["188"] = [function(require,module,exports){var DomUtils = module.exports;
+window.modules["188"] = [function(require,module,exports){// DOM-Level-1-compliant structure
+var NodePrototype = require(187);
+var ElementPrototype = module.exports = Object.create(NodePrototype);
 
-[
-	require(194),
-	require(191),
-	require(193),
-	require(190),
-	require(189),
-	require(192)
-].forEach(function(ext){
-	Object.keys(ext).forEach(function(key){
-		DomUtils[key] = ext[key].bind(DomUtils);
+var domLvl1 = {
+	tagName: "name"
+};
+
+Object.keys(domLvl1).forEach(function(key) {
+	var shorthand = domLvl1[key];
+	Object.defineProperty(ElementPrototype, key, {
+		get: function() {
+			return this[shorthand] || null;
+		},
+		set: function(val) {
+			this[shorthand] = val;
+			return val;
+		}
 	});
 });
-}, {"189":189,"190":190,"191":191,"192":192,"193":193,"194":194}];
+}, {"187":187}];

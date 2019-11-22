@@ -1,20 +1,6 @@
-window.modules["593"] = [function(require,module,exports){/*
-We're explicitly defining the list of entities that might see in escape HTML strings
-*/
-var htmlEntities = {
-  nbsp: ' ',
-  cent: '¢',
-  pound: '£',
-  yen: '¥',
-  euro: '€',
-  copy: '©',
-  reg: '®',
-  lt: '<',
-  gt: '>',
-  quot: '"',
-  amp: '&',
-  apos: '\''
-};
+window.modules["593"] = [function(require,module,exports){var trim = require(583);
 
-module.exports = htmlEntities;
-}, {}];
+module.exports = function dasherize(str) {
+  return trim(str).replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
+};
+}, {"583":583}];

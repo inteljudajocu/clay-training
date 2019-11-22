@@ -1,6 +1,7 @@
-window.modules["612"] = [function(require,module,exports){var toSentence = require(613);
-
-module.exports = function toSentenceSerial(array, sep, lastSep) {
-  return toSentence(array, sep, lastSep, true);
+window.modules["612"] = [function(require,module,exports){module.exports = function unquote(str, quoteChar) {
+  quoteChar = quoteChar || '"';
+  if (str[0] === quoteChar && str[str.length - 1] === quoteChar)
+    return str.slice(1, str.length - 1);
+  else return str;
 };
-}, {"613":613}];
+}, {}];

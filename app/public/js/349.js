@@ -1,19 +1,15 @@
 window.modules["349"] = [function(require,module,exports){/**
- * Converts `map` to its key-value pairs.
+ * The base implementation of `_.unary` without support for storing metadata.
  *
  * @private
- * @param {Object} map The map to convert.
- * @returns {Array} Returns the key-value pairs.
+ * @param {Function} func The function to cap arguments for.
+ * @returns {Function} Returns the new capped function.
  */
-function mapToArray(map) {
-  var index = -1,
-      result = Array(map.size);
-
-  map.forEach(function(value, key) {
-    result[++index] = [key, value];
-  });
-  return result;
+function baseUnary(func) {
+  return function(value) {
+    return func(value);
+  };
 }
 
-module.exports = mapToArray;
+module.exports = baseUnary;
 }, {}];

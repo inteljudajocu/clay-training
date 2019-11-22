@@ -1,21 +1,18 @@
-window.modules["71"] = [function(require,module,exports){'use strict';
+window.modules["71"] = [function(require,module,exports){module.exports = function createCustomError(name, message) {
+    // use Object.create(), because some VMs prevent setting line/column otherwise
+    // (iOS Safari 10 even throws an exception)
+    var error = Object.create(SyntaxError.prototype);
+    var errorStack = new Error();
 
-var createCustomError = require(70);
+    error.name = name;
+    error.message = message;
 
-var SyntaxParseError = function(message, syntaxStr, offset) {
-    var error = createCustomError('SyntaxParseError', message);
-
-    error.rawMessage = message;
-    error.syntax = syntaxStr;
-    error.offset = offset;
-    error.message = error.rawMessage + '\n' +
-        '  ' + error.syntax + '\n' +
-        '--' + new Array((error.offset || error.syntax.length) + 1).join('-') + '^';
+    Object.defineProperty(error, 'stack', {
+        get: function() {
+            return (errorStack.stack || '').replace(/^(.+\n){1,3}/, name + ': ' + message + '\n');
+        }
+    });
 
     return error;
 };
-
-module.exports = {
-    SyntaxParseError: SyntaxParseError
-};
-}, {"70":70}];
+}, {}];

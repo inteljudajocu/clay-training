@@ -1,34 +1,33 @@
-window.modules["324"] = [function(require,module,exports){var isFunction = require(310),
-    isLength = require(314);
+window.modules["324"] = [function(require,module,exports){var baseProperty = require(339),
+    basePropertyDeep = require(340),
+    isKey = require(336),
+    toKey = require(297);
 
 /**
- * Checks if `value` is array-like. A value is considered array-like if it's
- * not a function and has a `value.length` that's an integer greater than or
- * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
+ * Creates a function that returns the value at `path` of a given object.
  *
  * @static
  * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ * @since 2.4.0
+ * @category Util
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
  * @example
  *
- * _.isArrayLike([1, 2, 3]);
- * // => true
+ * var objects = [
+ *   { 'a': { 'b': 2 } },
+ *   { 'a': { 'b': 1 } }
+ * ];
  *
- * _.isArrayLike(document.body.children);
- * // => true
+ * _.map(objects, _.property('a.b'));
+ * // => [2, 1]
  *
- * _.isArrayLike('abc');
- * // => true
- *
- * _.isArrayLike(_.noop);
- * // => false
+ * _.map(_.sortBy(objects, _.property(['a', 'b'])), 'a.b');
+ * // => [1, 2]
  */
-function isArrayLike(value) {
-  return value != null && isLength(value.length) && !isFunction(value);
+function property(path) {
+  return isKey(path) ? baseProperty(toKey(path)) : basePropertyDeep(path);
 }
 
-module.exports = isArrayLike;
-}, {"310":310,"314":314}];
+module.exports = property;
+}, {"297":297,"336":336,"339":339,"340":340}];

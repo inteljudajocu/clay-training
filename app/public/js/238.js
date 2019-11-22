@@ -1,33 +1,18 @@
-window.modules["238"] = [function(require,module,exports){var listCacheClear = require(239),
-    listCacheDelete = require(242),
-    listCacheGet = require(243),
-    listCacheHas = require(240),
-    listCacheSet = require(241);
+window.modules["238"] = [function(require,module,exports){var baseIsNative = require(316),
+    getValue = require(365);
 
 /**
- * Creates an list cache object.
+ * Gets the native function at `key` of `object`.
  *
  * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
+ * @param {Object} object The object to query.
+ * @param {string} key The key of the method to get.
+ * @returns {*} Returns the function if it's native, else `undefined`.
  */
-function ListCache(entries) {
-  var index = -1,
-      length = entries == null ? 0 : entries.length;
-
-  this.clear();
-  while (++index < length) {
-    var entry = entries[index];
-    this.set(entry[0], entry[1]);
-  }
+function getNative(object, key) {
+  var value = getValue(object, key);
+  return baseIsNative(value) ? value : undefined;
 }
 
-// Add methods to `ListCache`.
-ListCache.prototype.clear = listCacheClear;
-ListCache.prototype['delete'] = listCacheDelete;
-ListCache.prototype.get = listCacheGet;
-ListCache.prototype.has = listCacheHas;
-ListCache.prototype.set = listCacheSet;
-
-module.exports = ListCache;
-}, {"239":239,"240":240,"241":241,"242":242,"243":243}];
+module.exports = getNative;
+}, {"316":316,"365":365}];

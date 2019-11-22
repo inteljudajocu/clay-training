@@ -1,105 +1,55 @@
-window.modules["414"] = [function(require,module,exports){var List = require(57).List;
-var resolveKeyword = require(57).keyword;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var walkRulesRight = require(57).walkRulesRight;
+window.modules["414"] = [function(require,module,exports){var packNumber = require(415).pack;
+var LENGTH_UNIT = {
+    // absolute length units
+    'px': true,
+    'mm': true,
+    'cm': true,
+    'in': true,
+    'pt': true,
+    'pc': true,
 
-function addRuleToMap(map, item, list, single) {
-    var node = item.data;
-    var name = resolveKeyword(node.name).name;
-    var id = node.name.toLowerCase() + '/' + (node.prelude ? node.prelude.id : null);
+    // relative length units
+    'em': true,
+    'ex': true,
+    'ch': true,
+    'rem': true,
 
-    if (!hasOwnProperty.call(map, name)) {
-        map[name] = Object.create(null);
-    }
-
-    if (single) {
-        delete map[name][id];
-    }
-
-    if (!hasOwnProperty.call(map[name], id)) {
-        map[name][id] = new List();
-    }
-
-    map[name][id].append(list.remove(item));
-}
-
-function relocateAtrules(ast, options) {
-    var collected = Object.create(null);
-    var topInjectPoint = null;
-
-    ast.children.each(function(node, item, list) {
-        if (node.type === 'Atrule') {
-            var keyword = resolveKeyword(node.name);
-
-            switch (keyword.name) {
-                case 'keyframes':
-                    addRuleToMap(collected, item, list, true);
-                    return;
-
-                case 'media':
-                    if (options.forceMediaMerge) {
-                        addRuleToMap(collected, item, list, false);
-                        return;
-                    }
-                    break;
-            }
-
-            if (topInjectPoint === null &&
-                keyword.name !== 'charset' &&
-                keyword.name !== 'import') {
-                topInjectPoint = item;
-            }
-        } else {
-            if (topInjectPoint === null) {
-                topInjectPoint = item;
-            }
-        }
-    });
-
-    for (var atrule in collected) {
-        for (var id in collected[atrule]) {
-            ast.children.insertList(collected[atrule][id], atrule === 'media' ? null : topInjectPoint);
-        }
-    }
+    // viewport-percentage lengths
+    'vh': true,
+    'vw': true,
+    'vmin': true,
+    'vmax': true,
+    'vm': true
 };
 
-function isMediaRule(node) {
-    return node.type === 'Atrule' && node.name === 'media';
-}
+module.exports = function compressDimension(node, item) {
+    var value = packNumber(node.value, item);
 
-function processAtrule(node, item, list) {
-    if (!isMediaRule(node)) {
-        return;
-    }
+    node.value = value;
 
-    var prev = item.prev && item.prev.data;
+    if (value === '0' && this.declaration !== null && this.atrulePrelude === null) {
+        var unit = node.unit.toLowerCase();
 
-    if (!prev || !isMediaRule(prev)) {
-        return;
-    }
-
-    // merge @media with same query
-    if (node.prelude &&
-        prev.prelude &&
-        node.prelude.id === prev.prelude.id) {
-        prev.block.children.appendList(node.block.children);
-        list.remove(item);
-
-        // TODO: use it when we can refer to several points in source
-        // prev.loc = {
-        //     primary: prev.loc,
-        //     merged: node.loc
-        // };
-    }
-}
-
-module.exports = function rejoinAtrule(ast, options) {
-    relocateAtrules(ast, options);
-
-    walkRulesRight(ast, function(node, item, list) {
-        if (node.type === 'Atrule') {
-            processAtrule(node, item, list);
+        // only length values can be compressed
+        if (!LENGTH_UNIT.hasOwnProperty(unit)) {
+            return;
         }
-    });
+
+        // issue #200: don't remove units in flex property as it could change value meaning
+        if (this.declaration.property === 'flex') {
+            return;
+        }
+
+        // issue #222: don't remove units inside calc
+        if (this['function'] && this['function'].name === 'calc') {
+            return;
+        }
+
+        item.data = {
+            type: 'Number',
+            loc: node.loc,
+            value: value
+        };
+    }
 };
-}, {"57":57}];
+}, {"415":415}];

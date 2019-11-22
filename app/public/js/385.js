@@ -1,153 +1,44 @@
-window.modules["385"] = [function(require,module,exports){var postcss = require(386);
-var translate = require(384).syntax.translate;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
+window.modules["385"] = [function(require,module,exports){var baseAssignValue = require(286),
+    baseForOwn = require(290),
+    baseIteratee = require(322);
 
-var DEFAULT_RAWS = {
-    before: '',
-    after: '',
-    between: '',
-    semicolon: false,
-    left: '',
-    right: ''
-};
-var ROOT_RAWS = {
-    semicolon: true
-};
-var DECL_RAWS = {
-    before: '',
-    after: '',
-    between: ':',
-    important: '!important'
-};
+/**
+ * Creates an object with the same keys as `object` and values generated
+ * by running each own enumerable string keyed property of `object` thru
+ * `iteratee`. The iteratee is invoked with three arguments:
+ * (value, key, object).
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Object
+ * @param {Object} object The object to iterate over.
+ * @param {Function} [iteratee=_.identity] The function invoked per iteration.
+ * @returns {Object} Returns the new mapped object.
+ * @see _.mapKeys
+ * @example
+ *
+ * var users = {
+ *   'fred':    { 'user': 'fred',    'age': 40 },
+ *   'pebbles': { 'user': 'pebbles', 'age': 1 }
+ * };
+ *
+ * _.mapValues(users, function(o) { return o.age; });
+ * // => { 'fred': 40, 'pebbles': 1 } (iteration order is not guaranteed)
+ *
+ * // The `_.property` iteratee shorthand.
+ * _.mapValues(users, 'age');
+ * // => { 'fred': 40, 'pebbles': 1 } (iteration order is not guaranteed)
+ */
+function mapValues(object, iteratee) {
+  var result = {};
+  iteratee = baseIteratee(iteratee, 3);
 
-function clone(source) {
-    var result = Object.create(Object.getPrototypeOf(source));
-
-    for (var key in source) {
-        if (hasOwnProperty.call(source, key)) {
-            result[key] = source[key];
-        }
-    }
-
-    return result;
+  baseForOwn(object, function(value, key, object) {
+    baseAssignValue(result, key, iteratee(value, key, object));
+  });
+  return result;
 }
 
-function listToPostcss(list, used) {
-    var result = [];
-    var before = '';
-
-    list.each(function(node) {
-        if (node.type === 'Raw' || node.type === 'Space') {
-            // attach raw and spaces to next node
-            before += node.value;
-        } else {
-            var postcssNode = cssoToPostcss(node, used);
-
-            if (before !== '') {
-                postcssNode.raws = clone(postcssNode.raws);
-                postcssNode.raws.before = before;
-                before = '';
-            }
-
-            result.push(postcssNode);
-        }
-    });
-
-    return result;
-}
-
-function cssoToPostcss(node, used) {
-    var postcssNode = node.loc ? node.loc.postcssNode : null;
-
-    if (postcssNode) {
-        // used is null when WeakSet is not supported
-        if (used === null || used.has(postcssNode)) {
-            // make node clone if it's already used in resulting tree
-            postcssNode = clone(postcssNode);
-        } else {
-            used.add(postcssNode);
-        }
-    }
-
-    switch (node.type) {
-        case 'StyleSheet':
-            if (!postcssNode) {
-                postcssNode = postcss.root();
-            }
-
-            postcssNode.raws = ROOT_RAWS;
-            postcssNode.nodes = listToPostcss(node.children, used);
-
-            break;
-
-        case 'Atrule':
-            if (!postcssNode) {
-                postcssNode = postcss.atRule();
-            }
-
-            postcssNode.raws = DEFAULT_RAWS;
-            postcssNode.name = node.name;
-            postcssNode.params = node.prelude ? translate(node.prelude) : '';
-            postcssNode.nodes = node.block ? listToPostcss(node.block.children, used) : undefined;
-
-            break;
-
-        case 'Rule':
-            if (!postcssNode) {
-                postcssNode = postcss.rule();
-            }
-
-            postcssNode.raws = DEFAULT_RAWS;
-            postcssNode.selector = translate(node.prelude);
-            postcssNode.nodes = listToPostcss(node.block.children, used);
-
-            break;
-
-        case 'Declaration':
-            if (!postcssNode) {
-                postcssNode = postcss.decl();
-            }
-
-            if (typeof node.important === 'string') {
-                postcssNode.raws = clone(DECL_RAWS);
-                postcssNode.raws.important = '!' + node.important;
-            } else {
-                postcssNode.raws = DECL_RAWS;
-            }
-
-            postcssNode.prop = node.property;
-            postcssNode.value = translate(node.value);
-            postcssNode.important = Boolean(node.important);
-
-            break;
-
-        case 'Comment':
-            if (!postcssNode) {
-                postcssNode = postcss.comment();
-            }
-
-            postcssNode.raws = DEFAULT_RAWS;
-            postcssNode.text = node.value;
-
-            break;
-    }
-
-    return postcssNode;
-};
-
-module.exports = function(node) {
-    var result;
-    var used = null;
-
-    // node.js 0.10 doesn't support for WeakSet -> always clone nodes
-    if (typeof WeakSet === 'function') {
-        // use weak set to avoid using the same original postcss node twice
-        // in resulting tree, since nodes are changing on tree building
-        used = new WeakSet();
-    }
-
-    result = cssoToPostcss(node, used);
-
-    return result;
-};
-}, {"384":384,"386":386}];
+module.exports = mapValues;
+}, {"286":286,"290":290,"322":322}];

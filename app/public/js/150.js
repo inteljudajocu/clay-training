@@ -1,57 +1,79 @@
-window.modules["150"] = [function(require,module,exports){var TYPE = require(74).TYPE;
+window.modules["150"] = [function(require,module,exports){var cmpChar = require(75).cmpChar;
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
+var STRING = TYPE.String;
 var NUMBER = TYPE.Number;
+var FUNCTION = TYPE.Function;
+var URL = TYPE.Url;
 var NUMBERSIGN = TYPE.NumberSign;
+var LEFTPARENTHESIS = TYPE.LeftParenthesis;
 var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
 var PLUSSIGN = TYPE.PlusSign;
+var HYPHENMINUS = TYPE.HyphenMinus;
+var COMMA = TYPE.Comma;
 var SOLIDUS = TYPE.Solidus;
 var ASTERISK = TYPE.Asterisk;
-var FULLSTOP = TYPE.FullStop;
-var COLON = TYPE.Colon;
-var GREATERTHANSIGN = TYPE.GreaterThanSign;
-var VERTICALLINE = TYPE.VerticalLine;
-var TILDE = TYPE.Tilde;
+var PERCENTSIGN = TYPE.PercentSign;
+var BACKSLASH = TYPE.Backslash;
+var U = 117; // 'u'.charCodeAt(0)
 
-function getNode(context) {
+module.exports = function defaultRecognizer(context) {
     switch (this.scanner.tokenType) {
-        case PLUSSIGN:
-        case GREATERTHANSIGN:
-        case TILDE:
+        case NUMBERSIGN:
+            return this.HexColor();
+
+        case COMMA:
             context.space = null;
             context.ignoreWSAfter = true;
-            return this.Combinator();
+            return this.Operator();
 
-        case SOLIDUS:  // /deep/
-            return this.Combinator();
+        case SOLIDUS:
+        case ASTERISK:
+        case PLUSSIGN:
+        case HYPHENMINUS:
+            return this.Operator();
 
-        case FULLSTOP:
-            return this.ClassSelector();
+        case LEFTPARENTHESIS:
+            return this.Parentheses(this.readSequence, context.recognizer);
 
         case LEFTSQUAREBRACKET:
-            return this.AttributeSelector();
+            return this.Brackets(this.readSequence, context.recognizer);
 
-        case NUMBERSIGN:
-            return this.IdSelector();
-
-        case COLON:
-            if (this.scanner.lookupType(1) === COLON) {
-                return this.PseudoElementSelector();
-            } else {
-                return this.PseudoClassSelector();
-            }
-
-        case IDENTIFIER:
-        case ASTERISK:
-        case VERTICALLINE:
-            return this.TypeSelector();
+        case STRING:
+            return this.String();
 
         case NUMBER:
-            return this.Percentage();
+            switch (this.scanner.lookupType(1)) {
+                case PERCENTSIGN:
+                    return this.Percentage();
+
+                case IDENTIFIER:
+                    // edge case: number with folowing \0 and \9 hack shouldn't to be a Dimension
+                    if (cmpChar(this.scanner.source, this.scanner.tokenEnd, BACKSLASH)) {
+                        return this.Number();
+                    } else {
+                        return this.Dimension();
+                    }
+
+                default:
+                    return this.Number();
+            }
+
+        case FUNCTION:
+            return this.Function(this.readSequence, context.recognizer);
+
+        case URL:
+            return this.Url();
+
+        case IDENTIFIER:
+            // check for unicode range, it should start with u+ or U+
+            if (cmpChar(this.scanner.source, this.scanner.tokenStart, U) &&
+                cmpChar(this.scanner.source, this.scanner.tokenStart + 1, PLUSSIGN)) {
+                return this.UnicodeRange();
+            } else {
+                return this.Identifier();
+            }
     }
 };
-
-module.exports = {
-    getNode: getNode
-};
-}, {"74":74}];
+}, {"75":75}];

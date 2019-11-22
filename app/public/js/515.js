@@ -1,124 +1,107 @@
 window.modules["515"] = [function(require,module,exports){'use strict';
 
-exports.__esModule = true;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _container = require(512);
-
-var _container2 = _interopRequireDefault(_container);
-
-var _list = require(528);
-
-var _list2 = _interopRequireDefault(_list);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-/**
- * Represents a CSS rule: a selector followed by a declaration block.
- *
- * @extends Container
- *
- * @example
- * const root = postcss.parse('a{}');
- * const rule = root.first;
- * rule.type       //=> 'rule'
- * rule.toString() //=> 'a{}'
- */
-var Rule = function (_Container) {
-  _inherits(Rule, _Container);
+var tokenizer = require(516);
+var Comment = require(517);
+var Parser = require(518);
 
-  function Rule(defaults) {
-    _classCallCheck(this, Rule);
+var SafeParser = function (_Parser) {
+  _inherits(SafeParser, _Parser);
 
-    var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
+  function SafeParser() {
+    _classCallCheck(this, SafeParser);
 
-    _this.type = 'rule';
-    if (!_this.nodes) _this.nodes = [];
-    return _this;
+    return _possibleConstructorReturn(this, _Parser.apply(this, arguments));
   }
 
-  /**
-   * An array containing the rule’s individual selectors.
-   * Groups of selectors are split at commas.
-   *
-   * @type {string[]}
-   *
-   * @example
-   * const root = postcss.parse('a, b { }');
-   * const rule = root.first;
-   *
-   * rule.selector  //=> 'a, b'
-   * rule.selectors //=> ['a', 'b']
-   *
-   * rule.selectors = ['a', 'strong'];
-   * rule.selector //=> 'a, strong'
-   */
+  SafeParser.prototype.createTokenizer = function createTokenizer() {
+    this.tokenizer = tokenizer(this.input, { ignoreErrors: true });
+  };
 
+  SafeParser.prototype.comment = function comment(token) {
+    var node = new Comment();
+    this.init(node, token[2], token[3]);
+    node.source.end = { line: token[4], column: token[5] };
 
-  _createClass(Rule, [{
-    key: 'selectors',
-    get: function get() {
-      return _list2.default.comma(this.selector);
-    },
-    set: function set(values) {
-      var match = this.selector ? this.selector.match(/,\s*/) : null;
-      var sep = match ? match[0] : ',' + this.raw('between', 'beforeOpen');
-      this.selector = values.join(sep);
+    var text = token[1].slice(2);
+    if (text.slice(-2) === '*/') text = text.slice(0, -2);
+
+    if (/^\s*$/.test(text)) {
+      node.text = '';
+      node.raws.left = text;
+      node.raws.right = '';
+    } else {
+      var match = text.match(/^(\s*)([^]*[^\s])(\s*)$/);
+      node.text = match[2];
+      node.raws.left = match[1];
+      node.raws.right = match[3];
     }
+  };
 
-    /**
-     * @memberof Rule#
-     * @member {string} selector - the rule’s full selector represented
-     *                             as a string
-     *
-     * @example
-     * const root = postcss.parse('a, b { }');
-     * const rule = root.first;
-     * rule.selector //=> 'a, b'
-     */
+  SafeParser.prototype.decl = function decl(tokens) {
+    if (tokens.length > 1) {
+      _Parser.prototype.decl.call(this, tokens);
+    }
+  };
 
-    /**
-     * @memberof Rule#
-     * @member {object} raws - Information to generate byte-to-byte equal
-     *                         node string as it was in the origin input.
-     *
-     * Every parser saves its own properties,
-     * but the default CSS parser uses:
-     *
-     * * `before`: the space symbols before the node. It also stores `*`
-     *   and `_` symbols before the declaration (IE hack).
-     * * `after`: the space symbols after the last child of the node
-     *   to the end of the node.
-     * * `between`: the symbols between the property and value
-     *   for declarations, selector and `{` for rules, or last parameter
-     *   and `{` for at-rules.
-     * * `semicolon`: contains `true` if the last child has
-     *   an (optional) semicolon.
-     * * `ownSemicolon`: contains `true` if there is semicolon after rule.
-     *
-     * PostCSS cleans selectors from comments and extra spaces,
-     * but it stores origin content in raws properties.
-     * As such, if you don’t change a declaration’s value,
-     * PostCSS will use the raw value with comments.
-     *
-     * @example
-     * const root = postcss.parse('a {\n  color:black\n}')
-     * root.first.first.raws //=> { before: '', between: ' ', after: '\n' }
-     */
+  SafeParser.prototype.unclosedBracket = function unclosedBracket() {};
 
-  }]);
+  SafeParser.prototype.unknownWord = function unknownWord(tokens) {
+    this.spaces += tokens.map(function (i) {
+      return i[1];
+    }).join('');
+  };
 
-  return Rule;
-}(_container2.default);
+  SafeParser.prototype.unexpectedClose = function unexpectedClose() {
+    this.current.raws.after += '}';
+  };
 
-exports.default = Rule;
-module.exports = exports['default'];
+  SafeParser.prototype.doubleColon = function doubleColon() {};
 
-}, {"512":512,"528":528}];
+  SafeParser.prototype.unnamedAtrule = function unnamedAtrule(node) {
+    node.name = '';
+  };
+
+  SafeParser.prototype.precheckMissedSemicolon = function precheckMissedSemicolon(tokens) {
+    var colon = this.colon(tokens);
+    if (colon === false) return;
+
+    var split = void 0;
+    for (split = colon - 1; split >= 0; split--) {
+      if (tokens[split][0] === 'word') break;
+    }
+    for (split -= 1; split >= 0; split--) {
+      if (tokens[split][0] !== 'space') {
+        split += 1;
+        break;
+      }
+    }
+    var other = tokens.splice(split, tokens.length - split);
+    this.decl(other);
+  };
+
+  SafeParser.prototype.checkMissedSemicolon = function checkMissedSemicolon() {};
+
+  SafeParser.prototype.endFile = function endFile() {
+    if (this.current.nodes && this.current.nodes.length) {
+      this.current.raws.semicolon = this.semicolon;
+    }
+    this.current.raws.after = (this.current.raws.after || '') + this.spaces;
+
+    while (this.current.parent) {
+      this.current = this.current.parent;
+      this.current.raws.after = '';
+    }
+  };
+
+  return SafeParser;
+}(Parser);
+
+module.exports = SafeParser;
+
+}, {"516":516,"517":517,"518":518}];

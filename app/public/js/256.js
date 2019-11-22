@@ -1,28 +1,23 @@
-window.modules["256"] = [function(require,module,exports){var ListCache = require(238),
-    stackClear = require(260),
-    stackDelete = require(258),
-    stackGet = require(257),
-    stackHas = require(259),
-    stackSet = require(261);
+window.modules["256"] = [function(require,module,exports){var getMapData = require(363);
 
 /**
- * Creates a stack cache object to store key-value pairs.
+ * Sets the map `key` to `value`.
  *
  * @private
- * @constructor
- * @param {Array} [entries] The key-value pairs to cache.
+ * @name set
+ * @memberOf MapCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the map cache instance.
  */
-function Stack(entries) {
-  var data = this.__data__ = new ListCache(entries);
-  this.size = data.size;
+function mapCacheSet(key, value) {
+  var data = getMapData(this, key),
+      size = data.size;
+
+  data.set(key, value);
+  this.size += data.size == size ? 0 : 1;
+  return this;
 }
 
-// Add methods to `Stack`.
-Stack.prototype.clear = stackClear;
-Stack.prototype['delete'] = stackDelete;
-Stack.prototype.get = stackGet;
-Stack.prototype.has = stackHas;
-Stack.prototype.set = stackSet;
-
-module.exports = Stack;
-}, {"238":238,"257":257,"258":258,"259":259,"260":260,"261":261}];
+module.exports = mapCacheSet;
+}, {"363":363}];

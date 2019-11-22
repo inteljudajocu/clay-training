@@ -1,23 +1,10 @@
-window.modules["411"] = [function(require,module,exports){module.exports = function compressFontWeight(node) {
-    var value = node.children.head.data;
+window.modules["411"] = [function(require,module,exports){var resolveKeyword = require(58).keyword;
+var compressKeyframes = require(412);
 
-    if (value.type === 'Identifier') {
-        switch (value.name) {
-            case 'normal':
-                node.children.head.data = {
-                    type: 'Number',
-                    loc: value.loc,
-                    value: '400'
-                };
-                break;
-            case 'bold':
-                node.children.head.data = {
-                    type: 'Number',
-                    loc: value.loc,
-                    value: '700'
-                };
-                break;
-        }
+module.exports = function(node) {
+    // compress @keyframe selectors
+    if (resolveKeyword(node.name).name === 'keyframes') {
+        compressKeyframes(node);
     }
 };
-}, {}];
+}, {"58":58,"412":412}];

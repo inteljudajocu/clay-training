@@ -1,6 +1,11 @@
-window.modules["583"] = [function(require,module,exports){var trim = require(573);
+window.modules["583"] = [function(require,module,exports){var makeString = require(586);
+var defaultToWhiteSpace = require(601);
+var nativeTrim = String.prototype.trim;
 
-module.exports = function dasherize(str) {
-  return trim(str).replace(/([A-Z])/g, '-$1').replace(/[-_\s]+/g, '-').toLowerCase();
+module.exports = function trim(str, characters) {
+  str = makeString(str);
+  if (!characters && nativeTrim) return nativeTrim.call(str);
+  characters = defaultToWhiteSpace(characters);
+  return str.replace(new RegExp('^' + characters + '+|' + characters + '+$', 'g'), '');
 };
-}, {"573":573}];
+}, {"586":586,"601":601}];

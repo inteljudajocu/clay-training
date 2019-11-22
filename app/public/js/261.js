@@ -1,35 +1,15 @@
-window.modules["261"] = [function(require,module,exports){var ListCache = require(238),
-    Map = require(244),
-    MapCache = require(245);
-
-/** Used as the size to enable large array optimizations. */
-var LARGE_ARRAY_SIZE = 200;
-
-/**
- * Sets the stack `key` to `value`.
+window.modules["261"] = [function(require,module,exports){/**
+ * Checks if `value` is in the array cache.
  *
  * @private
- * @name set
- * @memberOf Stack
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the stack cache instance.
+ * @name has
+ * @memberOf SetCache
+ * @param {*} value The value to search for.
+ * @returns {number} Returns `true` if `value` is found, else `false`.
  */
-function stackSet(key, value) {
-  var data = this.__data__;
-  if (data instanceof ListCache) {
-    var pairs = data.__data__;
-    if (!Map || (pairs.length < LARGE_ARRAY_SIZE - 1)) {
-      pairs.push([key, value]);
-      this.size = ++data.size;
-      return this;
-    }
-    data = this.__data__ = new MapCache(pairs);
-  }
-  data.set(key, value);
-  this.size = data.size;
-  return this;
+function setCacheHas(value) {
+  return this.__data__.has(value);
 }
 
-module.exports = stackSet;
-}, {"238":238,"244":244,"245":245}];
+module.exports = setCacheHas;
+}, {}];

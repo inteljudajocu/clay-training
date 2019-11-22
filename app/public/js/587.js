@@ -1,18 +1,6 @@
-window.modules["587"] = [function(require,module,exports){var makeString = require(576);
-var escapeChars = require(588);
+window.modules["587"] = [function(require,module,exports){var makeString = require(586);
 
-var regexString = '[';
-for(var key in escapeChars) {
-  regexString += key;
-}
-regexString += ']';
-
-var regex = new RegExp( regexString, 'g');
-
-module.exports = function escapeHTML(str) {
-
-  return makeString(str).replace(regex, function(m) {
-    return '&' + escapeChars[m] + ';';
-  });
+module.exports = function chars(str) {
+  return makeString(str).split('');
 };
-}, {"576":576,"588":588}];
+}, {"586":586}];

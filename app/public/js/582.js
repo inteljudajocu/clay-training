@@ -1,11 +1,15 @@
-window.modules["582"] = [function(require,module,exports){var makeString = require(576);
+window.modules["582"] = [function(require,module,exports){var trim = require(583);
+var decap = require(584);
 
-module.exports = function(str, substr) {
-  str = makeString(str);
-  substr = makeString(substr);
+module.exports = function camelize(str, decapitalize) {
+  str = trim(str).replace(/[-_\s]+(.)?/g, function(match, c) {
+    return c ? c.toUpperCase() : '';
+  });
 
-  if (str.length === 0 || substr.length === 0) return 0;
-  
-  return str.split(substr).length - 1;
+  if (decapitalize === true) {
+    return decap(str);
+  } else {
+    return str;
+  }
 };
-}, {"576":576}];
+}, {"583":583,"584":584}];

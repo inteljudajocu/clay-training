@@ -1,8 +1,10 @@
-window.modules["604"] = [function(require,module,exports){var chars = require(577);
-
-module.exports = function splice(str, i, howmany, substr) {
-  var arr = chars(str);
-  arr.splice(~~i, ~~howmany, substr);
-  return arr.join('');
+window.modules["604"] = [function(require,module,exports){module.exports = function strRepeat(str, qty){
+  if (qty < 1) return '';
+  var result = '';
+  while (qty > 0) {
+    if (qty & 1) result += str;
+    qty >>= 1, str += str;
+  }
+  return result;
 };
-}, {"577":577}];
+}, {}];

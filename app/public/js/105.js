@@ -1,36 +1,44 @@
-window.modules["105"] = [function(require,module,exports){var TYPE = require(74).TYPE;
+window.modules["105"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
-var ASTERISK = TYPE.Asterisk;
+var PLUSSIGN = TYPE.PlusSign;
 var SOLIDUS = TYPE.Solidus;
+var GREATERTHANSIGN = TYPE.GreaterThanSign;
+var TILDE = TYPE.Tilde;
 
-// '/*' .* '*/'
+// + | > | ~ | /deep/
 module.exports = {
-    name: 'Comment',
+    name: 'Combinator',
     structure: {
-        value: String
+        name: String
     },
     parse: function() {
         var start = this.scanner.tokenStart;
-        var end = this.scanner.tokenEnd;
 
-        if ((end - start + 2) >= 2 &&
-            this.scanner.source.charCodeAt(end - 2) === ASTERISK &&
-            this.scanner.source.charCodeAt(end - 1) === SOLIDUS) {
-            end -= 2;
+        switch (this.scanner.tokenType) {
+            case GREATERTHANSIGN:
+            case PLUSSIGN:
+            case TILDE:
+                this.scanner.next();
+                break;
+
+            case SOLIDUS:
+                this.scanner.next();
+                this.scanner.expectIdentifier('deep');
+                this.scanner.eat(SOLIDUS);
+                break;
+
+            default:
+                this.scanner.error('Combinator is expected');
         }
 
-        this.scanner.next();
-
         return {
-            type: 'Comment',
+            type: 'Combinator',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            value: this.scanner.source.substring(start + 2, end)
+            name: this.scanner.substrToCursor(start)
         };
     },
     generate: function(processChunk, node) {
-        processChunk('/*');
-        processChunk(node.value);
-        processChunk('*/');
+        processChunk(node.name);
     }
 };
-}, {"74":74}];
+}, {"75":75}];

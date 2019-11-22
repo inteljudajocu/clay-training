@@ -1,20 +1,17 @@
-window.modules["393"] = [function(require,module,exports){// remove useless universal selector
-module.exports = function cleanType(node, item, list) {
-    var name = item.data.name;
+window.modules["393"] = [function(require,module,exports){var postcss = require(396);
+var compress = require(394).compress;
+var postcssToCsso = require(397);
+var cssoToPostcss = require(395);
 
-    // check it's a non-namespaced universal selector
-    if (name !== '*') {
-        return;
-    }
+var postcssCsso = postcss.plugin('postcss-csso', function postcssCsso(options) {
+    return function(root, result) {
+        result.root = cssoToPostcss(compress(postcssToCsso(root), options).ast);
+    };
+});
 
-    // remove when universal selector before other selectors
-    var nextType = item.next && item.next.data.type;
-    if (nextType === 'IdSelector' ||
-        nextType === 'ClassSelector' ||
-        nextType === 'AttributeSelector' ||
-        nextType === 'PseudoClassSelector' ||
-        nextType === 'PseudoElementSelector') {
-        list.remove(item);
-    }
+postcssCsso.process = function(css, options) {
+    return postcss([postcssCsso(options)]).process(css);
 };
-}, {}];
+
+module.exports = postcssCsso;
+}, {"394":394,"395":395,"396":396,"397":397}];

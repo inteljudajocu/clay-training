@@ -1,20 +1,19 @@
-window.modules["255"] = [function(require,module,exports){/** Used to stand-in for `undefined` hash values. */
-var HASH_UNDEFINED = '__lodash_hash_undefined__';
+window.modules["255"] = [function(require,module,exports){var getMapData = require(363);
 
 /**
- * Adds `value` to the array cache.
+ * Removes `key` and its value from the map.
  *
  * @private
- * @name add
- * @memberOf SetCache
- * @alias push
- * @param {*} value The value to cache.
- * @returns {Object} Returns the cache instance.
+ * @name delete
+ * @memberOf MapCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
  */
-function setCacheAdd(value) {
-  this.__data__.set(value, HASH_UNDEFINED);
-  return this;
+function mapCacheDelete(key) {
+  var result = getMapData(this, key)['delete'](key);
+  this.size -= result ? 1 : 0;
+  return result;
 }
 
-module.exports = setCacheAdd;
-}, {}];
+module.exports = mapCacheDelete;
+}, {"363":363}];

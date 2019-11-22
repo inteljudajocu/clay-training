@@ -1,59 +1,36 @@
-window.modules["16"] = [function(require,module,exports){var assignValue = require(277),
-    copyObject = require(345),
-    createAssigner = require(347),
-    isArrayLike = require(324),
-    isPrototype = require(321),
-    keys = require(288);
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
+window.modules["16"] = [function(require,module,exports){var baseSet = require(344);
 
 /**
- * Assigns own enumerable string keyed properties of source objects to the
- * destination object. Source objects are applied from left to right.
- * Subsequent sources overwrite property assignments of previous sources.
+ * Sets the value at `path` of `object`. If a portion of `path` doesn't exist,
+ * it's created. Arrays are created for missing index properties while objects
+ * are created for all other missing properties. Use `_.setWith` to customize
+ * `path` creation.
  *
- * **Note:** This method mutates `object` and is loosely based on
- * [`Object.assign`](https://mdn.io/Object/assign).
+ * **Note:** This method mutates `object`.
  *
  * @static
  * @memberOf _
- * @since 0.10.0
+ * @since 3.7.0
  * @category Object
- * @param {Object} object The destination object.
- * @param {...Object} [sources] The source objects.
+ * @param {Object} object The object to modify.
+ * @param {Array|string} path The path of the property to set.
+ * @param {*} value The value to set.
  * @returns {Object} Returns `object`.
- * @see _.assignIn
  * @example
  *
- * function Foo() {
- *   this.a = 1;
- * }
+ * var object = { 'a': [{ 'b': { 'c': 3 } }] };
  *
- * function Bar() {
- *   this.c = 3;
- * }
+ * _.set(object, 'a[0].b.c', 4);
+ * console.log(object.a[0].b.c);
+ * // => 4
  *
- * Foo.prototype.b = 2;
- * Bar.prototype.d = 4;
- *
- * _.assign({ 'a': 0 }, new Foo, new Bar);
- * // => { 'a': 1, 'c': 3 }
+ * _.set(object, ['x', '0', 'y', 'z'], 5);
+ * console.log(object.x[0].y.z);
+ * // => 5
  */
-var assign = createAssigner(function(object, source) {
-  if (isPrototype(source) || isArrayLike(source)) {
-    copyObject(source, keys(source), object);
-    return;
-  }
-  for (var key in source) {
-    if (hasOwnProperty.call(source, key)) {
-      assignValue(object, key, source[key]);
-    }
-  }
-});
+function set(object, path, value) {
+  return object == null ? object : baseSet(object, path, value);
+}
 
-module.exports = assign;
-}, {"277":277,"288":288,"321":321,"324":324,"345":345,"347":347}];
+module.exports = set;
+}, {"344":344}];

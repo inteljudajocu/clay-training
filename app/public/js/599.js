@@ -1,13 +1,11 @@
-window.modules["599"] = [function(require,module,exports){module.exports = function numberFormat(number, dec, dsep, tsep) {
-  if (isNaN(number) || number == null) return '';
+window.modules["599"] = [function(require,module,exports){module.exports = function() {
+  var result = {};
 
-  number = number.toFixed(~~dec);
-  tsep = typeof tsep == 'string' ? tsep : ',';
+  for (var prop in this) {
+    if (!this.hasOwnProperty(prop) || prop.match(/^(?:include|contains|reverse|join|map|wrap)$/)) continue;
+    result[prop] = this[prop];
+  }
 
-  var parts = number.split('.'),
-    fnums = parts[0],
-    decimals = parts[1] ? (dsep || '.') + parts[1] : '';
-
-  return fnums.replace(/(\d)(?=(?:\d{3})+$)/g, '$1' + tsep) + decimals;
+  return result;
 };
 }, {}];

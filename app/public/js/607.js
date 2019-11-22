@@ -1,8 +1,7 @@
-window.modules["607"] = [function(require,module,exports){var isBlank = require(631);
-var trim = require(573);
+window.modules["607"] = [function(require,module,exports){var makeString = require(586);
 
-module.exports = function words(str, delimiter) {
-  if (isBlank(str)) return [];
-  return trim(str, delimiter).split(delimiter || /\s+/);
+module.exports = function include(str, needle) {
+  if (needle === '') return true;
+  return makeString(str).indexOf(needle) !== -1;
 };
-}, {"573":573,"631":631}];
+}, {"586":586}];

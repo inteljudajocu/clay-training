@@ -1,22 +1,17 @@
-window.modules["290"] = [function(require,module,exports){var isSymbol = require(339);
-
-/** Used as references for various `Number` constants. */
-var INFINITY = 1 / 0;
+window.modules["290"] = [function(require,module,exports){var baseFor = require(293),
+    keys = require(295);
 
 /**
- * Converts `value` to a string key if it's not a string or symbol.
+ * The base implementation of `_.forOwn` without support for iteratee shorthands.
  *
  * @private
- * @param {*} value The value to inspect.
- * @returns {string|symbol} Returns the key.
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Object} Returns `object`.
  */
-function toKey(value) {
-  if (typeof value == 'string' || isSymbol(value)) {
-    return value;
-  }
-  var result = (value + '');
-  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+function baseForOwn(object, iteratee) {
+  return object && baseFor(object, iteratee, keys);
 }
 
-module.exports = toKey;
-}, {"339":339}];
+module.exports = baseForOwn;
+}, {"293":293,"295":295}];

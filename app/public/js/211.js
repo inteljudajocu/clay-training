@@ -1,134 +1,258 @@
-window.modules["211"] = [function(require,module,exports){var _ = require(212);
-var _s = require(213);
+window.modules["211"] = [function(require,module,exports){var _ = require(213);
+var _s = require(214);
+var he = require(207);
 
-// Split a long word up to fit within the word wrap limit.  Use either a
-// character to split looking back from the word wrap limit, or
-// truncate to the word wrap limit.
-function splitLongWord(word, options) {
-  var wrapCharacters = options.longWordSplit.wrapCharacters || [];
-  var forceWrapOnLimit = options.longWordSplit.forceWrapOnLimit || false;
-  var max = options.wordwrap;
+var helper = require(212);
 
-  var fuseWord = [];
-  var idx = 0;
-  while (word.length > max) {
-    var firstLine = word.substr(0, max);
-    var remainingChars = word.substr(max);
+function formatText(elem, options) {
+  var text = elem.data || "";
+  text = he.decode(text, options.decodeOptions);
 
-    var splitIndex = firstLine.lastIndexOf(wrapCharacters[idx]);
-
-    if (splitIndex > -1) {
-      // We've found a character to split on, store before the split then check if we
-      // need to split again
-      word = firstLine.substr(splitIndex + 1) + remainingChars;
-      fuseWord.push(firstLine.substr(0, splitIndex + 1));
-    } else {
-      idx++;
-      if (idx >= wrapCharacters.length) {
-        // Cannot split on character, so either split at 'max' or preserve length
-        if (forceWrapOnLimit) {
-          fuseWord.push(firstLine);
-          word = remainingChars;
-          if (word.length > max) {
-            continue;
-          }
-        } else {
-          word = firstLine + remainingChars;
-          if (!options.preserveNewlines) {
-            word += '\n';
-          }
-        }
-        break;
-      } else {
-        word = firstLine + remainingChars;
-      }
-    }
+  if (options.isInPre) {
+    return text;
+  } else {
+    return helper.wordwrap(elem.trimLeadingSpace ? _s.lstrip(text) : text, options);
   }
-  fuseWord.push(word);
-
-  return fuseWord.join('\n');
 }
 
-exports.wordwrap = function wordwrap(text, options) {
-  var max = options.wordwrap;
-  var preserveNewlines = options.preserveNewlines;
-  var length = options.lineCharCount;
+function formatImage(elem, options) {
+  if (options.ignoreImage) {
+    return '';
+  }
 
-  // Preserve leading space
-  var result = _s.startsWith(text, ' ') ? ' ' : '';
-  length += result.length;
-  var buffer = [];
-  // Split the text into words, decide to preserve new lines or not.
-  var words = preserveNewlines
-    ? text.replace(/\n/g, '\n ').split(/\ +/)
-    : _s.words(text);
-
-  // Determine where to end line word by word.
-  _.each(words, function(word) {
-    // Add buffer to result if we can't fit any more words in the buffer.
-    if ((max || max === 0) && length > 0 && ((length + word.length > max) || (length + word.indexOf('\n') > max))) {
-      // Concat buffer and add it to the result
-      result += buffer.join(' ') + '\n';
-      // Reset buffer and length
-      buffer.length = length = 0;
+  var result = '', attribs = elem.attribs || {};
+  if (attribs.alt) {
+    result += he.decode(attribs.alt, options.decodeOptions);
+    if (attribs.src) {
+      result += ' ';
     }
+  }
+  if (attribs.src) {
+    result += '[' + attribs.src + ']';
+  }
+  return (result);
+}
 
-    // Check if the current word is long enough to be wrapped
-    if ((max || max === 0) && (options.longWordSplit) && (word.length > max)) {
-      word = splitLongWord(word, options);
+function formatLineBreak(elem, fn, options) {
+  return '\n' + fn(elem.children, options);
+}
+
+function formatParagraph(elem, fn, options) {
+  var paragraph = fn(elem.children, options)
+  if (options.singleNewLineParagraphs) {
+    return paragraph + '\n'
+  } else {
+    return paragraph + '\n\n'
+  }
+}
+
+function formatHeading(elem, fn, options) {
+  var heading = fn(elem.children, options);
+  if (options.uppercaseHeadings) {
+    heading = heading.toUpperCase();
+  }
+  return heading + '\n';
+}
+
+// If we have both href and anchor text, format it in a useful manner:
+// - "anchor text [href]"
+// Otherwise if we have only anchor text or an href, we return the part we have:
+// - "anchor text" or
+// - "href"
+function formatAnchor(elem, fn, options) {
+  var href = '';
+  // Always get the anchor text
+  var storedCharCount = options.lineCharCount;
+  var text = fn(elem.children || [], options);
+  if (!text) {
+    text = '';
+  }
+
+  var result = elem.trimLeadingSpace ? _s.lstrip(text) : text;
+
+  if (!options.ignoreHref) {
+    // Get the href, if present
+    if (elem.attribs && elem.attribs.href) {
+      href = elem.attribs.href.replace(/^mailto\:/, '');
     }
-
-    buffer.push(word);
-
-    // If the word contains a newline then restart the count and add the buffer to the result
-    if (word.indexOf('\n') !== -1) {
-      result += buffer.join(' ');
-
-      // Reset the buffer, let the length include any characters after the last newline
-      buffer.length = 0;
-      length = word.length - (word.lastIndexOf('\n') + 1);
-      // If there are characters after the newline, add a space and increase the length by 1
-      if (length) {
-        result += ' ';
-        length++;
+    if (href) {
+      if ((!options.noAnchorUrl) || (options.noAnchorUrl && href.indexOf('#') === -1)) {
+        if (options.linkHrefBaseUrl && href.indexOf('/') === 0) {
+          href = options.linkHrefBaseUrl + href;
+        }
+        if (!options.hideLinkHrefIfSameAsText || href !== _s.replaceAll(result, '\n', '')) {
+          if (!options.noLinkBrackets) {
+            result += ' [' + href + ']';
+          } else {
+            result += ' ' + href;
+          }
+        }
       }
-    } else {
-      // Add word length + one whitespace
-      length += word.length + 1;
     }
+  }
+
+  options.lineCharCount = storedCharCount;
+
+  return formatText({ data: result || href, trimLeadingSpace: elem.trimLeadingSpace }, options);
+}
+
+function formatHorizontalLine(elem, fn, options) {
+  return '\n' + _s.repeat('-', options.wordwrap) + '\n\n';
+}
+
+function formatListItem(prefix, elem, fn, options) {
+  options = _.clone(options);
+  // Reduce the wordwrap for sub elements.
+  if (options.wordwrap) {
+    options.wordwrap -= prefix.length;
+  }
+  // Process sub elements.
+  var text = fn(elem.children, options);
+  // Replace all line breaks with line break + prefix spacing.
+  text = text.replace(/\n/g, '\n' + _s.repeat(' ', prefix.length));
+  // Add first prefix and line break at the end.
+  return prefix + text + '\n';
+}
+
+var whiteSpaceRegex = /^\s*$/;
+
+function formatUnorderedList(elem, fn, options) {
+  var result = '';
+  var nonWhiteSpaceChildren = (elem.children || []).filter(function(child) {
+    return child.type !== 'text' || !whiteSpaceRegex.test(child.data);
   });
-  // Add the rest to the result.
-  result += buffer.join(' ');
+  _.each(nonWhiteSpaceChildren, function(elem) {
+    result += formatListItem(' * ', elem, fn, options);
+  });
+  return result + '\n';
+}
 
-  // Preserve trailing space
-  if (!_s.endsWith(text, ' ')) {
-    result = _s.rtrim(result);
-  } else if (!_s.endsWith(result, ' ')) {
-    result = result + ' ';
-  }
-
-  return result;
-};
-
-exports.arrayZip = function arrayZip(array) {
-  return _.zip.apply(_, array);
-};
-
-exports.splitCssSearchTag = function splitCssSearchTag(tagString) {
-  function getParams(re, string) {
-    var captures = [], found;
-    while ((found = re.exec(string)) !== null) {
-      captures.push(found[1]);
+function formatOrderedList(elem, fn, options) {
+  var result = '';
+  var nonWhiteSpaceChildren = (elem.children || []).filter(function(child) {
+    return child.type !== 'text' || !whiteSpaceRegex.test(child.data);
+  });
+  // Return different functions for different OL types
+  var typeFunction = (function() {
+    // Determine type
+    var olType = elem.attribs.type || '1';
+    // TODO Imeplement the other valid types
+    //   Fallback to type '1' function for other valid types
+    switch(olType) {
+      case 'a': return function(start, i) { return String.fromCharCode(i + start + 97)};
+      case 'A': return function(start, i) { return String.fromCharCode(i + start + 65)};
+      case '1':
+      default: return function(start, i) { return i + 1 + start};
     }
-    return captures;
+  }())
+  // Make sure there are list items present
+  if (nonWhiteSpaceChildren.length) {
+    // Calculate initial start from ol attribute
+    var start = Number(elem.attribs.start || '1') - 1;
+    // Calculate the maximum length to i.
+    var maxLength = (nonWhiteSpaceChildren.length + start).toString().length;
+    _.each(nonWhiteSpaceChildren, function(elem, i) {
+      // Use different function depending on type
+      var index = typeFunction(start, i);
+      // Calculate the needed spacing for nice indentation.
+      var spacing = maxLength - index.toString().length;
+      var prefix = ' ' + index + '. ' + _s.repeat(' ', spacing);
+      result += formatListItem(prefix, elem, fn, options);
+    });
   }
+  return result + '\n';
+}
 
-  var splitTag = {};
-  var elementRe = /(^\w*)/g;
-  splitTag.element = elementRe.exec(tagString)[1];
-  splitTag.classes = getParams( /\.([\d\w-]*)/g, tagString);
-  splitTag.ids = getParams( /#([\d\w-]*)/g, tagString);
+function tableToString(table) {
+  // Determine space width per column
+  // Convert all rows to lengths
+  var widths = _.map(table, function(row) {
+    return _.map(row, function(col) {
+      return col.length;
+    });
+  });
+  // Invert rows with colums
+  widths = helper.arrayZip(widths);
+  // Determine the max values for each column
+  widths = _.map(widths, function(col) {
+    return _.max(col);
+  });
 
-  return splitTag;
-};
-}, {"212":212,"213":213}];
+  // Build the table
+  var text = '';
+  _.each(table, function(row) {
+    var i = 0;
+    _.each(row, function(col) {
+      text += _s.rpad(_s.strip(col), widths[i++], ' ') + '   ';
+    });
+    text += '\n';
+  });
+  return text + '\n';
+}
+
+function formatTable(elem, fn, options) {
+  var table = [];
+  _.each(elem.children, tryParseRows);
+  return tableToString(table);
+
+  function tryParseRows(elem) {
+    if (elem.type !== 'tag') {
+      return;
+    }
+    switch (elem.name.toLowerCase()) {
+      case "thead":
+      case "tbody":
+      case "tfoot":
+      case "center":
+        _.each(elem.children, tryParseRows);
+        return;
+
+      case 'tr':
+        var rows = [];
+        _.each(elem.children, function(elem) {
+          var tokens, times;
+          if (elem.type === 'tag') {
+            switch (elem.name.toLowerCase()) {
+              case 'th':
+                tokens = formatHeading(elem, fn, options).split('\n');
+                rows.push(_.compact(tokens));
+                break;
+
+              case 'td':
+                tokens = fn(elem.children, options).split('\n');
+                rows.push(_.compact(tokens));
+                // Fill colspans with empty values
+                if (elem.attribs && elem.attribs.colspan) {
+                  times = elem.attribs.colspan - 1 || 0;
+                  _.times(times, function() {
+                    rows.push(['']);
+                  });
+                }
+                break;
+            }
+          }
+        });
+        rows = helper.arrayZip(rows);
+        _.each(rows, function(row) {
+          row = _.map(row, function(col) {
+            return col || '';
+          });
+          table.push(row);
+        });
+        break;
+    }
+  }
+}
+
+exports.text = formatText;
+exports.image = formatImage;
+exports.lineBreak = formatLineBreak;
+exports.paragraph = formatParagraph;
+exports.anchor = formatAnchor;
+exports.heading = formatHeading;
+exports.table = formatTable;
+exports.orderedList = formatOrderedList;
+exports.unorderedList = formatUnorderedList;
+exports.listItem = formatListItem;
+exports.horizontalLine = formatHorizontalLine;
+}, {"207":207,"212":212,"213":213,"214":214}];

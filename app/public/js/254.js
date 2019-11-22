@@ -1,15 +1,17 @@
-window.modules["254"] = [function(require,module,exports){/**
- * Checks if `value` is in the array cache.
+window.modules["254"] = [function(require,module,exports){var getMapData = require(363);
+
+/**
+ * Checks if a map value for `key` exists.
  *
  * @private
  * @name has
- * @memberOf SetCache
- * @param {*} value The value to search for.
- * @returns {number} Returns `true` if `value` is found, else `false`.
+ * @memberOf MapCache
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function setCacheHas(value) {
-  return this.__data__.has(value);
+function mapCacheHas(key) {
+  return getMapData(this, key).has(key);
 }
 
-module.exports = setCacheHas;
-}, {}];
+module.exports = mapCacheHas;
+}, {"363":363}];

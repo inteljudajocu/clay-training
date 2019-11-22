@@ -1,28 +1,17 @@
-window.modules["253"] = [function(require,module,exports){var MapCache = require(245),
-    setCacheAdd = require(255),
-    setCacheHas = require(254);
+window.modules["253"] = [function(require,module,exports){var getMapData = require(363);
 
 /**
- *
- * Creates an array cache object to store unique values.
+ * Gets the map value for `key`.
  *
  * @private
- * @constructor
- * @param {Array} [values] The values to cache.
+ * @name get
+ * @memberOf MapCache
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
  */
-function SetCache(values) {
-  var index = -1,
-      length = values == null ? 0 : values.length;
-
-  this.__data__ = new MapCache;
-  while (++index < length) {
-    this.add(values[index]);
-  }
+function mapCacheGet(key) {
+  return getMapData(this, key).get(key);
 }
 
-// Add methods to `SetCache`.
-SetCache.prototype.add = SetCache.prototype.push = setCacheAdd;
-SetCache.prototype.has = setCacheHas;
-
-module.exports = SetCache;
-}, {"245":245,"254":254,"255":255}];
+module.exports = mapCacheGet;
+}, {"363":363}];

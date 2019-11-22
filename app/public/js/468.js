@@ -1,40 +1,38 @@
 window.modules["468"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
+var ampersand = exports.ampersand = '&'.charCodeAt(0);
+var asterisk = exports.asterisk = '*'.charCodeAt(0);
+var at = exports.at = '@'.charCodeAt(0);
+var comma = exports.comma = ','.charCodeAt(0);
+var colon = exports.colon = ':'.charCodeAt(0);
+var semicolon = exports.semicolon = ';'.charCodeAt(0);
+var openParenthesis = exports.openParenthesis = '('.charCodeAt(0);
+var closeParenthesis = exports.closeParenthesis = ')'.charCodeAt(0);
+var openSquare = exports.openSquare = '['.charCodeAt(0);
+var closeSquare = exports.closeSquare = ']'.charCodeAt(0);
+var dollar = exports.dollar = '$'.charCodeAt(0);
+var tilde = exports.tilde = '~'.charCodeAt(0);
+var caret = exports.caret = '^'.charCodeAt(0);
+var plus = exports.plus = '+'.charCodeAt(0);
+var equals = exports.equals = '='.charCodeAt(0);
+var pipe = exports.pipe = '|'.charCodeAt(0);
+var greaterThan = exports.greaterThan = '>'.charCodeAt(0);
+var space = exports.space = ' '.charCodeAt(0);
+var singleQuote = exports.singleQuote = '\''.charCodeAt(0);
+var doubleQuote = exports.doubleQuote = '"'.charCodeAt(0);
+var slash = exports.slash = '/'.charCodeAt(0);
 
-var _container = require(477);
+var backslash = exports.backslash = 92;
+var cr = exports.cr = 13;
+var feed = exports.feed = 12;
+var newline = exports.newline = 10;
+var tab = exports.tab = 9;
 
-var _container2 = _interopRequireDefault(_container);
+// Expose aliases primarily for readability.
+var str = exports.str = singleQuote;
 
-var _types = require(460);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Pseudo = function (_Container) {
-    _inherits(Pseudo, _Container);
-
-    function Pseudo(opts) {
-        _classCallCheck(this, Pseudo);
-
-        var _this = _possibleConstructorReturn(this, _Container.call(this, opts));
-
-        _this.type = _types.PSEUDO;
-        return _this;
-    }
-
-    Pseudo.prototype.toString = function toString() {
-        var params = this.length ? '(' + this.map(String).join(',') + ')' : '';
-        return [this.spaces.before, String(this.value), params, this.spaces.after].join('');
-    };
-
-    return Pseudo;
-}(_container2.default);
-
-exports.default = Pseudo;
-module.exports = exports['default'];}, {"460":460,"477":477}];
+// No good single character representation!
+var comment = exports.comment = -1;
+var word = exports.word = -2;
+var combinator = exports.combinator = -3;}, {}];

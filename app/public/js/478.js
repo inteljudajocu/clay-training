@@ -1,54 +1,60 @@
-window.modules["478"] = [function(require,module,exports){"use strict";
+window.modules["478"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.isUniversal = exports.isTag = exports.isString = exports.isSelector = exports.isRoot = exports.isPseudo = exports.isNesting = exports.isIdentifier = exports.isComment = exports.isCombinator = exports.isClassName = exports.isAttribute = undefined;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _IS_TYPE;
+var _container = require(487);
 
-exports.isNode = isNode;
-exports.isPseudoElement = isPseudoElement;
-exports.isPseudoClass = isPseudoClass;
-exports.isContainer = isContainer;
-exports.isNamespace = isNamespace;
+var _container2 = _interopRequireDefault(_container);
 
-var _types = require(460);
+var _types = require(470);
 
-var IS_TYPE = (_IS_TYPE = {}, _IS_TYPE[_types.ATTRIBUTE] = true, _IS_TYPE[_types.CLASS] = true, _IS_TYPE[_types.COMBINATOR] = true, _IS_TYPE[_types.COMMENT] = true, _IS_TYPE[_types.ID] = true, _IS_TYPE[_types.NESTING] = true, _IS_TYPE[_types.PSEUDO] = true, _IS_TYPE[_types.ROOT] = true, _IS_TYPE[_types.SELECTOR] = true, _IS_TYPE[_types.STRING] = true, _IS_TYPE[_types.TAG] = true, _IS_TYPE[_types.UNIVERSAL] = true, _IS_TYPE);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function isNode(node) {
-    return (typeof node === "undefined" ? "undefined" : _typeof(node)) === "object" && IS_TYPE[node.type];
-}
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function isNodeType(type, node) {
-    return isNode(node) && node.type === type;
-}
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-var isAttribute = exports.isAttribute = isNodeType.bind(null, _types.ATTRIBUTE);
-var isClassName = exports.isClassName = isNodeType.bind(null, _types.CLASS);
-var isCombinator = exports.isCombinator = isNodeType.bind(null, _types.COMBINATOR);
-var isComment = exports.isComment = isNodeType.bind(null, _types.COMMENT);
-var isIdentifier = exports.isIdentifier = isNodeType.bind(null, _types.ID);
-var isNesting = exports.isNesting = isNodeType.bind(null, _types.NESTING);
-var isPseudo = exports.isPseudo = isNodeType.bind(null, _types.PSEUDO);
-var isRoot = exports.isRoot = isNodeType.bind(null, _types.ROOT);
-var isSelector = exports.isSelector = isNodeType.bind(null, _types.SELECTOR);
-var isString = exports.isString = isNodeType.bind(null, _types.STRING);
-var isTag = exports.isTag = isNodeType.bind(null, _types.TAG);
-var isUniversal = exports.isUniversal = isNodeType.bind(null, _types.UNIVERSAL);
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function isPseudoElement(node) {
-    return isPseudo(node) && node.value && (node.value.startsWith("::") || node.value === ":before" || node.value === ":after");
-}
-function isPseudoClass(node) {
-    return isPseudo(node) && !isPseudoElement(node);
-}
+var Root = function (_Container) {
+    _inherits(Root, _Container);
 
-function isContainer(node) {
-    return !!(isNode(node) && node.walk);
-}
+    function Root(opts) {
+        _classCallCheck(this, Root);
 
-function isNamespace(node) {
-    return isClassName(node) || isAttribute(node) || isTag(node);
-}}, {"460":460}];
+        var _this = _possibleConstructorReturn(this, _Container.call(this, opts));
+
+        _this.type = _types.ROOT;
+        return _this;
+    }
+
+    Root.prototype.toString = function toString() {
+        var str = this.reduce(function (memo, selector) {
+            var sel = String(selector);
+            return sel ? memo + sel + ',' : '';
+        }, '').slice(0, -1);
+        return this.trailingComma ? str + ',' : str;
+    };
+
+    Root.prototype.error = function error(message, options) {
+        if (this._error) {
+            return this._error(message, options);
+        } else {
+            return new Error(message);
+        }
+    };
+
+    _createClass(Root, [{
+        key: 'errorGenerator',
+        set: function set(handler) {
+            this._error = handler;
+        }
+    }]);
+
+    return Root;
+}(_container2.default);
+
+exports.default = Root;
+module.exports = exports['default'];}, {"470":470,"487":487}];

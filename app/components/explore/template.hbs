@@ -2,46 +2,18 @@
     <h2>{{ title }}</h2>
     <div class="explore-recipe">
         <ul class="explore-recipe-mul" >
+            {{#each recipes}}
             <li>
                 <div class="explore-recipe-single">
                     <img src="{{ imageUrl }}" class="explore-image" data-src="{{ imageUrl }}">
-                    <h5>{{ recipeName }}</h5>
+                    <h5>{{ title }}</h5>
                     <div class="explore-score">
                         <h6>{{ score }} </h6>
                         <h6> {{ reviews }}</h6>
                     </div>
                 </div>
             </li>
-            <li>
-                <div class="explore-recipe-single">
-                    <img src="{{ imageUrl }}" class="explore-image" data-src="{{ imageUrl }}">
-                    <h5>{{ recipeName }}</h5>
-                    <div class="explore-score">
-                        <h6>{{ score }} </h6>
-                        <h6> {{ reviews }}</h6>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <div class="explore-recipe-single">
-                    <img src="{{ imageUrl }}" class="explore-image" data-src="{{ imageUrl }}">
-                    <h5>{{ recipeName }}</h5>
-                    <div class="explore-score">
-                        <h6>{{ score }} </h6>
-                        <h6> {{ reviews }}</h6>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <div class="explore-recipe-single">
-                    <img src="{{ imageUrl }}" class="explore-image" data-src="{{ imageUrl }}">
-                    <h5>{{ recipeName }}</h5>
-                    <div class="explore-score">
-                        <h6>{{ score }} </h6>
-                        <h6> {{ reviews }}</h6>
-                    </div>
-                </div>
-            </li>
+            {{/each}}
         </ul>
     </div>
 </div>

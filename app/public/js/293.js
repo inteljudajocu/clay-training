@@ -1,29 +1,17 @@
-window.modules["293"] = [function(require,module,exports){var Symbol = require(262),
-    getRawTag = require(295),
-    objectToString = require(294);
-
-/** `Object#toString` result references. */
-var nullTag = '[object Null]',
-    undefinedTag = '[object Undefined]';
-
-/** Built-in value references. */
-var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+window.modules["293"] = [function(require,module,exports){var createBaseFor = require(294);
 
 /**
- * The base implementation of `getTag` without fallbacks for buggy environments.
+ * The base implementation of `baseForOwn` which iterates over `object`
+ * properties returned by `keysFunc` and invokes `iteratee` for each property.
+ * Iteratee functions may exit iteration early by explicitly returning `false`.
  *
  * @private
- * @param {*} value The value to query.
- * @returns {string} Returns the `toStringTag`.
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @param {Function} keysFunc The function to get the keys of `object`.
+ * @returns {Object} Returns `object`.
  */
-function baseGetTag(value) {
-  if (value == null) {
-    return value === undefined ? undefinedTag : nullTag;
-  }
-  return (symToStringTag && symToStringTag in Object(value))
-    ? getRawTag(value)
-    : objectToString(value);
-}
+var baseFor = createBaseFor();
 
-module.exports = baseGetTag;
-}, {"262":262,"294":294,"295":295}];
+module.exports = baseFor;
+}, {"294":294}];

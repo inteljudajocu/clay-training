@@ -1,6 +1,11 @@
-window.modules["592"] = [function(require,module,exports){var makeString = require(576);
+window.modules["592"] = [function(require,module,exports){var makeString = require(586);
 
-module.exports = function escapeRegExp(str) {
-  return makeString(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+module.exports = function(str, substr) {
+  str = makeString(str);
+  substr = makeString(substr);
+
+  if (str.length === 0 || substr.length === 0) return 0;
+  
+  return str.split(substr).length - 1;
 };
-}, {"576":576}];
+}, {"586":586}];

@@ -1,22 +1,21 @@
-window.modules["280"] = [function(require,module,exports){var eq = require(278);
-
-/**
- * Gets the index at which the `key` is found in `array` of key-value pairs.
+window.modules["280"] = [function(require,module,exports){/**
+ * The base implementation of `_.times` without support for iteratee shorthands
+ * or max array length checks.
  *
  * @private
- * @param {Array} array The array to inspect.
- * @param {*} key The key to search for.
- * @returns {number} Returns the index of the matched value, else `-1`.
+ * @param {number} n The number of times to invoke `iteratee`.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the array of results.
  */
-function assocIndexOf(array, key) {
-  var length = array.length;
-  while (length--) {
-    if (eq(array[length][0], key)) {
-      return length;
-    }
+function baseTimes(n, iteratee) {
+  var index = -1,
+      result = Array(n);
+
+  while (++index < n) {
+    result[index] = iteratee(index);
   }
-  return -1;
+  return result;
 }
 
-module.exports = assocIndexOf;
-}, {"278":278}];
+module.exports = baseTimes;
+}, {}];

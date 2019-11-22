@@ -1,44 +1,25 @@
-window.modules["104"] = [function(require,module,exports){var TYPE = require(74).TYPE;
+window.modules["104"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+var IDENTIFIER = TYPE.Identifier;
+var FULLSTOP = TYPE.FullStop;
 
-var PLUSSIGN = TYPE.PlusSign;
-var SOLIDUS = TYPE.Solidus;
-var GREATERTHANSIGN = TYPE.GreaterThanSign;
-var TILDE = TYPE.Tilde;
-
-// + | > | ~ | /deep/
+// '.' ident
 module.exports = {
-    name: 'Combinator',
+    name: 'ClassSelector',
     structure: {
         name: String
     },
     parse: function() {
-        var start = this.scanner.tokenStart;
-
-        switch (this.scanner.tokenType) {
-            case GREATERTHANSIGN:
-            case PLUSSIGN:
-            case TILDE:
-                this.scanner.next();
-                break;
-
-            case SOLIDUS:
-                this.scanner.next();
-                this.scanner.expectIdentifier('deep');
-                this.scanner.eat(SOLIDUS);
-                break;
-
-            default:
-                this.scanner.error('Combinator is expected');
-        }
+        this.scanner.eat(FULLSTOP);
 
         return {
-            type: 'Combinator',
-            loc: this.getLocation(start, this.scanner.tokenStart),
-            name: this.scanner.substrToCursor(start)
+            type: 'ClassSelector',
+            loc: this.getLocation(this.scanner.tokenStart - 1, this.scanner.tokenEnd),
+            name: this.scanner.consume(IDENTIFIER)
         };
     },
     generate: function(processChunk, node) {
+        processChunk('.');
         processChunk(node.name);
     }
 };
-}, {"74":74}];
+}, {"75":75}];

@@ -1,29 +1,16 @@
 window.modules["29"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(50);
+const isUriStringCheck = require(51);
 
 /**
- * Given stringified JSON, swap out the site's url-patterned prefix for
- * the site's slug
- *
- * @param  {String}  json
- * @param  {Object}  site
- * @param  {Boolean} [ref=false]
- * @return {String}
+ * First test if argument is a String. If true, test if '/_users/' is in the string.
+ * Otherwise, throw an error.
+ * @param  {string}  uri
+ * @return {Boolean}
  */
-module.exports = function (json, site, ref = false) {
-  var { slug, host, path, prefix } = site,
-    prefixString, replaceString, searchRegex;
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
 
-  isUriStringCheck.strCheck(json);
-
-  if (!prefix) {
-    prefix = path && path.length > 1 ? `${host}${path}` : host;
-  }
-
-  prefixString = `${ref ? '"_ref":' : '' }"${prefix}/_components/`;
-  replaceString = `${ref ? '"_ref":' : '' }"${slug}/_components/`;
-  searchRegex = new RegExp(prefixString, 'g');
-  return json.replace(searchRegex, replaceString);
+  return uri.toLowerCase().indexOf('/_users/') > -1;
 };
-}, {"50":50}];
+}, {"51":51}];

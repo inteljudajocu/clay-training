@@ -1,7 +1,7 @@
-window.modules["361"] = [function(require,module,exports){var getNative = require(231);
+window.modules["361"] = [function(require,module,exports){(function (global){
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
 
-/* Built-in method references that are verified to be native. */
-var nativeCreate = getNative(Object, 'create');
+module.exports = freeGlobal;
 
-module.exports = nativeCreate;
-}, {"231":231}];
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})}, {}];

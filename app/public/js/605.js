@@ -1,6 +1,8 @@
-window.modules["605"] = [function(require,module,exports){var splice = require(604);
+window.modules["605"] = [function(require,module,exports){var capitalize = require(585);
+var underscored = require(606);
+var trim = require(583);
 
-module.exports = function insert(str, i, substr) {
-  return splice(str, i, 0, substr);
+module.exports = function humanize(str) {
+  return capitalize(trim(underscored(str).replace(/_id$/, '').replace(/_/g, ' ')));
 };
-}, {"604":604}];
+}, {"583":583,"585":585,"606":606}];

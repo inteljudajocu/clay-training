@@ -1,19 +1,8 @@
-window.modules["258"] = [function(require,module,exports){/**
- * Removes `key` and its value from the stack.
- *
- * @private
- * @name delete
- * @memberOf Stack
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
- */
-function stackDelete(key) {
-  var data = this.__data__,
-      result = data['delete'](key);
+window.modules["258"] = [function(require,module,exports){var getNative = require(238),
+    root = require(237);
 
-  this.size = data.size;
-  return result;
-}
+/* Built-in method references that are verified to be native. */
+var Promise = getNative(root, 'Promise');
 
-module.exports = stackDelete;
-}, {}];
+module.exports = Promise;
+}, {"237":237,"238":238}];

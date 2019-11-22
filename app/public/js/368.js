@@ -1,37 +1,24 @@
-window.modules["368"] = [function(require,module,exports){var toFinite = require(375);
-
-/**
- * Converts `value` to an integer.
- *
- * **Note:** This method is loosely based on
- * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+window.modules["368"] = [function(require,module,exports){/**
+ * This method returns a new empty array.
  *
  * @static
  * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to convert.
- * @returns {number} Returns the converted integer.
+ * @since 4.13.0
+ * @category Util
+ * @returns {Array} Returns the new empty array.
  * @example
  *
- * _.toInteger(3.2);
- * // => 3
+ * var arrays = _.times(2, _.stubArray);
  *
- * _.toInteger(Number.MIN_VALUE);
- * // => 0
+ * console.log(arrays);
+ * // => [[], []]
  *
- * _.toInteger(Infinity);
- * // => 1.7976931348623157e+308
- *
- * _.toInteger('3.2');
- * // => 3
+ * console.log(arrays[0] === arrays[1]);
+ * // => false
  */
-function toInteger(value) {
-  var result = toFinite(value),
-      remainder = result % 1;
-
-  return result === result ? (remainder ? result - remainder : result) : 0;
+function stubArray() {
+  return [];
 }
 
-module.exports = toInteger;
-}, {"375":375}];
+module.exports = stubArray;
+}, {}];

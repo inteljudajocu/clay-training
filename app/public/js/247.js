@@ -1,23 +1,36 @@
-window.modules["247"] = [function(require,module,exports){var getMapData = require(354);
+window.modules["247"] = [function(require,module,exports){var assocIndexOf = require(287);
+
+/** Used for built-in method references. */
+var arrayProto = Array.prototype;
+
+/** Built-in value references. */
+var splice = arrayProto.splice;
 
 /**
- * Sets the map `key` to `value`.
+ * Removes `key` and its value from the list cache.
  *
  * @private
- * @name set
- * @memberOf MapCache
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the map cache instance.
+ * @name delete
+ * @memberOf ListCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
  */
-function mapCacheSet(key, value) {
-  var data = getMapData(this, key),
-      size = data.size;
+function listCacheDelete(key) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
 
-  data.set(key, value);
-  this.size += data.size == size ? 0 : 1;
-  return this;
+  if (index < 0) {
+    return false;
+  }
+  var lastIndex = data.length - 1;
+  if (index == lastIndex) {
+    data.pop();
+  } else {
+    splice.call(data, index, 1);
+  }
+  --this.size;
+  return true;
 }
 
-module.exports = mapCacheSet;
-}, {"354":354}];
+module.exports = listCacheDelete;
+}, {"287":287}];

@@ -1,55 +1,20 @@
-window.modules["404"] = [function(require,module,exports){var packNumber = require(405).pack;
-var LENGTH_UNIT = {
-    // absolute length units
-    'px': true,
-    'mm': true,
-    'cm': true,
-    'in': true,
-    'pt': true,
-    'pc': true,
+window.modules["404"] = [function(require,module,exports){module.exports = function cleanWhitespace(node, item, list) {
+    // remove when first or last item in sequence
+    if (item.next === null || item.prev === null) {
+        list.remove(item);
+        return;
+    }
 
-    // relative length units
-    'em': true,
-    'ex': true,
-    'ch': true,
-    'rem': true,
+    // remove when previous node is whitespace
+    if (item.prev.data.type === 'WhiteSpace') {
+        list.remove(item);
+        return;
+    }
 
-    // viewport-percentage lengths
-    'vh': true,
-    'vw': true,
-    'vmin': true,
-    'vmax': true,
-    'vm': true
-};
-
-module.exports = function compressDimension(node, item) {
-    var value = packNumber(node.value, item);
-
-    node.value = value;
-
-    if (value === '0' && this.declaration !== null && this.atrulePrelude === null) {
-        var unit = node.unit.toLowerCase();
-
-        // only length values can be compressed
-        if (!LENGTH_UNIT.hasOwnProperty(unit)) {
-            return;
-        }
-
-        // issue #200: don't remove units in flex property as it could change value meaning
-        if (this.declaration.property === 'flex') {
-            return;
-        }
-
-        // issue #222: don't remove units inside calc
-        if (this['function'] && this['function'].name === 'calc') {
-            return;
-        }
-
-        item.data = {
-            type: 'Number',
-            loc: node.loc,
-            value: value
-        };
+    if ((this.stylesheet !== null && this.stylesheet.children === list) ||
+        (this.block !== null && this.block.children === list)) {
+        list.remove(item);
+        return;
     }
 };
-}, {"405":405}];
+}, {}];

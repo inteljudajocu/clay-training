@@ -1,15 +1,18 @@
 window.modules["35"] = [function(require,module,exports){'use strict';
 
-const getComponentName = require(40),
-  { strCheck } = require(50);
+const isUriStringCheck = require(51);
 
-module.exports = (page, componentName) => {
-  strCheck(componentName);
+/**
+ * First test if argument passed in is a String. If true, get layout instance
+ * from uri without the layout version. Otherwise, throw an error.
+ * @example /_layouts/text/instances/0@published returns 0
+ * @param  {string} uri
+ * @return {string|null}
+ */
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  const result = /\/_layouts\/.+?\/instances\/([^\.\/@]+)/.exec(uri);
 
-  if (typeof page !== 'object') {
-    throw new Error(`Page argument must be an object, not ${typeof page}`);
-  }
-
-  return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
+  return result && result[1];
 };
-}, {"40":40,"50":50}];
+}, {"51":51}];

@@ -1,26 +1,15 @@
 window.modules["266"] = [function(require,module,exports){/**
- * A specialized version of `_.filter` for arrays without support for
- * iteratee shorthands.
+ * Checks if a stack value for `key` exists.
  *
  * @private
- * @param {Array} [array] The array to iterate over.
- * @param {Function} predicate The function invoked per iteration.
- * @returns {Array} Returns the new filtered array.
+ * @name has
+ * @memberOf Stack
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function arrayFilter(array, predicate) {
-  var index = -1,
-      length = array == null ? 0 : array.length,
-      resIndex = 0,
-      result = [];
-
-  while (++index < length) {
-    var value = array[index];
-    if (predicate(value, index, array)) {
-      result[resIndex++] = value;
-    }
-  }
-  return result;
+function stackHas(key) {
+  return this.__data__.has(key);
 }
 
-module.exports = arrayFilter;
+module.exports = stackHas;
 }, {}];

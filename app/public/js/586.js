@@ -1,4 +1,8 @@
-window.modules["586"] = [function(require,module,exports){module.exports = function toPositive(number) {
-  return number < 0 ? 0 : (+number || 0);
+window.modules["586"] = [function(require,module,exports){/**
+ * Ensure some object is a coerced to a string
+ **/
+module.exports = function makeString(object) {
+  if (object == null) return '';
+  return '' + object;
 };
 }, {}];

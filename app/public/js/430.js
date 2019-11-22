@@ -1,102 +1,88 @@
-window.modules["430"] = [function(require,module,exports){'use strict';
+window.modules["430"] = [function(require,module,exports){var walkRules = require(58).walkRules;
+var utils = require(426);
 
-exports.__esModule = true;
+/*
+    At this step all rules has single simple selector. We try to join by equal
+    declaration blocks to first rule, e.g.
 
-var _node = require(429);
+    .a { color: red }
+    b { ... }
+    .b { color: red }
+    ->
+    .a, .b { color: red }
+    b { ... }
+*/
 
-var _node2 = _interopRequireDefault(_node);
+function processRule(node, item, list) {
+    var selectors = node.prelude.children;
+    var declarations = node.block.children;
+    var nodeCompareMarker = selectors.first().compareMarker;
+    var skippedCompareMarkers = {};
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+    list.nextUntil(item.next, function(next, nextItem) {
+        // skip non-ruleset node if safe
+        if (next.type !== 'Rule') {
+            return utils.unsafeToSkipNode.call(selectors, next);
+        }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+        if (node.pseudoSignature !== next.pseudoSignature) {
+            return true;
+        }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+        var nextFirstSelector = next.prelude.children.head;
+        var nextDeclarations = next.block.children;
+        var nextCompareMarker = nextFirstSelector.data.compareMarker;
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+        // if next ruleset has same marked as one of skipped then stop joining
+        if (nextCompareMarker in skippedCompareMarkers) {
+            return true;
+        }
 
-/**
- * Represents a CSS declaration.
- *
- * @extends Node
- *
- * @example
- * const root = postcss.parse('a { color: black }');
- * const decl = root.first.first;
- * decl.type       //=> 'decl'
- * decl.toString() //=> ' color: black'
- */
-var Declaration = function (_Node) {
-  _inherits(Declaration, _Node);
+        // try to join by selectors
+        if (selectors.head === selectors.tail) {
+            if (selectors.first().id === nextFirstSelector.data.id) {
+                declarations.appendList(nextDeclarations);
+                list.remove(nextItem);
+                return;
+            }
+        }
 
-  function Declaration(defaults) {
-    _classCallCheck(this, Declaration);
+        // try to join by properties
+        if (utils.isEqualDeclarations(declarations, nextDeclarations)) {
+            var nextStr = nextFirstSelector.data.id;
 
-    var _this = _possibleConstructorReturn(this, _Node.call(this, defaults));
+            selectors.some(function(data, item) {
+                var curStr = data.id;
 
-    _this.type = 'decl';
-    return _this;
-  }
+                if (nextStr < curStr) {
+                    selectors.insert(nextFirstSelector, item);
+                    return true;
+                }
 
-  /**
-   * @memberof Declaration#
-   * @member {string} prop - the declaration’s property name
-   *
-   * @example
-   * const root = postcss.parse('a { color: black }');
-   * const decl = root.first.first;
-   * decl.prop //=> 'color'
-   */
+                if (!item.next) {
+                    selectors.insert(nextFirstSelector);
+                    return true;
+                }
+            });
 
-  /**
-   * @memberof Declaration#
-   * @member {string} value - the declaration’s value
-   *
-   * @example
-   * const root = postcss.parse('a { color: black }');
-   * const decl = root.first.first;
-   * decl.value //=> 'black'
-   */
+            list.remove(nextItem);
+            return;
+        }
 
-  /**
-   * @memberof Declaration#
-   * @member {boolean} important - `true` if the declaration
-   *                               has an !important annotation.
-   *
-   * @example
-   * const root = postcss.parse('a { color: black !important; color: red }');
-   * root.first.first.important //=> true
-   * root.first.last.important  //=> undefined
-   */
+        // go to next ruleset if current one can be skipped (has no equal specificity nor element selector)
+        if (nextCompareMarker === nodeCompareMarker) {
+            return true;
+        }
 
-  /**
-   * @memberof Declaration#
-   * @member {object} raws - Information to generate byte-to-byte equal
-   *                         node string as it was in the origin input.
-   *
-   * Every parser saves its own properties,
-   * but the default CSS parser uses:
-   *
-   * * `before`: the space symbols before the node. It also stores `*`
-   *   and `_` symbols before the declaration (IE hack).
-   * * `between`: the symbols between the property and value
-   *   for declarations.
-   * * `important`: the content of the important statement,
-   *   if it is not just `!important`.
-   *
-   * PostCSS cleans declaration from comments and extra spaces,
-   * but it stores origin content in raws properties.
-   * As such, if you don’t change a declaration’s value,
-   * PostCSS will use the raw value with comments.
-   *
-   * @example
-   * const root = postcss.parse('a {\n  color:black\n}')
-   * root.first.first.raws //=> { before: '\n  ', between: ':' }
-   */
+        skippedCompareMarkers[nextCompareMarker] = true;
+    });
+}
 
-  return Declaration;
-}(_node2.default);
-
-exports.default = Declaration;
-module.exports = exports['default'];
-
-}, {"429":429}];
+module.exports = function mergeRule(ast) {
+    walkRules(ast, function(node, item, list) {
+        if (node.type === 'Rule') {
+            processRule(node, item, list);
+        }
+    });
+};
+}, {"58":58,"426":426}];

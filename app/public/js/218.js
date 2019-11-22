@@ -1,19 +1,13 @@
-window.modules["218"] = [function(require,module,exports){/*!
- * wordcount <https://github.com/jonschlinkert/wordcount>
- *
- * Copyright (c) 2014-2015 Jon Schlinkert.
- * Licensed under the MIT License
- */
+window.modules["218"] = [function(require,module,exports){var htmlToText = require(209);
+var wordCount = require(219);
 
-'use strict';
+module.exports = function (body) {
+  var text = htmlToText.fromString(body, {
+    wordwrap: false,
+    ignoreImage: true,
+    ignoreHref: true
+  });
 
-var matches = require(378);
-
-module.exports = function wordcount(str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('expected a string');
-  }
-  var m = matches(str);
-  if (!m) return 0;
-  return m.length;
-};}, {"378":378}];
+  return wordCount(text);
+};
+}, {"209":209,"219":219}];

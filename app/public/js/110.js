@@ -1,75 +1,38 @@
-window.modules["110"] = [function(require,module,exports){var isHex = require(74).isHex;
-var TYPE = require(74).TYPE;
+window.modules["110"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 
-var IDENTIFIER = TYPE.Identifier;
-var NUMBER = TYPE.Number;
-var NUMBERSIGN = TYPE.NumberSign;
-
-function consumeHexSequence(scanner, required) {
-    if (!isHex(scanner.source.charCodeAt(scanner.tokenStart))) {
-        if (required) {
-            scanner.error('Unexpected input', scanner.tokenStart);
-        } else {
-            return;
-        }
-    }
-
-    for (var pos = scanner.tokenStart + 1; pos < scanner.tokenEnd; pos++) {
-        var code = scanner.source.charCodeAt(pos);
-
-        // break on non-hex char
-        if (!isHex(code)) {
-            // break token, exclude symbol
-            scanner.tokenStart = pos;
-            return;
-        }
-    }
-
-    // token is full hex sequence, go to next token
-    scanner.next();
-}
-
-// # ident
+// <function-token> <sequence> ')'
 module.exports = {
-    name: 'HexColor',
+    name: 'Function',
     structure: {
-        value: String
+        name: String,
+        children: [[]]
     },
-    parse: function() {
+    parse: function(readSequence, recognizer) {
         var start = this.scanner.tokenStart;
+        var name = this.scanner.consumeFunctionName();
+        var nameLowerCase = name.toLowerCase();
+        var children;
 
-        this.scanner.eat(NUMBERSIGN);
+        children = recognizer.hasOwnProperty(nameLowerCase)
+            ? recognizer[nameLowerCase].call(this, recognizer)
+            : readSequence.call(this, recognizer);
 
-        scan:
-        switch (this.scanner.tokenType) {
-            case NUMBER:
-                consumeHexSequence(this.scanner, true);
-
-                // if token is identifier then number consists of hex only,
-                // try to add identifier to result
-                if (this.scanner.tokenType === IDENTIFIER) {
-                    consumeHexSequence(this.scanner, false);
-                }
-
-                break;
-
-            case IDENTIFIER:
-                consumeHexSequence(this.scanner, true);
-                break;
-
-            default:
-                this.scanner.error('Number or identifier is expected');
-        }
+        this.scanner.eat(RIGHTPARENTHESIS);
 
         return {
-            type: 'HexColor',
+            type: 'Function',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            value: this.scanner.substrToCursor(start + 1) // skip #
+            name: name,
+            children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk('#');
-        processChunk(node.value);
-    }
+        processChunk(node.name);
+        processChunk('(');
+        this.each(processChunk, node);
+        processChunk(')');
+    },
+    walkContext: 'function'
 };
-}, {"74":74}];
+}, {"75":75}];

@@ -1,30 +1,31 @@
-window.modules["327"] = [function(require,module,exports){var isArray = require(272),
-    isSymbol = require(339);
+window.modules["327"] = [function(require,module,exports){var isPrototype = require(328),
+    nativeKeys = require(329);
 
-/** Used to match property names within property paths. */
-var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
-    reIsPlainProp = /^\w*$/;
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
 
 /**
- * Checks if `value` is a property name and not a property path.
+ * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
  *
  * @private
- * @param {*} value The value to check.
- * @param {Object} [object] The object to query keys on.
- * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
  */
-function isKey(value, object) {
-  if (isArray(value)) {
-    return false;
+function baseKeys(object) {
+  if (!isPrototype(object)) {
+    return nativeKeys(object);
   }
-  var type = typeof value;
-  if (type == 'number' || type == 'symbol' || type == 'boolean' ||
-      value == null || isSymbol(value)) {
-    return true;
+  var result = [];
+  for (var key in Object(object)) {
+    if (hasOwnProperty.call(object, key) && key != 'constructor') {
+      result.push(key);
+    }
   }
-  return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
-    (object != null && value in Object(object));
+  return result;
 }
 
-module.exports = isKey;
-}, {"272":272,"339":339}];
+module.exports = baseKeys;
+}, {"328":328,"329":329}];

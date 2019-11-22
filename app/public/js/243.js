@@ -1,20 +1,16 @@
-window.modules["243"] = [function(require,module,exports){var assocIndexOf = require(280);
+window.modules["243"] = [function(require,module,exports){var nativeCreate = require(370);
 
 /**
- * Gets the list cache value for `key`.
+ * Removes all key-value entries from the hash.
  *
  * @private
- * @name get
- * @memberOf ListCache
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
+ * @name clear
+ * @memberOf Hash
  */
-function listCacheGet(key) {
-  var data = this.__data__,
-      index = assocIndexOf(data, key);
-
-  return index < 0 ? undefined : data[index][1];
+function hashClear() {
+  this.__data__ = nativeCreate ? nativeCreate(null) : {};
+  this.size = 0;
 }
 
-module.exports = listCacheGet;
-}, {"280":280}];
+module.exports = hashClear;
+}, {"370":370}];

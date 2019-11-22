@@ -1,222 +1,504 @@
 window.modules["65"] = [function(require,module,exports){'use strict';
 
-var names = require(61);
+var SyntaxParseError = require(72).SyntaxParseError;
 
-// https://www.w3.org/TR/css-values-3/#lengths
-var LENGTH = {
-    // absolute length units
-    'px': true,
-    'mm': true,
-    'cm': true,
-    'in': true,
-    'pt': true,
-    'pc': true,
-    'q': true,
+var TAB = 9;
+var N = 10;
+var F = 12;
+var R = 13;
+var SPACE = 32;
+var EXCLAMATIONMARK = 33;    // !
+var NUMBERSIGN = 35;         // #
+var PERCENTSIGN = 37;        // %
+var AMPERSAND = 38;          // &
+var APOSTROPHE = 39;         // '
+var LEFTPARENTHESIS = 40;    // (
+var RIGHTPARENTHESIS = 41;   // )
+var ASTERISK = 42;           // *
+var PLUSSIGN = 43;           // +
+var COMMA = 44;              // ,
+var SOLIDUS = 47;            // /
+var LESSTHANSIGN = 60;       // <
+var GREATERTHANSIGN = 62;    // >
+var QUESTIONMARK = 63;       // ?
+var LEFTSQUAREBRACKET = 91;  // [
+var RIGHTSQUAREBRACKET = 93; // ]
+var LEFTCURLYBRACKET = 123;  // {
+var VERTICALLINE = 124;      // |
+var RIGHTCURLYBRACKET = 125; // }
+var COMBINATOR_PRECEDENCE = {
+    ' ': 1,
+    '&&': 2,
+    '||': 3,
+    '|': 4
+};
+var MULTIPLIER_DEFAULT = {
+    comma: false,
+    min: 1,
+    max: 1
+};
+var MULTIPLIER_ZERO_OR_MORE = {
+    comma: false,
+    min: 0,
+    max: 0
+};
+var MULTIPLIER_ONE_OR_MORE = {
+    comma: false,
+    min: 1,
+    max: 0
+};
+var MULTIPLIER_ONE_OR_MORE_COMMA_SEPARATED = {
+    comma: true,
+    min: 1,
+    max: 0
+};
+var MULTIPLIER_ZERO_OR_ONE = {
+    comma: false,
+    min: 0,
+    max: 1
+};
+var NAME_CHAR = (function() {
+    var array = typeof Uint32Array === 'function' ? new Uint32Array(128) : new Array(128);
+    for (var i = 0; i < 128; i++) {
+        array[i] = /[a-zA-Z0-9\-]/.test(String.fromCharCode(i)) ? 1 : 0;
+    }
+    return array;
+})();
 
-    // relative length units
-    'em': true,
-    'ex': true,
-    'ch': true,
-    'rem': true,
+var Tokenizer = function(str) {
+    this.str = str;
+    this.pos = 0;
+};
+Tokenizer.prototype = {
+    charCode: function() {
+        return this.pos < this.str.length ? this.str.charCodeAt(this.pos) : 0;
+    },
+    nextCharCode: function() {
+        return this.pos + 1 < this.str.length ? this.str.charCodeAt(this.pos + 1) : 0;
+    },
+    substringToPos: function(end) {
+        return this.str.substring(this.pos, this.pos = end);
+    },
+    eat: function(code) {
+        if (this.charCode() !== code) {
+            error(this, this.pos, 'Expect `' + String.fromCharCode(code) + '`');
+        }
 
-    // viewport-percentage lengths
-    'vh': true,
-    'vw': true,
-    'vmin': true,
-    'vmax': true,
-    'vm': true
+        this.pos++;
+    }
 };
 
-var ANGLE = {
-    'deg': true,
-    'grad': true,
-    'rad': true,
-    'turn': true
-};
+function scanSpaces(tokenizer) {
+    var end = tokenizer.pos + 1;
 
-var TIME = {
-    's': true,
-    'ms': true
-};
-
-var FREQUENCY = {
-    'hz': true,
-    'khz': true
-};
-
-// https://www.w3.org/TR/css-values-3/#resolution (https://drafts.csswg.org/css-values/#resolution)
-var RESOLUTION = {
-    'dpi': true,
-    'dpcm': true,
-    'dppx': true,
-    'x': true      // https://github.com/w3c/csswg-drafts/issues/461
-};
-
-// https://drafts.csswg.org/css-grid/#fr-unit
-var FLEX = {
-    'fr': true
-};
-
-// https://www.w3.org/TR/css3-speech/#mixing-props-voice-volume
-var DECIBEL = {
-    'db': true
-};
-
-// https://www.w3.org/TR/css3-speech/#voice-props-voice-pitch
-var SEMITONES = {
-    'st': true
-};
-
-// can be used wherever <length>, <frequency>, <angle>, <time>, <percentage>, <number>, or <integer> values are allowed
-// https://drafts.csswg.org/css-values/#calc-notation
-function isCalc(node) {
-    if (node.data.type !== 'Function') {
-        return false;
+    for (; end < tokenizer.str.length; end++) {
+        var code = tokenizer.str.charCodeAt(end);
+        if (code !== R && code !== N && code !== F && code !== SPACE && code !== TAB) {
+            break;
+        }
     }
 
-    var keyword = names.keyword(node.data.name);
-
-    if (keyword.name !== 'calc') {
-        return false;
-    }
-
-    // there were some prefixed implementations
-    return keyword.vendor === '' ||
-           keyword.vendor === '-moz-' ||
-           keyword.vendor === '-webkit-';
+    return tokenizer.substringToPos(end);
 }
 
-function astNode(type) {
-    return function(node) {
-        return node.data.type === type;
+function scanWord(tokenizer) {
+    var end = tokenizer.pos;
+
+    for (; end < tokenizer.str.length; end++) {
+        var code = tokenizer.str.charCodeAt(end);
+        if (code >= 128 || NAME_CHAR[code] === 0) {
+            break;
+        }
+    }
+
+    if (tokenizer.pos === end) {
+        error(tokenizer, tokenizer.pos, 'Expect a keyword');
+    }
+
+    return tokenizer.substringToPos(end);
+}
+
+function scanNumber(tokenizer) {
+    var end = tokenizer.pos;
+
+    for (; end < tokenizer.str.length; end++) {
+        var code = tokenizer.str.charCodeAt(end);
+        if (code < 48 || code > 57) {
+            break;
+        }
+    }
+
+    if (tokenizer.pos === end) {
+        error(tokenizer, tokenizer.pos, 'Expect a number');
+    }
+
+    return tokenizer.substringToPos(end);
+}
+
+function scanString(tokenizer) {
+    var end = tokenizer.str.indexOf('\'', tokenizer.pos + 1);
+
+    if (end === -1) {
+        error(tokenizer, tokenizer.str.length, 'Expect a quote');
+    }
+
+    return tokenizer.substringToPos(end + 1);
+}
+
+function readMultiplierRange(tokenizer, comma) {
+    var min = null;
+    var max = null;
+
+    tokenizer.eat(LEFTCURLYBRACKET);
+
+    min = scanNumber(tokenizer);
+
+    if (tokenizer.charCode() === COMMA) {
+        tokenizer.pos++;
+        if (tokenizer.charCode() !== RIGHTCURLYBRACKET) {
+            max = scanNumber(tokenizer);
+        }
+    } else {
+        max = min;
+    }
+
+    tokenizer.eat(RIGHTCURLYBRACKET);
+
+    return {
+        comma: comma,
+        min: Number(min),
+        max: max ? Number(max) : 0
     };
 }
 
-function dimension(type) {
-    return function(node) {
-        return isCalc(node) ||
-               (node.data.type === 'Dimension' && type.hasOwnProperty(node.data.unit.toLowerCase()));
+function readMultiplier(tokenizer) {
+    switch (tokenizer.charCode()) {
+        case ASTERISK:
+            tokenizer.pos++;
+            return MULTIPLIER_ZERO_OR_MORE;
+
+        case PLUSSIGN:
+            tokenizer.pos++;
+            return MULTIPLIER_ONE_OR_MORE;
+
+        case QUESTIONMARK:
+            tokenizer.pos++;
+            return MULTIPLIER_ZERO_OR_ONE;
+
+        case NUMBERSIGN:
+            tokenizer.pos++;
+
+            if (tokenizer.charCode() !== LEFTCURLYBRACKET) {
+                return MULTIPLIER_ONE_OR_MORE_COMMA_SEPARATED;
+            }
+
+            return readMultiplierRange(tokenizer, true);
+
+        case LEFTCURLYBRACKET:
+            return readMultiplierRange(tokenizer, false);
+    }
+
+    return MULTIPLIER_DEFAULT;
+}
+
+function maybeMultiplied(tokenizer, node) {
+    var multiplier = readMultiplier(tokenizer);
+
+    if (multiplier !== MULTIPLIER_DEFAULT) {
+        return {
+            type: 'Group',
+            terms: [node],
+            combinator: '|',  // `|` combinator is simplest in implementation (and therefore faster)
+            disallowEmpty: false,
+            multiplier: multiplier,
+            explicit: false
+        };
+    }
+
+    return node;
+}
+
+function readProperty(tokenizer) {
+    var name;
+
+    tokenizer.eat(LESSTHANSIGN);
+    tokenizer.eat(APOSTROPHE);
+
+    name = scanWord(tokenizer);
+
+    tokenizer.eat(APOSTROPHE);
+    tokenizer.eat(GREATERTHANSIGN);
+
+    return maybeMultiplied(tokenizer, {
+        type: 'Property',
+        name: name
+    });
+}
+
+function readType(tokenizer) {
+    var name;
+
+    tokenizer.eat(LESSTHANSIGN);
+    name = scanWord(tokenizer);
+
+    if (tokenizer.charCode() === LEFTPARENTHESIS &&
+        tokenizer.nextCharCode() === RIGHTPARENTHESIS) {
+        tokenizer.pos += 2;
+        name += '()';
+    }
+
+    tokenizer.eat(GREATERTHANSIGN);
+
+    return maybeMultiplied(tokenizer, {
+        type: 'Type',
+        name: name
+    });
+}
+
+function readKeywordOrFunction(tokenizer) {
+    var children = null;
+    var name;
+
+    name = scanWord(tokenizer);
+
+    if (tokenizer.charCode() === LEFTPARENTHESIS) {
+        tokenizer.pos++;
+        children = readImplicitGroup(tokenizer);
+        tokenizer.eat(RIGHTPARENTHESIS);
+
+        return maybeMultiplied(tokenizer, {
+            type: 'Function',
+            name: name,
+            children: children
+        });
+    }
+
+    return maybeMultiplied(tokenizer, {
+        type: 'Keyword',
+        name: name
+    });
+}
+
+function regroupTerms(terms, combinators) {
+    function createGroup(terms, combinator) {
+        return {
+            type: 'Group',
+            terms: terms,
+            combinator: combinator,
+            disallowEmpty: false,
+            multiplier: MULTIPLIER_DEFAULT,
+            explicit: false
+        };
+    }
+
+    combinators = Object.keys(combinators).sort(function(a, b) {
+        return COMBINATOR_PRECEDENCE[a] - COMBINATOR_PRECEDENCE[b];
+    });
+
+    while (combinators.length > 0) {
+        var combinator = combinators.shift();
+        for (var i = 0, subgroupStart = 0; i < terms.length; i++) {
+            var term = terms[i];
+            if (term.type === 'Combinator') {
+                if (term.value === combinator) {
+                    if (subgroupStart === -1) {
+                        subgroupStart = i - 1;
+                    }
+                    terms.splice(i, 1);
+                    i--;
+                } else {
+                    if (subgroupStart !== -1 && i - subgroupStart > 1) {
+                        terms.splice(
+                            subgroupStart,
+                            i - subgroupStart,
+                            createGroup(terms.slice(subgroupStart, i), combinator)
+                        );
+                        i = subgroupStart + 1;
+                    }
+                    subgroupStart = -1;
+                }
+            }
+        }
+
+        if (subgroupStart !== -1 && combinators.length) {
+            terms.splice(
+                subgroupStart,
+                i - subgroupStart,
+                createGroup(terms.slice(subgroupStart, i), combinator)
+            );
+        }
+    }
+
+    return combinator;
+}
+
+function readImplicitGroup(tokenizer) {
+    var terms = [];
+    var combinators = {};
+    var token;
+    var prevToken = null;
+    var prevTokenPos = tokenizer.pos;
+
+    while (token = peek(tokenizer)) {
+        if (token.type !== 'Spaces') {
+            if (token.type === 'Combinator') {
+                // check for combinator in group beginning and double combinator sequence
+                if (prevToken === null || prevToken.type === 'Combinator') {
+                    error(tokenizer, prevTokenPos, 'Unexpected combinator');
+                }
+
+                combinators[token.value] = true;
+            } else if (prevToken !== null && prevToken.type !== 'Combinator') {
+                combinators[' '] = true;  // a b
+                terms.push({
+                    type: 'Combinator',
+                    value: ' '
+                });
+            }
+
+            terms.push(token);
+            prevToken = token;
+            prevTokenPos = tokenizer.pos;
+        }
+    }
+
+    // check for combinator in group ending
+    if (prevToken !== null && prevToken.type === 'Combinator') {
+        error(tokenizer, tokenizer.pos - prevTokenPos, 'Unexpected combinator');
+    }
+
+    return {
+        type: 'Group',
+        terms: terms,
+        combinator: regroupTerms(terms, combinators) || ' ',
+        disallowEmpty: false,
+        multiplier: MULTIPLIER_DEFAULT,
+        explicit: false
     };
 }
 
-function zeroUnitlessDimension(type) {
-    return function(node) {
-        return isCalc(node) ||
-               (node.data.type === 'Dimension' && type.hasOwnProperty(node.data.unit.toLowerCase())) ||
-               (node.data.type === 'Number' && Number(node.data.value) === 0);
-    };
-}
+function readGroup(tokenizer) {
+    var result;
 
-function attr(node) {
-    return node.data.type === 'Function' && node.data.name.toLowerCase() === 'attr';
-}
+    tokenizer.eat(LEFTSQUAREBRACKET);
+    result = readImplicitGroup(tokenizer);
+    tokenizer.eat(RIGHTSQUAREBRACKET);
 
-function number(node) {
-    return isCalc(node) || node.data.type === 'Number';
-}
+    result.explicit = true;
+    result.multiplier = readMultiplier(tokenizer);
 
-function numberZeroOne(node) {
-    if (isCalc(node) || node.data.type === 'Number') {
-        var value = Number(node.data.value);
-
-        return value >= 0 && value <= 1;
+    if (tokenizer.charCode() === EXCLAMATIONMARK) {
+        tokenizer.pos++;
+        result.disallowEmpty = true;
     }
 
-    return false;
+    return result;
 }
 
-function numberOneOrGreater(node) {
-    if (isCalc(node) || node.data.type === 'Number') {
-        return Number(node.data.value) >= 1;
+function peek(tokenizer) {
+    var code = tokenizer.charCode();
+
+    if (code < 128 && NAME_CHAR[code] === 1) {
+        return readKeywordOrFunction(tokenizer);
     }
 
-    return false;
+    switch (code) {
+        case LEFTSQUAREBRACKET:
+            return readGroup(tokenizer);
+
+        case LESSTHANSIGN:
+            if (tokenizer.nextCharCode() === APOSTROPHE) {
+                return readProperty(tokenizer);
+            } else {
+                return readType(tokenizer);
+            }
+
+        case VERTICALLINE:
+            return {
+                type: 'Combinator',
+                value: tokenizer.substringToPos(tokenizer.nextCharCode() === VERTICALLINE ? tokenizer.pos + 2 : tokenizer.pos + 1)
+            };
+
+        case AMPERSAND:
+            tokenizer.pos++;
+            tokenizer.eat(AMPERSAND);
+            return {
+                type: 'Combinator',
+                value: '&&'
+            };
+
+        case COMMA:
+            tokenizer.pos++;
+            return {
+                type: 'Comma',
+                value: ','
+            };
+
+        case SOLIDUS:
+            tokenizer.pos++;
+            return {
+                type: 'Slash',
+                value: '/'
+            };
+
+        case PERCENTSIGN:  // looks like exception, needs for attr()'s <type-or-unit>
+            tokenizer.pos++;
+            return {
+                type: 'Percent',
+                value: '%'
+            };
+
+        case LEFTPARENTHESIS:
+            tokenizer.pos++;
+            var children = readImplicitGroup(tokenizer);
+            tokenizer.eat(RIGHTPARENTHESIS);
+
+            return {
+                type: 'Parentheses',
+                children: children
+            };
+
+        case APOSTROPHE:
+            return {
+                type: 'String',
+                value: scanString(tokenizer)
+            };
+
+        case SPACE:
+        case TAB:
+        case N:
+        case R:
+        case F:
+            return {
+                type: 'Spaces',
+                value: scanSpaces(tokenizer)
+            };
+    }
 }
 
-// TODO: fail on 10e-2
-function integer(node) {
-    return isCalc(node) ||
-           (node.data.type === 'Number' && node.data.value.indexOf('.') === -1);
+function error(tokenizer, pos, msg) {
+    throw new SyntaxParseError(msg || 'Unexpected input', tokenizer.str, pos);
 }
 
-// TODO: fail on 10e-2
-function positiveInteger(node) {
-    return isCalc(node) ||
-           (node.data.type === 'Number' && node.data.value.indexOf('.') === -1 && node.data.value.charAt(0) !== '-');
-}
+function parse(str) {
+    var tokenizer = new Tokenizer(str);
+    var result = readImplicitGroup(tokenizer);
 
-function percentage(node) {
-    return isCalc(node) ||
-           node.data.type === 'Percentage';
-}
-
-function hexColor(node) {
-    if (node.data.type !== 'HexColor') {
-        return false;
+    if (tokenizer.pos !== str.length) {
+        error(tokenizer, tokenizer.pos);
     }
 
-    var hex = node.data.value;
-
-    return /^[0-9a-fA-F]{3,8}$/.test(hex) &&
-           (hex.length === 3 || hex.length === 4 || hex.length === 6 || hex.length === 8);
-}
-
-function expression(node) {
-    return node.data.type === 'Function' && node.data.name.toLowerCase() === 'expression';
-}
-
-// https://developer.mozilla.org/en-US/docs/Web/CSS/custom-ident
-// https://drafts.csswg.org/css-values-4/#identifier-value
-function customIdent(node) {
-    if (node.data.type !== 'Identifier') {
-        return false;
+    // reduce redundant groups with single group term
+    if (result.terms.length === 1 && result.terms[0].type === 'Group') {
+        result = result.terms[0];
     }
 
-    var name = node.data.name.toLowerCase();
-
-    // § 3.2. Author-defined Identifiers: the <custom-ident> type
-    // The CSS-wide keywords are not valid <custom-ident>s
-    if (name === 'unset' || name === 'initial' || name === 'inherit') {
-        return false;
-    }
-
-    // The default keyword is reserved and is also not a valid <custom-ident>
-    if (name === 'default') {
-        return false;
-    }
-
-    // TODO: ignore property specific keywords (as described https://developer.mozilla.org/en-US/docs/Web/CSS/custom-ident)
-
-    return true;
+    return result;
 }
 
-module.exports = {
-    'angle': zeroUnitlessDimension(ANGLE),
-    'attr()': attr,
-    'custom-ident': customIdent,
-    'decibel': dimension(DECIBEL),
-    'dimension': astNode('Dimension'),
-    'frequency': dimension(FREQUENCY),
-    'flex': dimension(FLEX),
-    'hex-color': hexColor,
-    'id-selector': astNode('IdSelector'), // element( <id-selector> )
-    'ident': astNode('Identifier'),
-    'integer': integer,
-    'length': zeroUnitlessDimension(LENGTH),
-    'number': number,
-    'number-zero-one': numberZeroOne,
-    'number-one-or-greater': numberOneOrGreater,
-    'percentage': percentage,
-    'positive-integer': positiveInteger,
-    'resolution': dimension(RESOLUTION),
-    'semitones': dimension(SEMITONES),
-    'string': astNode('String'),
-    'time': dimension(TIME),
-    'unicode-range': astNode('UnicodeRange'),
-    'url': astNode('Url'),
+// warm up parse to elimitate code branches that never execute
+// fix soft deoptimizations (insufficient type feedback)
+parse('[a&&<b>#|<\'c\'>*||e(){2,} f{2} /,(% g#{1,2})]!');
 
-    // old IE stuff
-    'progid': astNode('Raw'),
-    'expression': expression
-};
-}, {"61":61}];
+module.exports = parse;
+}, {"72":72}];

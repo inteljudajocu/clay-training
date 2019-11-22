@@ -1,35 +1,58 @@
-window.modules["124"] = [function(require,module,exports){module.exports = {
-    name: 'Raw',
-    structure: {
-        value: String
-    },
-    parse: function(startToken, endTokenType1, endTokenType2, includeTokenType2, excludeWhiteSpace) {
-        var startOffset = this.scanner.getTokenStart(startToken);
-        var endOffset;
+window.modules["124"] = [function(require,module,exports){var isNumber = require(75).isNumber;
+var TYPE = require(75).TYPE;
+var NUMBER = TYPE.Number;
+var SOLIDUS = TYPE.Solidus;
+var FULLSTOP = TYPE.FullStop;
 
-        this.scanner.skip(
-            this.scanner.getRawLength(
-                startToken,
-                endTokenType1,
-                endTokenType2,
-                includeTokenType2
-            )
-        );
+// Terms of <ratio> should to be a positive number (not zero or negative)
+// (see https://drafts.csswg.org/mediaqueries-3/#values)
+// However, -o-min-device-pixel-ratio takes fractional values as a ratio's term
+// and this is using by various sites. Therefore we relax checking on parse
+// to test a term is unsigned number without exponent part.
+// Additional checks may to be applied on lexer validation.
+function consumeNumber(scanner) {
+    var value = scanner.consumeNonWS(NUMBER);
 
-        if (excludeWhiteSpace && this.scanner.tokenStart > startOffset) {
-            endOffset = this.scanner.getOffsetExcludeWS();
-        } else {
-            endOffset = this.scanner.tokenStart;
+    for (var i = 0; i < value.length; i++) {
+        var code = value.charCodeAt(i);
+        if (!isNumber(code) && code !== FULLSTOP) {
+            scanner.error('Unsigned number is expected', scanner.tokenStart - value.length + i);
         }
+    }
+
+    if (Number(value) === 0) {
+        scanner.error('Zero number is not allowed', scanner.tokenStart - value.length);
+    }
+
+    return value;
+}
+
+// <positive-integer> S* '/' S* <positive-integer>
+module.exports = {
+    name: 'Ratio',
+    structure: {
+        left: String,
+        right: String
+    },
+    parse: function() {
+        var start = this.scanner.tokenStart;
+        var left = consumeNumber(this.scanner);
+        var right;
+
+        this.scanner.eatNonWS(SOLIDUS);
+        right = consumeNumber(this.scanner);
 
         return {
-            type: 'Raw',
-            loc: this.getLocation(startOffset, endOffset),
-            value: this.scanner.source.substring(startOffset, endOffset)
+            type: 'Ratio',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            left: left,
+            right: right
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.value);
+        processChunk(node.left);
+        processChunk('/');
+        processChunk(node.right);
     }
 };
-}, {}];
+}, {"75":75}];

@@ -1,5 +1,10 @@
-window.modules["639"] = [function(require,module,exports){var deprecate = require(641);
+window.modules["639"] = [function(require,module,exports){var makeString = require(586);
 
-module.exports = deprecate(require(570).sprintf,
-  'sprintf() will be removed in the next major release, use the sprintf-js package instead.');
-}, {"570":570,"641":641}];
+module.exports = function(str, callback) {
+  str = makeString(str);
+
+  if (str.length === 0 || typeof callback !== 'function') return str;
+
+  return str.replace(/./g, callback);
+};
+}, {"586":586}];

@@ -1,30 +1,22 @@
-window.modules["119"] = [function(require,module,exports){var TYPE = require(74).TYPE;
-var LEFTPARENTHESIS = TYPE.LeftParenthesis;
-var RIGHTPARENTHESIS = TYPE.RightParenthesis;
-
+window.modules["119"] = [function(require,module,exports){// '/' | '*' | ',' | ':' | '+' | '-'
 module.exports = {
-    name: 'Parentheses',
+    name: 'Operator',
     structure: {
-        children: [[]]
+        value: String
     },
-    parse: function(readSequence, recognizer) {
+    parse: function() {
         var start = this.scanner.tokenStart;
-        var children = null;
 
-        this.scanner.eat(LEFTPARENTHESIS);
-        children = readSequence.call(this, recognizer);
-        this.scanner.eat(RIGHTPARENTHESIS);
+        this.scanner.next();
 
         return {
-            type: 'Parentheses',
+            type: 'Operator',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            children: children
+            value: this.scanner.substrToCursor(start)
         };
     },
     generate: function(processChunk, node) {
-        processChunk('(');
-        this.each(processChunk, node);
-        processChunk(')');
+        processChunk(node.value);
     }
 };
-}, {"74":74}];
+}, {}];

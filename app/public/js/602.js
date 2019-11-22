@@ -1,7 +1,6 @@
-window.modules["602"] = [function(require,module,exports){module.exports = function unquote(str, quoteChar) {
-  quoteChar = quoteChar || '"';
-  if (str[0] === quoteChar && str[str.length - 1] === quoteChar)
-    return str.slice(1, str.length - 1);
-  else return str;
+window.modules["602"] = [function(require,module,exports){var makeString = require(586);
+
+module.exports = function escapeRegExp(str) {
+  return makeString(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
 };
-}, {}];
+}, {"586":586}];

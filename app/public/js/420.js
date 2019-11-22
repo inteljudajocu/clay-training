@@ -1,88 +1,46 @@
-window.modules["420"] = [function(require,module,exports){var walkRules = require(57).walkRules;
-var utils = require(416);
+window.modules["420"] = [function(require,module,exports){module.exports = function compressFont(node) {
+    var list = node.children;
 
-/*
-    At this step all rules has single simple selector. We try to join by equal
-    declaration blocks to first rule, e.g.
+    list.eachRight(function(node, item) {
+        if (node.type === 'Identifier') {
+            if (node.name === 'bold') {
+                item.data = {
+                    type: 'Number',
+                    loc: node.loc,
+                    value: '700'
+                };
+            } else if (node.name === 'normal') {
+                var prev = item.prev;
 
-    .a { color: red }
-    b { ... }
-    .b { color: red }
-    ->
-    .a, .b { color: red }
-    b { ... }
-*/
+                if (prev && prev.data.type === 'Operator' && prev.data.value === '/') {
+                    this.remove(prev);
+                }
 
-function processRule(node, item, list) {
-    var selectors = node.prelude.children;
-    var declarations = node.block.children;
-    var nodeCompareMarker = selectors.first().compareMarker;
-    var skippedCompareMarkers = {};
+                this.remove(item);
+            } else if (node.name === 'medium') {
+                var next = item.next;
 
-    list.nextUntil(item.next, function(next, nextItem) {
-        // skip non-ruleset node if safe
-        if (next.type !== 'Rule') {
-            return utils.unsafeToSkipNode.call(selectors, next);
-        }
-
-        if (node.pseudoSignature !== next.pseudoSignature) {
-            return true;
-        }
-
-        var nextFirstSelector = next.prelude.children.head;
-        var nextDeclarations = next.block.children;
-        var nextCompareMarker = nextFirstSelector.data.compareMarker;
-
-        // if next ruleset has same marked as one of skipped then stop joining
-        if (nextCompareMarker in skippedCompareMarkers) {
-            return true;
-        }
-
-        // try to join by selectors
-        if (selectors.head === selectors.tail) {
-            if (selectors.first().id === nextFirstSelector.data.id) {
-                declarations.appendList(nextDeclarations);
-                list.remove(nextItem);
-                return;
+                if (!next || next.data.type !== 'Operator') {
+                    this.remove(item);
+                }
             }
         }
-
-        // try to join by properties
-        if (utils.isEqualDeclarations(declarations, nextDeclarations)) {
-            var nextStr = nextFirstSelector.data.id;
-
-            selectors.some(function(data, item) {
-                var curStr = data.id;
-
-                if (nextStr < curStr) {
-                    selectors.insert(nextFirstSelector, item);
-                    return true;
-                }
-
-                if (!item.next) {
-                    selectors.insert(nextFirstSelector);
-                    return true;
-                }
-            });
-
-            list.remove(nextItem);
-            return;
-        }
-
-        // go to next ruleset if current one can be skipped (has no equal specificity nor element selector)
-        if (nextCompareMarker === nodeCompareMarker) {
-            return true;
-        }
-
-        skippedCompareMarkers[nextCompareMarker] = true;
     });
-}
 
-module.exports = function mergeRule(ast) {
-    walkRules(ast, function(node, item, list) {
-        if (node.type === 'Rule') {
-            processRule(node, item, list);
+    // remove redundant spaces
+    list.each(function(node, item) {
+        if (node.type === 'WhiteSpace') {
+            if (!item.prev || !item.next || item.next.data.type === 'WhiteSpace') {
+                this.remove(item);
+            }
         }
     });
+
+    if (list.isEmpty()) {
+        list.insert(list.createItem({
+            type: 'Identifier',
+            name: 'normal'
+        }));
+    }
 };
-}, {"57":57,"416":416}];
+}, {}];

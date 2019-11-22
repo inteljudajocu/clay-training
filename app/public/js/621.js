@@ -1,9 +1,8 @@
-window.modules["621"] = [function(require,module,exports){var makeString = require(576);
+window.modules["621"] = [function(require,module,exports){var trim = require(583);
+var dasherize = require(593);
+var cleanDiacritics = require(591);
 
-module.exports = function truncate(str, length, truncateStr) {
-  str = makeString(str);
-  truncateStr = truncateStr || '...';
-  length = ~~length;
-  return str.length > length ? str.slice(0, length) + truncateStr : str;
+module.exports = function slugify(str) {
+  return trim(dasherize(cleanDiacritics(str).replace(/[^\w\s-]/g, '-').toLowerCase()), '-');
 };
-}, {"576":576}];
+}, {"583":583,"591":591,"593":593}];

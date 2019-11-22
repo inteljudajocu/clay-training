@@ -1,10 +1,6 @@
-window.modules["619"] = [function(require,module,exports){var makeString = require(576);
-var slice = [].slice;
+window.modules["619"] = [function(require,module,exports){var pad = require(644);
 
-module.exports = function join() {
-  var args = slice.call(arguments),
-    separator = args.shift();
-
-  return args.join(makeString(separator));
+module.exports = function rpad(str, length, padStr) {
+  return pad(str, length, padStr, 'right');
 };
-}, {"576":576}];
+}, {"644":644}];

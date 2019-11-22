@@ -1,6 +1,6 @@
 window.modules["image.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(1),
+var _get = require(3),
     defaultWidth = 'inline';
 
 module.exports.render = function (uri, data) {
@@ -26,16 +26,16 @@ module.exports.save = function (uri, data) {
 
   return Object.assign(data, image);
 };
-}, {"1":1}];
+}, {"3":3}];
 window.modules["list.model"] = [function(require,module,exports){'use strict';
 
-var striptags = require(3),
-    _require = require(5),
+var striptags = require(4),
+    _require = require(2),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
     _require2 = require(9),
     render = _require2.render,
-    _require3 = require(4),
+    _require3 = require(1),
     toSmartText = _require3.toSmartText;
 
 module.exports.save = function (uri, data) {
@@ -58,4 +58,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"3":3,"4":4,"5":5,"9":9}];
+}, {"1":1,"2":2,"4":4,"9":9}];

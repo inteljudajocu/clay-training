@@ -1,260 +1,172 @@
 window.modules["154"] = [function(require,module,exports){'use strict';
 
-var constants = require(153);
-var PUNCTUATION = constants.PUNCTUATION;
-var STOP_URL_RAW = constants.STOP_URL_RAW;
-var TYPE = constants.TYPE;
-var FULLSTOP = TYPE.FullStop;
-var PLUSSIGN = TYPE.PlusSign;
-var HYPHENMINUS = TYPE.HyphenMinus;
-var PUNCTUATOR = TYPE.Punctuator;
+// token types (note: value shouldn't intersect with used char codes)
+var WHITESPACE = 1;
+var IDENTIFIER = 2;
+var NUMBER = 3;
+var STRING = 4;
+var COMMENT = 5;
+var PUNCTUATOR = 6;
+var CDO = 7;
+var CDC = 8;
+var ATRULE = 14;
+var FUNCTION = 15;
+var URL = 16;
+var RAW = 17;
+
 var TAB = 9;
 var N = 10;
 var F = 12;
 var R = 13;
 var SPACE = 32;
-var BACK_SLASH = 92;
-var E = 101; // 'e'.charCodeAt(0)
 
-function firstCharOffset(source) {
-    // detect BOM (https://en.wikipedia.org/wiki/Byte_order_mark)
-    if (source.charCodeAt(0) === 0xFEFF ||  // UTF-16BE
-        source.charCodeAt(0) === 0xFFFE) {  // UTF-16LE
-        return 1;
-    }
+var TYPE = {
+    WhiteSpace:   WHITESPACE,
+    Identifier:   IDENTIFIER,
+    Number:           NUMBER,
+    String:           STRING,
+    Comment:         COMMENT,
+    Punctuator:   PUNCTUATOR,
+    CDO:                 CDO,
+    CDC:                 CDC,
+    Atrule:           ATRULE,
+    Function:       FUNCTION,
+    Url:                 URL,
+    Raw:                 RAW,
 
-    return 0;
+    ExclamationMark:      33,  // !
+    QuotationMark:        34,  // "
+    NumberSign:           35,  // #
+    DollarSign:           36,  // $
+    PercentSign:          37,  // %
+    Ampersand:            38,  // &
+    Apostrophe:           39,  // '
+    LeftParenthesis:      40,  // (
+    RightParenthesis:     41,  // )
+    Asterisk:             42,  // *
+    PlusSign:             43,  // +
+    Comma:                44,  // ,
+    HyphenMinus:          45,  // -
+    FullStop:             46,  // .
+    Solidus:              47,  // /
+    Colon:                58,  // :
+    Semicolon:            59,  // ;
+    LessThanSign:         60,  // <
+    EqualsSign:           61,  // =
+    GreaterThanSign:      62,  // >
+    QuestionMark:         63,  // ?
+    CommercialAt:         64,  // @
+    LeftSquareBracket:    91,  // [
+    Backslash:            92,  // \
+    RightSquareBracket:   93,  // ]
+    CircumflexAccent:     94,  // ^
+    LowLine:              95,  // _
+    GraveAccent:          96,  // `
+    LeftCurlyBracket:    123,  // {
+    VerticalLine:        124,  // |
+    RightCurlyBracket:   125,  // }
+    Tilde:               126   // ~
+};
+
+var NAME = Object.keys(TYPE).reduce(function(result, key) {
+    result[TYPE[key]] = key;
+    return result;
+}, {});
+
+// https://drafts.csswg.org/css-syntax/#tokenizer-definitions
+// > non-ASCII code point
+// >   A code point with a value equal to or greater than U+0080 <control>
+// > name-start code point
+// >   A letter, a non-ASCII code point, or U+005F LOW LINE (_).
+// > name code point
+// >   A name-start code point, a digit, or U+002D HYPHEN-MINUS (-)
+// That means only ASCII code points has a special meaning and we a maps for 0..127 codes only
+var SafeUint32Array = typeof Uint32Array !== 'undefined' ? Uint32Array : Array; // fallback on Array when TypedArray is not supported
+var SYMBOL_TYPE = new SafeUint32Array(0x80);
+var PUNCTUATION = new SafeUint32Array(0x80);
+var STOP_URL_RAW = new SafeUint32Array(0x80);
+
+for (var i = 0; i < SYMBOL_TYPE.length; i++) {
+    SYMBOL_TYPE[i] = IDENTIFIER;
 }
 
-function isHex(code) {
-    return (code >= 48 && code <= 57) || // 0 .. 9
-           (code >= 65 && code <= 70) || // A .. F
-           (code >= 97 && code <= 102);  // a .. f
+// fill categories
+[
+    TYPE.ExclamationMark,    // !
+    TYPE.QuotationMark,      // "
+    TYPE.NumberSign,         // #
+    TYPE.DollarSign,         // $
+    TYPE.PercentSign,        // %
+    TYPE.Ampersand,          // &
+    TYPE.Apostrophe,         // '
+    TYPE.LeftParenthesis,    // (
+    TYPE.RightParenthesis,   // )
+    TYPE.Asterisk,           // *
+    TYPE.PlusSign,           // +
+    TYPE.Comma,              // ,
+    TYPE.HyphenMinus,        // -
+    TYPE.FullStop,           // .
+    TYPE.Solidus,            // /
+    TYPE.Colon,              // :
+    TYPE.Semicolon,          // ;
+    TYPE.LessThanSign,       // <
+    TYPE.EqualsSign,         // =
+    TYPE.GreaterThanSign,    // >
+    TYPE.QuestionMark,       // ?
+    TYPE.CommercialAt,       // @
+    TYPE.LeftSquareBracket,  // [
+    // TYPE.Backslash,          // \
+    TYPE.RightSquareBracket, // ]
+    TYPE.CircumflexAccent,   // ^
+    // TYPE.LowLine,            // _
+    TYPE.GraveAccent,        // `
+    TYPE.LeftCurlyBracket,   // {
+    TYPE.VerticalLine,       // |
+    TYPE.RightCurlyBracket,  // }
+    TYPE.Tilde               // ~
+].forEach(function(key) {
+    SYMBOL_TYPE[Number(key)] = PUNCTUATOR;
+    PUNCTUATION[Number(key)] = PUNCTUATOR;
+});
+
+for (var i = 48; i <= 57; i++) {
+    SYMBOL_TYPE[i] = NUMBER;
 }
 
-function isNumber(code) {
-    return code >= 48 && code <= 57;
-}
+SYMBOL_TYPE[SPACE] = WHITESPACE;
+SYMBOL_TYPE[TAB] = WHITESPACE;
+SYMBOL_TYPE[N] = WHITESPACE;
+SYMBOL_TYPE[R] = WHITESPACE;
+SYMBOL_TYPE[F] = WHITESPACE;
 
-function isNewline(source, offset, code) {
-    if (code === N || code === F || code === R) {
-        if (code === R && offset + 1 < source.length && source.charCodeAt(offset + 1) === N) {
-            return 2;
-        }
+SYMBOL_TYPE[TYPE.Apostrophe] = STRING;
+SYMBOL_TYPE[TYPE.QuotationMark] = STRING;
 
-        return 1;
-    }
+STOP_URL_RAW[SPACE] = 1;
+STOP_URL_RAW[TAB] = 1;
+STOP_URL_RAW[N] = 1;
+STOP_URL_RAW[R] = 1;
+STOP_URL_RAW[F] = 1;
+STOP_URL_RAW[TYPE.Apostrophe] = 1;
+STOP_URL_RAW[TYPE.QuotationMark] = 1;
+STOP_URL_RAW[TYPE.LeftParenthesis] = 1;
+STOP_URL_RAW[TYPE.RightParenthesis] = 1;
 
-    return 0;
-}
-
-function cmpChar(testStr, offset, referenceCode) {
-    var code = testStr.charCodeAt(offset);
-
-    // code.toLowerCase()
-    if (code >= 65 && code <= 90) {
-        code = code | 32;
-    }
-
-    return code === referenceCode;
-}
-
-function cmpStr(testStr, start, end, referenceStr) {
-    if (end - start !== referenceStr.length) {
-        return false;
-    }
-
-    if (start < 0 || end > testStr.length) {
-        return false;
-    }
-
-    for (var i = start; i < end; i++) {
-        var testCode = testStr.charCodeAt(i);
-        var refCode = referenceStr.charCodeAt(i - start);
-
-        // testStr[i].toLowerCase()
-        if (testCode >= 65 && testCode <= 90) {
-            testCode = testCode | 32;
-        }
-
-        if (testCode !== refCode) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function endsWith(testStr, referenceStr) {
-    return cmpStr(testStr, testStr.length - referenceStr.length, testStr.length, referenceStr);
-}
-
-function findLastNonSpaceLocation(scanner) {
-    for (var i = scanner.source.length - 1; i >= 0; i--) {
-        var code = scanner.source.charCodeAt(i);
-
-        if (code !== SPACE && code !== TAB && code !== R && code !== N && code !== F) {
-            break;
-        }
-    }
-
-    return scanner.getLocation(i + 1);
-}
-
-function findWhiteSpaceEnd(source, offset) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        if (code !== SPACE && code !== TAB && code !== R && code !== N && code !== F) {
-            break;
-        }
-    }
-
-    return offset;
-}
-
-function findCommentEnd(source, offset) {
-    var commentEnd = source.indexOf('*/', offset);
-
-    if (commentEnd === -1) {
-        return source.length;
-    }
-
-    return commentEnd + 2;
-}
-
-function findStringEnd(source, offset, quote) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        // TODO: bad string
-        if (code === BACK_SLASH) {
-            offset++;
-        } else if (code === quote) {
-            offset++;
-            break;
-        }
-    }
-
-    return offset;
-}
-
-function findDecimalNumberEnd(source, offset) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        if (code < 48 || code > 57) {  // not a 0 .. 9
-            break;
-        }
-    }
-
-    return offset;
-}
-
-function findNumberEnd(source, offset, allowFraction) {
-    var code;
-
-    offset = findDecimalNumberEnd(source, offset);
-
-    // fraction: .\d+
-    if (allowFraction && offset + 1 < source.length && source.charCodeAt(offset) === FULLSTOP) {
-        code = source.charCodeAt(offset + 1);
-
-        if (isNumber(code)) {
-            offset = findDecimalNumberEnd(source, offset + 1);
-        }
-    }
-
-    // exponent: e[+-]\d+
-    if (offset + 1 < source.length) {
-        if ((source.charCodeAt(offset) | 32) === E) { // case insensitive check for `e`
-            code = source.charCodeAt(offset + 1);
-
-            if (code === PLUSSIGN || code === HYPHENMINUS) {
-                if (offset + 2 < source.length) {
-                    code = source.charCodeAt(offset + 2);
-                }
-            }
-
-            if (isNumber(code)) {
-                offset = findDecimalNumberEnd(source, offset + 2);
-            }
-        }
-    }
-
-    return offset;
-}
-
-// skip escaped unicode sequence that can ends with space
-// [0-9a-f]{1,6}(\r\n|[ \n\r\t\f])?
-function findEscaseEnd(source, offset) {
-    for (var i = 0; i < 7 && offset + i < source.length; i++) {
-        var code = source.charCodeAt(offset + i);
-
-        if (i !== 6 && isHex(code)) {
-            continue;
-        }
-
-        if (i > 0) {
-            offset += i - 1 + isNewline(source, offset + i, code);
-            if (code === SPACE || code === TAB) {
-                offset++;
-            }
-        }
-
-        break;
-    }
-
-    return offset;
-}
-
-function findIdentifierEnd(source, offset) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        if (code === BACK_SLASH) {
-            offset = findEscaseEnd(source, offset + 1);
-        } else if (code < 0x80 && PUNCTUATION[code] === PUNCTUATOR) {
-            break;
-        }
-    }
-
-    return offset;
-}
-
-function findUrlRawEnd(source, offset) {
-    for (; offset < source.length; offset++) {
-        var code = source.charCodeAt(offset);
-
-        if (code === BACK_SLASH) {
-            offset = findEscaseEnd(source, offset + 1);
-        } else if (code < 0x80 && STOP_URL_RAW[code] === 1) {
-            break;
-        }
-    }
-
-    return offset;
-}
+// whitespace is punctuation ...
+PUNCTUATION[SPACE] = PUNCTUATOR;
+PUNCTUATION[TAB] = PUNCTUATOR;
+PUNCTUATION[N] = PUNCTUATOR;
+PUNCTUATION[R] = PUNCTUATOR;
+PUNCTUATION[F] = PUNCTUATOR;
+// ... hyper minus is not
+PUNCTUATION[TYPE.HyphenMinus] = 0;
 
 module.exports = {
-    firstCharOffset: firstCharOffset,
+    TYPE: TYPE,
+    NAME: NAME,
 
-    isHex: isHex,
-    isNumber: isNumber,
-    isNewline: isNewline,
-
-    cmpChar: cmpChar,
-    cmpStr: cmpStr,
-    endsWith: endsWith,
-
-    findLastNonSpaceLocation: findLastNonSpaceLocation,
-    findWhiteSpaceEnd: findWhiteSpaceEnd,
-    findCommentEnd: findCommentEnd,
-    findStringEnd: findStringEnd,
-    findDecimalNumberEnd: findDecimalNumberEnd,
-    findNumberEnd: findNumberEnd,
-    findEscaseEnd: findEscaseEnd,
-    findIdentifierEnd: findIdentifierEnd,
-    findUrlRawEnd: findUrlRawEnd
+    SYMBOL_TYPE: SYMBOL_TYPE,
+    PUNCTUATION: PUNCTUATION,
+    STOP_URL_RAW: STOP_URL_RAW
 };
-}, {"153":153}];
+}, {}];

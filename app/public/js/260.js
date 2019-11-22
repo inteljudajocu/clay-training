@@ -1,16 +1,28 @@
-window.modules["260"] = [function(require,module,exports){var ListCache = require(238);
+window.modules["260"] = [function(require,module,exports){var MapCache = require(252),
+    setCacheAdd = require(262),
+    setCacheHas = require(261);
 
 /**
- * Removes all key-value entries from the stack.
+ *
+ * Creates an array cache object to store unique values.
  *
  * @private
- * @name clear
- * @memberOf Stack
+ * @constructor
+ * @param {Array} [values] The values to cache.
  */
-function stackClear() {
-  this.__data__ = new ListCache;
-  this.size = 0;
+function SetCache(values) {
+  var index = -1,
+      length = values == null ? 0 : values.length;
+
+  this.__data__ = new MapCache;
+  while (++index < length) {
+    this.add(values[index]);
+  }
 }
 
-module.exports = stackClear;
-}, {"238":238}];
+// Add methods to `SetCache`.
+SetCache.prototype.add = SetCache.prototype.push = setCacheAdd;
+SetCache.prototype.has = setCacheHas;
+
+module.exports = SetCache;
+}, {"252":252,"261":261,"262":262}];

@@ -1,13 +1,13 @@
 window.modules["article.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(1),
-    striptags = require(3),
+var _get = require(3),
+    striptags = require(4),
     dateFormat = require(6),
-    dateParse = require(2),
-    utils = require(5),
+    dateParse = require(5),
+    utils = require(2),
     has = utils.has,
     // convenience
-sanitize = require(4);
+sanitize = require(1);
 /**
  * only allow emphasis, italic, and strikethroughs in headlines
  * @param  {string} oldHeadline
@@ -101,13 +101,13 @@ module.exports.save = function (uri, data) {
 }, {"7":7,"8":8}];
 window.modules["direcctions.model"] = [function(require,module,exports){'use strict';
 
-var striptags = require(3),
-    _require = require(5),
+var striptags = require(4),
+    _require = require(2),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
     _require2 = require(9),
     render = _require2.render,
-    _require3 = require(4),
+    _require3 = require(1),
     toSmartText = _require3.toSmartText;
 
 module.exports.save = function (uri, data) {
@@ -129,13 +129,13 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"3":3,"4":4,"5":5,"9":9}];
+}, {"1":1,"2":2,"4":4,"9":9}];
 window.modules["divider.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(4);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   return data;
 };
-}, {"4":4}];
+}, {"1":1}];

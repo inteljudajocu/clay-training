@@ -1,125 +1,207 @@
-window.modules["451"] = [function(require,module,exports){var postcss = require(452);
-var parser = require(453);
+window.modules["451"] = [function(require,module,exports){'use strict';
 
-function parse(str) {
-    var nodes;
-    var saver = parser(function (parsed) {
-        nodes = parsed;
-    });
-    saver.processSync(str);
-    return nodes.at(0);
-}
+exports.__esModule = true;
 
-function replace(nodes, parent) {
-    var replaced = false;
-    nodes.each(function (i) {
-        if (i.type === 'nesting') {
-            i.replaceWith(parent.clone());
-            replaced = true;
-        } else if (i.nodes) {
-            if (replace(i, parent)) {
-                replaced = true;
-            }
-        }
-    });
-    return replaced;
-}
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function selectors(parent, child) {
-    var result = [];
-    parent.selectors.forEach(function (i) {
-        var parentNode = parse(i);
+var _warning = require(460);
 
-        child.selectors.forEach(function (j) {
-            var node = parse(j);
-            var replaced = replace(node, parentNode);
-            if (!replaced) {
-                node.prepend(parser.combinator({ value: ' ' }));
-                node.prepend(parentNode.clone());
-            }
-            result.push(node.toString());
-        });
-    });
-    return result;
-}
+var _warning2 = _interopRequireDefault(_warning);
 
-function pickComment(comment, after) {
-    if ( comment && comment.type === 'comment' ) {
-        after.after(comment);
-        return comment;
-    } else {
-        return after;
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * Provides the result of the PostCSS transformations.
+ *
+ * A Result instance is returned by {@link LazyResult#then}
+ * or {@link Root#toResult} methods.
+ *
+ * @example
+ * postcss([cssnext]).process(css).then(function (result) {
+ *    console.log(result.css);
+ * });
+ *
+ * @example
+ * var result2 = postcss.parse(css).toResult();
+ */
+var Result = function () {
+
+  /**
+   * @param {Processor} processor - processor used for this transformation.
+   * @param {Root}      root      - Root node after all transformations.
+   * @param {processOptions} opts - options from the {@link Processor#process}
+   *                                or {@link Root#toResult}
+   */
+  function Result(processor, root, opts) {
+    _classCallCheck(this, Result);
+
+    /**
+     * @member {Processor} - The Processor instance used
+     *                       for this transformation.
+     *
+     * @example
+     * for ( let plugin of result.processor.plugins) {
+     *   if ( plugin.postcssPlugin === 'postcss-bad' ) {
+     *     throw 'postcss-good is incompatible with postcss-bad';
+     *   }
+     * });
+     */
+    this.processor = processor;
+    /**
+     * @member {Message[]} - Contains messages from plugins
+     *                       (e.g., warnings or custom messages).
+     *                       Each message should have type
+     *                       and plugin properties.
+     *
+     * @example
+     * postcss.plugin('postcss-min-browser', () => {
+     *   return (root, result) => {
+     *     var browsers = detectMinBrowsersByCanIUse(root);
+     *     result.messages.push({
+     *       type:    'min-browser',
+     *       plugin:  'postcss-min-browser',
+     *       browsers: browsers
+     *     });
+     *   };
+     * });
+     */
+    this.messages = [];
+    /**
+     * @member {Root} - Root node after all transformations.
+     *
+     * @example
+     * root.toResult().root == root;
+     */
+    this.root = root;
+    /**
+     * @member {processOptions} - Options from the {@link Processor#process}
+     *                            or {@link Root#toResult} call
+     *                            that produced this Result instance.
+     *
+     * @example
+     * root.toResult(opts).opts == opts;
+     */
+    this.opts = opts;
+    /**
+     * @member {string} - A CSS string representing of {@link Result#root}.
+     *
+     * @example
+     * postcss.parse('a{}').toResult().css //=> "a{}"
+     */
+    this.css = undefined;
+    /**
+     * @member {SourceMapGenerator} - An instance of `SourceMapGenerator`
+     *                                class from the `source-map` library,
+     *                                representing changes
+     *                                to the {@link Result#root} instance.
+     *
+     * @example
+     * result.map.toJSON() //=> { version: 3, file: 'a.css', … }
+     *
+     * @example
+     * if ( result.map ) {
+     *   fs.writeFileSync(result.opts.to + '.map', result.map.toString());
+     * }
+     */
+    this.map = undefined;
+  }
+
+  /**
+   * Returns for @{link Result#css} content.
+   *
+   * @example
+   * result + '' === result.css
+   *
+   * @return {string} string representing of {@link Result#root}
+   */
+
+
+  Result.prototype.toString = function toString() {
+    return this.css;
+  };
+
+  /**
+   * Creates an instance of {@link Warning} and adds it
+   * to {@link Result#messages}.
+   *
+   * @param {string} text        - warning message
+   * @param {Object} [opts]      - warning options
+   * @param {Node}   opts.node   - CSS node that caused the warning
+   * @param {string} opts.word   - word in CSS source that caused the warning
+   * @param {number} opts.index  - index in CSS node string that caused
+   *                               the warning
+   * @param {string} opts.plugin - name of the plugin that created
+   *                               this warning. {@link Result#warn} fills
+   *                               this property automatically.
+   *
+   * @return {Warning} created warning
+   */
+
+
+  Result.prototype.warn = function warn(text) {
+    var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    if (!opts.plugin) {
+      if (this.lastPlugin && this.lastPlugin.postcssPlugin) {
+        opts.plugin = this.lastPlugin.postcssPlugin;
+      }
     }
-}
 
-function atruleChilds(rule, atrule) {
-    var children = [];
-    atrule.each(function (child) {
-        if ( child.type === 'comment' ) {
-            children.push( child );
-        } if ( child.type === 'decl' ) {
-            children.push( child );
-        } else if ( child.type === 'rule' ) {
-            child.selectors = selectors(rule, child);
-        } else if ( child.type === 'atrule' ) {
-            atruleChilds(rule, child);
-        }
+    var warning = new _warning2.default(text, opts);
+    this.messages.push(warning);
+
+    return warning;
+  };
+
+  /**
+   * Returns warnings from plugins. Filters {@link Warning} instances
+   * from {@link Result#messages}.
+   *
+   * @example
+   * result.warnings().forEach(warn => {
+   *   console.warn(warn.toString());
+   * });
+   *
+   * @return {Warning[]} warnings from plugins
+   */
+
+
+  Result.prototype.warnings = function warnings() {
+    return this.messages.filter(function (i) {
+      return i.type === 'warning';
     });
-    if ( atrule.name === 'font-face' ) return;
+  };
 
-    if ( children.length ) {
-        var clone = rule.clone({ nodes: [] });
-        for ( var i = 0; i < children.length; i++ ) {
-            clone.append(children[i]);
-        }
-        atrule.prepend(clone);
+  /**
+   * An alias for the {@link Result#css} property.
+   * Use it with syntaxes that generate non-CSS output.
+   * @type {string}
+   *
+   * @example
+   * result.css === result.content;
+   */
+
+
+  _createClass(Result, [{
+    key: 'content',
+    get: function get() {
+      return this.css;
     }
-}
+  }]);
 
-function processRule(rule, bubble, preserveEmpty) {
-    var unwrapped = false;
-    var after     = rule;
-    rule.each(function (child) {
-        if ( child.type === 'rule' ) {
-            unwrapped = true;
-            child.selectors = selectors(rule, child);
-            after = pickComment(child.prev(), after);
-            after.after(child);
-            after = child;
-        } else if ( child.type === 'atrule' ) {
-            if ( bubble.indexOf(child.name) !== -1 ) {
-                unwrapped = true;
-                atruleChilds(rule, child);
-                after = pickComment(child.prev(), after);
-                after.after(child);
-                after = child;
-            }
-        }
-    });
-    if ( unwrapped && preserveEmpty !== true ) {
-        rule.raws.semicolon = true;
-        if ( rule.nodes.length === 0 ) rule.remove();
-    }
-}
+  return Result;
+}();
 
-module.exports = postcss.plugin('postcss-nested', function (opts) {
-    var bubble = ['media', 'supports', 'document', 'font-face'];
-    if ( opts && opts.bubble ) {
-        bubble = bubble.concat(opts.bubble.map(function (i) {
-            return i.replace(/^@/, '');
-        }));
-    }
-    var preserveEmpty = opts ? opts.preserveEmpty : false;
+exports.default = Result;
 
-    var process = function (node) {
-        node.each(function (child) {
-            if ( child.type === 'rule' ) {
-                processRule(child, bubble, preserveEmpty);
-            } else if ( child.type === 'atrule' ) {
-                process(child);
-            }
-        });
-    };
-    return process;
-});
-}, {"452":452,"453":453}];
+/**
+ * @typedef  {object} Message
+ * @property {string} type   - message type
+ * @property {string} plugin - source PostCSS plugin name
+ */
+
+module.exports = exports['default'];
+
+}, {"460":460}];

@@ -1,10 +1,10 @@
-window.modules["141"] = [function(require,module,exports){var List = require(53);
+window.modules["141"] = [function(require,module,exports){var List = require(54);
 
 module.exports = {
-    parse: function compoundSelector() {
+    parse: function() {
         return new List().appendData(
-            this.Selector()
+            this.Identifier()
         );
     }
 };
-}, {"53":53}];
+}, {"54":54}];

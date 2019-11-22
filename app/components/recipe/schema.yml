@@ -3,6 +3,7 @@ description: |
 
 title:
   _label: Recipe title
+  _publish: pageTitle # Listened to by the `meta-title` component
   _has:
     input: text
 

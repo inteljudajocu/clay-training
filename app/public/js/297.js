@@ -1,21 +1,22 @@
-window.modules["297"] = [function(require,module,exports){var baseFindIndex = require(285),
-    baseIsNaN = require(298),
-    strictIndexOf = require(299);
+window.modules["297"] = [function(require,module,exports){var isSymbol = require(348);
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
 
 /**
- * The base implementation of `_.indexOf` without `fromIndex` bounds checks.
+ * Converts `value` to a string key if it's not a string or symbol.
  *
  * @private
- * @param {Array} array The array to inspect.
- * @param {*} value The value to search for.
- * @param {number} fromIndex The index to search from.
- * @returns {number} Returns the index of the matched value, else `-1`.
+ * @param {*} value The value to inspect.
+ * @returns {string|symbol} Returns the key.
  */
-function baseIndexOf(array, value, fromIndex) {
-  return value === value
-    ? strictIndexOf(array, value, fromIndex)
-    : baseFindIndex(array, baseIsNaN, fromIndex);
+function toKey(value) {
+  if (typeof value == 'string' || isSymbol(value)) {
+    return value;
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
 }
 
-module.exports = baseIndexOf;
-}, {"285":285,"298":298,"299":299}];
+module.exports = toKey;
+}, {"348":348}];

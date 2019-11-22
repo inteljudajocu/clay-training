@@ -1,42 +1,58 @@
-window.modules["517"] = [function(require,module,exports){'use strict';
+window.modules["517"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
-exports.default = parse;
+exports.default = void 0;
 
-var _parser = require(530);
-
-var _parser2 = _interopRequireDefault(_parser);
-
-var _input = require(521);
-
-var _input2 = _interopRequireDefault(_input);
+var _node = _interopRequireDefault(require(547));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function parse(css, opts) {
-    if (opts && opts.safe) {
-        throw new Error('Option safe was removed. ' + 'Use parser: require("postcss-safe-parser")');
-    }
+function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
-    var input = new _input2.default(css, opts);
-    var parser = new _parser2.default(input);
-    try {
-        parser.parse();
-    } catch (e) {
-        if (e.name === 'CssSyntaxError' && opts && opts.from) {
-            if (/\.scss$/i.test(opts.from)) {
-                e.message += '\nYou tried to parse SCSS with ' + 'the standard CSS parser; ' + 'try again with the postcss-scss parser';
-            } else if (/\.sass/i.test(opts.from)) {
-                e.message += '\nYou tried to parse Sass with ' + 'the standard CSS parser; ' + 'try again with the postcss-sass parser';
-            } else if (/\.less$/i.test(opts.from)) {
-                e.message += '\nYou tried to parse Less with ' + 'the standard CSS parser; ' + 'try again with the postcss-less parser';
-            }
-        }
-        throw e;
-    }
+/**
+ * Represents a comment between declarations or statements (rule and at-rules).
+ *
+ * Comments inside selectors, at-rule parameters, or declaration values
+ * will be stored in the `raws` properties explained above.
+ *
+ * @extends Node
+ */
+var Comment =
+/*#__PURE__*/
+function (_Node) {
+  _inheritsLoose(Comment, _Node);
 
-    return parser.root;
-}
-module.exports = exports['default'];
+  function Comment(defaults) {
+    var _this;
 
-}, {"521":521,"530":530}];
+    _this = _Node.call(this, defaults) || this;
+    _this.type = 'comment';
+    return _this;
+  }
+  /**
+   * @memberof Comment#
+   * @member {string} text The comment’s text.
+   */
+
+  /**
+   * @memberof Comment#
+   * @member {object} raws Information to generate byte-to-byte equal
+   *                       node string as it was in the origin input.
+   *
+   * Every parser saves its own properties,
+   * but the default CSS parser uses:
+   *
+   * * `before`: the space symbols before the node.
+   * * `left`: the space symbols between `/*` and the comment’s text.
+   * * `right`: the space symbols between the comment’s text.
+   */
+
+
+  return Comment;
+}(_node.default);
+
+var _default = Comment;
+exports.default = _default;
+module.exports = exports.default;
+
+}, {"547":547}];

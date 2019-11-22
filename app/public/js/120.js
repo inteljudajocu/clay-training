@@ -1,28 +1,30 @@
-window.modules["120"] = [function(require,module,exports){var TYPE = require(74).TYPE;
-
-var NUMBER = TYPE.Number;
-var PERCENTSIGN = TYPE.PercentSign;
+window.modules["120"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 
 module.exports = {
-    name: 'Percentage',
+    name: 'Parentheses',
     structure: {
-        value: String
+        children: [[]]
     },
-    parse: function() {
+    parse: function(readSequence, recognizer) {
         var start = this.scanner.tokenStart;
-        var number = this.scanner.consume(NUMBER);
+        var children = null;
 
-        this.scanner.eat(PERCENTSIGN);
+        this.scanner.eat(LEFTPARENTHESIS);
+        children = readSequence.call(this, recognizer);
+        this.scanner.eat(RIGHTPARENTHESIS);
 
         return {
-            type: 'Percentage',
+            type: 'Parentheses',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            value: number
+            children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.value);
-        processChunk('%');
+        processChunk('(');
+        this.each(processChunk, node);
+        processChunk(')');
     }
 };
-}, {"74":74}];
+}, {"75":75}];

@@ -1,6 +1,6 @@
 window.modules["recipe.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(1),
+var _get = require(3),
     defaultWidth = 'inline';
 
 module.exports.render = function (uri, data) {
@@ -26,24 +26,24 @@ module.exports.save = function (uri, data) {
 
   return Object.assign(data, image);
 };
-}, {"1":1}];
+}, {"3":3}];
 window.modules["subheader.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(4);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   data.subheaderId = "".concat(data.subheaderId || data.text).trim().replace(/\s+/g, '-');
   return data;
 };
-}, {"4":4}];
+}, {"1":1}];
 window.modules["tags.model"] = [function(require,module,exports){'use strict';
 
-var _map = require(17),
-    _assign = require(16),
-    _set = require(14),
-    _includes = require(15),
-    _require = require(4),
+var _map = require(15),
+    _assign = require(17),
+    _set = require(16),
+    _includes = require(18),
+    _require = require(1),
     removeNonAlphanumericCharacters = _require.removeNonAlphanumericCharacters,
     invisibleTags = [];
 /**
@@ -97,16 +97,16 @@ module.exports.save = function (uri, data) {
   data.items = items;
   return data;
 };
-}, {"4":4,"14":14,"15":15,"16":16,"17":17}];
+}, {"1":1,"15":15,"16":16,"17":17,"18":18}];
 window.modules["title-ingridients.model"] = [function(require,module,exports){'use strict';
 
-var striptags = require(3),
-    _require = require(5),
+var striptags = require(4),
+    _require = require(2),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
     _require2 = require(9),
     render = _require2.render,
-    _require3 = require(4),
+    _require3 = require(1),
     toSmartText = _require3.toSmartText;
 
 module.exports.save = function (uri, data) {
@@ -128,4 +128,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"3":3,"4":4,"5":5,"9":9}];
+}, {"1":1,"2":2,"4":4,"9":9}];

@@ -2,766 +2,552 @@ window.modules["456"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _declaration = require(440);
 
-var _dotProp = require(195);
+var _declaration2 = _interopRequireDefault(_declaration);
 
-var _dotProp2 = _interopRequireDefault(_dotProp);
-
-var _indexesOf = require(228);
-
-var _indexesOf2 = _interopRequireDefault(_indexesOf);
-
-var _uniq = require(473);
-
-var _uniq2 = _interopRequireDefault(_uniq);
-
-var _root = require(472);
-
-var _root2 = _interopRequireDefault(_root);
-
-var _selector = require(470);
-
-var _selector2 = _interopRequireDefault(_selector);
-
-var _className = require(466);
-
-var _className2 = _interopRequireDefault(_className);
-
-var _comment = require(464);
-
-var _comment2 = _interopRequireDefault(_comment);
-
-var _id = require(469);
-
-var _id2 = _interopRequireDefault(_id);
-
-var _tag = require(467);
-
-var _tag2 = _interopRequireDefault(_tag);
-
-var _string = require(461);
-
-var _string2 = _interopRequireDefault(_string);
-
-var _pseudo = require(468);
-
-var _pseudo2 = _interopRequireDefault(_pseudo);
-
-var _attribute = require(465);
-
-var _attribute2 = _interopRequireDefault(_attribute);
-
-var _universal = require(471);
-
-var _universal2 = _interopRequireDefault(_universal);
-
-var _combinator = require(462);
-
-var _combinator2 = _interopRequireDefault(_combinator);
-
-var _nesting = require(463);
-
-var _nesting2 = _interopRequireDefault(_nesting);
-
-var _sortAscending = require(457);
-
-var _sortAscending2 = _interopRequireDefault(_sortAscending);
-
-var _tokenize = require(459);
+var _tokenize = require(457);
 
 var _tokenize2 = _interopRequireDefault(_tokenize);
 
-var _tokenTypes = require(458);
+var _comment = require(438);
 
-var tokens = _interopRequireWildcard(_tokenTypes);
+var _comment2 = _interopRequireDefault(_comment);
 
-var _types = require(460);
+var _atRule = require(436);
 
-var types = _interopRequireWildcard(_types);
+var _atRule2 = _interopRequireDefault(_atRule);
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _root = require(443);
+
+var _root2 = _interopRequireDefault(_root);
+
+var _rule = require(441);
+
+var _rule2 = _interopRequireDefault(_rule);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function getSource(startLine, startColumn, endLine, endColumn) {
-    return {
-        start: {
-            line: startLine,
-            column: startColumn
-        },
-        end: {
-            line: endLine,
-            column: endColumn
-        }
-    };
-}
-
 var Parser = function () {
-    function Parser(rule) {
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
+    function Parser(input) {
         _classCallCheck(this, Parser);
 
-        this.rule = rule;
-        this.options = Object.assign({ lossy: false, safe: false }, options);
-        this.position = 0;
+        this.input = input;
+
         this.root = new _root2.default();
-        this.root.errorGenerator = this._errorGenerator();
+        this.current = this.root;
+        this.spaces = '';
+        this.semicolon = false;
 
-        var selector = new _selector2.default();
-        this.root.append(selector);
-        this.current = selector;
-
-        this.css = typeof this.rule === 'string' ? this.rule : this.rule.selector;
-
-        if (this.options.lossy) {
-            this.css = this.css.trim();
-        }
-        this.tokens = (0, _tokenize2.default)({
-            css: this.css,
-            error: this._errorGenerator(),
-            safe: this.options.safe
-        });
-
-        this.loop();
+        this.createTokenizer();
+        this.root.source = { input: input, start: { line: 1, column: 1 } };
     }
 
-    Parser.prototype._errorGenerator = function _errorGenerator() {
-        var _this = this;
-
-        return function (message, errorOptions) {
-            if (typeof _this.rule === 'string') {
-                return new Error(message);
-            }
-            return _this.rule.error(message, errorOptions);
-        };
+    Parser.prototype.createTokenizer = function createTokenizer() {
+        this.tokenizer = (0, _tokenize2.default)(this.input);
     };
 
-    Parser.prototype.attribute = function attribute() {
-        var attr = [];
-        var startingToken = this.currToken;
-        this.position++;
-        while (this.position < this.tokens.length && this.currToken[0] !== tokens.closeSquare) {
-            attr.push(this.currToken);
-            this.position++;
-        }
-        if (this.currToken[0] !== tokens.closeSquare) {
-            return this.expected('closing square bracket', this.currToken[5]);
-        }
-
-        var len = attr.length;
-        var node = {
-            source: getSource(startingToken[1], startingToken[2], this.currToken[3], this.currToken[4]),
-            sourceIndex: startingToken[5]
-        };
-
-        if (len === 1 && !~[tokens.word].indexOf(attr[0][0])) {
-            return this.expected('attribute', attr[0][5]);
-        }
-
-        var pos = 0;
-        var spaceBefore = '';
-        var commentBefore = '';
-        var lastAdded = null;
-        var spaceAfterMeaningfulToken = false;
-
-        while (pos < len) {
-            var token = attr[pos];
-            var content = this.content(token);
-            var next = attr[pos + 1];
+    Parser.prototype.parse = function parse() {
+        var token = void 0;
+        while (!this.tokenizer.endOfFile()) {
+            token = this.tokenizer.nextToken();
 
             switch (token[0]) {
-                case tokens.space:
-                    if (len === 1 || pos === 0 && this.content(next) === '|') {
-                        return this.expected('attribute', token[5], content);
-                    }
-                    spaceAfterMeaningfulToken = true;
-                    if (this.options.lossy) {
-                        break;
-                    }
-                    if (lastAdded) {
-                        var spaceProp = 'spaces.' + lastAdded + '.after';
-                        _dotProp2.default.set(node, spaceProp, _dotProp2.default.get(node, spaceProp, '') + content);
-                        var commentProp = 'raws.spaces.' + lastAdded + '.after';
-                        var existingComment = _dotProp2.default.get(node, commentProp);
-                        if (existingComment) {
-                            _dotProp2.default.set(node, commentProp, existingComment + content);
-                        }
-                    } else {
-                        spaceBefore = spaceBefore + content;
-                        commentBefore = commentBefore + content;
-                    }
+
+                case 'space':
+                    this.spaces += token[1];
                     break;
-                case tokens.asterisk:
-                    if (next[0] === tokens.equals) {
-                        node.operator = content;
-                        lastAdded = 'operator';
-                    } else if ((!node.namespace || lastAdded === "namespace" && !spaceAfterMeaningfulToken) && next) {
-                        if (spaceBefore) {
-                            _dotProp2.default.set(node, 'spaces.attribute.before', spaceBefore);
-                            spaceBefore = '';
-                        }
-                        if (commentBefore) {
-                            _dotProp2.default.set(node, 'raws.spaces.attribute.before', spaceBefore);
-                            commentBefore = '';
-                        }
-                        node.namespace = (node.namespace || "") + content;
-                        var rawValue = _dotProp2.default.get(node, "raws.namespace");
-                        if (rawValue) {
-                            node.raws.namespace += content;
-                        }
-                        lastAdded = 'namespace';
-                    }
-                    spaceAfterMeaningfulToken = false;
+
+                case ';':
+                    this.freeSemicolon(token);
                     break;
-                case tokens.dollar:
-                case tokens.caret:
-                    if (next[0] === tokens.equals) {
-                        node.operator = content;
-                        lastAdded = 'operator';
-                    }
-                    spaceAfterMeaningfulToken = false;
+
+                case '}':
+                    this.end(token);
                     break;
-                case tokens.combinator:
-                    if (content === '~' && next[0] === tokens.equals) {
-                        node.operator = content;
-                        lastAdded = 'operator';
-                    }
-                    if (content !== '|') {
-                        spaceAfterMeaningfulToken = false;
-                        break;
-                    }
-                    if (next[0] === tokens.equals) {
-                        node.operator = content;
-                        lastAdded = 'operator';
-                    } else if (!node.namespace && !node.attribute) {
-                        node.namespace = true;
-                    }
-                    spaceAfterMeaningfulToken = false;
+
+                case 'comment':
+                    this.comment(token);
                     break;
-                case tokens.word:
-                    if (next && this.content(next) === '|' && attr[pos + 2] && attr[pos + 2][0] !== tokens.equals && // this look-ahead probably fails with comment nodes involved.
-                    !node.operator && !node.namespace) {
-                        node.namespace = content;
-                        lastAdded = 'namespace';
-                    } else if (!node.attribute || lastAdded === "attribute" && !spaceAfterMeaningfulToken) {
-                        if (spaceBefore) {
-                            _dotProp2.default.set(node, 'spaces.attribute.before', spaceBefore);
-                            spaceBefore = '';
-                        }
-                        if (commentBefore) {
-                            _dotProp2.default.set(node, 'raws.spaces.attribute.before', commentBefore);
-                            commentBefore = '';
-                        }
-                        node.attribute = (node.attribute || "") + content;
-                        var _rawValue = _dotProp2.default.get(node, "raws.attribute");
-                        if (_rawValue) {
-                            node.raws.attribute += content;
-                        }
-                        lastAdded = 'attribute';
-                    } else if (!node.value || lastAdded === "value" && !spaceAfterMeaningfulToken) {
-                        node.value = (node.value || "") + content;
-                        var _rawValue2 = _dotProp2.default.get(node, "raws.value");
-                        if (_rawValue2) {
-                            node.raws.value += content;
-                        }
-                        lastAdded = 'value';
-                        _dotProp2.default.set(node, 'raws.unquoted', _dotProp2.default.get(node, 'raws.unquoted', '') + content);
-                    } else if (content === 'i') {
-                        if (node.value && (node.quoted || spaceAfterMeaningfulToken)) {
-                            node.insensitive = true;
-                            lastAdded = 'insensitive';
-                            if (spaceBefore) {
-                                _dotProp2.default.set(node, 'spaces.insensitive.before', spaceBefore);
-                                spaceBefore = '';
-                            }
-                            if (commentBefore) {
-                                _dotProp2.default.set(node, 'raws.spaces.insensitive.before', commentBefore);
-                                commentBefore = '';
-                            }
-                        } else if (node.value) {
-                            lastAdded = 'value';
-                            node.value += 'i';
-                            if (node.raws.value) {
-                                node.raws.value += 'i';
-                            }
-                        }
-                    }
-                    spaceAfterMeaningfulToken = false;
+
+                case 'at-word':
+                    this.atrule(token);
                     break;
-                case tokens.str:
-                    if (!node.attribute || !node.operator) {
-                        return this.error('Expected an attribute followed by an operator preceding the string.', {
-                            index: token[5]
-                        });
-                    }
-                    node.value = content;
-                    node.quoted = true;
-                    lastAdded = 'value';
-                    _dotProp2.default.set(node, 'raws.unquoted', content.slice(1, -1));
-                    spaceAfterMeaningfulToken = false;
+
+                case '{':
+                    this.emptyRule(token);
                     break;
-                case tokens.equals:
-                    if (!node.attribute) {
-                        return this.expected('attribute', token[5], content);
-                    }
-                    if (node.value) {
-                        return this.error('Unexpected "=" found; an operator was already defined.', { index: token[5] });
-                    }
-                    node.operator = node.operator ? node.operator + content : content;
-                    lastAdded = 'operator';
-                    spaceAfterMeaningfulToken = false;
-                    break;
-                case tokens.comment:
-                    if (lastAdded) {
-                        if (spaceAfterMeaningfulToken || next && next[0] === tokens.space) {
-                            var lastComment = _dotProp2.default.get(node, 'raws.spaces.' + lastAdded + '.after', _dotProp2.default.get(node, 'spaces.' + lastAdded + '.after', ''));
-                            _dotProp2.default.set(node, 'raws.spaces.' + lastAdded + '.after', lastComment + content);
-                        } else {
-                            var lastValue = _dotProp2.default.get(node, 'raws.' + lastAdded, _dotProp2.default.get(node, lastAdded, ''));
-                            _dotProp2.default.set(node, 'raws.' + lastAdded, lastValue + content);
-                        }
-                    } else {
-                        commentBefore = commentBefore + content;
-                    }
-                    break;
+
                 default:
-                    return this.error('Unexpected "' + content + '" found.', { index: token[5] });
+                    this.other(token);
+                    break;
             }
-            pos++;
         }
-
-        this.newNode(new _attribute2.default(node));
-        this.position++;
+        this.endFile();
     };
 
-    Parser.prototype.combinator = function combinator() {
-        var current = this.currToken;
-        if (this.content() === '|') {
-            return this.namespace();
+    Parser.prototype.comment = function comment(token) {
+        var node = new _comment2.default();
+        this.init(node, token[2], token[3]);
+        node.source.end = { line: token[4], column: token[5] };
+
+        var text = token[1].slice(2, -2);
+        if (/^\s*$/.test(text)) {
+            node.text = '';
+            node.raws.left = text;
+            node.raws.right = '';
+        } else {
+            var match = text.match(/^(\s*)([^]*[^\s])(\s*)$/);
+            node.text = match[2];
+            node.raws.left = match[1];
+            node.raws.right = match[3];
         }
-        var node = new _combinator2.default({
-            value: '',
-            source: getSource(current[1], current[2], current[3], current[4]),
-            sourceIndex: current[5]
-        });
-        while (this.position < this.tokens.length && this.currToken && (this.currToken[0] === tokens.space || this.currToken[0] === tokens.combinator)) {
-            var content = this.content();
-            if (this.nextToken && this.nextToken[0] === tokens.combinator) {
-                node.spaces.before = this.parseSpace(content);
-                node.source = getSource(this.nextToken[1], this.nextToken[2], this.nextToken[3], this.nextToken[4]);
-                node.sourceIndex = this.nextToken[5];
-            } else if (this.prevToken && this.prevToken[0] === tokens.combinator) {
-                node.spaces.after = this.parseSpace(content);
-            } else if (this.currToken[0] === tokens.combinator) {
-                node.value = content;
-            } else if (this.currToken[0] === tokens.space) {
-                node.value = this.parseSpace(content, ' ');
-            }
-            this.position++;
-        }
-        return this.newNode(node);
     };
 
-    Parser.prototype.comma = function comma() {
-        if (this.position === this.tokens.length - 1) {
-            this.root.trailingComma = true;
-            this.position++;
+    Parser.prototype.emptyRule = function emptyRule(token) {
+        var node = new _rule2.default();
+        this.init(node, token[2], token[3]);
+        node.selector = '';
+        node.raws.between = '';
+        this.current = node;
+    };
+
+    Parser.prototype.other = function other(start) {
+        var end = false;
+        var type = null;
+        var colon = false;
+        var bracket = null;
+        var brackets = [];
+
+        var tokens = [];
+        var token = start;
+        while (token) {
+            type = token[0];
+            tokens.push(token);
+
+            if (type === '(' || type === '[') {
+                if (!bracket) bracket = token;
+                brackets.push(type === '(' ? ')' : ']');
+            } else if (brackets.length === 0) {
+                if (type === ';') {
+                    if (colon) {
+                        this.decl(tokens);
+                        return;
+                    } else {
+                        break;
+                    }
+                } else if (type === '{') {
+                    this.rule(tokens);
+                    return;
+                } else if (type === '}') {
+                    this.tokenizer.back(tokens.pop());
+                    end = true;
+                    break;
+                } else if (type === ':') {
+                    colon = true;
+                }
+            } else if (type === brackets[brackets.length - 1]) {
+                brackets.pop();
+                if (brackets.length === 0) bracket = null;
+            }
+
+            token = this.tokenizer.nextToken();
+        }
+
+        if (this.tokenizer.endOfFile()) end = true;
+        if (brackets.length > 0) this.unclosedBracket(bracket);
+
+        if (end && colon) {
+            while (tokens.length) {
+                token = tokens[tokens.length - 1][0];
+                if (token !== 'space' && token !== 'comment') break;
+                this.tokenizer.back(tokens.pop());
+            }
+            this.decl(tokens);
             return;
-        }
-        var selector = new _selector2.default();
-        this.current.parent.append(selector);
-        this.current = selector;
-        this.position++;
-    };
-
-    Parser.prototype.comment = function comment() {
-        var current = this.currToken;
-        this.newNode(new _comment2.default({
-            value: this.content(),
-            source: getSource(current[1], current[2], current[3], current[4]),
-            sourceIndex: current[5]
-        }));
-        this.position++;
-    };
-
-    Parser.prototype.error = function error(message, opts) {
-        throw this.root.error(message, opts);
-    };
-
-    Parser.prototype.missingBackslash = function missingBackslash() {
-        return this.error('Expected a backslash preceding the semicolon.', {
-            index: this.currToken[5]
-        });
-    };
-
-    Parser.prototype.missingParenthesis = function missingParenthesis() {
-        return this.expected('opening parenthesis', this.currToken[5]);
-    };
-
-    Parser.prototype.missingSquareBracket = function missingSquareBracket() {
-        return this.expected('opening square bracket', this.currToken[5]);
-    };
-
-    Parser.prototype.namespace = function namespace() {
-        var before = this.prevToken && this.content(this.prevToken) || true;
-        if (this.nextToken[0] === tokens.word) {
-            this.position++;
-            return this.word(before);
-        } else if (this.nextToken[0] === tokens.asterisk) {
-            this.position++;
-            return this.universal(before);
-        }
-    };
-
-    Parser.prototype.nesting = function nesting() {
-        var current = this.currToken;
-        this.newNode(new _nesting2.default({
-            value: this.content(),
-            source: getSource(current[1], current[2], current[3], current[4]),
-            sourceIndex: current[5]
-        }));
-        this.position++;
-    };
-
-    Parser.prototype.parentheses = function parentheses() {
-        var last = this.current.last;
-        var balanced = 1;
-        this.position++;
-        if (last && last.type === types.PSEUDO) {
-            var selector = new _selector2.default();
-            var cache = this.current;
-            last.append(selector);
-            this.current = selector;
-            while (this.position < this.tokens.length && balanced) {
-                if (this.currToken[0] === tokens.openParenthesis) {
-                    balanced++;
-                }
-                if (this.currToken[0] === tokens.closeParenthesis) {
-                    balanced--;
-                }
-                if (balanced) {
-                    this.parse();
-                } else {
-                    selector.parent.source.end.line = this.currToken[3];
-                    selector.parent.source.end.column = this.currToken[4];
-                    this.position++;
-                }
-            }
-            this.current = cache;
         } else {
-            last.value += '(';
-            while (this.position < this.tokens.length && balanced) {
-                if (this.currToken[0] === tokens.openParenthesis) {
-                    balanced++;
-                }
-                if (this.currToken[0] === tokens.closeParenthesis) {
-                    balanced--;
-                }
-                last.value += this.parseParenthesisToken(this.currToken);
-                this.position++;
-            }
-        }
-        if (balanced) {
-            return this.expected('closing parenthesis', this.currToken[5]);
+            this.unknownWord(tokens);
         }
     };
 
-    Parser.prototype.pseudo = function pseudo() {
-        var _this2 = this;
+    Parser.prototype.rule = function rule(tokens) {
+        tokens.pop();
 
-        var pseudoStr = '';
-        var startingToken = this.currToken;
-        while (this.currToken && this.currToken[0] === tokens.colon) {
-            pseudoStr += this.content();
-            this.position++;
+        var node = new _rule2.default();
+        this.init(node, tokens[0][2], tokens[0][3]);
+
+        node.raws.between = this.spacesAndCommentsFromEnd(tokens);
+        this.raw(node, 'selector', tokens);
+        this.current = node;
+    };
+
+    Parser.prototype.decl = function decl(tokens) {
+        var node = new _declaration2.default();
+        this.init(node);
+
+        var last = tokens[tokens.length - 1];
+        if (last[0] === ';') {
+            this.semicolon = true;
+            tokens.pop();
         }
-        if (!this.currToken) {
-            return this.expected(['pseudo-class', 'pseudo-element'], this.position - 1);
-        }
-        if (this.currToken[0] === tokens.word) {
-            this.splitWord(false, function (first, length) {
-                pseudoStr += first;
-                _this2.newNode(new _pseudo2.default({
-                    value: pseudoStr,
-                    source: getSource(startingToken[1], startingToken[2], _this2.currToken[3], _this2.currToken[4]),
-                    sourceIndex: startingToken[5]
-                }));
-                if (length > 1 && _this2.nextToken && _this2.nextToken[0] === tokens.openParenthesis) {
-                    _this2.error('Misplaced parenthesis.', {
-                        index: _this2.nextToken[5]
-                    });
-                }
-            });
+        if (last[4]) {
+            node.source.end = { line: last[4], column: last[5] };
         } else {
-            return this.expected(['pseudo-class', 'pseudo-element'], this.currToken[5]);
+            node.source.end = { line: last[2], column: last[3] };
         }
-    };
 
-    Parser.prototype.space = function space() {
-        var content = this.content();
-        // Handle space before and after the selector
-        if (this.position === 0 || this.prevToken[0] === tokens.comma || this.prevToken[0] === tokens.openParenthesis) {
-            this.spaces = this.parseSpace(content);
-            this.position++;
-        } else if (this.position === this.tokens.length - 1 || this.nextToken[0] === tokens.comma || this.nextToken[0] === tokens.closeParenthesis) {
-            this.current.last.spaces.after = this.parseSpace(content);
-            this.position++;
-        } else {
-            this.combinator();
+        while (tokens[0][0] !== 'word') {
+            if (tokens.length === 1) this.unknownWord(tokens);
+            node.raws.before += tokens.shift()[1];
         }
-    };
+        node.source.start = { line: tokens[0][2], column: tokens[0][3] };
 
-    Parser.prototype.string = function string() {
-        var current = this.currToken;
-        this.newNode(new _string2.default({
-            value: this.content(),
-            source: getSource(current[1], current[2], current[3], current[4]),
-            sourceIndex: current[5]
-        }));
-        this.position++;
-    };
-
-    Parser.prototype.universal = function universal(namespace) {
-        var nextToken = this.nextToken;
-        if (nextToken && this.content(nextToken) === '|') {
-            this.position++;
-            return this.namespace();
-        }
-        var current = this.currToken;
-        this.newNode(new _universal2.default({
-            value: this.content(),
-            source: getSource(current[1], current[2], current[3], current[4]),
-            sourceIndex: current[5]
-        }), namespace);
-        this.position++;
-    };
-
-    Parser.prototype.splitWord = function splitWord(namespace, firstCallback) {
-        var _this3 = this;
-
-        var nextToken = this.nextToken;
-        var word = this.content();
-        while (nextToken && ~[tokens.dollar, tokens.caret, tokens.equals, tokens.word].indexOf(nextToken[0])) {
-            this.position++;
-            var current = this.content();
-            word += current;
-            if (current.lastIndexOf('\\') === current.length - 1) {
-                var next = this.nextToken;
-                if (next && next[0] === tokens.space) {
-                    word += this.parseSpace(this.content(next), ' ');
-                    this.position++;
-                }
+        node.prop = '';
+        while (tokens.length) {
+            var type = tokens[0][0];
+            if (type === ':' || type === 'space' || type === 'comment') {
+                break;
             }
-            nextToken = this.nextToken;
+            node.prop += tokens.shift()[1];
         }
-        var hasClass = (0, _indexesOf2.default)(word, '.');
-        var hasId = (0, _indexesOf2.default)(word, '#');
-        // Eliminate Sass interpolations from the list of id indexes
-        var interpolations = (0, _indexesOf2.default)(word, '#{');
-        if (interpolations.length) {
-            hasId = hasId.filter(function (hashIndex) {
-                return !~interpolations.indexOf(hashIndex);
-            });
-        }
-        var indices = (0, _sortAscending2.default)((0, _uniq2.default)([0].concat(hasClass, hasId)));
-        indices.forEach(function (ind, i) {
-            var index = indices[i + 1] || word.length;
-            var value = word.slice(ind, index);
-            if (i === 0 && firstCallback) {
-                return firstCallback.call(_this3, value, indices.length);
-            }
-            var node = void 0;
-            var current = _this3.currToken;
-            var sourceIndex = current[5] + indices[i];
-            var source = getSource(current[1], current[2] + ind, current[3], current[2] + (index - 1));
-            if (~hasClass.indexOf(ind)) {
-                node = new _className2.default({
-                    value: value.slice(1),
-                    source: source,
-                    sourceIndex: sourceIndex
-                });
-            } else if (~hasId.indexOf(ind)) {
-                node = new _id2.default({
-                    value: value.slice(1),
-                    source: source,
-                    sourceIndex: sourceIndex
-                });
+
+        node.raws.between = '';
+
+        var token = void 0;
+        while (tokens.length) {
+            token = tokens.shift();
+
+            if (token[0] === ':') {
+                node.raws.between += token[1];
+                break;
             } else {
-                node = new _tag2.default({
-                    value: value,
-                    source: source,
-                    sourceIndex: sourceIndex
-                });
+                node.raws.between += token[1];
             }
-            _this3.newNode(node, namespace);
-            // Ensure that the namespace is used only once
-            namespace = null;
-        });
-        this.position++;
-    };
-
-    Parser.prototype.word = function word(namespace) {
-        var nextToken = this.nextToken;
-        if (nextToken && this.content(nextToken) === '|') {
-            this.position++;
-            return this.namespace();
         }
-        return this.splitWord(namespace);
-    };
 
-    Parser.prototype.loop = function loop() {
-        while (this.position < this.tokens.length) {
-            this.parse(true);
+        if (node.prop[0] === '_' || node.prop[0] === '*') {
+            node.raws.before += node.prop[0];
+            node.prop = node.prop.slice(1);
         }
-        return this.root;
-    };
+        node.raws.between += this.spacesAndCommentsFromStart(tokens);
+        this.precheckMissedSemicolon(tokens);
 
-    Parser.prototype.parse = function parse(throwOnParenthesis) {
-        switch (this.currToken[0]) {
-            case tokens.space:
-                this.space();
+        for (var i = tokens.length - 1; i > 0; i--) {
+            token = tokens[i];
+            if (token[1].toLowerCase() === '!important') {
+                node.important = true;
+                var string = this.stringFrom(tokens, i);
+                string = this.spacesFromEnd(tokens) + string;
+                if (string !== ' !important') node.raws.important = string;
                 break;
-            case tokens.comment:
-                this.comment();
-                break;
-            case tokens.openParenthesis:
-                this.parentheses();
-                break;
-            case tokens.closeParenthesis:
-                if (throwOnParenthesis) {
-                    this.missingParenthesis();
+            } else if (token[1].toLowerCase() === 'important') {
+                var cache = tokens.slice(0);
+                var str = '';
+                for (var j = i; j > 0; j--) {
+                    var _type = cache[j][0];
+                    if (str.trim().indexOf('!') === 0 && _type !== 'space') {
+                        break;
+                    }
+                    str = cache.pop()[1] + str;
                 }
-                break;
-            case tokens.openSquare:
-                this.attribute();
-                break;
-            case tokens.dollar:
-            case tokens.caret:
-            case tokens.equals:
-            case tokens.word:
-                this.word();
-                break;
-            case tokens.colon:
-                this.pseudo();
-                break;
-            case tokens.comma:
-                this.comma();
-                break;
-            case tokens.asterisk:
-                this.universal();
-                break;
-            case tokens.ampersand:
-                this.nesting();
-                break;
-            case tokens.combinator:
-                this.combinator();
-                break;
-            case tokens.str:
-                this.string();
-                break;
-            // These cases throw; no break needed.
-            case tokens.closeSquare:
-                this.missingSquareBracket();
-            case tokens.semicolon:
-                this.missingBackslash();
-        }
-    };
-
-    /**
-     * Helpers
-     */
-
-    Parser.prototype.expected = function expected(description, index, found) {
-        if (Array.isArray(description)) {
-            var last = description.pop();
-            description = description.join(', ') + ' or ' + last;
-        }
-        var an = /^[aeiou]/.test(description[0]) ? 'an' : 'a';
-        if (!found) {
-            return this.error('Expected ' + an + ' ' + description + '.', { index: index });
-        }
-        return this.error('Expected ' + an + ' ' + description + ', found "' + found + '" instead.', { index: index });
-    };
-
-    Parser.prototype.parseNamespace = function parseNamespace(namespace) {
-        if (this.options.lossy && typeof namespace === 'string') {
-            var trimmed = namespace.trim();
-            if (!trimmed.length) {
-                return true;
+                if (str.trim().indexOf('!') === 0) {
+                    node.important = true;
+                    node.raws.important = str;
+                    tokens = cache;
+                }
             }
 
-            return trimmed;
+            if (token[0] !== 'space' && token[0] !== 'comment') {
+                break;
+            }
         }
 
-        return namespace;
+        this.raw(node, 'value', tokens);
+
+        if (node.value.indexOf(':') !== -1) this.checkMissedSemicolon(tokens);
     };
 
-    Parser.prototype.parseSpace = function parseSpace(space) {
-        var replacement = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+    Parser.prototype.atrule = function atrule(token) {
+        var node = new _atRule2.default();
+        node.name = token[1].slice(1);
+        if (node.name === '') {
+            this.unnamedAtrule(node, token);
+        }
+        this.init(node, token[2], token[3]);
 
-        return this.options.lossy ? replacement : space;
+        var prev = void 0;
+        var shift = void 0;
+        var last = false;
+        var open = false;
+        var params = [];
+
+        while (!this.tokenizer.endOfFile()) {
+            token = this.tokenizer.nextToken();
+
+            if (token[0] === ';') {
+                node.source.end = { line: token[2], column: token[3] };
+                this.semicolon = true;
+                break;
+            } else if (token[0] === '{') {
+                open = true;
+                break;
+            } else if (token[0] === '}') {
+                if (params.length > 0) {
+                    shift = params.length - 1;
+                    prev = params[shift];
+                    while (prev && prev[0] === 'space') {
+                        prev = params[--shift];
+                    }
+                    if (prev) {
+                        node.source.end = { line: prev[4], column: prev[5] };
+                    }
+                }
+                this.end(token);
+                break;
+            } else {
+                params.push(token);
+            }
+
+            if (this.tokenizer.endOfFile()) {
+                last = true;
+                break;
+            }
+        }
+
+        node.raws.between = this.spacesAndCommentsFromEnd(params);
+        if (params.length) {
+            node.raws.afterName = this.spacesAndCommentsFromStart(params);
+            this.raw(node, 'params', params);
+            if (last) {
+                token = params[params.length - 1];
+                node.source.end = { line: token[4], column: token[5] };
+                this.spaces = node.raws.between;
+                node.raws.between = '';
+            }
+        } else {
+            node.raws.afterName = '';
+            node.params = '';
+        }
+
+        if (open) {
+            node.nodes = [];
+            this.current = node;
+        }
     };
 
-    Parser.prototype.parseValue = function parseValue(value) {
-        if (!this.options.lossy || !value || typeof value !== 'string') {
-            return value;
+    Parser.prototype.end = function end(token) {
+        if (this.current.nodes && this.current.nodes.length) {
+            this.current.raws.semicolon = this.semicolon;
         }
-        return value.trim();
+        this.semicolon = false;
+
+        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
+        this.spaces = '';
+
+        if (this.current.parent) {
+            this.current.source.end = { line: token[2], column: token[3] };
+            this.current = this.current.parent;
+        } else {
+            this.unexpectedClose(token);
+        }
     };
 
-    Parser.prototype.parseParenthesisToken = function parseParenthesisToken(token) {
-        var content = this.content(token);
-        if (!this.options.lossy) {
-            return content;
+    Parser.prototype.endFile = function endFile() {
+        if (this.current.parent) this.unclosedBlock();
+        if (this.current.nodes && this.current.nodes.length) {
+            this.current.raws.semicolon = this.semicolon;
         }
-
-        if (token[0] === tokens.space) {
-            return this.parseSpace(content, ' ');
-        }
-
-        return this.parseValue(content);
+        this.current.raws.after = (this.current.raws.after || '') + this.spaces;
     };
 
-    Parser.prototype.newNode = function newNode(node, namespace) {
-        if (namespace) {
-            node.namespace = this.parseNamespace(namespace);
+    Parser.prototype.freeSemicolon = function freeSemicolon(token) {
+        this.spaces += token[1];
+        if (this.current.nodes) {
+            var prev = this.current.nodes[this.current.nodes.length - 1];
+            if (prev && prev.type === 'rule' && !prev.raws.ownSemicolon) {
+                prev.raws.ownSemicolon = this.spaces;
+                this.spaces = '';
+            }
         }
-        if (this.spaces) {
-            node.spaces.before = this.spaces;
-            this.spaces = '';
-        }
-        return this.current.append(node);
     };
 
-    Parser.prototype.content = function content() {
-        var token = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.currToken;
+    // Helpers
 
-        return this.css.slice(token[5], token[6]);
+    Parser.prototype.init = function init(node, line, column) {
+        this.current.push(node);
+
+        node.source = { start: { line: line, column: column }, input: this.input };
+        node.raws.before = this.spaces;
+        this.spaces = '';
+        if (node.type !== 'comment') this.semicolon = false;
     };
 
-    _createClass(Parser, [{
-        key: 'currToken',
-        get: function get() {
-            return this.tokens[this.position];
+    Parser.prototype.raw = function raw(node, prop, tokens) {
+        var token = void 0,
+            type = void 0;
+        var length = tokens.length;
+        var value = '';
+        var clean = true;
+        var next = void 0,
+            prev = void 0;
+        var pattern = /^([.|#])?([\w])+/i;
+
+        for (var i = 0; i < length; i += 1) {
+            token = tokens[i];
+            type = token[0];
+
+            if (type === 'comment' && node.type === 'rule') {
+                prev = tokens[i - 1];
+                next = tokens[i + 1];
+
+                if (prev[0] !== 'space' && next[0] !== 'space' && pattern.test(prev[1]) && pattern.test(next[1])) {
+                    value += token[1];
+                } else {
+                    clean = false;
+                }
+
+                continue;
+            }
+
+            if (type === 'comment' || type === 'space' && i === length - 1) {
+                clean = false;
+            } else {
+                value += token[1];
+            }
         }
-    }, {
-        key: 'nextToken',
-        get: function get() {
-            return this.tokens[this.position + 1];
+        if (!clean) {
+            var raw = tokens.reduce(function (all, i) {
+                return all + i[1];
+            }, '');
+            node.raws[prop] = { value: value, raw: raw };
         }
-    }, {
-        key: 'prevToken',
-        get: function get() {
-            return this.tokens[this.position - 1];
+        node[prop] = value;
+    };
+
+    Parser.prototype.spacesAndCommentsFromEnd = function spacesAndCommentsFromEnd(tokens) {
+        var lastTokenType = void 0;
+        var spaces = '';
+        while (tokens.length) {
+            lastTokenType = tokens[tokens.length - 1][0];
+            if (lastTokenType !== 'space' && lastTokenType !== 'comment') break;
+            spaces = tokens.pop()[1] + spaces;
         }
-    }]);
+        return spaces;
+    };
+
+    Parser.prototype.spacesAndCommentsFromStart = function spacesAndCommentsFromStart(tokens) {
+        var next = void 0;
+        var spaces = '';
+        while (tokens.length) {
+            next = tokens[0][0];
+            if (next !== 'space' && next !== 'comment') break;
+            spaces += tokens.shift()[1];
+        }
+        return spaces;
+    };
+
+    Parser.prototype.spacesFromEnd = function spacesFromEnd(tokens) {
+        var lastTokenType = void 0;
+        var spaces = '';
+        while (tokens.length) {
+            lastTokenType = tokens[tokens.length - 1][0];
+            if (lastTokenType !== 'space') break;
+            spaces = tokens.pop()[1] + spaces;
+        }
+        return spaces;
+    };
+
+    Parser.prototype.stringFrom = function stringFrom(tokens, from) {
+        var result = '';
+        for (var i = from; i < tokens.length; i++) {
+            result += tokens[i][1];
+        }
+        tokens.splice(from, tokens.length - from);
+        return result;
+    };
+
+    Parser.prototype.colon = function colon(tokens) {
+        var brackets = 0;
+        var token = void 0,
+            type = void 0,
+            prev = void 0;
+        for (var i = 0; i < tokens.length; i++) {
+            token = tokens[i];
+            type = token[0];
+
+            if (type === '(') {
+                brackets += 1;
+            } else if (type === ')') {
+                brackets -= 1;
+            } else if (brackets === 0 && type === ':') {
+                if (!prev) {
+                    this.doubleColon(token);
+                } else if (prev[0] === 'word' && prev[1] === 'progid') {
+                    continue;
+                } else {
+                    return i;
+                }
+            }
+
+            prev = token;
+        }
+        return false;
+    };
+
+    // Errors
+
+    Parser.prototype.unclosedBracket = function unclosedBracket(bracket) {
+        throw this.input.error('Unclosed bracket', bracket[2], bracket[3]);
+    };
+
+    Parser.prototype.unknownWord = function unknownWord(tokens) {
+        throw this.input.error('Unknown word', tokens[0][2], tokens[0][3]);
+    };
+
+    Parser.prototype.unexpectedClose = function unexpectedClose(token) {
+        throw this.input.error('Unexpected }', token[2], token[3]);
+    };
+
+    Parser.prototype.unclosedBlock = function unclosedBlock() {
+        var pos = this.current.source.start;
+        throw this.input.error('Unclosed block', pos.line, pos.column);
+    };
+
+    Parser.prototype.doubleColon = function doubleColon(token) {
+        throw this.input.error('Double colon', token[2], token[3]);
+    };
+
+    Parser.prototype.unnamedAtrule = function unnamedAtrule(node, token) {
+        throw this.input.error('At-rule without name', token[2], token[3]);
+    };
+
+    Parser.prototype.precheckMissedSemicolon = function precheckMissedSemicolon(tokens) {
+        // Hook for Safe Parser
+        tokens;
+    };
+
+    Parser.prototype.checkMissedSemicolon = function checkMissedSemicolon(tokens) {
+        var colon = this.colon(tokens);
+        if (colon === false) return;
+
+        var founded = 0;
+        var token = void 0;
+        for (var j = colon - 1; j >= 0; j--) {
+            token = tokens[j];
+            if (token[0] !== 'space') {
+                founded += 1;
+                if (founded === 2) break;
+            }
+        }
+        throw this.input.error('Missed semicolon', token[2], token[3]);
+    };
 
     return Parser;
 }();
 
 exports.default = Parser;
-module.exports = exports['default'];}, {"195":195,"228":228,"457":457,"458":458,"459":459,"460":460,"461":461,"462":462,"463":463,"464":464,"465":465,"466":466,"467":467,"468":468,"469":469,"470":470,"471":471,"472":472,"473":473}];
+module.exports = exports['default'];
+
+}, {"436":436,"438":438,"440":440,"441":441,"443":443,"457":457}];

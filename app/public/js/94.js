@@ -1,42 +1,10 @@
-window.modules["94"] = [function(require,module,exports){var List = require(53);
-var TYPE = require(74).TYPE;
+window.modules["94"] = [function(require,module,exports){var List = require(54);
 
-var IDENTIFIER = TYPE.Identifier;
-var COMMA = TYPE.Comma;
-var SEMICOLON = TYPE.Semicolon;
-var HYPHENMINUS = TYPE.HyphenMinus;
-var EXCLAMATIONMARK = TYPE.ExclamationMark;
-
-// var '(' ident (',' <value>? )? ')'
+// legacy IE function
+// expression '(' raw ')'
 module.exports = function() {
-    var children = new List();
-
-    this.scanner.skipSC();
-
-    var identStart = this.scanner.tokenStart;
-
-    this.scanner.eat(HYPHENMINUS);
-    if (this.scanner.source.charCodeAt(this.scanner.tokenStart) !== HYPHENMINUS) {
-        this.scanner.error('HyphenMinus is expected');
-    }
-    this.scanner.eat(IDENTIFIER);
-
-    children.appendData({
-        type: 'Identifier',
-        loc: this.getLocation(identStart, this.scanner.tokenStart),
-        name: this.scanner.substrToCursor(identStart)
-    });
-
-    this.scanner.skipSC();
-
-    if (this.scanner.tokenType === COMMA) {
-        children.appendData(this.Operator());
-        children.appendData(this.parseCustomProperty
-            ? this.Value(null)
-            : this.Raw(this.scanner.currentToken, EXCLAMATIONMARK, SEMICOLON, false, false)
-        );
-    }
-
-    return children;
+    return new List().appendData(
+        this.Raw(this.scanner.currentToken, 0, 0, false, false)
+    );
 };
-}, {"53":53,"74":74}];
+}, {"54":54}];

@@ -1,20 +1,18 @@
-window.modules["341"] = [function(require,module,exports){var arrayMap = require(274);
+window.modules["341"] = [function(require,module,exports){var identity = require(323),
+    overRest = require(342),
+    setToString = require(343);
 
 /**
- * The base implementation of `_.values` and `_.valuesIn` which creates an
- * array of `object` property values corresponding to the property names
- * of `props`.
+ * The base implementation of `_.rest` which doesn't validate or coerce arguments.
  *
  * @private
- * @param {Object} object The object to query.
- * @param {Array} props The property names to get values for.
- * @returns {Object} Returns the array of property values.
+ * @param {Function} func The function to apply a rest parameter to.
+ * @param {number} [start=func.length-1] The start position of the rest parameter.
+ * @returns {Function} Returns the new function.
  */
-function baseValues(object, props) {
-  return arrayMap(props, function(key) {
-    return object[key];
-  });
+function baseRest(func, start) {
+  return setToString(overRest(func, start, identity), func + '');
 }
 
-module.exports = baseValues;
-}, {"274":274}];
+module.exports = baseRest;
+}, {"323":323,"342":342,"343":343}];

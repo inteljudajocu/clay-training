@@ -2,35 +2,25 @@ window.modules["463"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(475);
+var _processor = require(465);
 
-var _node2 = _interopRequireDefault(_node);
+var _processor2 = _interopRequireDefault(_processor);
 
-var _types = require(460);
+var _selectors = require(464);
+
+var selectors = _interopRequireWildcard(_selectors);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var parser = function parser(processor) {
+  return new _processor2.default(processor);
+};
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+Object.assign(parser, selectors);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+delete parser.__esModule;
 
-var Nesting = function (_Node) {
-    _inherits(Nesting, _Node);
-
-    function Nesting(opts) {
-        _classCallCheck(this, Nesting);
-
-        var _this = _possibleConstructorReturn(this, _Node.call(this, opts));
-
-        _this.type = _types.NESTING;
-        _this.value = '&';
-        return _this;
-    }
-
-    return Nesting;
-}(_node2.default);
-
-exports.default = Nesting;
-module.exports = exports['default'];}, {"460":460,"475":475}];
+exports.default = parser;
+module.exports = exports['default'];}, {"464":464,"465":465}];

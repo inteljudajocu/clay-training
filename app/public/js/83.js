@@ -1,43 +1,9 @@
-window.modules["83"] = [function(require,module,exports){module.exports = {
-    AnPlusB: require(95),
-    Atrule: require(96),
-    AtrulePrelude: require(97),
-    AttributeSelector: require(98),
-    Block: require(99),
-    Brackets: require(100),
-    CDC: require(101),
-    CDO: require(102),
-    ClassSelector: require(103),
-    Combinator: require(104),
-    Comment: require(105),
-    Declaration: require(106),
-    DeclarationList: require(107),
-    Dimension: require(108),
-    Function: require(109),
-    HexColor: require(110),
-    Identifier: require(112),
-    IdSelector: require(111),
-    MediaFeature: require(113),
-    MediaQuery: require(114),
-    MediaQueryList: require(115),
-    Nth: require(116),
-    Number: require(117),
-    Operator: require(118),
-    Parentheses: require(119),
-    Percentage: require(120),
-    PseudoClassSelector: require(121),
-    PseudoElementSelector: require(122),
-    Ratio: require(123),
-    Raw: require(124),
-    Rule: require(125),
-    Selector: require(126),
-    SelectorList: require(127),
-    String: require(128),
-    StyleSheet: require(129),
-    TypeSelector: require(130),
-    UnicodeRange: require(131),
-    Url: require(132),
-    Value: require(133),
-    WhiteSpace: require(134)
+window.modules["83"] = [function(require,module,exports){var data = require(52);
+
+module.exports = {
+    generic: true,
+    types: data.types,
+    properties: data.properties,
+    node: require(84)
 };
-}, {"95":95,"96":96,"97":97,"98":98,"99":99,"100":100,"101":101,"102":102,"103":103,"104":104,"105":105,"106":106,"107":107,"108":108,"109":109,"110":110,"111":111,"112":112,"113":113,"114":114,"115":115,"116":116,"117":117,"118":118,"119":119,"120":120,"121":121,"122":122,"123":123,"124":124,"125":125,"126":126,"127":127,"128":128,"129":129,"130":130,"131":131,"132":132,"133":133,"134":134}];
+}, {"52":52,"84":84}];

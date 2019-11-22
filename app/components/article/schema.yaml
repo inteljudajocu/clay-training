@@ -6,7 +6,6 @@ _confirmRemoval: true
 # this is the headline that displays on the article itself
 headline:
   _label: Headline
-  _publish: pageTitle # Listened to by the `meta-title` component
   _placeholder:
     height: 40px
     text: Headline

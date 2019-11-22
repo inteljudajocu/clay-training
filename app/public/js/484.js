@@ -1,42 +1,83 @@
 window.modules["484"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.default = parse;
 
-var _parser = require(498);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _parser2 = _interopRequireDefault(_parser);
+var _node = require(485);
 
-var _input = require(489);
-
-var _input2 = _interopRequireDefault(_input);
+var _node2 = _interopRequireDefault(_node);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function parse(css, opts) {
-    if (opts && opts.safe) {
-        throw new Error('Option safe was removed. ' + 'Use parser: require("postcss-safe-parser")');
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Namespace = function (_Node) {
+    _inherits(Namespace, _Node);
+
+    function Namespace() {
+        _classCallCheck(this, Namespace);
+
+        return _possibleConstructorReturn(this, _Node.apply(this, arguments));
     }
 
-    var input = new _input2.default(css, opts);
-    var parser = new _parser2.default(input);
-    try {
-        parser.parse();
-    } catch (e) {
-        if (e.name === 'CssSyntaxError' && opts && opts.from) {
-            if (/\.scss$/i.test(opts.from)) {
-                e.message += '\nYou tried to parse SCSS with ' + 'the standard CSS parser; ' + 'try again with the postcss-scss parser';
-            } else if (/\.sass/i.test(opts.from)) {
-                e.message += '\nYou tried to parse Sass with ' + 'the standard CSS parser; ' + 'try again with the postcss-sass parser';
-            } else if (/\.less$/i.test(opts.from)) {
-                e.message += '\nYou tried to parse Less with ' + 'the standard CSS parser; ' + 'try again with the postcss-less parser';
+    Namespace.prototype.qualifiedName = function qualifiedName(value) {
+        if (this.namespace) {
+            return this.namespaceString + '|' + value;
+        } else {
+            return value;
+        }
+    };
+
+    Namespace.prototype.toString = function toString() {
+        return [this.spaces.before, this.qualifiedName(this.value), this.spaces.after].join('');
+    };
+
+    _createClass(Namespace, [{
+        key: 'namespace',
+        get: function get() {
+            return this._namespace;
+        },
+        set: function set(namespace) {
+            this._namespace = namespace;
+            if (this.raws) {
+                delete this.raws.namespace;
             }
         }
-        throw e;
-    }
+    }, {
+        key: 'ns',
+        get: function get() {
+            return this._namespace;
+        },
+        set: function set(namespace) {
+            this._namespace = namespace;
+            if (this.raws) {
+                delete this.raws.namespace;
+            }
+        }
+    }, {
+        key: 'namespaceString',
+        get: function get() {
+            if (this.namespace) {
+                var ns = this.raws && this.raws.namespace || this.namespace;
+                if (ns === true) {
+                    return '';
+                } else {
+                    return ns;
+                }
+            } else {
+                return '';
+            }
+        }
+    }]);
 
-    return parser.root;
-}
-module.exports = exports['default'];
+    return Namespace;
+}(_node2.default);
 
-}, {"489":489,"498":498}];
+exports.default = Namespace;
+;
+module.exports = exports['default'];}, {"485":485}];

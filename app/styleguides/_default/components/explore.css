@@ -1,7 +1,7 @@
 $divider_color: #767676;
 
 .explore-recipe-single{
-    width: 20%;
+    width: inherit;
     margin-top: 0%;
     margin-bottom: 0%;
 }

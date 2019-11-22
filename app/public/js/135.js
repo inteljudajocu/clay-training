@@ -1,11 +1,27 @@
-window.modules["135"] = [function(require,module,exports){var List = require(53);
-var DISALLOW_OF_CLAUSE = false;
+window.modules["135"] = [function(require,module,exports){var WHITESPACE = require(75).TYPE.WhiteSpace;
+var SPACE = Object.freeze({
+    type: 'WhiteSpace',
+    loc: null,
+    value: ' '
+});
 
 module.exports = {
-    parse: function nth() {
-        return new List().appendData(
-            this.Nth(DISALLOW_OF_CLAUSE)
-        );
+    name: 'WhiteSpace',
+    structure: {
+        value: String
+    },
+    parse: function() {
+        this.scanner.eat(WHITESPACE);
+        return SPACE;
+
+        // return {
+        //     type: 'WhiteSpace',
+        //     loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+        //     value: this.scanner.consume(WHITESPACE)
+        // };
+    },
+    generate: function(processChunk, node) {
+        processChunk(node.value);
     }
 };
-}, {"53":53}];
+}, {"75":75}];

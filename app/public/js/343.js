@@ -1,29 +1,15 @@
-window.modules["343"] = [function(require,module,exports){var baseToString = require(338);
+window.modules["343"] = [function(require,module,exports){var baseSetToString = require(345),
+    shortOut = require(374);
 
 /**
- * Converts `value` to a string. An empty string is returned for `null`
- * and `undefined` values. The sign of `-0` is preserved.
+ * Sets the `toString` method of `func` to return `string`.
  *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to convert.
- * @returns {string} Returns the converted string.
- * @example
- *
- * _.toString(null);
- * // => ''
- *
- * _.toString(-0);
- * // => '-0'
- *
- * _.toString([1, 2, 3]);
- * // => '1,2,3'
+ * @private
+ * @param {Function} func The function to modify.
+ * @param {Function} string The `toString` result.
+ * @returns {Function} Returns `func`.
  */
-function toString(value) {
-  return value == null ? '' : baseToString(value);
-}
+var setToString = shortOut(baseSetToString);
 
-module.exports = toString;
-}, {"338":338}];
+module.exports = setToString;
+}, {"345":345,"374":374}];

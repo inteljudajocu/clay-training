@@ -1,58 +1,49 @@
-window.modules["425"] = [function(require,module,exports){module.exports = function specificity(simpleSelector) {
-    var A = 0;
-    var B = 0;
-    var C = 0;
+window.modules["425"] = [function(require,module,exports){var walkRules = require(58).walkRules;
+var utils = require(426);
 
-    simpleSelector.children.each(function walk(node) {
-        switch (node.type) {
-            case 'SelectorList':
-            case 'Selector':
-                node.children.each(walk);
-                break;
+function processRule(node, item, list) {
+    var selectors = node.prelude.children;
+    var declarations = node.block.children;
 
-            case 'IdSelector':
-                A++;
-                break;
+    list.prevUntil(item.prev, function(prev) {
+        // skip non-ruleset node if safe
+        if (prev.type !== 'Rule') {
+            return utils.unsafeToSkipNode.call(selectors, prev);
+        }
 
-            case 'ClassSelector':
-            case 'AttributeSelector':
-                B++;
-                break;
+        var prevSelectors = prev.prelude.children;
+        var prevDeclarations = prev.block.children;
 
-            case 'PseudoClassSelector':
-                switch (node.name.toLowerCase()) {
-                    case 'not':
-                        node.children.each(walk);
-                        break;
+        // try to join rulesets with equal pseudo signature
+        if (node.pseudoSignature === prev.pseudoSignature) {
+            // try to join by selectors
+            if (utils.isEqualSelectors(prevSelectors, selectors)) {
+                prevDeclarations.appendList(declarations);
+                list.remove(item);
+                return true;
+            }
 
-                    case 'before':
-                    case 'after':
-                    case 'first-line':
-                    case 'first-letter':
-                        C++;
-                        break;
+            // try to join by declarations
+            if (utils.isEqualDeclarations(declarations, prevDeclarations)) {
+                utils.addSelectors(prevSelectors, selectors);
+                list.remove(item);
+                return true;
+            }
+        }
 
-                    // TODO: support for :nth-*(.. of <SelectorList>), :matches(), :has()
+        // go to prev ruleset if has no selector similarities
+        return utils.hasSimilarSelectors(selectors, prevSelectors);
+    });
+}
 
-                    default:
-                        B++;
-                }
-                break;
-
-            case 'PseudoElementSelector':
-                C++;
-                break;
-
-            case 'TypeSelector':
-                // ignore universal selector
-                if (node.name.charAt(node.name.length - 1) !== '*') {
-                    C++;
-                }
-                break;
-
+// NOTE: direction should be left to right, since rulesets merge to left
+// ruleset. When direction right to left unmerged rulesets may prevent lookup
+// TODO: remove initial merge
+module.exports = function initialMergeRule(ast) {
+    walkRules(ast, function(node, item, list) {
+        if (node.type === 'Rule') {
+            processRule(node, item, list);
         }
     });
-
-    return [A, B, C];
 };
-}, {}];
+}, {"58":58,"426":426}];

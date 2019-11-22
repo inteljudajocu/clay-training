@@ -1,84 +1,54 @@
-window.modules["488"] = [function(require,module,exports){'use strict';
+window.modules["488"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
+exports.isUniversal = exports.isTag = exports.isString = exports.isSelector = exports.isRoot = exports.isPseudo = exports.isNesting = exports.isIdentifier = exports.isComment = exports.isCombinator = exports.isClassName = exports.isAttribute = undefined;
 
-var _chalk = require(19);
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _chalk2 = _interopRequireDefault(_chalk);
+var _IS_TYPE;
 
-var _tokenize = require(499);
+exports.isNode = isNode;
+exports.isPseudoElement = isPseudoElement;
+exports.isPseudoClass = isPseudoClass;
+exports.isContainer = isContainer;
+exports.isNamespace = isNamespace;
 
-var _tokenize2 = _interopRequireDefault(_tokenize);
+var _types = require(470);
 
-var _input = require(489);
+var IS_TYPE = (_IS_TYPE = {}, _IS_TYPE[_types.ATTRIBUTE] = true, _IS_TYPE[_types.CLASS] = true, _IS_TYPE[_types.COMBINATOR] = true, _IS_TYPE[_types.COMMENT] = true, _IS_TYPE[_types.ID] = true, _IS_TYPE[_types.NESTING] = true, _IS_TYPE[_types.PSEUDO] = true, _IS_TYPE[_types.ROOT] = true, _IS_TYPE[_types.SELECTOR] = true, _IS_TYPE[_types.STRING] = true, _IS_TYPE[_types.TAG] = true, _IS_TYPE[_types.UNIVERSAL] = true, _IS_TYPE);
 
-var _input2 = _interopRequireDefault(_input);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var HIGHLIGHT_THEME = {
-    'brackets': _chalk2.default.cyan,
-    'at-word': _chalk2.default.cyan,
-    'call': _chalk2.default.cyan,
-    'comment': _chalk2.default.gray,
-    'string': _chalk2.default.green,
-    'class': _chalk2.default.yellow,
-    'hash': _chalk2.default.magenta,
-    '(': _chalk2.default.cyan,
-    ')': _chalk2.default.cyan,
-    '{': _chalk2.default.yellow,
-    '}': _chalk2.default.yellow,
-    '[': _chalk2.default.yellow,
-    ']': _chalk2.default.yellow,
-    ':': _chalk2.default.yellow,
-    ';': _chalk2.default.yellow
-};
-
-function getTokenType(_ref, processor) {
-    var type = _ref[0],
-        value = _ref[1];
-
-    if (type === 'word') {
-        if (value[0] === '.') {
-            return 'class';
-        }
-        if (value[0] === '#') {
-            return 'hash';
-        }
-    }
-
-    if (!processor.endOfFile()) {
-        var next = processor.nextToken();
-        processor.back(next);
-        if (next[0] === 'brackets' || next[0] === '(') return 'call';
-    }
-
-    return type;
+function isNode(node) {
+    return (typeof node === "undefined" ? "undefined" : _typeof(node)) === "object" && IS_TYPE[node.type];
 }
 
-function terminalHighlight(css) {
-    var processor = (0, _tokenize2.default)(new _input2.default(css), { ignoreErrors: true });
-    var result = '';
-
-    var _loop = function _loop() {
-        var token = processor.nextToken();
-        var color = HIGHLIGHT_THEME[getTokenType(token, processor)];
-        if (color) {
-            result += token[1].split(/\r?\n/).map(function (i) {
-                return color(i);
-            }).join('\n');
-        } else {
-            result += token[1];
-        }
-    };
-
-    while (!processor.endOfFile()) {
-        _loop();
-    }
-    return result;
+function isNodeType(type, node) {
+    return isNode(node) && node.type === type;
 }
 
-exports.default = terminalHighlight;
-module.exports = exports['default'];
+var isAttribute = exports.isAttribute = isNodeType.bind(null, _types.ATTRIBUTE);
+var isClassName = exports.isClassName = isNodeType.bind(null, _types.CLASS);
+var isCombinator = exports.isCombinator = isNodeType.bind(null, _types.COMBINATOR);
+var isComment = exports.isComment = isNodeType.bind(null, _types.COMMENT);
+var isIdentifier = exports.isIdentifier = isNodeType.bind(null, _types.ID);
+var isNesting = exports.isNesting = isNodeType.bind(null, _types.NESTING);
+var isPseudo = exports.isPseudo = isNodeType.bind(null, _types.PSEUDO);
+var isRoot = exports.isRoot = isNodeType.bind(null, _types.ROOT);
+var isSelector = exports.isSelector = isNodeType.bind(null, _types.SELECTOR);
+var isString = exports.isString = isNodeType.bind(null, _types.STRING);
+var isTag = exports.isTag = isNodeType.bind(null, _types.TAG);
+var isUniversal = exports.isUniversal = isNodeType.bind(null, _types.UNIVERSAL);
 
-}, {"19":19,"489":489,"499":499}];
+function isPseudoElement(node) {
+    return isPseudo(node) && node.value && (node.value.startsWith("::") || node.value === ":before" || node.value === ":after");
+}
+function isPseudoClass(node) {
+    return isPseudo(node) && !isPseudoElement(node);
+}
+
+function isContainer(node) {
+    return !!(isNode(node) && node.walk);
+}
+
+function isNamespace(node) {
+    return isClassName(node) || isAttribute(node) || isTag(node);
+}}, {"470":470}];

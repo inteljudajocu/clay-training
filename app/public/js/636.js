@@ -1,6 +1,9 @@
-window.modules["636"] = [function(require,module,exports){var adjacent = require(590);
+window.modules["636"] = [function(require,module,exports){var makeString = require(586);
 
-module.exports = function succ(str) {
-  return adjacent(str, -1);
+module.exports = function strLeftBack(str, sep) {
+  str = makeString(str);
+  sep = makeString(sep);
+  var pos = str.lastIndexOf(sep);
+  return~ pos ? str.slice(0, pos) : str;
 };
-}, {"590":590}];
+}, {"586":586}];

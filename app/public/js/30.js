@@ -1,16 +1,23 @@
 window.modules["30"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(50);
+const isUriStringCheck = require(51);
 
 /**
- * First test if argument is a String. If true, test if '/_users/' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
+ * Remove the url-patterned prefix for the site's slug.
+ *
+ * @param  {String} uri
+ * @param  {Object} site
+ * @return {String}
  */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
+module.exports = function (uri, site) {
+  var { host, path, slug, prefix } = site,
+    hasSlash = uri.indexOf('/_') !== -1;
 
-  return uri.toLowerCase().indexOf('/_users/') > -1;
+  if (!prefix) {
+    prefix = path && path.length > 1 ? `${host}${path}` : host;
+  }
+
+  isUriStringCheck.strCheck(uri);
+  return uri.replace(`${prefix}${hasSlash ? '/' : ''}`, `${slug}${hasSlash ? '/' : ''}`);
 };
-}, {"50":50}];
+}, {"51":51}];

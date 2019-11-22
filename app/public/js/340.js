@@ -1,15 +1,17 @@
-window.modules["340"] = [function(require,module,exports){/**
- * The base implementation of `_.unary` without support for storing metadata.
+window.modules["340"] = [function(require,module,exports){var baseGet = require(296);
+
+/**
+ * A specialized version of `baseProperty` which supports deep paths.
  *
  * @private
- * @param {Function} func The function to cap arguments for.
- * @returns {Function} Returns the new capped function.
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
  */
-function baseUnary(func) {
-  return function(value) {
-    return func(value);
+function basePropertyDeep(path) {
+  return function(object) {
+    return baseGet(object, path);
   };
 }
 
-module.exports = baseUnary;
-}, {}];
+module.exports = basePropertyDeep;
+}, {"296":296}];

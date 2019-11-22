@@ -1,25 +1,75 @@
-window.modules["111"] = [function(require,module,exports){var TYPE = require(74).TYPE;
+window.modules["111"] = [function(require,module,exports){var isHex = require(75).isHex;
+var TYPE = require(75).TYPE;
+
 var IDENTIFIER = TYPE.Identifier;
+var NUMBER = TYPE.Number;
 var NUMBERSIGN = TYPE.NumberSign;
 
-// '#' ident
+function consumeHexSequence(scanner, required) {
+    if (!isHex(scanner.source.charCodeAt(scanner.tokenStart))) {
+        if (required) {
+            scanner.error('Unexpected input', scanner.tokenStart);
+        } else {
+            return;
+        }
+    }
+
+    for (var pos = scanner.tokenStart + 1; pos < scanner.tokenEnd; pos++) {
+        var code = scanner.source.charCodeAt(pos);
+
+        // break on non-hex char
+        if (!isHex(code)) {
+            // break token, exclude symbol
+            scanner.tokenStart = pos;
+            return;
+        }
+    }
+
+    // token is full hex sequence, go to next token
+    scanner.next();
+}
+
+// # ident
 module.exports = {
-    name: 'IdSelector',
+    name: 'HexColor',
     structure: {
-        name: String
+        value: String
     },
     parse: function() {
+        var start = this.scanner.tokenStart;
+
         this.scanner.eat(NUMBERSIGN);
 
+        scan:
+        switch (this.scanner.tokenType) {
+            case NUMBER:
+                consumeHexSequence(this.scanner, true);
+
+                // if token is identifier then number consists of hex only,
+                // try to add identifier to result
+                if (this.scanner.tokenType === IDENTIFIER) {
+                    consumeHexSequence(this.scanner, false);
+                }
+
+                break;
+
+            case IDENTIFIER:
+                consumeHexSequence(this.scanner, true);
+                break;
+
+            default:
+                this.scanner.error('Number or identifier is expected');
+        }
+
         return {
-            type: 'IdSelector',
-            loc: this.getLocation(this.scanner.tokenStart - 1, this.scanner.tokenEnd),
-            name: this.scanner.consume(IDENTIFIER)
+            type: 'HexColor',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            value: this.scanner.substrToCursor(start + 1) // skip #
         };
     },
     generate: function(processChunk, node) {
         processChunk('#');
-        processChunk(node.name);
+        processChunk(node.value);
     }
 };
-}, {"74":74}];
+}, {"75":75}];

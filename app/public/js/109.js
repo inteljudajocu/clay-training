@@ -1,38 +1,46 @@
-window.modules["109"] = [function(require,module,exports){var TYPE = require(74).TYPE;
-var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+window.modules["109"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
 
-// <function-token> <sequence> ')'
+// special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
+function readUnit(scanner) {
+    var unit = scanner.getTokenValue();
+    var backSlashPos = unit.indexOf('\\');
+
+    if (backSlashPos > 0) {
+        // patch token offset
+        scanner.tokenStart += backSlashPos;
+
+        // return part before backslash
+        return unit.substring(0, backSlashPos);
+    }
+
+    // no backslash in unit name
+    scanner.next();
+
+    return unit;
+}
+
+// number ident
 module.exports = {
-    name: 'Function',
+    name: 'Dimension',
     structure: {
-        name: String,
-        children: [[]]
+        value: String,
+        unit: String
     },
-    parse: function(readSequence, recognizer) {
+    parse: function() {
         var start = this.scanner.tokenStart;
-        var name = this.scanner.consumeFunctionName();
-        var nameLowerCase = name.toLowerCase();
-        var children;
-
-        children = recognizer.hasOwnProperty(nameLowerCase)
-            ? recognizer[nameLowerCase].call(this, recognizer)
-            : readSequence.call(this, recognizer);
-
-        this.scanner.eat(RIGHTPARENTHESIS);
+        var value = this.scanner.consume(NUMBER);
+        var unit = readUnit(this.scanner);
 
         return {
-            type: 'Function',
+            type: 'Dimension',
             loc: this.getLocation(start, this.scanner.tokenStart),
-            name: name,
-            children: children
+            value: value,
+            unit: unit
         };
     },
     generate: function(processChunk, node) {
-        processChunk(node.name);
-        processChunk('(');
-        this.each(processChunk, node);
-        processChunk(')');
-    },
-    walkContext: 'function'
+        processChunk(node.value);
+        processChunk(node.unit);
+    }
 };
-}, {"74":74}];
+}, {"75":75}];

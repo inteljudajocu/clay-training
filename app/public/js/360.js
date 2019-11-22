@@ -1,40 +1,17 @@
-window.modules["360"] = [function(require,module,exports){var castPath = require(291),
-    isArguments = require(268),
-    isArray = require(272),
-    isIndex = require(271),
-    isLength = require(314),
-    toKey = require(290);
+window.modules["360"] = [function(require,module,exports){var baseGetAllKeys = require(299),
+    getSymbols = require(362),
+    keys = require(295);
 
 /**
- * Checks if `path` exists on `object`.
+ * Creates an array of own enumerable property names and symbols of `object`.
  *
  * @private
  * @param {Object} object The object to query.
- * @param {Array|string} path The path to check.
- * @param {Function} hasFunc The function to check properties.
- * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ * @returns {Array} Returns the array of property names and symbols.
  */
-function hasPath(object, path, hasFunc) {
-  path = castPath(path, object);
-
-  var index = -1,
-      length = path.length,
-      result = false;
-
-  while (++index < length) {
-    var key = toKey(path[index]);
-    if (!(result = object != null && hasFunc(object, key))) {
-      break;
-    }
-    object = object[key];
-  }
-  if (result || ++index != length) {
-    return result;
-  }
-  length = object == null ? 0 : object.length;
-  return !!length && isLength(length) && isIndex(key, length) &&
-    (isArray(object) || isArguments(object));
+function getAllKeys(object) {
+  return baseGetAllKeys(object, keys, getSymbols);
 }
 
-module.exports = hasPath;
-}, {"268":268,"271":271,"272":272,"290":290,"291":291,"314":314}];
+module.exports = getAllKeys;
+}, {"295":295,"299":299,"362":362}];

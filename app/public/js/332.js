@@ -1,18 +1,23 @@
-window.modules["332"] = [function(require,module,exports){var identity = require(316),
-    overRest = require(333),
-    setToString = require(334);
+window.modules["332"] = [function(require,module,exports){var baseEach = require(289),
+    isArrayLike = require(333);
 
 /**
- * The base implementation of `_.rest` which doesn't validate or coerce arguments.
+ * The base implementation of `_.map` without support for iteratee shorthands.
  *
  * @private
- * @param {Function} func The function to apply a rest parameter to.
- * @param {number} [start=func.length-1] The start position of the rest parameter.
- * @returns {Function} Returns the new function.
+ * @param {Array|Object} collection The collection to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the new mapped array.
  */
-function baseRest(func, start) {
-  return setToString(overRest(func, start, identity), func + '');
+function baseMap(collection, iteratee) {
+  var index = -1,
+      result = isArrayLike(collection) ? Array(collection.length) : [];
+
+  baseEach(collection, function(value, key, collection) {
+    result[++index] = iteratee(value, key, collection);
+  });
+  return result;
 }
 
-module.exports = baseRest;
-}, {"316":316,"333":333,"334":334}];
+module.exports = baseMap;
+}, {"289":289,"333":333}];

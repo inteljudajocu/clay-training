@@ -1,88 +1,67 @@
-window.modules["387"] = [function(require,module,exports){var parse = require(384).syntax.parse;
+window.modules["387"] = [function(require,module,exports){var isObject = require(12),
+    isSymbol = require(348);
 
-function getInfo(postcssNode) {
-    return {
-        postcssNode: postcssNode
-    };
+/** Used as references for various `Number` constants. */
+var NAN = 0 / 0;
+
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return NAN;
+  }
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
 }
 
-function appendChildren(cssoNode, nodes) {
-    cssoNode.children.fromArray(nodes.map(postcssToCsso));
-    return cssoNode;
-}
-
-function parseToCsso(css, config, postcssNode) {
-    var cssoNode;
-
-    try {
-        cssoNode = parse(css || '', config);
-    } catch (e) {
-        if (e.name === 'CssSyntaxError') {
-            throw postcssNode.error(e.message, { index: e.offset });
-        }
-
-        throw e;
-    }
-
-    cssoNode.loc = getInfo(postcssNode);
-
-    return cssoNode;
-}
-
-function postcssToCsso(node) {
-    switch (node.type) {
-        case 'root':
-            return appendChildren(
-                parseToCsso('', { context: 'stylesheet' }, node),
-                node.nodes
-            );
-
-        case 'rule':
-            return {
-                type: 'Rule',
-                loc: getInfo(node),
-                prelude: parseToCsso(node.selector, { context: 'selectorList' }, node),
-                block: appendChildren(
-                    parseToCsso('{}', { context: 'block' }, node),
-                    node.nodes
-                )
-            };
-
-        case 'atrule':
-            var cssoNode = {
-                type: 'Atrule',
-                loc: getInfo(node),
-                name: node.name,
-                prelude: node.params
-                    ? parseToCsso(node.params, { context: 'atrulePrelude', atrule: node.name }, node)
-                    : null,
-                block: null
-            };
-
-            if (node.nodes) {
-                cssoNode.block = appendChildren(
-                    parseToCsso('{}', { context: 'block' }, node),
-                    node.nodes
-                );
-            }
-
-            return cssoNode;
-
-        case 'decl':
-            return parseToCsso(
-                (node.raws.before || '').trimLeft() + node.toString(),
-                { context: 'declaration' },
-                node
-            );
-
-        case 'comment':
-            return {
-                type: 'Comment',
-                loc: getInfo(node),
-                value: node.raws.left + node.text + node.raws.right
-            };
-    }
-}
-
-module.exports = postcssToCsso;
-}, {"384":384}];
+module.exports = toNumber;
+}, {"12":12,"348":348}];

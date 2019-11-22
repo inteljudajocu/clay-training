@@ -1,15 +1,21 @@
-window.modules["282"] = [function(require,module,exports){var baseForOwn = require(283),
-    createBaseEach = require(284);
-
-/**
- * The base implementation of `_.forEach` without support for iteratee shorthands.
+window.modules["282"] = [function(require,module,exports){/**
+ * Appends the elements of `values` to `array`.
  *
  * @private
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array|Object} Returns `collection`.
+ * @param {Array} array The array to modify.
+ * @param {Array} values The values to append.
+ * @returns {Array} Returns `array`.
  */
-var baseEach = createBaseEach(baseForOwn);
+function arrayPush(array, values) {
+  var index = -1,
+      length = values.length,
+      offset = array.length;
 
-module.exports = baseEach;
-}, {"283":283,"284":284}];
+  while (++index < length) {
+    array[offset + index] = values[index];
+  }
+  return array;
+}
+
+module.exports = arrayPush;
+}, {}];

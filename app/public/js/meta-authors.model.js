@@ -1,6 +1,6 @@
 window.modules["meta-authors.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(1);
+var _get = require(3);
 
 module.exports.save = function (ref, data) {
   data.authors = data.authors || []; // Normalize "authors" value; if saved from a Kiln form, it will be of the form
@@ -22,4 +22,4 @@ module.exports.render = function (ref, data) {
   });
   return data;
 };
-}, {"1":1}];
+}, {"3":3}];

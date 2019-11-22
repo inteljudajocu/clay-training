@@ -1,34 +1,21 @@
-window.modules["319"] = [function(require,module,exports){var baseIsEqual = require(302),
-    get = require(1),
-    hasIn = require(329),
-    isKey = require(327),
-    isStrictComparable = require(328),
-    matchesStrictComparable = require(325),
-    toKey = require(290);
+window.modules["319"] = [function(require,module,exports){var coreJsData = require(355);
 
-/** Used to compose bitmasks for value comparisons. */
-var COMPARE_PARTIAL_FLAG = 1,
-    COMPARE_UNORDERED_FLAG = 2;
+/** Used to detect methods masquerading as native. */
+var maskSrcKey = (function() {
+  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+  return uid ? ('Symbol(src)_1.' + uid) : '';
+}());
 
 /**
- * The base implementation of `_.matchesProperty` which doesn't clone `srcValue`.
+ * Checks if `func` has its source masked.
  *
  * @private
- * @param {string} path The path of the property to get.
- * @param {*} srcValue The value to match.
- * @returns {Function} Returns the new spec function.
+ * @param {Function} func The function to check.
+ * @returns {boolean} Returns `true` if `func` is masked, else `false`.
  */
-function baseMatchesProperty(path, srcValue) {
-  if (isKey(path) && isStrictComparable(srcValue)) {
-    return matchesStrictComparable(toKey(path), srcValue);
-  }
-  return function(object) {
-    var objValue = get(object, path);
-    return (objValue === undefined && objValue === srcValue)
-      ? hasIn(object, path)
-      : baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG);
-  };
+function isMasked(func) {
+  return !!maskSrcKey && (maskSrcKey in func);
 }
 
-module.exports = baseMatchesProperty;
-}, {"1":1,"290":290,"302":302,"325":325,"327":327,"328":328,"329":329}];
+module.exports = isMasked;
+}, {"355":355}];

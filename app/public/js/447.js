@@ -1,307 +1,173 @@
-window.modules["447"] = [function(require,module,exports){'use strict';
+window.modules["447"] = [function(require,module,exports){(function (Buffer){
+'use strict';
 
 exports.__esModule = true;
-exports.default = tokenizer;
-var SINGLE_QUOTE = 39;
-var DOUBLE_QUOTE = 34;
-var BACKSLASH = 92;
-var SLASH = 47;
-var NEWLINE = 10;
-var SPACE = 32;
-var FEED = 12;
-var TAB = 9;
-var CR = 13;
-var OPEN_SQUARE = 91;
-var CLOSE_SQUARE = 93;
-var OPEN_PARENTHESES = 40;
-var CLOSE_PARENTHESES = 41;
-var OPEN_CURLY = 123;
-var CLOSE_CURLY = 125;
-var SEMICOLON = 59;
-var ASTERISK = 42;
-var COLON = 58;
-var AT = 64;
 
-var RE_AT_END = /[ \n\t\r\f\{\}\(\)'"\\;/\[\]#]/g;
-var RE_WORD_END = /[ \n\t\r\f\(\)\{\}:;@!'"\\\]\[#]|\/(?=\*)/g;
-var RE_BAD_BRACKET = /.[\\\/\("'\n]/;
-var RE_HEX_ESCAPE = /[a-f0-9]/i;
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-function tokenizer(input) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+var _sourceMap = require(454);
 
-    var css = input.css.valueOf();
-    var ignore = options.ignoreErrors;
+var _sourceMap2 = _interopRequireDefault(_sourceMap);
 
-    var code = void 0,
-        next = void 0,
-        quote = void 0,
-        lines = void 0,
-        last = void 0,
-        content = void 0,
-        escape = void 0,
-        nextLine = void 0,
-        nextOffset = void 0,
-        escaped = void 0,
-        escapePos = void 0,
-        prev = void 0,
-        n = void 0,
-        currentToken = void 0;
+var _path = require(392);
 
-    var length = css.length;
-    var offset = -1;
-    var line = 1;
-    var pos = 0;
-    var buffer = [];
-    var returned = [];
+var _path2 = _interopRequireDefault(_path);
 
-    function unclosed(what) {
-        throw input.error('Unclosed ' + what, line, pos - offset);
-    }
+var _fs = require(20);
 
-    function endOfFile() {
-        return returned.length === 0 && pos >= length;
-    }
+var _fs2 = _interopRequireDefault(_fs);
 
-    function nextToken() {
-        if (returned.length) return returned.pop();
-        if (pos >= length) return;
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-        code = css.charCodeAt(pos);
-        if (code === NEWLINE || code === FEED || code === CR && css.charCodeAt(pos + 1) !== NEWLINE) {
-            offset = pos;
-            line += 1;
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function fromBase64(str) {
+    if (Buffer) {
+        if (Buffer.from && Buffer.from !== Uint8Array.from) {
+            return Buffer.from(str, 'base64').toString();
+        } else {
+            return new Buffer(str, 'base64').toString();
         }
-
-        switch (code) {
-            case NEWLINE:
-            case SPACE:
-            case TAB:
-            case CR:
-            case FEED:
-                next = pos;
-                do {
-                    next += 1;
-                    code = css.charCodeAt(next);
-                    if (code === NEWLINE) {
-                        offset = next;
-                        line += 1;
-                    }
-                } while (code === SPACE || code === NEWLINE || code === TAB || code === CR || code === FEED);
-
-                currentToken = ['space', css.slice(pos, next)];
-                pos = next - 1;
-                break;
-
-            case OPEN_SQUARE:
-                currentToken = ['[', '[', line, pos - offset];
-                break;
-
-            case CLOSE_SQUARE:
-                currentToken = [']', ']', line, pos - offset];
-                break;
-
-            case OPEN_CURLY:
-                currentToken = ['{', '{', line, pos - offset];
-                break;
-
-            case CLOSE_CURLY:
-                currentToken = ['}', '}', line, pos - offset];
-                break;
-
-            case COLON:
-                currentToken = [':', ':', line, pos - offset];
-                break;
-
-            case SEMICOLON:
-                currentToken = [';', ';', line, pos - offset];
-                break;
-
-            case OPEN_PARENTHESES:
-                prev = buffer.length ? buffer.pop()[1] : '';
-                n = css.charCodeAt(pos + 1);
-                if (prev === 'url' && n !== SINGLE_QUOTE && n !== DOUBLE_QUOTE && n !== SPACE && n !== NEWLINE && n !== TAB && n !== FEED && n !== CR) {
-                    next = pos;
-                    do {
-                        escaped = false;
-                        next = css.indexOf(')', next + 1);
-                        if (next === -1) {
-                            if (ignore) {
-                                next = pos;
-                                break;
-                            } else {
-                                unclosed('bracket');
-                            }
-                        }
-                        escapePos = next;
-                        while (css.charCodeAt(escapePos - 1) === BACKSLASH) {
-                            escapePos -= 1;
-                            escaped = !escaped;
-                        }
-                    } while (escaped);
-
-                    currentToken = ['brackets', css.slice(pos, next + 1), line, pos - offset, line, next - offset];
-
-                    pos = next;
-                } else {
-                    next = css.indexOf(')', pos + 1);
-                    content = css.slice(pos, next + 1);
-
-                    if (next === -1 || RE_BAD_BRACKET.test(content)) {
-                        currentToken = ['(', '(', line, pos - offset];
-                    } else {
-                        currentToken = ['brackets', content, line, pos - offset, line, next - offset];
-                        pos = next;
-                    }
-                }
-
-                break;
-
-            case CLOSE_PARENTHESES:
-                currentToken = [')', ')', line, pos - offset];
-                break;
-
-            case SINGLE_QUOTE:
-            case DOUBLE_QUOTE:
-                quote = code === SINGLE_QUOTE ? '\'' : '"';
-                next = pos;
-                do {
-                    escaped = false;
-                    next = css.indexOf(quote, next + 1);
-                    if (next === -1) {
-                        if (ignore) {
-                            next = pos + 1;
-                            break;
-                        } else {
-                            unclosed('string');
-                        }
-                    }
-                    escapePos = next;
-                    while (css.charCodeAt(escapePos - 1) === BACKSLASH) {
-                        escapePos -= 1;
-                        escaped = !escaped;
-                    }
-                } while (escaped);
-
-                content = css.slice(pos, next + 1);
-                lines = content.split('\n');
-                last = lines.length - 1;
-
-                if (last > 0) {
-                    nextLine = line + last;
-                    nextOffset = next - lines[last].length;
-                } else {
-                    nextLine = line;
-                    nextOffset = offset;
-                }
-
-                currentToken = ['string', css.slice(pos, next + 1), line, pos - offset, nextLine, next - nextOffset];
-
-                offset = nextOffset;
-                line = nextLine;
-                pos = next;
-                break;
-
-            case AT:
-                RE_AT_END.lastIndex = pos + 1;
-                RE_AT_END.test(css);
-                if (RE_AT_END.lastIndex === 0) {
-                    next = css.length - 1;
-                } else {
-                    next = RE_AT_END.lastIndex - 2;
-                }
-
-                currentToken = ['at-word', css.slice(pos, next + 1), line, pos - offset, line, next - offset];
-
-                pos = next;
-                break;
-
-            case BACKSLASH:
-                next = pos;
-                escape = true;
-                while (css.charCodeAt(next + 1) === BACKSLASH) {
-                    next += 1;
-                    escape = !escape;
-                }
-                code = css.charCodeAt(next + 1);
-                if (escape && code !== SLASH && code !== SPACE && code !== NEWLINE && code !== TAB && code !== CR && code !== FEED) {
-                    next += 1;
-                    if (RE_HEX_ESCAPE.test(css.charAt(next))) {
-                        while (RE_HEX_ESCAPE.test(css.charAt(next + 1))) {
-                            next += 1;
-                        }
-                        if (css.charCodeAt(next + 1) === SPACE) {
-                            next += 1;
-                        }
-                    }
-                }
-
-                currentToken = ['word', css.slice(pos, next + 1), line, pos - offset, line, next - offset];
-
-                pos = next;
-                break;
-
-            default:
-                if (code === SLASH && css.charCodeAt(pos + 1) === ASTERISK) {
-                    next = css.indexOf('*/', pos + 2) + 1;
-                    if (next === 0) {
-                        if (ignore) {
-                            next = css.length;
-                        } else {
-                            unclosed('comment');
-                        }
-                    }
-
-                    content = css.slice(pos, next + 1);
-                    lines = content.split('\n');
-                    last = lines.length - 1;
-
-                    if (last > 0) {
-                        nextLine = line + last;
-                        nextOffset = next - lines[last].length;
-                    } else {
-                        nextLine = line;
-                        nextOffset = offset;
-                    }
-
-                    currentToken = ['comment', content, line, pos - offset, nextLine, next - nextOffset];
-
-                    offset = nextOffset;
-                    line = nextLine;
-                    pos = next;
-                } else {
-                    RE_WORD_END.lastIndex = pos + 1;
-                    RE_WORD_END.test(css);
-                    if (RE_WORD_END.lastIndex === 0) {
-                        next = css.length - 1;
-                    } else {
-                        next = RE_WORD_END.lastIndex - 2;
-                    }
-
-                    currentToken = ['word', css.slice(pos, next + 1), line, pos - offset, line, next - offset];
-
-                    buffer.push(currentToken);
-
-                    pos = next;
-                }
-
-                break;
-        }
-
-        pos++;
-        return currentToken;
+    } else {
+        return window.atob(str);
     }
-
-    function back(token) {
-        returned.push(token);
-    }
-
-    return {
-        back: back,
-        nextToken: nextToken,
-        endOfFile: endOfFile
-    };
 }
+
+/**
+ * Source map information from input CSS.
+ * For example, source map after Sass compiler.
+ *
+ * This class will automatically find source map in input CSS or in file system
+ * near input file (according `from` option).
+ *
+ * @example
+ * const root = postcss.parse(css, { from: 'a.sass.css' });
+ * root.input.map //=> PreviousMap
+ */
+
+var PreviousMap = function () {
+
+    /**
+     * @param {string}         css    - input CSS source
+     * @param {processOptions} [opts] - {@link Processor#process} options
+     */
+    function PreviousMap(css, opts) {
+        _classCallCheck(this, PreviousMap);
+
+        this.loadAnnotation(css);
+        /**
+         * @member {boolean} - Was source map inlined by data-uri to input CSS.
+         */
+        this.inline = this.startWith(this.annotation, 'data:');
+
+        var prev = opts.map ? opts.map.prev : undefined;
+        var text = this.loadMap(opts.from, prev);
+        if (text) this.text = text;
+    }
+
+    /**
+     * Create a instance of `SourceMapGenerator` class
+     * from the `source-map` library to work with source map information.
+     *
+     * It is lazy method, so it will create object only on first call
+     * and then it will use cache.
+     *
+     * @return {SourceMapGenerator} object with source map information
+     */
+
+
+    PreviousMap.prototype.consumer = function consumer() {
+        if (!this.consumerCache) {
+            this.consumerCache = new _sourceMap2.default.SourceMapConsumer(this.text);
+        }
+        return this.consumerCache;
+    };
+
+    /**
+     * Does source map contains `sourcesContent` with input source text.
+     *
+     * @return {boolean} Is `sourcesContent` present
+     */
+
+
+    PreviousMap.prototype.withContent = function withContent() {
+        return !!(this.consumer().sourcesContent && this.consumer().sourcesContent.length > 0);
+    };
+
+    PreviousMap.prototype.startWith = function startWith(string, start) {
+        if (!string) return false;
+        return string.substr(0, start.length) === start;
+    };
+
+    PreviousMap.prototype.loadAnnotation = function loadAnnotation(css) {
+        var match = css.match(/\/\*\s*# sourceMappingURL=(.*)\s*\*\//);
+        if (match) this.annotation = match[1].trim();
+    };
+
+    PreviousMap.prototype.decodeInline = function decodeInline(text) {
+        // data:application/json;charset=utf-8;base64,
+        // data:application/json;charset=utf8;base64,
+        // data:application/json;base64,
+        var baseUri = /^data:application\/json;(?:charset=utf-?8;)?base64,/;
+        var uri = 'data:application/json,';
+
+        if (this.startWith(text, uri)) {
+            return decodeURIComponent(text.substr(uri.length));
+        } else if (baseUri.test(text)) {
+            return fromBase64(text.substr(RegExp.lastMatch.length));
+        } else {
+            var encoding = text.match(/data:application\/json;([^,]+),/)[1];
+            throw new Error('Unsupported source map encoding ' + encoding);
+        }
+    };
+
+    PreviousMap.prototype.loadMap = function loadMap(file, prev) {
+        if (prev === false) return false;
+
+        if (prev) {
+            if (typeof prev === 'string') {
+                return prev;
+            } else if (typeof prev === 'function') {
+                var prevPath = prev(file);
+                if (prevPath && _fs2.default.existsSync && _fs2.default.existsSync(prevPath)) {
+                    return _fs2.default.readFileSync(prevPath, 'utf-8').toString().trim();
+                } else {
+                    throw new Error('Unable to load previous source map: ' + prevPath.toString());
+                }
+            } else if (prev instanceof _sourceMap2.default.SourceMapConsumer) {
+                return _sourceMap2.default.SourceMapGenerator.fromSourceMap(prev).toString();
+            } else if (prev instanceof _sourceMap2.default.SourceMapGenerator) {
+                return prev.toString();
+            } else if (this.isMap(prev)) {
+                return JSON.stringify(prev);
+            } else {
+                throw new Error('Unsupported previous source map format: ' + prev.toString());
+            }
+        } else if (this.inline) {
+            return this.decodeInline(this.annotation);
+        } else if (this.annotation) {
+            var map = this.annotation;
+            if (file) map = _path2.default.join(_path2.default.dirname(file), map);
+
+            this.root = _path2.default.dirname(map);
+            if (_fs2.default.existsSync && _fs2.default.existsSync(map)) {
+                return _fs2.default.readFileSync(map, 'utf-8').toString().trim();
+            } else {
+                return false;
+            }
+        }
+    };
+
+    PreviousMap.prototype.isMap = function isMap(map) {
+        if ((typeof map === 'undefined' ? 'undefined' : _typeof(map)) !== 'object') return false;
+        return typeof map.mappings === 'string' || typeof map._mappings === 'string';
+    };
+
+    return PreviousMap;
+}();
+
+exports.default = PreviousMap;
 module.exports = exports['default'];
 
-}, {}];
+
+}).call(this,require(22).Buffer)}, {"20":20,"22":22,"392":392,"454":454}];

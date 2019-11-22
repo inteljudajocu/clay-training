@@ -1,196 +1,185 @@
-window.modules["465"] = [function(require,module,exports){'use strict';
+window.modules["465"] = [function(require,module,exports){"use strict";
 
 exports.__esModule = true;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _parser = require(466);
 
-var _namespace = require(474);
-
-var _namespace2 = _interopRequireDefault(_namespace);
-
-var _types = require(460);
+var _parser2 = _interopRequireDefault(_parser);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+var Processor = function () {
+    function Processor(func, options) {
+        _classCallCheck(this, Processor);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Attribute = function (_Namespace) {
-    _inherits(Attribute, _Namespace);
-
-    function Attribute() {
-        var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        _classCallCheck(this, Attribute);
-
-        var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
-
-        _this.type = _types.ATTRIBUTE;
-        _this.raws = _this.raws || {};
-        _this._constructed = true;
-        return _this;
+        this.func = func || function noop() {};
+        this.funcRes = null;
+        this.options = options;
     }
 
-    Attribute.prototype._spacesFor = function _spacesFor(name) {
-        var attrSpaces = { before: '', after: '' };
-        var spaces = this.spaces[name] || {};
-        var rawSpaces = this.raws.spaces && this.raws.spaces[name] || {};
-        return Object.assign(attrSpaces, spaces, rawSpaces);
+    Processor.prototype._shouldUpdateSelector = function _shouldUpdateSelector(rule) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        var merged = Object.assign({}, this.options, options);
+        if (merged.updateSelector === false) {
+            return false;
+        } else {
+            return typeof rule !== "string";
+        }
     };
 
-    Attribute.prototype._valueFor = function _valueFor(name) {
-        return this.raws[name] || this[name];
+    Processor.prototype._isLossy = function _isLossy() {
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        var merged = Object.assign({}, this.options, options);
+        if (merged.lossless === false) {
+            return true;
+        } else {
+            return false;
+        }
     };
 
-    Attribute.prototype._stringFor = function _stringFor(name) {
-        var spaceName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : name;
-        var concat = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : defaultAttrConcat;
+    Processor.prototype._root = function _root(rule) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        var attrSpaces = this._spacesFor(spaceName);
-        return concat(this._valueFor(name), attrSpaces);
+        var parser = new _parser2.default(rule, this._parseOptions(options));
+        return parser.root;
+    };
+
+    Processor.prototype._parseOptions = function _parseOptions(options) {
+        return {
+            lossy: this._isLossy(options)
+        };
+    };
+
+    Processor.prototype._run = function _run(rule) {
+        var _this = this;
+
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        return new Promise(function (resolve, reject) {
+            try {
+                var root = _this._root(rule, options);
+                Promise.resolve(_this.func(root)).then(function (transform) {
+                    var string = undefined;
+                    if (_this._shouldUpdateSelector(rule, options)) {
+                        string = root.toString();
+                        rule.selector = string;
+                    }
+                    return { transform: transform, root: root, string: string };
+                }).then(resolve, reject);
+            } catch (e) {
+                reject(e);
+                return;
+            }
+        });
+    };
+
+    Processor.prototype._runSync = function _runSync(rule) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        var root = this._root(rule, options);
+        var transform = this.func(root);
+        if (transform && typeof transform.then === "function") {
+            throw new Error("Selector processor returned a promise to a synchronous call.");
+        }
+        var string = undefined;
+        if (options.updateSelector && typeof rule !== "string") {
+            string = root.toString();
+            rule.selector = string;
+        }
+        return { transform: transform, root: root, string: string };
     };
 
     /**
-     * returns the offset of the attribute part specified relative to the
-     * start of the node of the output string.
-     *
-     * * "ns" - alias for "namespace"
-     * * "namespace" - the namespace if it exists.
-     * * "attribute" - the attribute name
-     * * "attributeNS" - the start of the attribute or its namespace
-     * * "operator" - the match operator of the attribute
-     * * "value" - The value (string or identifier)
-     * * "insensitive" - the case insensitivity flag;
-     * @param part One of the possible values inside an attribute.
-     * @returns -1 if the name is invalid or the value doesn't exist in this attribute.
+     * Process rule into a selector AST.
+     * 
+     * @param rule {postcss.Rule | string} The css selector to be processed
+     * @param options The options for processing
+     * @returns {Promise<parser.Root>} The AST of the selector after processing it.
      */
 
 
-    Attribute.prototype.offsetOf = function offsetOf(name) {
-        var count = 1;
-        var attributeSpaces = this._spacesFor("attribute");
-        count += attributeSpaces.before.length;
-        if (name === "namespace" || name === "ns") {
-            return this.namespace ? count : -1;
-        }
-        if (name === "attributeNS") {
-            return count;
-        }
-
-        count += this.namespaceString.length;
-        if (this.namespace) {
-            count += 1;
-        }
-        if (name === "attribute") {
-            return count;
-        }
-
-        count += this._valueFor("attribute").length;
-        count += attributeSpaces.after.length;
-        var operatorSpaces = this._spacesFor("operator");
-        count += operatorSpaces.before.length;
-        var operator = this._valueFor("operator");
-        if (name === "operator") {
-            return operator ? count : -1;
-        }
-
-        count += operator.length;
-        count += operatorSpaces.after.length;
-        var valueSpaces = this._spacesFor("value");
-        count += valueSpaces.before.length;
-        var value = this._valueFor("value");
-        if (name === "value") {
-            return value ? count : -1;
-        }
-
-        count += value.length;
-        count += valueSpaces.after.length;
-        var insensitiveSpaces = this._spacesFor("insensitive");
-        count += insensitiveSpaces.before.length;
-        if (name === "insensitive") {
-            return this.insensitive ? count : -1;
-        }
-        return -1;
+    Processor.prototype.ast = function ast(rule, options) {
+        return this._run(rule, options).then(function (result) {
+            return result.root;
+        });
     };
 
-    Attribute.prototype.toString = function toString() {
-        var _this2 = this;
+    /**
+     * Process rule into a selector AST synchronously.
+     * 
+     * @param rule {postcss.Rule | string} The css selector to be processed
+     * @param options The options for processing
+     * @returns {parser.Root} The AST of the selector after processing it.
+     */
 
-        var selector = [this.spaces.before, '['];
 
-        selector.push(this._stringFor('qualifiedAttribute', 'attribute'));
-
-        if (this.operator && this.value) {
-            selector.push(this._stringFor('operator'));
-            selector.push(this._stringFor('value'));
-            selector.push(this._stringFor('insensitiveFlag', 'insensitive', function (attrValue, attrSpaces) {
-                if (attrValue.length > 0 && !_this2.quoted && attrSpaces.before.length === 0 && !(_this2.spaces.value && _this2.spaces.value.after)) {
-                    attrSpaces.before = " ";
-                }
-                return defaultAttrConcat(attrValue, attrSpaces);
-            }));
-        }
-
-        selector.push(']');
-        selector.push(this.spaces.after);
-        return selector.join('');
+    Processor.prototype.astSync = function astSync(rule, options) {
+        return this._runSync(rule, options).root;
     };
 
-    _createClass(Attribute, [{
-        key: 'qualifiedAttribute',
-        get: function get() {
-            return this.qualifiedName(this.raws.attribute || this.attribute);
-        }
-    }, {
-        key: 'insensitiveFlag',
-        get: function get() {
-            return this.insensitive ? 'i' : '';
-        }
-    }, {
-        key: 'value',
-        get: function get() {
-            return this._value;
-        },
-        set: function set(v) {
-            this._value = v;
-            if (this._constructed) {
-                delete this.raws.value;
-            }
-        }
-    }, {
-        key: 'namespace',
-        get: function get() {
-            return this._namespace;
-        },
-        set: function set(v) {
-            this._namespace = v;
-            if (this._constructed) {
-                delete this.raws.namespace;
-            }
-        }
-    }, {
-        key: 'attribute',
-        get: function get() {
-            return this._attribute;
-        },
-        set: function set(v) {
-            this._attribute = v;
-            if (this._constructed) {
-                delete this.raws.attibute;
-            }
-        }
-    }]);
-
-    return Attribute;
-}(_namespace2.default);
-
-exports.default = Attribute;
+    /**
+     * Process a selector into a transformed value asynchronously
+     * 
+     * @param rule {postcss.Rule | string} The css selector to be processed
+     * @param options The options for processing
+     * @returns {Promise<any>} The value returned by the processor.
+     */
 
 
-function defaultAttrConcat(attrValue, attrSpaces) {
-    return '' + attrSpaces.before + attrValue + attrSpaces.after;
-}
-module.exports = exports['default'];}, {"460":460,"474":474}];
+    Processor.prototype.transform = function transform(rule, options) {
+        return this._run(rule, options).then(function (result) {
+            return result.transform;
+        });
+    };
+
+    /**
+     * Process a selector into a transformed value synchronously.
+     * 
+     * @param rule {postcss.Rule | string} The css selector to be processed
+     * @param options The options for processing
+     * @returns {any} The value returned by the processor.
+     */
+
+
+    Processor.prototype.transformSync = function transformSync(rule, options) {
+        return this._runSync(rule, options).transform;
+    };
+
+    /**
+     * Process a selector into a new selector string asynchronously.
+     * 
+     * @param rule {postcss.Rule | string} The css selector to be processed
+     * @param options The options for processing
+     * @returns {string} the selector after processing.
+     */
+
+
+    Processor.prototype.process = function process(rule, options) {
+        return this._run(rule, options).then(function (result) {
+            return result.string || result.root.toString();
+        });
+    };
+
+    /**
+     * Process a selector into a new selector string synchronously.
+     * 
+     * @param rule {postcss.Rule | string} The css selector to be processed
+     * @param options The options for processing
+     * @returns {string} the selector after processing.
+     */
+
+
+    Processor.prototype.processSync = function processSync(rule, options) {
+        var result = this._runSync(rule, options);
+        return result.string || result.root.toString();
+    };
+
+    return Processor;
+}();
+
+exports.default = Processor;
+module.exports = exports["default"];}, {"466":466}];

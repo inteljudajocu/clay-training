@@ -1,17 +1,21 @@
-window.modules["331"] = [function(require,module,exports){var baseGet = require(289);
-
-/**
- * A specialized version of `baseProperty` which supports deep paths.
+window.modules["331"] = [function(require,module,exports){/**
+ * This function is like
+ * [`Object.keys`](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+ * except that it includes inherited enumerable properties.
  *
  * @private
- * @param {Array|string} path The path of the property to get.
- * @returns {Function} Returns the new accessor function.
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
  */
-function basePropertyDeep(path) {
-  return function(object) {
-    return baseGet(object, path);
-  };
+function nativeKeysIn(object) {
+  var result = [];
+  if (object != null) {
+    for (var key in Object(object)) {
+      result.push(key);
+    }
+  }
+  return result;
 }
 
-module.exports = basePropertyDeep;
-}, {"289":289}];
+module.exports = nativeKeysIn;
+}, {}];

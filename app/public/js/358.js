@@ -1,16 +1,19 @@
 window.modules["358"] = [function(require,module,exports){/**
- * Creates a unary function that invokes `func` with its argument transformed.
+ * Converts `map` to its key-value pairs.
  *
  * @private
- * @param {Function} func The function to wrap.
- * @param {Function} transform The argument transform.
- * @returns {Function} Returns the new function.
+ * @param {Object} map The map to convert.
+ * @returns {Array} Returns the key-value pairs.
  */
-function overArg(func, transform) {
-  return function(arg) {
-    return func(transform(arg));
-  };
+function mapToArray(map) {
+  var index = -1,
+      result = Array(map.size);
+
+  map.forEach(function(value, key) {
+    result[++index] = [key, value];
+  });
+  return result;
 }
 
-module.exports = overArg;
+module.exports = mapToArray;
 }, {}];

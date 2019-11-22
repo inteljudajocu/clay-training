@@ -1,6 +1,6 @@
-window.modules["616"] = [function(require,module,exports){var makeString = require(576);
+window.modules["616"] = [function(require,module,exports){var chars = require(587);
 
-module.exports = function stripTags(str) {
-  return makeString(str).replace(/<\/?[^>]+>/g, '');
+module.exports = function reverse(str) {
+  return chars(str).reverse().join('');
 };
-}, {"576":576}];
+}, {"587":587}];

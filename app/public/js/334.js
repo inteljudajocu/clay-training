@@ -1,15 +1,21 @@
-window.modules["334"] = [function(require,module,exports){var baseSetToString = require(336),
-    shortOut = require(365);
-
-/**
- * Sets the `toString` method of `func` to return `string`.
+window.modules["334"] = [function(require,module,exports){/**
+ * A specialized version of `matchesProperty` for source values suitable
+ * for strict equality comparisons, i.e. `===`.
  *
  * @private
- * @param {Function} func The function to modify.
- * @param {Function} string The `toString` result.
- * @returns {Function} Returns `func`.
+ * @param {string} key The key of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
  */
-var setToString = shortOut(baseSetToString);
+function matchesStrictComparable(key, srcValue) {
+  return function(object) {
+    if (object == null) {
+      return false;
+    }
+    return object[key] === srcValue &&
+      (srcValue !== undefined || (key in Object(object)));
+  };
+}
 
-module.exports = setToString;
-}, {"336":336,"365":365}];
+module.exports = matchesStrictComparable;
+}, {}];

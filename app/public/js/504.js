@@ -1,217 +1,207 @@
-window.modules["504"] = [function(require,module,exports){"use strict";
+window.modules["504"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.default = void 0;
 
-var _cssSyntaxError = _interopRequireDefault(require(541));
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _previousMap = _interopRequireDefault(require(542));
+var _warning = require(512);
 
-var _path = _interopRequireDefault(require(381));
+var _warning2 = _interopRequireDefault(_warning);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var sequence = 0;
 /**
- * Represents the source CSS.
+ * Provides the result of the PostCSS transformations.
+ *
+ * A Result instance is returned by {@link LazyResult#then}
+ * or {@link Root#toResult} methods.
  *
  * @example
- * const root  = postcss.parse(css, { from: file })
- * const input = root.source.input
+ * postcss([cssnext]).process(css).then(function (result) {
+ *    console.log(result.css);
+ * });
+ *
+ * @example
+ * var result2 = postcss.parse(css).toResult();
  */
+var Result = function () {
 
-var Input =
-/*#__PURE__*/
-function () {
   /**
-   * @param {string} css    Input CSS source.
-   * @param {object} [opts] {@link Processor#process} options.
+   * @param {Processor} processor - processor used for this transformation.
+   * @param {Root}      root      - Root node after all transformations.
+   * @param {processOptions} opts - options from the {@link Processor#process}
+   *                                or {@link Root#toResult}
    */
-  function Input(css, opts) {
-    if (opts === void 0) {
-      opts = {};
-    }
+  function Result(processor, root, opts) {
+    _classCallCheck(this, Result);
 
-    if (css === null || typeof css === 'object' && !css.toString) {
-      throw new Error("PostCSS received " + css + " instead of CSS string");
-    }
     /**
-     * Input CSS source
-     *
-     * @type {string}
+     * @member {Processor} - The Processor instance used
+     *                       for this transformation.
      *
      * @example
-     * const input = postcss.parse('a{}', { from: file }).input
-     * input.css //=> "a{}"
+     * for ( let plugin of result.processor.plugins) {
+     *   if ( plugin.postcssPlugin === 'postcss-bad' ) {
+     *     throw 'postcss-good is incompatible with postcss-bad';
+     *   }
+     * });
      */
+    this.processor = processor;
+    /**
+     * @member {Message[]} - Contains messages from plugins
+     *                       (e.g., warnings or custom messages).
+     *                       Each message should have type
+     *                       and plugin properties.
+     *
+     * @example
+     * postcss.plugin('postcss-min-browser', () => {
+     *   return (root, result) => {
+     *     var browsers = detectMinBrowsersByCanIUse(root);
+     *     result.messages.push({
+     *       type:    'min-browser',
+     *       plugin:  'postcss-min-browser',
+     *       browsers: browsers
+     *     });
+     *   };
+     * });
+     */
+    this.messages = [];
+    /**
+     * @member {Root} - Root node after all transformations.
+     *
+     * @example
+     * root.toResult().root == root;
+     */
+    this.root = root;
+    /**
+     * @member {processOptions} - Options from the {@link Processor#process}
+     *                            or {@link Root#toResult} call
+     *                            that produced this Result instance.
+     *
+     * @example
+     * root.toResult(opts).opts == opts;
+     */
+    this.opts = opts;
+    /**
+     * @member {string} - A CSS string representing of {@link Result#root}.
+     *
+     * @example
+     * postcss.parse('a{}').toResult().css //=> "a{}"
+     */
+    this.css = undefined;
+    /**
+     * @member {SourceMapGenerator} - An instance of `SourceMapGenerator`
+     *                                class from the `source-map` library,
+     *                                representing changes
+     *                                to the {@link Result#root} instance.
+     *
+     * @example
+     * result.map.toJSON() //=> { version: 3, file: 'a.css', … }
+     *
+     * @example
+     * if ( result.map ) {
+     *   fs.writeFileSync(result.opts.to + '.map', result.map.toString());
+     * }
+     */
+    this.map = undefined;
+  }
+
+  /**
+   * Returns for @{link Result#css} content.
+   *
+   * @example
+   * result + '' === result.css
+   *
+   * @return {string} string representing of {@link Result#root}
+   */
 
 
-    this.css = css.toString();
+  Result.prototype.toString = function toString() {
+    return this.css;
+  };
 
-    if (this.css[0] === "\uFEFF" || this.css[0] === "\uFFFE") {
-      this.hasBOM = true;
-      this.css = this.css.slice(1);
-    } else {
-      this.hasBOM = false;
-    }
+  /**
+   * Creates an instance of {@link Warning} and adds it
+   * to {@link Result#messages}.
+   *
+   * @param {string} text        - warning message
+   * @param {Object} [opts]      - warning options
+   * @param {Node}   opts.node   - CSS node that caused the warning
+   * @param {string} opts.word   - word in CSS source that caused the warning
+   * @param {number} opts.index  - index in CSS node string that caused
+   *                               the warning
+   * @param {string} opts.plugin - name of the plugin that created
+   *                               this warning. {@link Result#warn} fills
+   *                               this property automatically.
+   *
+   * @return {Warning} created warning
+   */
 
-    if (opts.from) {
-      if (/^\w+:\/\//.test(opts.from)) {
-        /**
-         * The absolute path to the CSS source file defined
-         * with the `from` option.
-         *
-         * @type {string}
-         *
-         * @example
-         * const root = postcss.parse(css, { from: 'a.css' })
-         * root.source.input.file //=> '/home/ai/a.css'
-         */
-        this.file = opts.from;
-      } else {
-        this.file = _path.default.resolve(opts.from);
+
+  Result.prototype.warn = function warn(text) {
+    var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    if (!opts.plugin) {
+      if (this.lastPlugin && this.lastPlugin.postcssPlugin) {
+        opts.plugin = this.lastPlugin.postcssPlugin;
       }
     }
 
-    var map = new _previousMap.default(this.css, opts);
+    var warning = new _warning2.default(text, opts);
+    this.messages.push(warning);
 
-    if (map.text) {
-      /**
-       * The input source map passed from a compilation step before PostCSS
-       * (for example, from Sass compiler).
-       *
-       * @type {PreviousMap}
-       *
-       * @example
-       * root.source.input.map.consumer().sources //=> ['a.sass']
-       */
-      this.map = map;
-      var file = map.consumer().file;
-      if (!this.file && file) this.file = this.mapResolve(file);
-    }
-
-    if (!this.file) {
-      sequence += 1;
-      /**
-       * The unique ID of the CSS source. It will be created if `from` option
-       * is not provided (because PostCSS does not know the file path).
-       *
-       * @type {string}
-       *
-       * @example
-       * const root = postcss.parse(css)
-       * root.source.input.file //=> undefined
-       * root.source.input.id   //=> "<input css 1>"
-       */
-
-      this.id = '<input css ' + sequence + '>';
-    }
-
-    if (this.map) this.map.file = this.from;
-  }
-
-  var _proto = Input.prototype;
-
-  _proto.error = function error(message, line, column, opts) {
-    if (opts === void 0) {
-      opts = {};
-    }
-
-    var result;
-    var origin = this.origin(line, column);
-
-    if (origin) {
-      result = new _cssSyntaxError.default(message, origin.line, origin.column, origin.source, origin.file, opts.plugin);
-    } else {
-      result = new _cssSyntaxError.default(message, line, column, this.css, this.file, opts.plugin);
-    }
-
-    result.input = {
-      line: line,
-      column: column,
-      source: this.css
-    };
-    if (this.file) result.input.file = this.file;
-    return result;
-  }
-  /**
-   * Reads the input source map and returns a symbol position
-   * in the input source (e.g., in a Sass file that was compiled
-   * to CSS before being passed to PostCSS).
-   *
-   * @param {number} line   Line in input CSS.
-   * @param {number} column Column in input CSS.
-   *
-   * @return {filePosition} Position in input source.
-   *
-   * @example
-   * root.source.input.origin(1, 1) //=> { file: 'a.css', line: 3, column: 1 }
-   */
-  ;
-
-  _proto.origin = function origin(line, column) {
-    if (!this.map) return false;
-    var consumer = this.map.consumer();
-    var from = consumer.originalPositionFor({
-      line: line,
-      column: column
-    });
-    if (!from.source) return false;
-    var result = {
-      file: this.mapResolve(from.source),
-      line: from.line,
-      column: from.column
-    };
-    var source = consumer.sourceContentFor(from.source);
-    if (source) result.source = source;
-    return result;
+    return warning;
   };
 
-  _proto.mapResolve = function mapResolve(file) {
-    if (/^\w+:\/\//.test(file)) {
-      return file;
-    }
-
-    return _path.default.resolve(this.map.consumer().sourceRoot || '.', file);
-  }
   /**
-   * The CSS source identifier. Contains {@link Input#file} if the user
-   * set the `from` option, or {@link Input#id} if they did not.
+   * Returns warnings from plugins. Filters {@link Warning} instances
+   * from {@link Result#messages}.
    *
+   * @example
+   * result.warnings().forEach(warn => {
+   *   console.warn(warn.toString());
+   * });
+   *
+   * @return {Warning[]} warnings from plugins
+   */
+
+
+  Result.prototype.warnings = function warnings() {
+    return this.messages.filter(function (i) {
+      return i.type === 'warning';
+    });
+  };
+
+  /**
+   * An alias for the {@link Result#css} property.
+   * Use it with syntaxes that generate non-CSS output.
    * @type {string}
    *
    * @example
-   * const root = postcss.parse(css, { from: 'a.css' })
-   * root.source.input.from //=> "/home/ai/a.css"
-   *
-   * const root = postcss.parse(css)
-   * root.source.input.from //=> "<input css 1>"
+   * result.css === result.content;
    */
-  ;
 
-  _createClass(Input, [{
-    key: "from",
+
+  _createClass(Result, [{
+    key: 'content',
     get: function get() {
-      return this.file || this.id;
+      return this.css;
     }
   }]);
 
-  return Input;
+  return Result;
 }();
 
-var _default = Input;
+exports.default = Result;
+
 /**
- * @typedef  {object} filePosition
- * @property {string} file   Path to file.
- * @property {number} line   Source line in file.
- * @property {number} column Source column in file.
+ * @typedef  {object} Message
+ * @property {string} type   - message type
+ * @property {string} plugin - source PostCSS plugin name
  */
 
-exports.default = _default;
-module.exports = exports.default;
+module.exports = exports['default'];
 
-}, {"381":381,"541":541,"542":542}];
+}, {"512":512}];

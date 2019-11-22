@@ -1,33 +1,48 @@
-window.modules["126"] = [function(require,module,exports){module.exports = {
-    name: 'Selector',
+window.modules["126"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+
+var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+
+function consumeRaw(startToken) {
+    return this.Raw(startToken, LEFTCURLYBRACKET, 0, false, true);
+}
+
+module.exports = {
+    name: 'Rule',
     structure: {
-        children: [[
-            'TypeSelector',
-            'IdSelector',
-            'ClassSelector',
-            'AttributeSelector',
-            'PseudoClassSelector',
-            'PseudoElementSelector',
-            'Combinator',
-            'WhiteSpace'
-        ]]
+        prelude: ['SelectorList', 'Raw'],
+        block: ['Block']
     },
     parse: function() {
-        var children = this.readSequence(this.scope.Selector);
+        var startToken = this.scanner.currentToken;
+        var startOffset = this.scanner.tokenStart;
+        var prelude;
+        var block;
 
-        // nothing were consumed
-        if (children.isEmpty()) {
-            this.scanner.error('Selector is expected');
+        if (this.parseRulePrelude) {
+            prelude = this.tolerantParse(this.SelectorList, consumeRaw);
+
+            if (this.tolerant && !this.scanner.eof) {
+                if (prelude.type !== 'Raw' && this.scanner.tokenType !== LEFTCURLYBRACKET) {
+                    prelude = consumeRaw.call(this, startToken);
+                }
+            }
+        } else {
+            prelude = consumeRaw.call(this, startToken);
         }
 
+        block = this.Block(true);
+
         return {
-            type: 'Selector',
-            loc: this.getLocationFromList(children),
-            children: children
+            type: 'Rule',
+            loc: this.getLocation(startOffset, this.scanner.tokenStart),
+            prelude: prelude,
+            block: block
         };
     },
     generate: function(processChunk, node) {
-        this.each(processChunk, node);
-    }
+        this.generate(processChunk, node.prelude);
+        this.generate(processChunk, node.block);
+    },
+    walkContext: 'rule'
 };
-}, {}];
+}, {"75":75}];

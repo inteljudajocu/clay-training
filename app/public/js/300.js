@@ -1,19 +1,29 @@
-window.modules["300"] = [function(require,module,exports){var baseGetTag = require(293),
-    isObjectLike = require(301);
+window.modules["300"] = [function(require,module,exports){var Symbol = require(269),
+    getRawTag = require(302),
+    objectToString = require(301);
 
 /** `Object#toString` result references. */
-var argsTag = '[object Arguments]';
+var nullTag = '[object Null]',
+    undefinedTag = '[object Undefined]';
+
+/** Built-in value references. */
+var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
 
 /**
- * The base implementation of `_.isArguments`.
+ * The base implementation of `getTag` without fallbacks for buggy environments.
  *
  * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ * @param {*} value The value to query.
+ * @returns {string} Returns the `toStringTag`.
  */
-function baseIsArguments(value) {
-  return isObjectLike(value) && baseGetTag(value) == argsTag;
+function baseGetTag(value) {
+  if (value == null) {
+    return value === undefined ? undefinedTag : nullTag;
+  }
+  return (symToStringTag && symToStringTag in Object(value))
+    ? getRawTag(value)
+    : objectToString(value);
 }
 
-module.exports = baseIsArguments;
-}, {"293":293,"301":301}];
+module.exports = baseGetTag;
+}, {"269":269,"301":301,"302":302}];

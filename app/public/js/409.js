@@ -1,46 +1,36 @@
-window.modules["409"] = [function(require,module,exports){module.exports = function compressFont(node) {
-    var list = node.children;
+window.modules["409"] = [function(require,module,exports){var prepare = require(432);
+var mergeAtrule = require(424);
+var initialMergeRuleset = require(425);
+var disjoinRuleset = require(427);
+var restructShorthand = require(428);
+var restructBlock = require(429);
+var mergeRuleset = require(430);
+var restructRuleset = require(431);
 
-    list.eachRight(function(node, item) {
-        if (node.type === 'Identifier') {
-            if (node.name === 'bold') {
-                item.data = {
-                    type: 'Number',
-                    loc: node.loc,
-                    value: '700'
-                };
-            } else if (node.name === 'normal') {
-                var prev = item.prev;
+module.exports = function(ast, options) {
+    // prepare ast for restructing
+    var indexer = prepare(ast, options);
+    options.logger('prepare', ast);
 
-                if (prev && prev.data.type === 'Operator' && prev.data.value === '/') {
-                    this.remove(prev);
-                }
+    mergeAtrule(ast, options);
+    options.logger('mergeAtrule', ast);
 
-                this.remove(item);
-            } else if (node.name === 'medium') {
-                var next = item.next;
+    initialMergeRuleset(ast);
+    options.logger('initialMergeRuleset', ast);
 
-                if (!next || next.data.type !== 'Operator') {
-                    this.remove(item);
-                }
-            }
-        }
-    });
+    disjoinRuleset(ast);
+    options.logger('disjoinRuleset', ast);
 
-    // remove redundant spaces
-    list.each(function(node, item) {
-        if (node.type === 'WhiteSpace') {
-            if (!item.prev || !item.next || item.next.data.type === 'WhiteSpace') {
-                this.remove(item);
-            }
-        }
-    });
+    restructShorthand(ast, indexer);
+    options.logger('restructShorthand', ast);
 
-    if (list.isEmpty()) {
-        list.insert(list.createItem({
-            type: 'Identifier',
-            name: 'normal'
-        }));
-    }
+    restructBlock(ast);
+    options.logger('restructBlock', ast);
+
+    mergeRuleset(ast);
+    options.logger('mergeRuleset', ast);
+
+    restructRuleset(ast);
+    options.logger('restructRuleset', ast);
 };
-}, {}];
+}, {"424":424,"425":425,"427":427,"428":428,"429":429,"430":430,"431":431,"432":432}];

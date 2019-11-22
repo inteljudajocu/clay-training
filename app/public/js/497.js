@@ -2,344 +2,256 @@ window.modules["497"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
+var _supportsColor = require(20);
+
+var _supportsColor2 = _interopRequireDefault(_supportsColor);
+
+var _chalk = require(20);
+
+var _chalk2 = _interopRequireDefault(_chalk);
+
+var _terminalHighlight = require(498);
+
+var _terminalHighlight2 = _interopRequireDefault(_terminalHighlight);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var defaultRaw = {
-    colon: ': ',
-    indent: '    ',
-    beforeDecl: '\n',
-    beforeRule: '\n',
-    beforeOpen: ' ',
-    beforeClose: '\n',
-    beforeComment: '\n',
-    after: '\n',
-    emptyBody: '',
-    commentLeft: ' ',
-    commentRight: ' '
-};
+/**
+ * The CSS parser throws this error for broken CSS.
+ *
+ * Custom parsers can throw this error for broken custom syntax using
+ * the {@link Node#error} method.
+ *
+ * PostCSS will use the input source map to detect the original error location.
+ * If you wrote a Sass file, compiled it to CSS and then parsed it with PostCSS,
+ * PostCSS will show the original position in the Sass file.
+ *
+ * If you need the position in the PostCSS input
+ * (e.g., to debug the previous compiler), use `error.input.file`.
+ *
+ * @example
+ * // Catching and checking syntax error
+ * try {
+ *   postcss.parse('a{')
+ * } catch (error) {
+ *   if ( error.name === 'CssSyntaxError' ) {
+ *     error //=> CssSyntaxError
+ *   }
+ * }
+ *
+ * @example
+ * // Raising error from plugin
+ * throw node.error('Unknown variable', { plugin: 'postcss-vars' });
+ */
+var CssSyntaxError = function () {
 
-function capitalize(str) {
-    return str[0].toUpperCase() + str.slice(1);
-}
+    /**
+     * @param {string} message  - error message
+     * @param {number} [line]   - source line of the error
+     * @param {number} [column] - source column of the error
+     * @param {string} [source] - source code of the broken file
+     * @param {string} [file]   - absolute path to the broken file
+     * @param {string} [plugin] - PostCSS plugin name, if error came from plugin
+     */
+    function CssSyntaxError(message, line, column, source, file, plugin) {
+        _classCallCheck(this, CssSyntaxError);
 
-var Stringifier = function () {
-    function Stringifier(builder) {
-        _classCallCheck(this, Stringifier);
+        /**
+         * @member {string} - Always equal to `'CssSyntaxError'`. You should
+         *                    always check error type
+         *                    by `error.name === 'CssSyntaxError'` instead of
+         *                    `error instanceof CssSyntaxError`, because
+         *                    npm could have several PostCSS versions.
+         *
+         * @example
+         * if ( error.name === 'CssSyntaxError' ) {
+         *   error //=> CssSyntaxError
+         * }
+         */
+        this.name = 'CssSyntaxError';
+        /**
+         * @member {string} - Error message.
+         *
+         * @example
+         * error.message //=> 'Unclosed block'
+         */
+        this.reason = message;
 
-        this.builder = builder;
+        if (file) {
+            /**
+             * @member {string} - Absolute path to the broken file.
+             *
+             * @example
+             * error.file       //=> 'a.sass'
+             * error.input.file //=> 'a.css'
+             */
+            this.file = file;
+        }
+        if (source) {
+            /**
+             * @member {string} - Source code of the broken file.
+             *
+             * @example
+             * error.source       //=> 'a { b {} }'
+             * error.input.column //=> 'a b { }'
+             */
+            this.source = source;
+        }
+        if (plugin) {
+            /**
+             * @member {string} - Plugin name, if error came from plugin.
+             *
+             * @example
+             * error.plugin //=> 'postcss-vars'
+             */
+            this.plugin = plugin;
+        }
+        if (typeof line !== 'undefined' && typeof column !== 'undefined') {
+            /**
+             * @member {number} - Source line of the error.
+             *
+             * @example
+             * error.line       //=> 2
+             * error.input.line //=> 4
+             */
+            this.line = line;
+            /**
+             * @member {number} - Source column of the error.
+             *
+             * @example
+             * error.column       //=> 1
+             * error.input.column //=> 4
+             */
+            this.column = column;
+        }
+
+        this.setMessage();
+
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, CssSyntaxError);
+        }
     }
 
-    Stringifier.prototype.stringify = function stringify(node, semicolon) {
-        this[node.type](node, semicolon);
+    CssSyntaxError.prototype.setMessage = function setMessage() {
+        /**
+         * @member {string} - Full error text in the GNU error format
+         *                    with plugin, file, line and column.
+         *
+         * @example
+         * error.message //=> 'a.css:1:1: Unclosed block'
+         */
+        this.message = this.plugin ? this.plugin + ': ' : '';
+        this.message += this.file ? this.file : '<css input>';
+        if (typeof this.line !== 'undefined') {
+            this.message += ':' + this.line + ':' + this.column;
+        }
+        this.message += ': ' + this.reason;
     };
 
-    Stringifier.prototype.root = function root(node) {
-        this.body(node);
-        if (node.raws.after) this.builder(node.raws.after);
-    };
+    /**
+     * Returns a few lines of CSS source that caused the error.
+     *
+     * If the CSS has an input source map without `sourceContent`,
+     * this method will return an empty string.
+     *
+     * @param {boolean} [color] whether arrow will be colored red by terminal
+     *                          color codes. By default, PostCSS will detect
+     *                          color support by `process.stdout.isTTY`
+     *                          and `window.process.env.NODE_DISABLE_COLORS`.
+     *
+     * @example
+     * error.showSourceCode() //=> "  4 | }
+     *                        //      5 | a {
+     *                        //    > 6 |   bad
+     *                        //        |   ^
+     *                        //      7 | }
+     *                        //      8 | b {"
+     *
+     * @return {string} few lines of CSS source that caused the error
+     */
 
-    Stringifier.prototype.comment = function comment(node) {
-        var left = this.raw(node, 'left', 'commentLeft');
-        var right = this.raw(node, 'right', 'commentRight');
-        this.builder('/*' + left + node.text + right + '*/', node);
-    };
 
-    Stringifier.prototype.decl = function decl(node, semicolon) {
-        var between = this.raw(node, 'between', 'colon');
-        var string = node.prop + between + this.rawValue(node, 'value');
+    CssSyntaxError.prototype.showSourceCode = function showSourceCode(color) {
+        var _this = this;
 
-        if (node.important) {
-            string += node.raws.important || ' !important';
-        }
+        if (!this.source) return '';
 
-        if (semicolon) string += ';';
-        this.builder(string, node);
-    };
+        var css = this.source;
+        if (typeof color === 'undefined') color = _supportsColor2.default.stdout;
+        if (color) css = (0, _terminalHighlight2.default)(css);
 
-    Stringifier.prototype.rule = function rule(node) {
-        this.block(node, this.rawValue(node, 'selector'));
-        if (node.raws.ownSemicolon) {
-            this.builder(node.raws.ownSemicolon, node, 'end');
-        }
-    };
+        var lines = css.split(/\r?\n/);
+        var start = Math.max(this.line - 3, 0);
+        var end = Math.min(this.line + 2, lines.length);
 
-    Stringifier.prototype.atrule = function atrule(node, semicolon) {
-        var name = '@' + node.name;
-        var params = node.params ? this.rawValue(node, 'params') : '';
+        var maxWidth = String(end).length;
 
-        if (typeof node.raws.afterName !== 'undefined') {
-            name += node.raws.afterName;
-        } else if (params) {
-            name += ' ';
-        }
-
-        if (node.nodes) {
-            this.block(node, name + params);
-        } else {
-            var end = (node.raws.between || '') + (semicolon ? ';' : '');
-            this.builder(name + params + end, node);
-        }
-    };
-
-    Stringifier.prototype.body = function body(node) {
-        var last = node.nodes.length - 1;
-        while (last > 0) {
-            if (node.nodes[last].type !== 'comment') break;
-            last -= 1;
-        }
-
-        var semicolon = this.raw(node, 'semicolon');
-        for (var i = 0; i < node.nodes.length; i++) {
-            var child = node.nodes[i];
-            var before = this.raw(child, 'before');
-            if (before) this.builder(before);
-            this.stringify(child, last !== i || semicolon);
-        }
-    };
-
-    Stringifier.prototype.block = function block(node, start) {
-        var between = this.raw(node, 'between', 'beforeOpen');
-        this.builder(start + between + '{', node, 'start');
-
-        var after = void 0;
-        if (node.nodes && node.nodes.length) {
-            this.body(node);
-            after = this.raw(node, 'after');
-        } else {
-            after = this.raw(node, 'after', 'emptyBody');
-        }
-
-        if (after) this.builder(after);
-        this.builder('}', node, 'end');
-    };
-
-    Stringifier.prototype.raw = function raw(node, own, detect) {
-        var value = void 0;
-        if (!detect) detect = own;
-
-        // Already had
-        if (own) {
-            value = node.raws[own];
-            if (typeof value !== 'undefined') return value;
-        }
-
-        var parent = node.parent;
-
-        // Hack for first rule in CSS
-        if (detect === 'before') {
-            if (!parent || parent.type === 'root' && parent.first === node) {
-                return '';
-            }
-        }
-
-        // Floating child without parent
-        if (!parent) return defaultRaw[detect];
-
-        // Detect style by other nodes
-        var root = node.root();
-        if (!root.rawCache) root.rawCache = {};
-        if (typeof root.rawCache[detect] !== 'undefined') {
-            return root.rawCache[detect];
-        }
-
-        if (detect === 'before' || detect === 'after') {
-            return this.beforeAfter(node, detect);
-        } else {
-            var method = 'raw' + capitalize(detect);
-            if (this[method]) {
-                value = this[method](root, node);
+        function mark(text) {
+            if (color && _chalk2.default.red) {
+                return _chalk2.default.red.bold(text);
             } else {
-                root.walk(function (i) {
-                    value = i.raws[own];
-                    if (typeof value !== 'undefined') return false;
-                });
+                return text;
+            }
+        }
+        function aside(text) {
+            if (color && _chalk2.default.gray) {
+                return _chalk2.default.gray(text);
+            } else {
+                return text;
             }
         }
 
-        if (typeof value === 'undefined') value = defaultRaw[detect];
-
-        root.rawCache[detect] = value;
-        return value;
+        return lines.slice(start, end).map(function (line, index) {
+            var number = start + 1 + index;
+            var gutter = ' ' + (' ' + number).slice(-maxWidth) + ' | ';
+            if (number === _this.line) {
+                var spacing = aside(gutter.replace(/\d/g, ' ')) + line.slice(0, _this.column - 1).replace(/[^\t]/g, ' ');
+                return mark('>') + aside(gutter) + line + '\n ' + spacing + mark('^');
+            } else {
+                return ' ' + aside(gutter) + line;
+            }
+        }).join('\n');
     };
 
-    Stringifier.prototype.rawSemicolon = function rawSemicolon(root) {
-        var value = void 0;
-        root.walk(function (i) {
-            if (i.nodes && i.nodes.length && i.last.type === 'decl') {
-                value = i.raws.semicolon;
-                if (typeof value !== 'undefined') return false;
-            }
-        });
-        return value;
-    };
+    /**
+     * Returns error position, message and source code of the broken part.
+     *
+     * @example
+     * error.toString() //=> "CssSyntaxError: app.css:1:1: Unclosed block
+     *                  //    > 1 | a {
+     *                  //        | ^"
+     *
+     * @return {string} error position, message and source code
+     */
 
-    Stringifier.prototype.rawEmptyBody = function rawEmptyBody(root) {
-        var value = void 0;
-        root.walk(function (i) {
-            if (i.nodes && i.nodes.length === 0) {
-                value = i.raws.after;
-                if (typeof value !== 'undefined') return false;
-            }
-        });
-        return value;
-    };
 
-    Stringifier.prototype.rawIndent = function rawIndent(root) {
-        if (root.raws.indent) return root.raws.indent;
-        var value = void 0;
-        root.walk(function (i) {
-            var p = i.parent;
-            if (p && p !== root && p.parent && p.parent === root) {
-                if (typeof i.raws.before !== 'undefined') {
-                    var parts = i.raws.before.split('\n');
-                    value = parts[parts.length - 1];
-                    value = value.replace(/[^\s]/g, '');
-                    return false;
-                }
-            }
-        });
-        return value;
-    };
-
-    Stringifier.prototype.rawBeforeComment = function rawBeforeComment(root, node) {
-        var value = void 0;
-        root.walkComments(function (i) {
-            if (typeof i.raws.before !== 'undefined') {
-                value = i.raws.before;
-                if (value.indexOf('\n') !== -1) {
-                    value = value.replace(/[^\n]+$/, '');
-                }
-                return false;
-            }
-        });
-        if (typeof value === 'undefined') {
-            value = this.raw(node, null, 'beforeDecl');
-        } else if (value) {
-            value = value.replace(/[^\s]/g, '');
+    CssSyntaxError.prototype.toString = function toString() {
+        var code = this.showSourceCode();
+        if (code) {
+            code = '\n\n' + code + '\n';
         }
-        return value;
+        return this.name + ': ' + this.message + code;
     };
 
-    Stringifier.prototype.rawBeforeDecl = function rawBeforeDecl(root, node) {
-        var value = void 0;
-        root.walkDecls(function (i) {
-            if (typeof i.raws.before !== 'undefined') {
-                value = i.raws.before;
-                if (value.indexOf('\n') !== -1) {
-                    value = value.replace(/[^\n]+$/, '');
-                }
-                return false;
-            }
-        });
-        if (typeof value === 'undefined') {
-            value = this.raw(node, null, 'beforeRule');
-        } else if (value) {
-            value = value.replace(/[^\s]/g, '');
-        }
-        return value;
-    };
+    /**
+     * @memberof CssSyntaxError#
+     * @member {Input} input - Input object with PostCSS internal information
+     *                         about input file. If input has source map
+     *                         from previous tool, PostCSS will use origin
+     *                         (for example, Sass) source. You can use this
+     *                         object to get PostCSS input source.
+     *
+     * @example
+     * error.input.file //=> 'a.css'
+     * error.file       //=> 'a.sass'
+     */
 
-    Stringifier.prototype.rawBeforeRule = function rawBeforeRule(root) {
-        var value = void 0;
-        root.walk(function (i) {
-            if (i.nodes && (i.parent !== root || root.first !== i)) {
-                if (typeof i.raws.before !== 'undefined') {
-                    value = i.raws.before;
-                    if (value.indexOf('\n') !== -1) {
-                        value = value.replace(/[^\n]+$/, '');
-                    }
-                    return false;
-                }
-            }
-        });
-        if (value) value = value.replace(/[^\s]/g, '');
-        return value;
-    };
-
-    Stringifier.prototype.rawBeforeClose = function rawBeforeClose(root) {
-        var value = void 0;
-        root.walk(function (i) {
-            if (i.nodes && i.nodes.length > 0) {
-                if (typeof i.raws.after !== 'undefined') {
-                    value = i.raws.after;
-                    if (value.indexOf('\n') !== -1) {
-                        value = value.replace(/[^\n]+$/, '');
-                    }
-                    return false;
-                }
-            }
-        });
-        if (value) value = value.replace(/[^\s]/g, '');
-        return value;
-    };
-
-    Stringifier.prototype.rawBeforeOpen = function rawBeforeOpen(root) {
-        var value = void 0;
-        root.walk(function (i) {
-            if (i.type !== 'decl') {
-                value = i.raws.between;
-                if (typeof value !== 'undefined') return false;
-            }
-        });
-        return value;
-    };
-
-    Stringifier.prototype.rawColon = function rawColon(root) {
-        var value = void 0;
-        root.walkDecls(function (i) {
-            if (typeof i.raws.between !== 'undefined') {
-                value = i.raws.between.replace(/[^\s:]/g, '');
-                return false;
-            }
-        });
-        return value;
-    };
-
-    Stringifier.prototype.beforeAfter = function beforeAfter(node, detect) {
-        var value = void 0;
-        if (node.type === 'decl') {
-            value = this.raw(node, null, 'beforeDecl');
-        } else if (node.type === 'comment') {
-            value = this.raw(node, null, 'beforeComment');
-        } else if (detect === 'before') {
-            value = this.raw(node, null, 'beforeRule');
-        } else {
-            value = this.raw(node, null, 'beforeClose');
-        }
-
-        var buf = node.parent;
-        var depth = 0;
-        while (buf && buf.type !== 'root') {
-            depth += 1;
-            buf = buf.parent;
-        }
-
-        if (value.indexOf('\n') !== -1) {
-            var indent = this.raw(node, null, 'indent');
-            if (indent.length) {
-                for (var step = 0; step < depth; step++) {
-                    value += indent;
-                }
-            }
-        }
-
-        return value;
-    };
-
-    Stringifier.prototype.rawValue = function rawValue(node, prop) {
-        var value = node[prop];
-        var raw = node.raws[prop];
-        if (raw && raw.value === value) {
-            return raw.raw;
-        } else {
-            return value;
-        }
-    };
-
-    return Stringifier;
+    return CssSyntaxError;
 }();
 
-exports.default = Stringifier;
+exports.default = CssSyntaxError;
 module.exports = exports['default'];
 
-}, {}];
+}, {"20":20,"498":498}];

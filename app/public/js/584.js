@@ -1,29 +1,7 @@
-window.modules["584"] = [function(require,module,exports){var makeString = require(576);
+window.modules["584"] = [function(require,module,exports){var makeString = require(586);
 
-function getIndent(str) {
-  var matches = str.match(/^[\s\\t]*/gm);
-  var indent = matches[0].length;
-  
-  for (var i = 1; i < matches.length; i++) {
-    indent = Math.min(matches[i].length, indent);
-  }
-
-  return indent;
-}
-
-module.exports = function dedent(str, pattern) {
+module.exports = function decapitalize(str) {
   str = makeString(str);
-  var indent = getIndent(str);
-  var reg;
-
-  if (indent === 0) return str;
-
-  if (typeof pattern === 'string') {
-    reg = new RegExp('^' + pattern, 'gm');
-  } else {
-    reg = new RegExp('^[ \\t]{' + indent + '}', 'gm');
-  }
-
-  return str.replace(reg, '');
+  return str.charAt(0).toLowerCase() + str.slice(1);
 };
-}, {"576":576}];
+}, {"586":586}];

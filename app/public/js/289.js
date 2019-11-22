@@ -1,25 +1,15 @@
-window.modules["289"] = [function(require,module,exports){var castPath = require(291),
-    toKey = require(290);
+window.modules["289"] = [function(require,module,exports){var baseForOwn = require(290),
+    createBaseEach = require(291);
 
 /**
- * The base implementation of `_.get` without support for default values.
+ * The base implementation of `_.forEach` without support for iteratee shorthands.
  *
  * @private
- * @param {Object} object The object to query.
- * @param {Array|string} path The path of the property to get.
- * @returns {*} Returns the resolved value.
+ * @param {Array|Object} collection The collection to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array|Object} Returns `collection`.
  */
-function baseGet(object, path) {
-  path = castPath(path, object);
+var baseEach = createBaseEach(baseForOwn);
 
-  var index = 0,
-      length = path.length;
-
-  while (object != null && index < length) {
-    object = object[toKey(path[index++])];
-  }
-  return (index && index == length) ? object : undefined;
-}
-
-module.exports = baseGet;
+module.exports = baseEach;
 }, {"290":290,"291":291}];

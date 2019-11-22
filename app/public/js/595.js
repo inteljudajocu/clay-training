@@ -1,8 +1,14 @@
-window.modules["595"] = [function(require,module,exports){var capitalize = require(575);
-var underscored = require(596);
-var trim = require(573);
+window.modules["595"] = [function(require,module,exports){var makeString = require(586);
+var toPositive = require(596);
 
-module.exports = function humanize(str) {
-  return capitalize(trim(underscored(str).replace(/_id$/, '').replace(/_/g, ' ')));
+module.exports = function endsWith(str, ends, position) {
+  str = makeString(str);
+  ends = '' + ends;
+  if (typeof position == 'undefined') {
+    position = str.length - ends.length;
+  } else {
+    position = Math.min(toPositive(position), str.length) - ends.length;
+  }
+  return position >= 0 && str.indexOf(ends, position) === position;
 };
-}, {"573":573,"575":575,"596":596}];
+}, {"586":586,"596":596}];

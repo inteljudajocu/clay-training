@@ -1,28 +1,35 @@
-window.modules["174"] = [function(require,module,exports){var parse = require(2)
+window.modules["174"] = [function(require,module,exports){var parse = require(5)
+var startOfISOWeek = require(177)
+var startOfISOYear = require(176)
+
+var MILLISECONDS_IN_WEEK = 604800000
 
 /**
- * @category Year Helpers
- * @summary Return the start of a year for the given date.
+ * @category ISO Week Helpers
+ * @summary Get the ISO week of the given date.
  *
  * @description
- * Return the start of a year for the given date.
- * The result will be in the local timezone.
+ * Get the ISO week of the given date.
  *
- * @param {Date|String|Number} date - the original date
- * @returns {Date} the start of a year
+ * ISO week-numbering year: http://en.wikipedia.org/wiki/ISO_week_date
+ *
+ * @param {Date|String|Number} date - the given date
+ * @returns {Number} the ISO week
  *
  * @example
- * // The start of a year for 2 September 2014 11:55:00:
- * var result = startOfYear(new Date(2014, 8, 2, 11, 55, 00))
- * //=> Wed Jan 01 2014 00:00:00
+ * // Which week of the ISO-week numbering year is 2 January 2005?
+ * var result = getISOWeek(new Date(2005, 0, 2))
+ * //=> 53
  */
-function startOfYear (dirtyDate) {
-  var cleanDate = parse(dirtyDate)
-  var date = new Date(0)
-  date.setFullYear(cleanDate.getFullYear(), 0, 1)
-  date.setHours(0, 0, 0, 0)
-  return date
+function getISOWeek (dirtyDate) {
+  var date = parse(dirtyDate)
+  var diff = startOfISOWeek(date).getTime() - startOfISOYear(date).getTime()
+
+  // Round the number of days to the nearest integer
+  // because the number of milliseconds in a week is not constant
+  // (e.g. it's different in the week of the daylight saving time clock shift)
+  return Math.round(diff / MILLISECONDS_IN_WEEK) + 1
 }
 
-module.exports = startOfYear
-}, {"2":2}];
+module.exports = getISOWeek
+}, {"5":5,"176":176,"177":177}];

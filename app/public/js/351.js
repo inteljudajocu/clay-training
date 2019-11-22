@@ -1,17 +1,14 @@
-window.modules["351"] = [function(require,module,exports){var baseGetAllKeys = require(292),
-    getSymbols = require(353),
-    keys = require(288);
-
-/**
- * Creates an array of own enumerable property names and symbols of `object`.
+window.modules["351"] = [function(require,module,exports){/**
+ * Checks if a `cache` value for `key` exists.
  *
  * @private
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property names and symbols.
+ * @param {Object} cache The cache to query.
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function getAllKeys(object) {
-  return baseGetAllKeys(object, keys, getSymbols);
+function cacheHas(cache, key) {
+  return cache.has(key);
 }
 
-module.exports = getAllKeys;
-}, {"288":288,"292":292,"353":353}];
+module.exports = cacheHas;
+}, {}];

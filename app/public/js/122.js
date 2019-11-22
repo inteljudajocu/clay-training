@@ -1,14 +1,14 @@
-window.modules["122"] = [function(require,module,exports){var List = require(53);
-var TYPE = require(74).TYPE;
+window.modules["122"] = [function(require,module,exports){var List = require(54);
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var FUNCTION = TYPE.Function;
 var COLON = TYPE.Colon;
 var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 
-// :: ident [ '(' .. ')' ]?
+// : ident [ '(' .. ')' ]?
 module.exports = {
-    name: 'PseudoElementSelector',
+    name: 'PseudoClassSelector',
     structure: {
         name: String,
         children: [['Raw'], null]
@@ -19,7 +19,6 @@ module.exports = {
         var name;
         var nameLowerCase;
 
-        this.scanner.eat(COLON);
         this.scanner.eat(COLON);
 
         if (this.scanner.tokenType === FUNCTION) {
@@ -42,14 +41,14 @@ module.exports = {
         }
 
         return {
-            type: 'PseudoElementSelector',
+            type: 'PseudoClassSelector',
             loc: this.getLocation(start, this.scanner.tokenStart),
             name: name,
             children: children
         };
     },
     generate: function(processChunk, node) {
-        processChunk('::');
+        processChunk(':');
         processChunk(node.name);
 
         if (node.children !== null) {
@@ -60,4 +59,4 @@ module.exports = {
     },
     walkContext: 'function'
 };
-}, {"53":53,"74":74}];
+}, {"54":54,"75":75}];

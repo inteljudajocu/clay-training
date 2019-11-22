@@ -1,19 +1,16 @@
 window.modules["50"] = [function(require,module,exports){'use strict';
 
-/**
- * Return true if argument passed in is a string. If not, throw an error.
- * strCheck is used in each util function to check if the URI passed in is a string.
- *
- * @param  {string} arg
- * @return {boolean|error}
- */
-function strCheck(arg) {
-  if (typeof arg === 'string') {
-    return true;
-  } else {
-    throw new Error('Argument must be a string, not ' + typeof arg);
-  }
-}
+const isUriStringCheck = require(51);
 
-module.exports.strCheck = strCheck;
-}, {}];
+/**
+ * First test if argument is a String. If true, test if '/_lists/' is in the string.
+ * Otherwise, throw an error.
+ * @param  {string}  uri
+ * @return {Boolean}
+ */
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+
+  return uri.toLowerCase().indexOf('/_lists/') > -1;
+};
+}, {"51":51}];

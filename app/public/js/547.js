@@ -1,357 +1,611 @@
-window.modules["547"] = [function(require,module,exports){(function (Buffer){
+window.modules["547"] = [function(require,module,exports){(function (process){
 "use strict";
 
 exports.__esModule = true;
 exports.default = void 0;
 
-var _sourceMap = _interopRequireDefault(require(444));
+var _cssSyntaxError = _interopRequireDefault(require(551));
 
-var _path = _interopRequireDefault(require(381));
+var _stringifier = _interopRequireDefault(require(559));
+
+var _stringify = _interopRequireDefault(require(554));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var MapGenerator =
-/*#__PURE__*/
-function () {
-  function MapGenerator(stringify, root, opts) {
-    this.stringify = stringify;
-    this.mapOpts = opts.map || {};
-    this.root = root;
-    this.opts = opts;
+function cloneNode(obj, parent) {
+  var cloned = new obj.constructor();
+
+  for (var i in obj) {
+    if (!obj.hasOwnProperty(i)) continue;
+    var value = obj[i];
+    var type = typeof value;
+
+    if (i === 'parent' && type === 'object') {
+      if (parent) cloned[i] = parent;
+    } else if (i === 'source') {
+      cloned[i] = value;
+    } else if (value instanceof Array) {
+      cloned[i] = value.map(function (j) {
+        return cloneNode(j, cloned);
+      });
+    } else {
+      if (type === 'object' && value !== null) value = cloneNode(value);
+      cloned[i] = value;
+    }
   }
 
-  var _proto = MapGenerator.prototype;
+  return cloned;
+}
+/**
+ * All node classes inherit the following common methods.
+ *
+ * @abstract
+ */
 
-  _proto.isMap = function isMap() {
-    if (typeof this.opts.map !== 'undefined') {
-      return !!this.opts.map;
+
+var Node =
+/*#__PURE__*/
+function () {
+  /**
+   * @param {object} [defaults] Value for node properties.
+   */
+  function Node(defaults) {
+    if (defaults === void 0) {
+      defaults = {};
     }
 
-    return this.previous().length > 0;
-  };
+    this.raws = {};
 
-  _proto.previous = function previous() {
-    var _this = this;
-
-    if (!this.previousMaps) {
-      this.previousMaps = [];
-      this.root.walk(function (node) {
-        if (node.source && node.source.input.map) {
-          var map = node.source.input.map;
-
-          if (_this.previousMaps.indexOf(map) === -1) {
-            _this.previousMaps.push(map);
-          }
-        }
-      });
-    }
-
-    return this.previousMaps;
-  };
-
-  _proto.isInline = function isInline() {
-    if (typeof this.mapOpts.inline !== 'undefined') {
-      return this.mapOpts.inline;
-    }
-
-    var annotation = this.mapOpts.annotation;
-
-    if (typeof annotation !== 'undefined' && annotation !== true) {
-      return false;
-    }
-
-    if (this.previous().length) {
-      return this.previous().some(function (i) {
-        return i.inline;
-      });
-    }
-
-    return true;
-  };
-
-  _proto.isSourcesContent = function isSourcesContent() {
-    if (typeof this.mapOpts.sourcesContent !== 'undefined') {
-      return this.mapOpts.sourcesContent;
-    }
-
-    if (this.previous().length) {
-      return this.previous().some(function (i) {
-        return i.withContent();
-      });
-    }
-
-    return true;
-  };
-
-  _proto.clearAnnotation = function clearAnnotation() {
-    if (this.mapOpts.annotation === false) return;
-    var node;
-
-    for (var i = this.root.nodes.length - 1; i >= 0; i--) {
-      node = this.root.nodes[i];
-      if (node.type !== 'comment') continue;
-
-      if (node.text.indexOf('# sourceMappingURL=') === 0) {
-        this.root.removeChild(i);
+    if (window.process.env.NODE_ENV !== 'production') {
+      if (typeof defaults !== 'object' && typeof defaults !== 'undefined') {
+        throw new Error('PostCSS nodes constructor accepts object, not ' + JSON.stringify(defaults));
       }
     }
-  };
 
-  _proto.setSourcesContent = function setSourcesContent() {
-    var _this2 = this;
-
-    var already = {};
-    this.root.walk(function (node) {
-      if (node.source) {
-        var from = node.source.input.from;
-
-        if (from && !already[from]) {
-          already[from] = true;
-
-          var relative = _this2.relative(from);
-
-          _this2.map.setSourceContent(relative, node.source.input.css);
-        }
-      }
-    });
-  };
-
-  _proto.applyPrevMaps = function applyPrevMaps() {
-    for (var _iterator = this.previous(), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-      var _ref;
-
-      if (_isArray) {
-        if (_i >= _iterator.length) break;
-        _ref = _iterator[_i++];
-      } else {
-        _i = _iterator.next();
-        if (_i.done) break;
-        _ref = _i.value;
-      }
-
-      var prev = _ref;
-      var from = this.relative(prev.file);
-
-      var root = prev.root || _path.default.dirname(prev.file);
-
-      var map = void 0;
-
-      if (this.mapOpts.sourcesContent === false) {
-        map = new _sourceMap.default.SourceMapConsumer(prev.text);
-
-        if (map.sourcesContent) {
-          map.sourcesContent = map.sourcesContent.map(function () {
-            return null;
-          });
-        }
-      } else {
-        map = prev.consumer();
-      }
-
-      this.map.applySourceMap(map, from, this.relative(root));
+    for (var name in defaults) {
+      this[name] = defaults[name];
     }
-  };
+  }
+  /**
+   * Returns a `CssSyntaxError` instance containing the original position
+   * of the node in the source, showing line and column numbers and also
+   * a small excerpt to facilitate debugging.
+   *
+   * If present, an input source map will be used to get the original position
+   * of the source, even from a previous compilation step
+   * (e.g., from Sass compilation).
+   *
+   * This method produces very useful error messages.
+   *
+   * @param {string} message     Error description.
+   * @param {object} [opts]      Options.
+   * @param {string} opts.plugin Plugin name that created this error.
+   *                             PostCSS will set it automatically.
+   * @param {string} opts.word   A word inside a node’s string that should
+   *                             be highlighted as the source of the error.
+   * @param {number} opts.index  An index inside a node’s string that should
+   *                             be highlighted as the source of the error.
+   *
+   * @return {CssSyntaxError} Error object to throw it.
+   *
+   * @example
+   * if (!variables[name]) {
+   *   throw decl.error('Unknown variable ' + name, { word: name })
+   *   // CssSyntaxError: postcss-vars:a.sass:4:3: Unknown variable $black
+   *   //   color: $black
+   *   // a
+   *   //          ^
+   *   //   background: white
+   * }
+   */
 
-  _proto.isAnnotation = function isAnnotation() {
-    if (this.isInline()) {
-      return true;
+
+  var _proto = Node.prototype;
+
+  _proto.error = function error(message, opts) {
+    if (opts === void 0) {
+      opts = {};
     }
 
-    if (typeof this.mapOpts.annotation !== 'undefined') {
-      return this.mapOpts.annotation;
+    if (this.source) {
+      var pos = this.positionBy(opts);
+      return this.source.input.error(message, pos.line, pos.column, opts);
     }
 
-    if (this.previous().length) {
-      return this.previous().some(function (i) {
-        return i.annotation;
-      });
+    return new _cssSyntaxError.default(message);
+  }
+  /**
+   * This method is provided as a convenience wrapper for {@link Result#warn}.
+   *
+   * @param {Result} result      The {@link Result} instance
+   *                             that will receive the warning.
+   * @param {string} text        Warning message.
+   * @param {object} [opts]      Options
+   * @param {string} opts.plugin Plugin name that created this warning.
+   *                             PostCSS will set it automatically.
+   * @param {string} opts.word   A word inside a node’s string that should
+   *                             be highlighted as the source of the warning.
+   * @param {number} opts.index  An index inside a node’s string that should
+   *                             be highlighted as the source of the warning.
+   *
+   * @return {Warning} Created warning object.
+   *
+   * @example
+   * const plugin = postcss.plugin('postcss-deprecated', () => {
+   *   return (root, result) => {
+   *     root.walkDecls('bad', decl => {
+   *       decl.warn(result, 'Deprecated property bad')
+   *     })
+   *   }
+   * })
+   */
+  ;
+
+  _proto.warn = function warn(result, text, opts) {
+    var data = {
+      node: this
+    };
+
+    for (var i in opts) {
+      data[i] = opts[i];
     }
 
-    return true;
-  };
+    return result.warn(text, data);
+  }
+  /**
+   * Removes the node from its parent and cleans the parent properties
+   * from the node and its children.
+   *
+   * @example
+   * if (decl.prop.match(/^-webkit-/)) {
+   *   decl.remove()
+   * }
+   *
+   * @return {Node} Node to make calls chain.
+   */
+  ;
 
-  _proto.toBase64 = function toBase64(str) {
-    if (Buffer) {
-      return Buffer.from(str).toString('base64');
+  _proto.remove = function remove() {
+    if (this.parent) {
+      this.parent.removeChild(this);
     }
 
-    return window.btoa(unescape(encodeURIComponent(str)));
-  };
+    this.parent = undefined;
+    return this;
+  }
+  /**
+   * Returns a CSS string representing the node.
+   *
+   * @param {stringifier|syntax} [stringifier] A syntax to use
+   *                                           in string generation.
+   *
+   * @return {string} CSS string of this node.
+   *
+   * @example
+   * postcss.rule({ selector: 'a' }).toString() //=> "a {}"
+   */
+  ;
 
-  _proto.addAnnotation = function addAnnotation() {
-    var content;
-
-    if (this.isInline()) {
-      content = 'data:application/json;base64,' + this.toBase64(this.map.toString());
-    } else if (typeof this.mapOpts.annotation === 'string') {
-      content = this.mapOpts.annotation;
-    } else {
-      content = this.outputFile() + '.map';
+  _proto.toString = function toString(stringifier) {
+    if (stringifier === void 0) {
+      stringifier = _stringify.default;
     }
 
-    var eol = '\n';
-    if (this.css.indexOf('\r\n') !== -1) eol = '\r\n';
-    this.css += eol + '/*# sourceMappingURL=' + content + ' */';
-  };
-
-  _proto.outputFile = function outputFile() {
-    if (this.opts.to) {
-      return this.relative(this.opts.to);
-    }
-
-    if (this.opts.from) {
-      return this.relative(this.opts.from);
-    }
-
-    return 'to.css';
-  };
-
-  _proto.generateMap = function generateMap() {
-    this.generateString();
-    if (this.isSourcesContent()) this.setSourcesContent();
-    if (this.previous().length > 0) this.applyPrevMaps();
-    if (this.isAnnotation()) this.addAnnotation();
-
-    if (this.isInline()) {
-      return [this.css];
-    }
-
-    return [this.css, this.map];
-  };
-
-  _proto.relative = function relative(file) {
-    if (file.indexOf('<') === 0) return file;
-    if (/^\w+:\/\//.test(file)) return file;
-    var from = this.opts.to ? _path.default.dirname(this.opts.to) : '.';
-
-    if (typeof this.mapOpts.annotation === 'string') {
-      from = _path.default.dirname(_path.default.resolve(from, this.mapOpts.annotation));
-    }
-
-    file = _path.default.relative(from, file);
-
-    if (_path.default.sep === '\\') {
-      return file.replace(/\\/g, '/');
-    }
-
-    return file;
-  };
-
-  _proto.sourcePath = function sourcePath(node) {
-    if (this.mapOpts.from) {
-      return this.mapOpts.from;
-    }
-
-    return this.relative(node.source.input.from);
-  };
-
-  _proto.generateString = function generateString() {
-    var _this3 = this;
-
-    this.css = '';
-    this.map = new _sourceMap.default.SourceMapGenerator({
-      file: this.outputFile()
-    });
-    var line = 1;
-    var column = 1;
-    var lines, last;
-    this.stringify(this.root, function (str, node, type) {
-      _this3.css += str;
-
-      if (node && type !== 'end') {
-        if (node.source && node.source.start) {
-          _this3.map.addMapping({
-            source: _this3.sourcePath(node),
-            generated: {
-              line: line,
-              column: column - 1
-            },
-            original: {
-              line: node.source.start.line,
-              column: node.source.start.column - 1
-            }
-          });
-        } else {
-          _this3.map.addMapping({
-            source: '<no source>',
-            original: {
-              line: 1,
-              column: 0
-            },
-            generated: {
-              line: line,
-              column: column - 1
-            }
-          });
-        }
-      }
-
-      lines = str.match(/\n/g);
-
-      if (lines) {
-        line += lines.length;
-        last = str.lastIndexOf('\n');
-        column = str.length - last;
-      } else {
-        column += str.length;
-      }
-
-      if (node && type !== 'start') {
-        var p = node.parent || {
-          raws: {}
-        };
-
-        if (node.type !== 'decl' || node !== p.last || p.raws.semicolon) {
-          if (node.source && node.source.end) {
-            _this3.map.addMapping({
-              source: _this3.sourcePath(node),
-              generated: {
-                line: line,
-                column: column - 2
-              },
-              original: {
-                line: node.source.end.line,
-                column: node.source.end.column - 1
-              }
-            });
-          } else {
-            _this3.map.addMapping({
-              source: '<no source>',
-              original: {
-                line: 1,
-                column: 0
-              },
-              generated: {
-                line: line,
-                column: column - 1
-              }
-            });
-          }
-        }
-      }
-    });
-  };
-
-  _proto.generate = function generate() {
-    this.clearAnnotation();
-
-    if (this.isMap()) {
-      return this.generateMap();
-    }
-
+    if (stringifier.stringify) stringifier = stringifier.stringify;
     var result = '';
-    this.stringify(this.root, function (i) {
+    stringifier(this, function (i) {
       result += i;
     });
-    return [result];
+    return result;
+  }
+  /**
+   * Returns an exact clone of the node.
+   *
+   * The resulting cloned node and its (cloned) children will retain
+   * code style properties.
+   *
+   * @param {object} [overrides] New properties to override in the clone.
+   *
+   * @example
+   * decl.raws.before    //=> "\n  "
+   * const cloned = decl.clone({ prop: '-moz-' + decl.prop })
+   * cloned.raws.before  //=> "\n  "
+   * cloned.toString()   //=> -moz-transform: scale(0)
+   *
+   * @return {Node} Clone of the node.
+   */
+  ;
+
+  _proto.clone = function clone(overrides) {
+    if (overrides === void 0) {
+      overrides = {};
+    }
+
+    var cloned = cloneNode(this);
+
+    for (var name in overrides) {
+      cloned[name] = overrides[name];
+    }
+
+    return cloned;
+  }
+  /**
+   * Shortcut to clone the node and insert the resulting cloned node
+   * before the current node.
+   *
+   * @param {object} [overrides] Mew properties to override in the clone.
+   *
+   * @example
+   * decl.cloneBefore({ prop: '-moz-' + decl.prop })
+   *
+   * @return {Node} New node
+   */
+  ;
+
+  _proto.cloneBefore = function cloneBefore(overrides) {
+    if (overrides === void 0) {
+      overrides = {};
+    }
+
+    var cloned = this.clone(overrides);
+    this.parent.insertBefore(this, cloned);
+    return cloned;
+  }
+  /**
+   * Shortcut to clone the node and insert the resulting cloned node
+   * after the current node.
+   *
+   * @param {object} [overrides] New properties to override in the clone.
+   *
+   * @return {Node} New node.
+   */
+  ;
+
+  _proto.cloneAfter = function cloneAfter(overrides) {
+    if (overrides === void 0) {
+      overrides = {};
+    }
+
+    var cloned = this.clone(overrides);
+    this.parent.insertAfter(this, cloned);
+    return cloned;
+  }
+  /**
+   * Inserts node(s) before the current node and removes the current node.
+   *
+   * @param {...Node} nodes Mode(s) to replace current one.
+   *
+   * @example
+   * if (atrule.name === 'mixin') {
+   *   atrule.replaceWith(mixinRules[atrule.params])
+   * }
+   *
+   * @return {Node} Current node to methods chain.
+   */
+  ;
+
+  _proto.replaceWith = function replaceWith() {
+    if (this.parent) {
+      for (var _len = arguments.length, nodes = new Array(_len), _key = 0; _key < _len; _key++) {
+        nodes[_key] = arguments[_key];
+      }
+
+      for (var _i = 0; _i < nodes.length; _i++) {
+        var node = nodes[_i];
+        this.parent.insertBefore(this, node);
+      }
+
+      this.remove();
+    }
+
+    return this;
+  }
+  /**
+   * Returns the next child of the node’s parent.
+   * Returns `undefined` if the current node is the last child.
+   *
+   * @return {Node|undefined} Next node.
+   *
+   * @example
+   * if (comment.text === 'delete next') {
+   *   const next = comment.next()
+   *   if (next) {
+   *     next.remove()
+   *   }
+   * }
+   */
+  ;
+
+  _proto.next = function next() {
+    if (!this.parent) return undefined;
+    var index = this.parent.index(this);
+    return this.parent.nodes[index + 1];
+  }
+  /**
+   * Returns the previous child of the node’s parent.
+   * Returns `undefined` if the current node is the first child.
+   *
+   * @return {Node|undefined} Previous node.
+   *
+   * @example
+   * const annotation = decl.prev()
+   * if (annotation.type === 'comment') {
+   *   readAnnotation(annotation.text)
+   * }
+   */
+  ;
+
+  _proto.prev = function prev() {
+    if (!this.parent) return undefined;
+    var index = this.parent.index(this);
+    return this.parent.nodes[index - 1];
+  }
+  /**
+   * Insert new node before current node to current node’s parent.
+   *
+   * Just alias for `node.parent.insertBefore(node, add)`.
+   *
+   * @param {Node|object|string|Node[]} add New node.
+   *
+   * @return {Node} This node for methods chain.
+   *
+   * @example
+   * decl.before('content: ""')
+   */
+  ;
+
+  _proto.before = function before(add) {
+    this.parent.insertBefore(this, add);
+    return this;
+  }
+  /**
+   * Insert new node after current node to current node’s parent.
+   *
+   * Just alias for `node.parent.insertAfter(node, add)`.
+   *
+   * @param {Node|object|string|Node[]} add New node.
+   *
+   * @return {Node} This node for methods chain.
+   *
+   * @example
+   * decl.after('color: black')
+   */
+  ;
+
+  _proto.after = function after(add) {
+    this.parent.insertAfter(this, add);
+    return this;
   };
 
-  return MapGenerator;
+  _proto.toJSON = function toJSON() {
+    var fixed = {};
+
+    for (var name in this) {
+      if (!this.hasOwnProperty(name)) continue;
+      if (name === 'parent') continue;
+      var value = this[name];
+
+      if (value instanceof Array) {
+        fixed[name] = value.map(function (i) {
+          if (typeof i === 'object' && i.toJSON) {
+            return i.toJSON();
+          } else {
+            return i;
+          }
+        });
+      } else if (typeof value === 'object' && value.toJSON) {
+        fixed[name] = value.toJSON();
+      } else {
+        fixed[name] = value;
+      }
+    }
+
+    return fixed;
+  }
+  /**
+   * Returns a {@link Node#raws} value. If the node is missing
+   * the code style property (because the node was manually built or cloned),
+   * PostCSS will try to autodetect the code style property by looking
+   * at other nodes in the tree.
+   *
+   * @param {string} prop          Name of code style property.
+   * @param {string} [defaultType] Name of default value, it can be missed
+   *                               if the value is the same as prop.
+   *
+   * @example
+   * const root = postcss.parse('a { background: white }')
+   * root.nodes[0].append({ prop: 'color', value: 'black' })
+   * root.nodes[0].nodes[1].raws.before   //=> undefined
+   * root.nodes[0].nodes[1].raw('before') //=> ' '
+   *
+   * @return {string} Code style value.
+   */
+  ;
+
+  _proto.raw = function raw(prop, defaultType) {
+    var str = new _stringifier.default();
+    return str.raw(this, prop, defaultType);
+  }
+  /**
+   * Finds the Root instance of the node’s tree.
+   *
+   * @example
+   * root.nodes[0].nodes[0].root() === root
+   *
+   * @return {Root} Root parent.
+   */
+  ;
+
+  _proto.root = function root() {
+    var result = this;
+
+    while (result.parent) {
+      result = result.parent;
+    }
+
+    return result;
+  }
+  /**
+   * Clear the code style properties for the node and its children.
+   *
+   * @param {boolean} [keepBetween] Keep the raws.between symbols.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * node.raws.before  //=> ' '
+   * node.cleanRaws()
+   * node.raws.before  //=> undefined
+   */
+  ;
+
+  _proto.cleanRaws = function cleanRaws(keepBetween) {
+    delete this.raws.before;
+    delete this.raws.after;
+    if (!keepBetween) delete this.raws.between;
+  };
+
+  _proto.positionInside = function positionInside(index) {
+    var string = this.toString();
+    var column = this.source.start.column;
+    var line = this.source.start.line;
+
+    for (var i = 0; i < index; i++) {
+      if (string[i] === '\n') {
+        column = 1;
+        line += 1;
+      } else {
+        column += 1;
+      }
+    }
+
+    return {
+      line: line,
+      column: column
+    };
+  };
+
+  _proto.positionBy = function positionBy(opts) {
+    var pos = this.source.start;
+
+    if (opts.index) {
+      pos = this.positionInside(opts.index);
+    } else if (opts.word) {
+      var index = this.toString().indexOf(opts.word);
+      if (index !== -1) pos = this.positionInside(index);
+    }
+
+    return pos;
+  }
+  /**
+   * @memberof Node#
+   * @member {string} type String representing the node’s type.
+   *                       Possible values are `root`, `atrule`, `rule`,
+   *                       `decl`, or `comment`.
+   *
+   * @example
+   * postcss.decl({ prop: 'color', value: 'black' }).type //=> 'decl'
+   */
+
+  /**
+   * @memberof Node#
+   * @member {Container} parent The node’s parent node.
+   *
+   * @example
+   * root.nodes[0].parent === root
+   */
+
+  /**
+   * @memberof Node#
+   * @member {source} source The input source of the node.
+   *
+   * The property is used in source map generation.
+   *
+   * If you create a node manually (e.g., with `postcss.decl()`),
+   * that node will not have a `source` property and will be absent
+   * from the source map. For this reason, the plugin developer should
+   * consider cloning nodes to create new ones (in which case the new node’s
+   * source will reference the original, cloned node) or setting
+   * the `source` property manually.
+   *
+   * ```js
+   * // Bad
+   * const prefixed = postcss.decl({
+   *   prop: '-moz-' + decl.prop,
+   *   value: decl.value
+   * })
+   *
+   * // Good
+   * const prefixed = decl.clone({ prop: '-moz-' + decl.prop })
+   * ```
+   *
+   * ```js
+   * if (atrule.name === 'add-link') {
+   *   const rule = postcss.rule({ selector: 'a', source: atrule.source })
+   *   atrule.parent.insertBefore(atrule, rule)
+   * }
+   * ```
+   *
+   * @example
+   * decl.source.input.from //=> '/home/ai/a.sass'
+   * decl.source.start      //=> { line: 10, column: 2 }
+   * decl.source.end        //=> { line: 10, column: 12 }
+   */
+
+  /**
+   * @memberof Node#
+   * @member {object} raws Information to generate byte-to-byte equal
+   *                       node string as it was in the origin input.
+   *
+   * Every parser saves its own properties,
+   * but the default CSS parser uses:
+   *
+   * * `before`: the space symbols before the node. It also stores `*`
+   *   and `_` symbols before the declaration (IE hack).
+   * * `after`: the space symbols after the last child of the node
+   *   to the end of the node.
+   * * `between`: the symbols between the property and value
+   *   for declarations, selector and `{` for rules, or last parameter
+   *   and `{` for at-rules.
+   * * `semicolon`: contains true if the last child has
+   *   an (optional) semicolon.
+   * * `afterName`: the space between the at-rule name and its parameters.
+   * * `left`: the space symbols between `/*` and the comment’s text.
+   * * `right`: the space symbols between the comment’s text
+   *   and <code>*&#47;</code>.
+   * * `important`: the content of the important statement,
+   *   if it is not just `!important`.
+   *
+   * PostCSS cleans selectors, declaration values and at-rule parameters
+   * from comments and extra spaces, but it stores origin content in raws
+   * properties. As such, if you don’t change a declaration’s value,
+   * PostCSS will use the raw value with comments.
+   *
+   * @example
+   * const root = postcss.parse('a {\n  color:black\n}')
+   * root.first.first.raws //=> { before: '\n  ', between: ':' }
+   */
+  ;
+
+  return Node;
 }();
 
-var _default = MapGenerator;
+var _default = Node;
+/**
+ * @typedef {object} position
+ * @property {number} line   Source line in file.
+ * @property {number} column Source column in file.
+ */
+
+/**
+ * @typedef {object} source
+ * @property {Input} input    {@link Input} with input file
+ * @property {position} start The starting position of the node’s source.
+ * @property {position} end   The ending position of the node’s source.
+ */
+
 exports.default = _default;
 module.exports = exports.default;
 
 
-}).call(this,require(21).Buffer)}, {"21":21,"381":381,"444":444}];
+}).call(this,require(233))}, {"233":233,"551":551,"554":554,"559":559}];

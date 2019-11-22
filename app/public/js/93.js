@@ -1,10 +1,16 @@
-window.modules["93"] = [function(require,module,exports){var List = require(53);
+window.modules["93"] = [function(require,module,exports){var List = require(54);
 
-// legacy IE function
-// expression '(' raw ')'
+// https://drafts.csswg.org/css-images-4/#element-notation
+// https://developer.mozilla.org/en-US/docs/Web/CSS/element
 module.exports = function() {
+    this.scanner.skipSC();
+
+    var id = this.IdSelector();
+
+    this.scanner.skipSC();
+
     return new List().appendData(
-        this.Raw(this.scanner.currentToken, 0, 0, false, false)
+        id
     );
 };
-}, {"53":53}];
+}, {"54":54}];

@@ -1,11 +1,23 @@
-window.modules["591"] = [function(require,module,exports){var escapeRegExp = require(592);
+window.modules["591"] = [function(require,module,exports){
+var makeString = require(586);
 
-module.exports = function defaultToWhiteSpace(characters) {
-  if (characters == null)
-    return '\\s';
-  else if (characters.source)
-    return characters.source;
-  else
-    return '[' + escapeRegExp(characters) + ']';
+var from  = 'ąàáäâãåæăćčĉęèéëêĝĥìíïîĵłľńňòóöőôõðøśșşšŝťțţŭùúüűûñÿýçżźž',
+  to    = 'aaaaaaaaaccceeeeeghiiiijllnnoooooooossssstttuuuuuunyyczzz';
+
+from += from.toUpperCase();
+to += to.toUpperCase();
+
+to = to.split('');
+
+// for tokens requireing multitoken output
+from += 'ß';
+to.push('ss');
+
+
+module.exports = function cleanDiacritics(str) {
+  return makeString(str).replace(/.{1}/g, function(c){
+    var index = from.indexOf(c);
+    return index === -1 ? c : to[index];
+  });
 };
-}, {"592":592}];
+}, {"586":586}];

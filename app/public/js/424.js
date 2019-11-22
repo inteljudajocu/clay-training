@@ -1,95 +1,105 @@
-window.modules["424"] = [function(require,module,exports){var translate = require(57).translate;
-var specificity = require(425);
+window.modules["424"] = [function(require,module,exports){var List = require(58).List;
+var resolveKeyword = require(58).keyword;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var walkRulesRight = require(58).walkRulesRight;
 
-var nonFreezePseudoElements = {
-    'first-letter': true,
-    'first-line': true,
-    'after': true,
-    'before': true
-};
-var nonFreezePseudoClasses = {
-    'link': true,
-    'visited': true,
-    'hover': true,
-    'active': true,
-    'first-letter': true,
-    'first-line': true,
-    'after': true,
-    'before': true
-};
+function addRuleToMap(map, item, list, single) {
+    var node = item.data;
+    var name = resolveKeyword(node.name).name;
+    var id = node.name.toLowerCase() + '/' + (node.prelude ? node.prelude.id : null);
 
-module.exports = function freeze(node, usageData) {
-    var pseudos = Object.create(null);
-    var hasPseudo = false;
+    if (!hasOwnProperty.call(map, name)) {
+        map[name] = Object.create(null);
+    }
 
-    node.prelude.children.each(function(simpleSelector) {
-        var tagName = '*';
-        var scope = 0;
+    if (single) {
+        delete map[name][id];
+    }
 
-        simpleSelector.children.each(function(node) {
-            switch (node.type) {
-                case 'ClassSelector':
-                    if (usageData && usageData.scopes) {
-                        var classScope = usageData.scopes[node.name] || 0;
+    if (!hasOwnProperty.call(map[name], id)) {
+        map[name][id] = new List();
+    }
 
-                        if (scope !== 0 && classScope !== scope) {
-                            throw new Error('Selector can\'t has classes from different scopes: ' + translate(simpleSelector));
-                        }
+    map[name][id].append(list.remove(item));
+}
 
-                        scope = classScope;
+function relocateAtrules(ast, options) {
+    var collected = Object.create(null);
+    var topInjectPoint = null;
+
+    ast.children.each(function(node, item, list) {
+        if (node.type === 'Atrule') {
+            var keyword = resolveKeyword(node.name);
+
+            switch (keyword.name) {
+                case 'keyframes':
+                    addRuleToMap(collected, item, list, true);
+                    return;
+
+                case 'media':
+                    if (options.forceMediaMerge) {
+                        addRuleToMap(collected, item, list, false);
+                        return;
                     }
-                    break;
-
-                case 'PseudoClassSelector':
-                    var name = node.name.toLowerCase();
-
-                    if (!nonFreezePseudoClasses.hasOwnProperty(name)) {
-                        pseudos[name] = true;
-                        hasPseudo = true;
-                    }
-                    break;
-
-                case 'PseudoElementSelector':
-                    var name = node.name.toLowerCase();
-
-                    if (!nonFreezePseudoElements.hasOwnProperty(name)) {
-                        pseudos[name] = true;
-                        hasPseudo = true;
-                    }
-                    break;
-
-                case 'TypeSelector':
-                    tagName = node.name.toLowerCase();
-                    break;
-
-                case 'AttributeSelector':
-                    if (node.flags) {
-                        pseudos['[' + node.flags.toLowerCase() + ']'] = true;
-                        hasPseudo = true;
-                    }
-                    break;
-
-                case 'WhiteSpace':
-                case 'Combinator':
-                    tagName = '*';
                     break;
             }
-        });
 
-        simpleSelector.compareMarker = specificity(simpleSelector).toString();
-        simpleSelector.id = null; // pre-init property to avoid multiple hidden class
-        simpleSelector.id = translate(simpleSelector);
-
-        if (scope) {
-            simpleSelector.compareMarker += ':' + scope;
-        }
-
-        if (tagName !== '*') {
-            simpleSelector.compareMarker += ',' + tagName;
+            if (topInjectPoint === null &&
+                keyword.name !== 'charset' &&
+                keyword.name !== 'import') {
+                topInjectPoint = item;
+            }
+        } else {
+            if (topInjectPoint === null) {
+                topInjectPoint = item;
+            }
         }
     });
 
-    // add property to all rule nodes to avoid multiple hidden class
-    node.pseudoSignature = hasPseudo && Object.keys(pseudos).sort().join(',');
+    for (var atrule in collected) {
+        for (var id in collected[atrule]) {
+            ast.children.insertList(collected[atrule][id], atrule === 'media' ? null : topInjectPoint);
+        }
+    }
 };
-}, {"57":57,"425":425}];
+
+function isMediaRule(node) {
+    return node.type === 'Atrule' && node.name === 'media';
+}
+
+function processAtrule(node, item, list) {
+    if (!isMediaRule(node)) {
+        return;
+    }
+
+    var prev = item.prev && item.prev.data;
+
+    if (!prev || !isMediaRule(prev)) {
+        return;
+    }
+
+    // merge @media with same query
+    if (node.prelude &&
+        prev.prelude &&
+        node.prelude.id === prev.prelude.id) {
+        prev.block.children.appendList(node.block.children);
+        list.remove(item);
+
+        // TODO: use it when we can refer to several points in source
+        // prev.loc = {
+        //     primary: prev.loc,
+        //     merged: node.loc
+        // };
+    }
+}
+
+module.exports = function rejoinAtrule(ast, options) {
+    relocateAtrules(ast, options);
+
+    walkRulesRight(ast, function(node, item, list) {
+        if (node.type === 'Atrule') {
+            processAtrule(node, item, list);
+        }
+    });
+};
+}, {"58":58}];

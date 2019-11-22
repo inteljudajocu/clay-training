@@ -1,7 +1,28 @@
-window.modules["263"] = [function(require,module,exports){var root = require(230);
+window.modules["263"] = [function(require,module,exports){var ListCache = require(245),
+    stackClear = require(267),
+    stackDelete = require(265),
+    stackGet = require(264),
+    stackHas = require(266),
+    stackSet = require(268);
 
-/** Built-in value references. */
-var Uint8Array = root.Uint8Array;
+/**
+ * Creates a stack cache object to store key-value pairs.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function Stack(entries) {
+  var data = this.__data__ = new ListCache(entries);
+  this.size = data.size;
+}
 
-module.exports = Uint8Array;
-}, {"230":230}];
+// Add methods to `Stack`.
+Stack.prototype.clear = stackClear;
+Stack.prototype['delete'] = stackDelete;
+Stack.prototype.get = stackGet;
+Stack.prototype.has = stackHas;
+Stack.prototype.set = stackSet;
+
+module.exports = Stack;
+}, {"245":245,"264":264,"265":265,"266":266,"267":267,"268":268}];

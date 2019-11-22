@@ -1,66 +1,74 @@
-window.modules["114"] = [function(require,module,exports){var List = require(53);
-var TYPE = require(74).TYPE;
+window.modules["114"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
-var WHITESPACE = TYPE.WhiteSpace;
-var COMMENT = TYPE.Comment;
 var IDENTIFIER = TYPE.Identifier;
+var NUMBER = TYPE.Number;
 var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+var COLON = TYPE.Colon;
+var SOLIDUS = TYPE.Solidus;
 
 module.exports = {
-    name: 'MediaQuery',
+    name: 'MediaFeature',
     structure: {
-        children: [['Identifier', 'MediaFeature', 'WhiteSpace']]
+        name: String,
+        value: ['Identifier', 'Number', 'Dimension', 'Ratio', null]
     },
     parse: function() {
+        var start = this.scanner.tokenStart;
+        var name;
+        var value = null;
+
+        this.scanner.eat(LEFTPARENTHESIS);
         this.scanner.skipSC();
 
-        var children = new List();
-        var child = null;
-        var space = null;
+        name = this.scanner.consume(IDENTIFIER);
+        this.scanner.skipSC();
 
-        scan:
-        while (!this.scanner.eof) {
+        if (this.scanner.tokenType !== RIGHTPARENTHESIS) {
+            this.scanner.eat(COLON);
+            this.scanner.skipSC();
+
             switch (this.scanner.tokenType) {
-                case COMMENT:
-                    this.scanner.next();
-                    continue;
+                case NUMBER:
+                    if (this.scanner.lookupType(1) === IDENTIFIER) {
+                        value = this.Dimension();
+                    } else if (this.scanner.lookupNonWSType(1) === SOLIDUS) {
+                        value = this.Ratio();
+                    } else {
+                        value = this.Number();
+                    }
 
-                case WHITESPACE:
-                    space = this.WhiteSpace();
-                    continue;
-
-                case IDENTIFIER:
-                    child = this.Identifier();
                     break;
 
-                case LEFTPARENTHESIS:
-                    child = this.MediaFeature();
+                case IDENTIFIER:
+                    value = this.Identifier();
+
                     break;
 
                 default:
-                    break scan;
+                    this.scanner.error('Number, dimension, ratio or identifier is expected');
             }
 
-            if (space !== null) {
-                children.appendData(space);
-                space = null;
-            }
-
-            children.appendData(child);
+            this.scanner.skipSC();
         }
 
-        if (child === null) {
-            this.scanner.error('Identifier or parenthesis is expected');
-        }
+        this.scanner.eat(RIGHTPARENTHESIS);
 
         return {
-            type: 'MediaQuery',
-            loc: this.getLocationFromList(children),
-            children: children
+            type: 'MediaFeature',
+            loc: this.getLocation(start, this.scanner.tokenStart),
+            name: name,
+            value: value
         };
     },
     generate: function(processChunk, node) {
-        this.each(processChunk, node);
+        processChunk('(');
+        processChunk(node.name);
+        if (node.value !== null) {
+            processChunk(':');
+            this.generate(processChunk, node.value);
+        }
+        processChunk(')');
     }
 };
-}, {"53":53,"74":74}];
+}, {"75":75}];

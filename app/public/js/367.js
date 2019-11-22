@@ -1,35 +1,16 @@
-window.modules["367"] = [function(require,module,exports){var baseValues = require(341),
-    keys = require(288);
-
-/**
- * Creates an array of the own enumerable string keyed property values of `object`.
+window.modules["367"] = [function(require,module,exports){/**
+ * Creates a unary function that invokes `func` with its argument transformed.
  *
- * **Note:** Non-object values are coerced to objects.
- *
- * @static
- * @since 0.1.0
- * @memberOf _
- * @category Object
- * @param {Object} object The object to query.
- * @returns {Array} Returns the array of property values.
- * @example
- *
- * function Foo() {
- *   this.a = 1;
- *   this.b = 2;
- * }
- *
- * Foo.prototype.c = 3;
- *
- * _.values(new Foo);
- * // => [1, 2] (iteration order is not guaranteed)
- *
- * _.values('hi');
- * // => ['h', 'i']
+ * @private
+ * @param {Function} func The function to wrap.
+ * @param {Function} transform The argument transform.
+ * @returns {Function} Returns the new function.
  */
-function values(object) {
-  return object == null ? [] : baseValues(object, keys(object));
+function overArg(func, transform) {
+  return function(arg) {
+    return func(transform(arg));
+  };
 }
 
-module.exports = values;
-}, {"288":288,"341":341}];
+module.exports = overArg;
+}, {}];

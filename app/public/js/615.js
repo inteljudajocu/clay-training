@@ -1,21 +1,6 @@
-window.modules["615"] = [function(require,module,exports){var trim = require(573);
+window.modules["615"] = [function(require,module,exports){var splice = require(614);
 
-function boolMatch(s, matchers) {
-  var i, matcher, down = s.toLowerCase();
-  matchers = [].concat(matchers);
-  for (i = 0; i < matchers.length; i += 1) {
-    matcher = matchers[i];
-    if (!matcher) continue;
-    if (matcher.test && matcher.test(s)) return true;
-    if (matcher.toLowerCase() === down) return true;
-  }
-}
-
-module.exports = function toBoolean(str, trueValues, falseValues) {
-  if (typeof str === 'number') str = '' + str;
-  if (typeof str !== 'string') return !!str;
-  str = trim(str);
-  if (boolMatch(str, trueValues || ['true', '1'])) return true;
-  if (boolMatch(str, falseValues || ['false', '0'])) return false;
+module.exports = function insert(str, i, substr) {
+  return splice(str, i, 0, substr);
 };
-}, {"573":573}];
+}, {"614":614}];

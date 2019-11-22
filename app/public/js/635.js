@@ -1,11 +1,9 @@
-window.modules["635"] = [function(require,module,exports){var makeString = require(576);
-var defaultToWhiteSpace = require(591);
-var nativeTrimRight = String.prototype.trimRight;
+window.modules["635"] = [function(require,module,exports){var makeString = require(586);
 
-module.exports = function rtrim(str, characters) {
+module.exports = function strLeft(str, sep) {
   str = makeString(str);
-  if (!characters && nativeTrimRight) return nativeTrimRight.call(str);
-  characters = defaultToWhiteSpace(characters);
-  return str.replace(new RegExp(characters + '+$'), '');
+  sep = makeString(sep);
+  var pos = !sep ? -1 : str.indexOf(sep);
+  return~ pos ? str.slice(0, pos) : str;
 };
-}, {"576":576,"591":591}];
+}, {"586":586}];

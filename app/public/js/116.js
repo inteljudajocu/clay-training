@@ -1,53 +1,34 @@
-window.modules["116"] = [function(require,module,exports){// https://drafts.csswg.org/css-syntax-3/#the-anb-type
+window.modules["116"] = [function(require,module,exports){var List = require(54);
+var COMMA = require(75).TYPE.Comma;
+
 module.exports = {
-    name: 'Nth',
+    name: 'MediaQueryList',
     structure: {
-        nth: ['AnPlusB', 'Identifier'],
-        selector: ['SelectorList', null]
+        children: [['MediaQuery']]
     },
-    parse: function(allowOfClause) {
-        this.scanner.skipSC();
-
-        var start = this.scanner.tokenStart;
-        var end = start;
-        var selector = null;
-        var query;
-
-        if (this.scanner.lookupValue(0, 'odd') || this.scanner.lookupValue(0, 'even')) {
-            query = this.Identifier();
-        } else {
-            query = this.AnPlusB();
-        }
+    parse: function(relative) {
+        var children = new List();
 
         this.scanner.skipSC();
 
-        if (allowOfClause && this.scanner.lookupValue(0, 'of')) {
+        while (!this.scanner.eof) {
+            children.appendData(this.MediaQuery(relative));
+
+            if (this.scanner.tokenType !== COMMA) {
+                break;
+            }
+
             this.scanner.next();
-
-            selector = this.SelectorList();
-
-            if (this.needPositions) {
-                end = selector.children.last().loc.end.offset;
-            }
-        } else {
-            if (this.needPositions) {
-                end = query.loc.end.offset;
-            }
         }
 
         return {
-            type: 'Nth',
-            loc: this.getLocation(start, end),
-            nth: query,
-            selector: selector
+            type: 'MediaQueryList',
+            loc: this.getLocationFromList(children),
+            children: children
         };
     },
     generate: function(processChunk, node) {
-        this.generate(processChunk, node.nth);
-        if (node.selector !== null) {
-            processChunk(' of ');
-            this.generate(processChunk, node.selector);
-        }
+        this.eachComma(processChunk, node);
     }
 };
-}, {}];
+}, {"54":54,"75":75}];

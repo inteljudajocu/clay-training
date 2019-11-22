@@ -4,204 +4,121 @@ exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _warning = require(502);
+var _container = require(490);
 
-var _warning2 = _interopRequireDefault(_warning);
+var _container2 = _interopRequireDefault(_container);
+
+var _list = require(506);
+
+var _list2 = _interopRequireDefault(_list);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 /**
- * Provides the result of the PostCSS transformations.
+ * Represents a CSS rule: a selector followed by a declaration block.
  *
- * A Result instance is returned by {@link LazyResult#then}
- * or {@link Root#toResult} methods.
- *
- * @example
- * postcss([cssnext]).process(css).then(function (result) {
- *    console.log(result.css);
- * });
+ * @extends Container
  *
  * @example
- * var result2 = postcss.parse(css).toResult();
+ * const root = postcss.parse('a{}');
+ * const rule = root.first;
+ * rule.type       //=> 'rule'
+ * rule.toString() //=> 'a{}'
  */
-var Result = function () {
+var Rule = function (_Container) {
+  _inherits(Rule, _Container);
 
-  /**
-   * @param {Processor} processor - processor used for this transformation.
-   * @param {Root}      root      - Root node after all transformations.
-   * @param {processOptions} opts - options from the {@link Processor#process}
-   *                                or {@link Root#toResult}
-   */
-  function Result(processor, root, opts) {
-    _classCallCheck(this, Result);
+  function Rule(defaults) {
+    _classCallCheck(this, Rule);
 
-    /**
-     * @member {Processor} - The Processor instance used
-     *                       for this transformation.
-     *
-     * @example
-     * for ( let plugin of result.processor.plugins) {
-     *   if ( plugin.postcssPlugin === 'postcss-bad' ) {
-     *     throw 'postcss-good is incompatible with postcss-bad';
-     *   }
-     * });
-     */
-    this.processor = processor;
-    /**
-     * @member {Message[]} - Contains messages from plugins
-     *                       (e.g., warnings or custom messages).
-     *                       Each message should have type
-     *                       and plugin properties.
-     *
-     * @example
-     * postcss.plugin('postcss-min-browser', () => {
-     *   return (root, result) => {
-     *     var browsers = detectMinBrowsersByCanIUse(root);
-     *     result.messages.push({
-     *       type:    'min-browser',
-     *       plugin:  'postcss-min-browser',
-     *       browsers: browsers
-     *     });
-     *   };
-     * });
-     */
-    this.messages = [];
-    /**
-     * @member {Root} - Root node after all transformations.
-     *
-     * @example
-     * root.toResult().root == root;
-     */
-    this.root = root;
-    /**
-     * @member {processOptions} - Options from the {@link Processor#process}
-     *                            or {@link Root#toResult} call
-     *                            that produced this Result instance.
-     *
-     * @example
-     * root.toResult(opts).opts == opts;
-     */
-    this.opts = opts;
-    /**
-     * @member {string} - A CSS string representing of {@link Result#root}.
-     *
-     * @example
-     * postcss.parse('a{}').toResult().css //=> "a{}"
-     */
-    this.css = undefined;
-    /**
-     * @member {SourceMapGenerator} - An instance of `SourceMapGenerator`
-     *                                class from the `source-map` library,
-     *                                representing changes
-     *                                to the {@link Result#root} instance.
-     *
-     * @example
-     * result.map.toJSON() //=> { version: 3, file: 'a.css', … }
-     *
-     * @example
-     * if ( result.map ) {
-     *   fs.writeFileSync(result.opts.to + '.map', result.map.toString());
-     * }
-     */
-    this.map = undefined;
+    var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
+
+    _this.type = 'rule';
+    if (!_this.nodes) _this.nodes = [];
+    return _this;
   }
 
   /**
-   * Returns for @{link Result#css} content.
+   * An array containing the rule’s individual selectors.
+   * Groups of selectors are split at commas.
+   *
+   * @type {string[]}
    *
    * @example
-   * result + '' === result.css
+   * const root = postcss.parse('a, b { }');
+   * const rule = root.first;
    *
-   * @return {string} string representing of {@link Result#root}
+   * rule.selector  //=> 'a, b'
+   * rule.selectors //=> ['a', 'b']
+   *
+   * rule.selectors = ['a', 'strong'];
+   * rule.selector //=> 'a, strong'
    */
 
 
-  Result.prototype.toString = function toString() {
-    return this.css;
-  };
-
-  /**
-   * Creates an instance of {@link Warning} and adds it
-   * to {@link Result#messages}.
-   *
-   * @param {string} text        - warning message
-   * @param {Object} [opts]      - warning options
-   * @param {Node}   opts.node   - CSS node that caused the warning
-   * @param {string} opts.word   - word in CSS source that caused the warning
-   * @param {number} opts.index  - index in CSS node string that caused
-   *                               the warning
-   * @param {string} opts.plugin - name of the plugin that created
-   *                               this warning. {@link Result#warn} fills
-   *                               this property automatically.
-   *
-   * @return {Warning} created warning
-   */
-
-
-  Result.prototype.warn = function warn(text) {
-    var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    if (!opts.plugin) {
-      if (this.lastPlugin && this.lastPlugin.postcssPlugin) {
-        opts.plugin = this.lastPlugin.postcssPlugin;
-      }
-    }
-
-    var warning = new _warning2.default(text, opts);
-    this.messages.push(warning);
-
-    return warning;
-  };
-
-  /**
-   * Returns warnings from plugins. Filters {@link Warning} instances
-   * from {@link Result#messages}.
-   *
-   * @example
-   * result.warnings().forEach(warn => {
-   *   console.warn(warn.toString());
-   * });
-   *
-   * @return {Warning[]} warnings from plugins
-   */
-
-
-  Result.prototype.warnings = function warnings() {
-    return this.messages.filter(function (i) {
-      return i.type === 'warning';
-    });
-  };
-
-  /**
-   * An alias for the {@link Result#css} property.
-   * Use it with syntaxes that generate non-CSS output.
-   * @type {string}
-   *
-   * @example
-   * result.css === result.content;
-   */
-
-
-  _createClass(Result, [{
-    key: 'content',
+  _createClass(Rule, [{
+    key: 'selectors',
     get: function get() {
-      return this.css;
+      return _list2.default.comma(this.selector);
+    },
+    set: function set(values) {
+      var match = this.selector ? this.selector.match(/,\s*/) : null;
+      var sep = match ? match[0] : ',' + this.raw('between', 'beforeOpen');
+      this.selector = values.join(sep);
     }
+
+    /**
+     * @memberof Rule#
+     * @member {string} selector - the rule’s full selector represented
+     *                             as a string
+     *
+     * @example
+     * const root = postcss.parse('a, b { }');
+     * const rule = root.first;
+     * rule.selector //=> 'a, b'
+     */
+
+    /**
+     * @memberof Rule#
+     * @member {object} raws - Information to generate byte-to-byte equal
+     *                         node string as it was in the origin input.
+     *
+     * Every parser saves its own properties,
+     * but the default CSS parser uses:
+     *
+     * * `before`: the space symbols before the node. It also stores `*`
+     *   and `_` symbols before the declaration (IE hack).
+     * * `after`: the space symbols after the last child of the node
+     *   to the end of the node.
+     * * `between`: the symbols between the property and value
+     *   for declarations, selector and `{` for rules, or last parameter
+     *   and `{` for at-rules.
+     * * `semicolon`: contains `true` if the last child has
+     *   an (optional) semicolon.
+     * * `ownSemicolon`: contains `true` if there is semicolon after rule.
+     *
+     * PostCSS cleans selectors from comments and extra spaces,
+     * but it stores origin content in raws properties.
+     * As such, if you don’t change a declaration’s value,
+     * PostCSS will use the raw value with comments.
+     *
+     * @example
+     * const root = postcss.parse('a {\n  color:black\n}')
+     * root.first.first.raws //=> { before: '', between: ' ', after: '\n' }
+     */
+
   }]);
 
-  return Result;
-}();
+  return Rule;
+}(_container2.default);
 
-exports.default = Result;
-
-/**
- * @typedef  {object} Message
- * @property {string} type   - message type
- * @property {string} plugin - source PostCSS plugin name
- */
-
+exports.default = Rule;
 module.exports = exports['default'];
 
-}, {"502":502}];
+}, {"490":490,"506":506}];

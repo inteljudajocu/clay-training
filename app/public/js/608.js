@@ -1,6 +1,5 @@
-window.modules["608"] = [function(require,module,exports){var pad = require(634);
-
-module.exports = function lpad(str, length, padStr) {
-  return pad(str, length, padStr);
+window.modules["608"] = [function(require,module,exports){module.exports = function lines(str) {
+  if (str == null) return [];
+  return String(str).split(/\r\n?|\n/);
 };
-}, {"634":634}];
+}, {}];

@@ -1,43 +1,6 @@
-window.modules["647"] = [function(require,module,exports){'use strict';
+window.modules["647"] = [function(require,module,exports){var adjacent = require(600);
 
-var moment = require(380);
-
-function getPrettyMonthAbrev(month) {
-  switch (month) {
-    case 'May':
-      return month;
-      break;
-
-    case 'Jun':
-      return 'June';
-      break;
-
-    case 'Jul':
-      return 'July';
-      break;
-
-    case 'Sep':
-      return 'Sept.';
-      break;
-
-    default:
-      return month + '.';
-      break;
-  }
-}
-
-module.exports = function (date) {
-  var mDate = moment(date),
-      now = moment();
-
-  if (!mDate.isValid(date)) {
-    return '';
-  }
-
-  if (moment.duration(now.diff(mDate)).asDays() < 1) {
-    return "".concat(mDate.format('h:mm'), " ").concat(mDate.format('A'));
-  } else {
-    return "".concat(getPrettyMonthAbrev(mDate.format('MMM')), " ").concat(mDate.format('D, YYYY'));
-  }
+module.exports = function succ(str) {
+  return adjacent(str, -1);
 };
-}, {"380":380}];
+}, {"600":600}];

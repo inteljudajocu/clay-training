@@ -1,22 +1,33 @@
-window.modules["291"] = [function(require,module,exports){var isArray = require(272),
-    isKey = require(327),
-    stringToPath = require(344),
-    toString = require(343);
+window.modules["291"] = [function(require,module,exports){var isArrayLike = require(333);
 
 /**
- * Casts `value` to a path array if it's not one.
+ * Creates a `baseEach` or `baseEachRight` function.
  *
  * @private
- * @param {*} value The value to inspect.
- * @param {Object} [object] The object to query keys on.
- * @returns {Array} Returns the cast property path array.
+ * @param {Function} eachFunc The function to iterate over a collection.
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {Function} Returns the new base function.
  */
-function castPath(value, object) {
-  if (isArray(value)) {
-    return value;
-  }
-  return isKey(value, object) ? [value] : stringToPath(toString(value));
+function createBaseEach(eachFunc, fromRight) {
+  return function(collection, iteratee) {
+    if (collection == null) {
+      return collection;
+    }
+    if (!isArrayLike(collection)) {
+      return eachFunc(collection, iteratee);
+    }
+    var length = collection.length,
+        index = fromRight ? length : -1,
+        iterable = Object(collection);
+
+    while ((fromRight ? index-- : ++index < length)) {
+      if (iteratee(iterable[index], index, iterable) === false) {
+        break;
+      }
+    }
+    return collection;
+  };
 }
 
-module.exports = castPath;
-}, {"272":272,"327":327,"343":343,"344":344}];
+module.exports = createBaseEach;
+}, {"333":333}];
