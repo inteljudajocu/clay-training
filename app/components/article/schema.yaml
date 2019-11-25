@@ -20,12 +20,6 @@ headline:
       required: true
       max: 100
       maxMessage: Headline must be 100 characters or fewer
-byline:
-  _label: Byline
-  _publish: pageAuthors
-  _has:
-    input: simple-list
-    help: An array of Authors
 
 # users edit the published date from the articleDate and articleTime fields
 date:
@@ -56,37 +50,10 @@ content:
     height: 600px
   _componentList:
     include:
-      - paragraph
-      - subheader
-      - divider
-      - image
-      - list
-      - pull-quote
-      - code-sample
       - direcctions
       - title-ingridients
       - explore
       - recipe
-
-ledeUrl:
-  _label: Lede Image URL
-  _has:
-    input: text
-    type: url
-    help: Image URL
-ledeAlt:
-  _label: Lede Alt Text
-  _has:
-    input: text
-    help: Alternative text for screen readers
-ledeCaption:
-  _label: Lede Caption Text
-  _has:
-    input: wysiwyg
-    buttons:
-      - link
-      - bold
-      - italic
 
 _groups:
   publishedDate:
@@ -98,32 +65,9 @@ _groups:
       text: Custom Published Date
       height: 30px
       ifEmpty: articleDate or articleTime
-  bylines:
-    fields:
-      - byline
-    _placeholder:
-      text: Byline
-      height: 30px
-      ifEmpty: 'byline'
-  lede:
-    fields:
-      - ledeUrl
-      - ledeAlt
-      - ledeCaption
-    _placeholder:
-      text: Lede
-      height: 330px
-      ifEmpty: ledeUrl
 
 # non-user-editable fields, set by model.js and used for pubsub
 canonicalUrl:
   _publish: url
   _has:
     help: Canonical URL of an article. Set when the article publishes.
-
-tags:
-  _component:
-    include:
-      - tags
-normalizedTags:
-  _subscribe: normalizedTags

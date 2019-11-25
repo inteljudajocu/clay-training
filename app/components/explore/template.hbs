@@ -5,7 +5,9 @@
             {{#each recipes}}
             <li>
                 <div class="explore-recipe-single">
-                    <img src="{{ imageUrl }}" class="explore-image" data-src="{{ imageUrl }}">
+                    <a target="_blank" href= "{{ url }}" >
+                        <img src="{{ imageUrl }}" class="explore-image" data-src="{{ imageUrl }}">
+                    </a>
                     <h5>{{ title }}</h5>
                     <div class="explore-score">
                         <h6>{{ score }} </h6>
