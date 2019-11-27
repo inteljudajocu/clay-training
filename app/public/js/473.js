@@ -16,21 +16,20 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Nesting = function (_Node) {
-    _inherits(Nesting, _Node);
+var String = function (_Node) {
+    _inherits(String, _Node);
 
-    function Nesting(opts) {
-        _classCallCheck(this, Nesting);
+    function String(opts) {
+        _classCallCheck(this, String);
 
         var _this = _possibleConstructorReturn(this, _Node.call(this, opts));
 
-        _this.type = _types.NESTING;
-        _this.value = '&';
+        _this.type = _types.STRING;
         return _this;
     }
 
-    return Nesting;
+    return String;
 }(_node2.default);
 
-exports.default = Nesting;
+exports.default = String;
 module.exports = exports['default'];}, {"470":470,"485":485}];

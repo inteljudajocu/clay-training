@@ -1,16 +1,18 @@
 window.modules["33"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51),
-  isPage = require(25);
+const isUriStringCheck = require(51);
 
 /**
- * First test if argument is a String. If true, test if '/_pages/:id/meta' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
+ * First test if the argument passed in is a String. If true, get page version from uri.
+ * Otherwise throw an error.
+ * @example /_pages/foo/@published returns published
+ * @param  {string} uri
+ * @return {string|null}
  */
 module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return isPage(uri) && !!uri.match(/\/meta$/i);
+  const result = /\/_pages\/.+?@(.+)/.exec(uri);
+
+  return result && result[1];
 };
-}, {"25":25,"51":51}];
+}, {"51":51}];

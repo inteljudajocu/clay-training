@@ -1,13 +1,13 @@
 window.modules["90"] = [function(require,module,exports){var List = require(54);
-var Tokenizer = require(75);
+var Tokenizer = require(76);
 var Lexer = require(60);
 var grammar = require(73);
 var createParser = require(74);
 var createGenerator = require(55);
 var createConvertor = require(53);
-var createWalker = require(91);
-var clone = require(92);
-var names = require(62);
+var createWalker = require(92);
+var clone = require(91);
+var names = require(61);
 var mix = require(85);
 
 function assign(dest, src) {
@@ -80,4 +80,4 @@ function createSyntax(config) {
 exports.create = function(config) {
     return createSyntax(mix({}, config));
 };
-}, {"53":53,"54":54,"55":55,"60":60,"62":62,"73":73,"74":74,"75":75,"85":85,"91":91,"92":92}];
+}, {"53":53,"54":54,"55":55,"60":60,"61":61,"73":73,"74":74,"76":76,"85":85,"91":91,"92":92}];

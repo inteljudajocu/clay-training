@@ -1,8 +1,8 @@
 window.modules["263"] = [function(require,module,exports){var ListCache = require(245),
     stackClear = require(267),
-    stackDelete = require(265),
+    stackDelete = require(266),
     stackGet = require(264),
-    stackHas = require(266),
+    stackHas = require(265),
     stackSet = require(268);
 
 /**

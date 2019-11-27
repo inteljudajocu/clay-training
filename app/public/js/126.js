@@ -1,4 +1,4 @@
-window.modules["126"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+window.modules["126"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 
 var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
 
@@ -45,4 +45,4 @@ module.exports = {
     },
     walkContext: 'rule'
 };
-}, {"75":75}];
+}, {"76":76}];

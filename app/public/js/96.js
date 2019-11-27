@@ -1,6 +1,6 @@
-window.modules["96"] = [function(require,module,exports){var cmpChar = require(75).cmpChar;
-var isNumber = require(75).isNumber;
-var TYPE = require(75).TYPE;
+window.modules["96"] = [function(require,module,exports){var cmpChar = require(76).cmpChar;
+var isNumber = require(76).isNumber;
+var TYPE = require(76).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var NUMBER = TYPE.Number;
@@ -178,4 +178,4 @@ module.exports = {
         }
     }
 };
-}, {"75":75}];
+}, {"76":76}];

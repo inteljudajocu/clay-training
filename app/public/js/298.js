@@ -1,4 +1,4 @@
-window.modules["298"] = [function(require,module,exports){var isArray = require(279),
+window.modules["298"] = [function(require,module,exports){var isArray = require(275),
     isKey = require(336),
     stringToPath = require(353),
     toString = require(352);
@@ -19,4 +19,4 @@ function castPath(value, object) {
 }
 
 module.exports = castPath;
-}, {"279":279,"336":336,"352":352,"353":353}];
+}, {"275":275,"336":336,"352":352,"353":353}];

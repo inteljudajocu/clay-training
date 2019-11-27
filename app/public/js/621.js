@@ -1,8 +1,13 @@
-window.modules["621"] = [function(require,module,exports){var trim = require(583);
-var dasherize = require(593);
-var cleanDiacritics = require(591);
+window.modules["621"] = [function(require,module,exports){var rtrim = require(633);
 
-module.exports = function slugify(str) {
-  return trim(dasherize(cleanDiacritics(str).replace(/[^\w\s-]/g, '-').toLowerCase()), '-');
+module.exports = function toSentence(array, separator, lastSeparator, serial) {
+  separator = separator || ', ';
+  lastSeparator = lastSeparator || ' and ';
+  var a = array.slice(),
+    lastMember = a.pop();
+
+  if (array.length > 2 && serial) lastSeparator = rtrim(separator) + lastSeparator;
+
+  return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
 };
-}, {"583":583,"591":591,"593":593}];
+}, {"633":633}];

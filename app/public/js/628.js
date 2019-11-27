@@ -1,9 +1,10 @@
 window.modules["628"] = [function(require,module,exports){var makeString = require(586);
+var slice = [].slice;
 
-module.exports = function replaceAll(str, find, replace, ignorecase) {
-  var flags = (ignorecase === true)?'gi':'g';
-  var reg = new RegExp(find, flags);
+module.exports = function join() {
+  var args = slice.call(arguments),
+    separator = args.shift();
 
-  return makeString(str).replace(reg, replace);
+  return args.join(makeString(separator));
 };
 }, {"586":586}];

@@ -1,8 +1,6 @@
-window.modules["617"] = [function(require,module,exports){var isBlank = require(641);
-var trim = require(583);
+window.modules["617"] = [function(require,module,exports){var pad = require(645);
 
-module.exports = function words(str, delimiter) {
-  if (isBlank(str)) return [];
-  return trim(str, delimiter).split(delimiter || /\s+/);
+module.exports = function lpad(str, length, padStr) {
+  return pad(str, length, padStr);
 };
-}, {"583":583,"641":641}];
+}, {"645":645}];

@@ -1,6 +1,6 @@
 window.modules["304"] = [function(require,module,exports){var baseFindIndex = require(292),
-    baseIsNaN = require(305),
-    strictIndexOf = require(306);
+    baseIsNaN = require(306),
+    strictIndexOf = require(305);
 
 /**
  * The base implementation of `_.indexOf` without `fromIndex` bounds checks.

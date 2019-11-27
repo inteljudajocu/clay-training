@@ -3,16 +3,27 @@ window.modules["44"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * First test if argument passed in is a String. If true, get list instance
- * from URI. Otherwise, throw an error.
- * @example /_lists/foo returns "foo"
- * @param  {string} uri
- * @return {string|null}
+ * Given stringified JSON, swap out the site's url-patterned prefix for
+ * the site's slug
+ *
+ * @param  {String}  json
+ * @param  {Object}  site
+ * @param  {Boolean} [ref=false]
+ * @return {String}
  */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
-  const result = /\/_lists\/(.*)/.exec(uri);
+module.exports = function (json, site, ref = false) {
+  var { slug, host, path, prefix } = site,
+    prefixString, replaceString, searchRegex;
 
-  return result && result[1];
+  isUriStringCheck.strCheck(json);
+
+  if (!prefix) {
+    prefix = path && path.length > 1 ? `${host}${path}` : host;
+  }
+
+  prefixString = `${ref ? '"_ref":' : '' }"${prefix}/_components/`;
+  replaceString = `${ref ? '"_ref":' : '' }"${slug}/_components/`;
+  searchRegex = new RegExp(prefixString, 'g');
+  return json.replace(searchRegex, replaceString);
 };
 }, {"51":51}];

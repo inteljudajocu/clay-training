@@ -2,9 +2,9 @@ window.modules["482"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _container = require(487);
+var _namespace = require(484);
 
-var _container2 = _interopRequireDefault(_container);
+var _namespace2 = _interopRequireDefault(_namespace);
 
 var _types = require(470);
 
@@ -16,20 +16,24 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Selector = function (_Container) {
-    _inherits(Selector, _Container);
+var ClassName = function (_Namespace) {
+    _inherits(ClassName, _Namespace);
 
-    function Selector(opts) {
-        _classCallCheck(this, Selector);
+    function ClassName(opts) {
+        _classCallCheck(this, ClassName);
 
-        var _this = _possibleConstructorReturn(this, _Container.call(this, opts));
+        var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
 
-        _this.type = _types.SELECTOR;
+        _this.type = _types.CLASS;
         return _this;
     }
 
-    return Selector;
-}(_container2.default);
+    ClassName.prototype.toString = function toString() {
+        return [this.spaces.before, this.ns, String('.' + this.value), this.spaces.after].join('');
+    };
 
-exports.default = Selector;
-module.exports = exports['default'];}, {"470":470,"487":487}];
+    return ClassName;
+}(_namespace2.default);
+
+exports.default = ClassName;
+module.exports = exports['default'];}, {"470":470,"484":484}];

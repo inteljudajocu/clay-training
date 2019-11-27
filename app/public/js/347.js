@@ -1,6 +1,6 @@
 window.modules["347"] = [function(require,module,exports){var Symbol = require(269),
     arrayMap = require(281),
-    isArray = require(279),
+    isArray = require(275),
     isSymbol = require(348);
 
 /** Used as references for various `Number` constants. */
@@ -35,4 +35,4 @@ function baseToString(value) {
 }
 
 module.exports = baseToString;
-}, {"269":269,"279":279,"281":281,"348":348}];
+}, {"269":269,"275":275,"281":281,"348":348}];

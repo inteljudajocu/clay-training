@@ -3,11 +3,11 @@
 const { search } = require('../../services/server/elastic'),
   query = {
     size: 5,
-    sort: [
-      {
-        date: 'desc'
-      }
-    ],
+    // sort: [
+    //   {
+    //     date: 'desc'
+    //   }
+    // ],
     query: {
       match_all: {}
     }

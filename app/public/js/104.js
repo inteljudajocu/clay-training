@@ -1,4 +1,4 @@
-window.modules["104"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+window.modules["104"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 var IDENTIFIER = TYPE.Identifier;
 var FULLSTOP = TYPE.FullStop;
 
@@ -22,4 +22,4 @@ module.exports = {
         processChunk(node.name);
     }
 };
-}, {"75":75}];
+}, {"76":76}];

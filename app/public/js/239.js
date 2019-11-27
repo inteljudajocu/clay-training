@@ -1,8 +1,8 @@
 window.modules["239"] = [function(require,module,exports){var hashClear = require(243),
     hashDelete = require(240),
-    hashGet = require(242),
-    hashHas = require(241),
-    hashSet = require(244);
+    hashGet = require(244),
+    hashHas = require(242),
+    hashSet = require(241);
 
 /**
  * Creates a hash object.

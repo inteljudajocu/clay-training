@@ -1,5 +1,5 @@
 window.modules["377"] = [function(require,module,exports){var baseGetTag = require(300),
-    isArray = require(279),
+    isArray = require(275),
     isObjectLike = require(308);
 
 /** `Object#toString` result references. */
@@ -28,4 +28,4 @@ function isString(value) {
 }
 
 module.exports = isString;
-}, {"279":279,"300":300,"308":308}];
+}, {"275":275,"300":300,"308":308}];

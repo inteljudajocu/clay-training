@@ -1,19 +1,15 @@
 window.modules["265"] = [function(require,module,exports){/**
- * Removes `key` and its value from the stack.
+ * Checks if a stack value for `key` exists.
  *
  * @private
- * @name delete
+ * @name has
  * @memberOf Stack
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function stackDelete(key) {
-  var data = this.__data__,
-      result = data['delete'](key);
-
-  this.size = data.size;
-  return result;
+function stackHas(key) {
+  return this.__data__.has(key);
 }
 
-module.exports = stackDelete;
+module.exports = stackHas;
 }, {}];

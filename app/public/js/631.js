@@ -1,9 +1,8 @@
 window.modules["631"] = [function(require,module,exports){var makeString = require(586);
 
-module.exports = function truncate(str, length, truncateStr) {
-  str = makeString(str);
-  truncateStr = truncateStr || '...';
-  length = ~~length;
-  return str.length > length ? str.slice(0, length) + truncateStr : str;
+module.exports = function titleize(str) {
+  return makeString(str).toLowerCase().replace(/(?:^|\s|-)\S/g, function(c) {
+    return c.toUpperCase();
+  });
 };
 }, {"586":586}];

@@ -191,8 +191,8 @@ module.exports.sourceMap = require(56);
 }, {"56":56}];
 window.modules["74"] = [function(require,module,exports){'use strict';
 
-var Tokenizer = require(75);
-var sequence = require(76);
+var Tokenizer = require(76);
+var sequence = require(75);
 var noop = function() {};
 
 function createParseContext(name) {
@@ -349,15 +349,15 @@ module.exports = function createParser(config) {
 };
 }, {"75":75,"76":76}];
 window.modules["90"] = [function(require,module,exports){var List = require(54);
-var Tokenizer = require(75);
+var Tokenizer = require(76);
 var Lexer = require(60);
 var grammar = require(73);
 var createParser = require(74);
 var createGenerator = require(55);
 var createConvertor = require(53);
-var createWalker = require(91);
-var clone = require(92);
-var names = require(62);
+var createWalker = require(92);
+var clone = require(91);
+var names = require(61);
 var mix = require(85);
 
 function assign(dest, src) {
@@ -430,10 +430,10 @@ function createSyntax(config) {
 exports.create = function(config) {
     return createSyntax(mix({}, config));
 };
-}, {"53":53,"54":54,"55":55,"60":60,"62":62,"73":73,"74":74,"75":75,"85":85,"91":91,"92":92}];
-window.modules["96"] = [function(require,module,exports){var cmpChar = require(75).cmpChar;
-var isNumber = require(75).isNumber;
-var TYPE = require(75).TYPE;
+}, {"53":53,"54":54,"55":55,"60":60,"61":61,"73":73,"74":74,"76":76,"85":85,"91":91,"92":92}];
+window.modules["96"] = [function(require,module,exports){var cmpChar = require(76).cmpChar;
+var isNumber = require(76).isNumber;
+var TYPE = require(76).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var NUMBER = TYPE.Number;
@@ -611,8 +611,8 @@ module.exports = {
         }
     }
 };
-}, {"75":75}];
-window.modules["97"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+}, {"76":76}];
+window.modules["97"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 
 var ATRULE = TYPE.Atrule;
 var SEMICOLON = TYPE.Semicolon;
@@ -746,7 +746,7 @@ module.exports = {
     },
     walkContext: 'atrule'
 };
-}, {"75":75}];
+}, {"76":76}];
 window.modules["98"] = [function(require,module,exports){var List = require(54);
 
 module.exports = {
@@ -788,7 +788,7 @@ module.exports = {
     walkContext: 'atrulePrelude'
 };
 }, {"54":54}];
-window.modules["99"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+window.modules["99"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var STRING = TYPE.String;
@@ -950,9 +950,9 @@ module.exports = {
         processChunk(']');
     }
 };
-}, {"75":75}];
+}, {"76":76}];
 window.modules["100"] = [function(require,module,exports){var List = require(54);
-var TYPE = require(75).TYPE;
+var TYPE = require(76).TYPE;
 
 var WHITESPACE = TYPE.WhiteSpace;
 var COMMENT = TYPE.Comment;
@@ -1030,8 +1030,8 @@ module.exports = {
     },
     walkContext: 'block'
 };
-}, {"54":54,"75":75}];
-window.modules["101"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+}, {"54":54,"76":76}];
+window.modules["101"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
 var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
 
@@ -1063,8 +1063,8 @@ module.exports = {
         processChunk(']');
     }
 };
-}, {"75":75}];
-window.modules["102"] = [function(require,module,exports){var CDC = require(75).TYPE.CDC;
+}, {"76":76}];
+window.modules["102"] = [function(require,module,exports){var CDC = require(76).TYPE.CDC;
 
 module.exports = {
     name: 'CDC',
@@ -1083,8 +1083,8 @@ module.exports = {
         processChunk('-->');
     }
 };
-}, {"75":75}];
-window.modules["103"] = [function(require,module,exports){var CDO = require(75).TYPE.CDO;
+}, {"76":76}];
+window.modules["103"] = [function(require,module,exports){var CDO = require(76).TYPE.CDO;
 
 module.exports = {
     name: 'CDO',
@@ -1103,8 +1103,8 @@ module.exports = {
         processChunk('<!--');
     }
 };
-}, {"75":75}];
-window.modules["104"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+}, {"76":76}];
+window.modules["104"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 var IDENTIFIER = TYPE.Identifier;
 var FULLSTOP = TYPE.FullStop;
 
@@ -1128,8 +1128,8 @@ module.exports = {
         processChunk(node.name);
     }
 };
-}, {"75":75}];
-window.modules["105"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+}, {"76":76}];
+window.modules["105"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 
 var PLUSSIGN = TYPE.PlusSign;
 var SOLIDUS = TYPE.Solidus;
@@ -1172,8 +1172,8 @@ module.exports = {
         processChunk(node.name);
     }
 };
-}, {"75":75}];
-window.modules["106"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+}, {"76":76}];
+window.modules["106"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 
 var ASTERISK = TYPE.Asterisk;
 var SOLIDUS = TYPE.Solidus;
@@ -1208,8 +1208,8 @@ module.exports = {
         processChunk('*/');
     }
 };
-}, {"75":75}];
-window.modules["107"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+}, {"76":76}];
+window.modules["107"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var COLON = TYPE.Colon;
@@ -1336,9 +1336,9 @@ function getImportant(scanner) {
     // for better original source restoring and hacks like `!ie` support
     return important === 'important' ? true : important;
 }
-}, {"75":75}];
+}, {"76":76}];
 window.modules["108"] = [function(require,module,exports){var List = require(54);
-var TYPE = require(75).TYPE;
+var TYPE = require(76).TYPE;
 
 var WHITESPACE = TYPE.WhiteSpace;
 var COMMENT = TYPE.Comment;
@@ -1380,8 +1380,8 @@ module.exports = {
         this.each(processChunk, node);
     }
 };
-}, {"54":54,"75":75}];
-window.modules["109"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
+}, {"54":54,"76":76}];
+window.modules["109"] = [function(require,module,exports){var NUMBER = require(76).TYPE.Number;
 
 // special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
 function readUnit(scanner) {
@@ -1426,7 +1426,7 @@ module.exports = {
         processChunk(node.unit);
     }
 };
-}, {"75":75}];
+}, {"76":76}];
 window.modules["139"] = [function(require,module,exports){var List = require(54);
 
 module.exports = {
@@ -1441,8 +1441,8 @@ window.modules["149"] = [function(require,module,exports){module.exports = {
     getNode: require(150)
 };
 }, {"150":150}];
-window.modules["150"] = [function(require,module,exports){var cmpChar = require(75).cmpChar;
-var TYPE = require(75).TYPE;
+window.modules["150"] = [function(require,module,exports){var cmpChar = require(76).cmpChar;
+var TYPE = require(76).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var STRING = TYPE.String;
@@ -1519,7 +1519,7 @@ module.exports = function defaultRecognizer(context) {
             }
     }
 };
-}, {"75":75}];
+}, {"76":76}];
 window.modules["154"] = [function(require,module,exports){'use strict';
 
 // token types (note: value shouldn't intersect with used char codes)
@@ -1692,7 +1692,7 @@ module.exports = {
     STOP_URL_RAW: STOP_URL_RAW
 };
 }, {}];
-window.modules["92"] = [function(require,module,exports){'use strict';
+window.modules["91"] = [function(require,module,exports){'use strict';
 
 var List = require(54);
 
@@ -1736,7 +1736,7 @@ window.modules["71"] = [function(require,module,exports){module.exports = functi
     return error;
 };
 }, {}];
-window.modules["91"] = [function(require,module,exports){'use strict';
+window.modules["92"] = [function(require,module,exports){'use strict';
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -2468,9 +2468,9 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
   return index;
 };
 }, {}];
-window.modules["199"] = [function(require,module,exports){var entityMap = require(200),
+window.modules["199"] = [function(require,module,exports){var entityMap = require(201),
     legacyMap = require(202),
-    xmlMap = require(201),
+    xmlMap = require(200),
     decodeCodePoint = require(203);
 
 var decodeXMLStrict = getStrictDecoder(xmlMap),
@@ -3934,7 +3934,7 @@ CollectingHandler.prototype.restart = function() {
     }
 };
 }, {"216":216}];
-window.modules["17"] = [function(require,module,exports){var assignValue = require(284),
+window.modules["16"] = [function(require,module,exports){var assignValue = require(284),
     copyObject = require(354),
     createAssigner = require(356),
     isArrayLike = require(333),
@@ -4085,7 +4085,7 @@ var defaults = baseRest(function(object, sources) {
 
 module.exports = defaults;
 }, {"285":285,"341":341,"357":357,"376":376}];
-window.modules["395"] = [function(require,module,exports){var postcss = require(396);
+window.modules["397"] = [function(require,module,exports){var postcss = require(396);
 var translate = require(394).syntax.translate;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -5187,7 +5187,7 @@ module.exports = function compressBackground(node) {
     node.children = new List().fromArray(newValue);
 };
 }, {"58":58}];
-window.modules["421"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
+window.modules["420"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
     var prev = item.prev;
     var next = item.next;
 
@@ -5451,7 +5451,7 @@ exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _declaration = require(440);
+var _declaration = require(443);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -6186,7 +6186,7 @@ var Container = function (_Node) {
         var _this2 = this;
 
         if (typeof nodes === 'string') {
-            var parse = require(442);
+            var parse = require(440);
             nodes = cleanSource(parse(nodes).nodes);
         } else if (Array.isArray(nodes)) {
             nodes = nodes.slice(0);
@@ -6266,7 +6266,7 @@ var Container = function (_Node) {
 
         var fix = void 0;
         if (node.type === 'root') {
-            var Root = require(443);
+            var Root = require(442);
             fix = new Root();
         } else if (node.type === 'atrule') {
             var AtRule = require(436);
@@ -6610,7 +6610,7 @@ exports.default = CssSyntaxError;
 module.exports = exports['default'];
 
 }, {"20":20,"445":445}];
-window.modules["440"] = [function(require,module,exports){'use strict';
+window.modules["443"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6712,7 +6712,7 @@ exports.default = Declaration;
 module.exports = exports['default'];
 
 }, {"439":439}];
-window.modules["479"] = [function(require,module,exports){'use strict';
+window.modules["474"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6908,7 +6908,7 @@ function defaultAttrConcat(attrValue, attrSpaces) {
     return '' + attrSpaces.before + attrValue + attrSpaces.after;
 }
 module.exports = exports['default'];}, {"470":470,"484":484}];
-window.modules["481"] = [function(require,module,exports){'use strict';
+window.modules["482"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6947,7 +6947,7 @@ var ClassName = function (_Namespace) {
 
 exports.default = ClassName;
 module.exports = exports['default'];}, {"470":470,"484":484}];
-window.modules["472"] = [function(require,module,exports){'use strict';
+window.modules["477"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6982,7 +6982,7 @@ var Combinator = function (_Node) {
 
 exports.default = Combinator;
 module.exports = exports['default'];}, {"470":470,"485":485}];
-window.modules["474"] = [function(require,module,exports){'use strict';
+window.modules["478"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7022,51 +7022,51 @@ window.modules["486"] = [function(require,module,exports){'use strict';
 exports.__esModule = true;
 exports.universal = exports.tag = exports.string = exports.selector = exports.root = exports.pseudo = exports.nesting = exports.id = exports.comment = exports.combinator = exports.className = exports.attribute = undefined;
 
-var _attribute = require(479);
+var _attribute = require(474);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
-var _className = require(481);
+var _className = require(482);
 
 var _className2 = _interopRequireDefault(_className);
 
-var _combinator = require(472);
+var _combinator = require(477);
 
 var _combinator2 = _interopRequireDefault(_combinator);
 
-var _comment = require(474);
+var _comment = require(478);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _id = require(476);
+var _id = require(471);
 
 var _id2 = _interopRequireDefault(_id);
 
-var _nesting = require(473);
+var _nesting = require(476);
 
 var _nesting2 = _interopRequireDefault(_nesting);
 
-var _pseudo = require(480);
+var _pseudo = require(472);
 
 var _pseudo2 = _interopRequireDefault(_pseudo);
 
-var _root = require(478);
+var _root = require(479);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _selector = require(482);
+var _selector = require(481);
 
 var _selector2 = _interopRequireDefault(_selector);
 
-var _string = require(471);
+var _string = require(473);
 
 var _string2 = _interopRequireDefault(_string);
 
-var _tag = require(475);
+var _tag = require(480);
 
 var _tag2 = _interopRequireDefault(_tag);
 
-var _universal = require(477);
+var _universal = require(475);
 
 var _universal2 = _interopRequireDefault(_universal);
 
@@ -8435,7 +8435,7 @@ var Container = function (_Node) {
             }
             nodes = [new _declaration2.default(nodes)];
         } else if (nodes.selector) {
-            var Rule = require(495);
+            var Rule = require(496);
             nodes = [new Rule(nodes)];
         } else if (nodes.name) {
             var AtRule = require(489);
@@ -8467,13 +8467,13 @@ var Container = function (_Node) {
 
         var fix = void 0;
         if (node.type === 'root') {
-            var Root = require(496);
+            var Root = require(495);
             fix = new Root();
         } else if (node.type === 'atrule') {
             var AtRule = require(489);
             fix = new AtRule();
         } else if (node.type === 'rule') {
-            var Rule = require(495);
+            var Rule = require(496);
             fix = new Rule();
         } else if (node.type === 'decl') {
             fix = new _declaration2.default();
@@ -9113,7 +9113,7 @@ exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _declaration = require(526);
+var _declaration = require(525);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -9848,7 +9848,7 @@ var Container = function (_Node) {
         var _this2 = this;
 
         if (typeof nodes === 'string') {
-            var parse = require(527);
+            var parse = require(526);
             nodes = cleanSource(parse(nodes).nodes);
         } else if (Array.isArray(nodes)) {
             nodes = nodes.slice(0);
@@ -9896,7 +9896,7 @@ var Container = function (_Node) {
             }
             nodes = [new _declaration2.default(nodes)];
         } else if (nodes.selector) {
-            var Rule = require(525);
+            var Rule = require(527);
             nodes = [new Rule(nodes)];
         } else if (nodes.name) {
             var AtRule = require(521);
@@ -9934,7 +9934,7 @@ var Container = function (_Node) {
             var AtRule = require(521);
             fix = new AtRule();
         } else if (node.type === 'rule') {
-            var Rule = require(525);
+            var Rule = require(527);
             fix = new Rule();
         } else if (node.type === 'decl') {
             fix = new _declaration2.default();
@@ -10272,7 +10272,7 @@ exports.default = CssSyntaxError;
 module.exports = exports['default'];
 
 }, {"20":20,"530":530}];
-window.modules["526"] = [function(require,module,exports){'use strict';
+window.modules["525"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -12726,7 +12726,7 @@ window.modules["659"] = [function(require,module,exports){'use strict';
 
 var _get = require(3),
     _join = require(384),
-    _map = require(15),
+    _map = require(18),
     _isObject = require(12);
 /**
  * Comma separate a list of author strings
@@ -12757,10 +12757,10 @@ function formatSimpleByline() {
 }
 
 module.exports = formatSimpleByline;
-}, {"3":3,"12":12,"15":15,"384":384}];
+}, {"3":3,"12":12,"18":18,"384":384}];
 window.modules["660"] = [function(require,module,exports){'use strict';
 
-var _includes = require(18);
+var _includes = require(17);
 
 function isVideo(contentData) {
   return contentData.featureTypes && (contentData.featureTypes['Video-Original'] || contentData.featureTypes['Video-Aggregation'] || contentData.featureTypes['Video-Original News']);
@@ -12783,4 +12783,4 @@ function getCalloutType(contentData) {
 }
 
 module.exports = getCalloutType;
-}, {"18":18}];
+}, {"17":17}];

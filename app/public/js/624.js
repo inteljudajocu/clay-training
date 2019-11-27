@@ -1,6 +1,8 @@
-window.modules["624"] = [function(require,module,exports){var surround = require(611);
+window.modules["624"] = [function(require,module,exports){var trim = require(583);
+var dasherize = require(593);
+var cleanDiacritics = require(591);
 
-module.exports = function quote(str, quoteChar) {
-  return surround(str, quoteChar || '"');
+module.exports = function slugify(str) {
+  return trim(dasherize(cleanDiacritics(str).replace(/[^\w\s-]/g, '-').toLowerCase()), '-');
 };
-}, {"611":611}];
+}, {"583":583,"591":591,"593":593}];

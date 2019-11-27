@@ -1,4 +1,4 @@
-window.modules["131"] = [function(require,module,exports){var TYPE = require(75).TYPE;
+window.modules["131"] = [function(require,module,exports){var TYPE = require(76).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var ASTERISK = TYPE.Asterisk;
@@ -51,4 +51,4 @@ module.exports = {
         processChunk(node.name);
     }
 };
-}, {"75":75}];
+}, {"76":76}];

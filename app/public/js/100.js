@@ -1,5 +1,5 @@
 window.modules["100"] = [function(require,module,exports){var List = require(54);
-var TYPE = require(75).TYPE;
+var TYPE = require(76).TYPE;
 
 var WHITESPACE = TYPE.WhiteSpace;
 var COMMENT = TYPE.Comment;
@@ -77,4 +77,4 @@ module.exports = {
     },
     walkContext: 'block'
 };
-}, {"54":54,"75":75}];
+}, {"54":54,"76":76}];

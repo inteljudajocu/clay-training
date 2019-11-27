@@ -1,5 +1,5 @@
-window.modules["111"] = [function(require,module,exports){var isHex = require(75).isHex;
-var TYPE = require(75).TYPE;
+window.modules["111"] = [function(require,module,exports){var isHex = require(76).isHex;
+var TYPE = require(76).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var NUMBER = TYPE.Number;
@@ -72,4 +72,4 @@ module.exports = {
         processChunk(node.value);
     }
 };
-}, {"75":75}];
+}, {"76":76}];

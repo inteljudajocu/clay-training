@@ -2,7 +2,7 @@ window.modules["520"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(526);
+var _declaration = require(525);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -10,7 +10,7 @@ var _processor = require(543);
 
 var _processor2 = _interopRequireDefault(_processor);
 
-var _stringify = require(534);
+var _stringify = require(535);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
@@ -26,7 +26,7 @@ var _vendor = require(542);
 
 var _vendor2 = _interopRequireDefault(_vendor);
 
-var _parse = require(527);
+var _parse = require(526);
 
 var _parse2 = _interopRequireDefault(_parse);
 
@@ -34,7 +34,7 @@ var _list = require(538);
 
 var _list2 = _interopRequireDefault(_list);
 
-var _rule = require(525);
+var _rule = require(527);
 
 var _rule2 = _interopRequireDefault(_rule);
 
@@ -290,4 +290,4 @@ postcss.root = function (defaults) {
 exports.default = postcss;
 module.exports = exports['default'];
 
-}, {"521":521,"523":523,"525":525,"526":526,"527":527,"528":528,"534":534,"538":538,"542":542,"543":543}];
+}, {"521":521,"523":523,"525":525,"526":526,"527":527,"528":528,"535":535,"538":538,"542":542,"543":543}];

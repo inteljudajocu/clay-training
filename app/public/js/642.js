@@ -1,21 +1,10 @@
 window.modules["642"] = [function(require,module,exports){var makeString = require(586);
-var htmlEntities = require(603);
 
-module.exports = function unescapeHTML(str) {
-  return makeString(str).replace(/\&([^;]{1,10});/g, function(entity, entityCode) {
-    var match;
+module.exports = function(str, callback) {
+  str = makeString(str);
 
-    if (entityCode in htmlEntities) {
-      return htmlEntities[entityCode];
-    /*eslint no-cond-assign: 0*/
-    } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
-      return String.fromCharCode(parseInt(match[1], 16));
-    /*eslint no-cond-assign: 0*/
-    } else if (match = entityCode.match(/^#(\d+)$/)) {
-      return String.fromCharCode(~~match[1]);
-    } else {
-      return entity;
-    }
-  });
+  if (str.length === 0 || typeof callback !== 'function') return str;
+
+  return str.replace(/./g, callback);
 };
-}, {"586":586,"603":603}];
+}, {"586":586}];

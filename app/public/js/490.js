@@ -787,7 +787,7 @@ var Container = function (_Node) {
             }
             nodes = [new _declaration2.default(nodes)];
         } else if (nodes.selector) {
-            var Rule = require(495);
+            var Rule = require(496);
             nodes = [new Rule(nodes)];
         } else if (nodes.name) {
             var AtRule = require(489);
@@ -819,13 +819,13 @@ var Container = function (_Node) {
 
         var fix = void 0;
         if (node.type === 'root') {
-            var Root = require(496);
+            var Root = require(495);
             fix = new Root();
         } else if (node.type === 'atrule') {
             var AtRule = require(489);
             fix = new AtRule();
         } else if (node.type === 'rule') {
-            var Rule = require(495);
+            var Rule = require(496);
             fix = new Rule();
         } else if (node.type === 'decl') {
             fix = new _declaration2.default();

@@ -1,9 +1,9 @@
 window.modules["274"] = [function(require,module,exports){var baseTimes = require(280),
-    isArguments = require(275),
-    isArray = require(279),
-    isBuffer = require(276),
-    isIndex = require(278),
-    isTypedArray = require(277);
+    isArguments = require(277),
+    isArray = require(275),
+    isBuffer = require(279),
+    isIndex = require(276),
+    isTypedArray = require(278);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;

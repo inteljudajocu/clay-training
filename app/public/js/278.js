@@ -1,26 +1,28 @@
-window.modules["278"] = [function(require,module,exports){/** Used as references for various `Number` constants. */
-var MAX_SAFE_INTEGER = 9007199254740991;
+window.modules["278"] = [function(require,module,exports){var baseIsTypedArray = require(320),
+    baseUnary = require(349),
+    nodeUtil = require(373);
 
-/** Used to detect unsigned integer values. */
-var reIsUint = /^(?:0|[1-9]\d*)$/;
+/* Node.js helper references. */
+var nodeIsTypedArray = nodeUtil && nodeUtil.isTypedArray;
 
 /**
- * Checks if `value` is a valid array-like index.
+ * Checks if `value` is classified as a typed array.
  *
- * @private
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category Lang
  * @param {*} value The value to check.
- * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
- * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+ * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
+ * @example
+ *
+ * _.isTypedArray(new Uint8Array);
+ * // => true
+ *
+ * _.isTypedArray([]);
+ * // => false
  */
-function isIndex(value, length) {
-  var type = typeof value;
-  length = length == null ? MAX_SAFE_INTEGER : length;
+var isTypedArray = nodeIsTypedArray ? baseUnary(nodeIsTypedArray) : baseIsTypedArray;
 
-  return !!length &&
-    (type == 'number' ||
-      (type != 'symbol' && reIsUint.test(value))) &&
-        (value > -1 && value % 1 == 0 && value < length);
-}
-
-module.exports = isIndex;
-}, {}];
+module.exports = isTypedArray;
+}, {"320":320,"349":349,"373":373}];

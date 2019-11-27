@@ -1,7 +1,7 @@
 window.modules["322"] = [function(require,module,exports){var baseMatches = require(325),
     baseMatchesProperty = require(326),
     identity = require(323),
-    isArray = require(279),
+    isArray = require(275),
     property = require(324);
 
 /**
@@ -29,4 +29,4 @@ function baseIteratee(value) {
 }
 
 module.exports = baseIteratee;
-}, {"279":279,"323":323,"324":324,"325":325,"326":326}];
+}, {"275":275,"323":323,"324":324,"325":325,"326":326}];

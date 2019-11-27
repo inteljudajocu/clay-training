@@ -1,28 +1,37 @@
-window.modules["277"] = [function(require,module,exports){var baseIsTypedArray = require(320),
-    baseUnary = require(349),
-    nodeUtil = require(373);
+window.modules["277"] = [function(require,module,exports){var baseIsArguments = require(307),
+    isObjectLike = require(308);
 
-/* Node.js helper references. */
-var nodeIsTypedArray = nodeUtil && nodeUtil.isTypedArray;
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Built-in value references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
 
 /**
- * Checks if `value` is classified as a typed array.
+ * Checks if `value` is likely an `arguments` object.
  *
  * @static
  * @memberOf _
- * @since 3.0.0
+ * @since 0.1.0
  * @category Lang
  * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
+ * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ *  else `false`.
  * @example
  *
- * _.isTypedArray(new Uint8Array);
+ * _.isArguments(function() { return arguments; }());
  * // => true
  *
- * _.isTypedArray([]);
+ * _.isArguments([1, 2, 3]);
  * // => false
  */
-var isTypedArray = nodeIsTypedArray ? baseUnary(nodeIsTypedArray) : baseIsTypedArray;
+var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsArguments : function(value) {
+  return isObjectLike(value) && hasOwnProperty.call(value, 'callee') &&
+    !propertyIsEnumerable.call(value, 'callee');
+};
 
-module.exports = isTypedArray;
-}, {"320":320,"349":349,"373":373}];
+module.exports = isArguments;
+}, {"307":307,"308":308}];

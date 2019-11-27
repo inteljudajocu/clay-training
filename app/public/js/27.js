@@ -3,21 +3,12 @@ window.modules["27"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * Remove the site's slug for the url-patterned prefix
- *
- * @param  {String} uri
- * @param  {Object} site
- * @return {String}
+ * Return the site prefix from the URI.
+ * @param  {string}  uri
+ * @return {string}
  */
-module.exports = function (uri, site) {
-  var { slug, prefix, host, path } = site,
-    hasSlash = uri.indexOf('/_') !== -1;
-
-  if (!prefix) {
-    prefix = path && path.length > 1 ? `${host}${path}` : host;
-  }
-
+module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return uri.replace(`${slug}${hasSlash ? '/' : ''}`, `${prefix}${hasSlash ? '/' : ''}`);
+  return uri.split(/\/_(pages|components|lists|uris|schedule|users|layouts)/)[0];
 };
 }, {"51":51}];

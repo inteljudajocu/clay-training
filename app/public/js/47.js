@@ -1,16 +1,15 @@
 window.modules["47"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51);
+const getComponentName = require(25),
+  { strCheck } = require(51);
 
-/**
- * First test if argument passed in is a String. If true, determine if a uri points
- * to a DEFAULT instance of a layout. Otherwise, throw an error.
- *
- * @param  {string}  uri
- * @return {Boolean}
- */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
-  return !!uri.match(/\/_layouts\/[A-Za-z0-9\-]+$/);
+module.exports = (page, componentName) => {
+  strCheck(componentName);
+
+  if (typeof page !== 'object') {
+    throw new Error(`Page argument must be an object, not ${typeof page}`);
+  }
+
+  return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
 };
-}, {"51":51}];
+}, {"25":25,"51":51}];

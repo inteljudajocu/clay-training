@@ -3,28 +3,16 @@ window.modules["31"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * Given stringified JSON, conver the site's slug
- * to the url-patterned site prefix
- *
- * @param  {Object} site
- * @param  {String} ref
- * @return {Function}
+ * First test if the argument passed in is a String. If true, get component version from uri.
+ * Otherwise throw an error.
+ * @example /_components/foo/instances/bar@published returns published
+ * @param  {string} uri
+ * @return {string|null}
  */
-module.exports = function (site, ref = false) {
-  return function (json) {
-    var { slug, host, path, prefix } = site,
-      prefixString, searchString, searchRegex;
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  const result = /\/_components\/.+?@(.+)/.exec(uri);
 
-    isUriStringCheck.strCheck(json);
-
-    if (!prefix) {
-      prefix = path && path.length > 1 ? `${host}${path}` : host;
-    }
-
-    prefixString = `${ref ? '"_ref":' : '' }"${prefix}/_components/`;
-    searchString = `${ref ? '"_ref":' : '' }"${slug}/_components/`;
-    searchRegex = new RegExp(searchString, 'g');
-    return json.replace(searchRegex, prefixString);
-  };
+  return result && result[1];
 };
 }, {"51":51}];

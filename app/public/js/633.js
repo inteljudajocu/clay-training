@@ -1,9 +1,11 @@
 window.modules["633"] = [function(require,module,exports){var makeString = require(586);
+var defaultToWhiteSpace = require(601);
+var nativeTrimRight = String.prototype.trimRight;
 
-module.exports = function strRight(str, sep) {
+module.exports = function rtrim(str, characters) {
   str = makeString(str);
-  sep = makeString(sep);
-  var pos = !sep ? -1 : str.indexOf(sep);
-  return~ pos ? str.slice(pos + sep.length, str.length) : str;
+  if (!characters && nativeTrimRight) return nativeTrimRight.call(str);
+  characters = defaultToWhiteSpace(characters);
+  return str.replace(new RegExp(characters + '+$'), '');
 };
-}, {"586":586}];
+}, {"586":586,"601":601}];

@@ -3,6 +3,10 @@ window.modules["explore.model"] = [function(require,module,exports){'use strict'
 var _require = require(10),
     search = _require.search,
     query = {
+  size: 5,
+  sort: [{
+    date: 'desc'
+  }],
   query: {
     match_all: {}
   }

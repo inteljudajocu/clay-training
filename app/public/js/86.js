@@ -20,9 +20,9 @@ window.modules["86"] = [function(require,module,exports){module.exports = {
             return this.Value(options.property ? String(options.property) : null);
         }
     },
-    scope: require(87),
+    scope: require(88),
     atrule: require(79),
-    pseudo: require(88),
+    pseudo: require(87),
     node: require(84)
 };
 }, {"79":79,"84":84,"87":87,"88":88}];
