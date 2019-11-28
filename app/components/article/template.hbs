@@ -1,4 +1,31 @@
 <article data-uri="{{ default _ref _self }}" class="{{ componentVariation }}{{ if @root.locals.edit ' editing' }}" role="main">
+  <header class="article-header">
+    <div class="lede-wrapper">
+      <div class="primary-area">
+        <div class="article-header-section">
+          {{! date and time }}
+          <time class="article-timestamp" datetime="{{ date }}" itemprop="datePublished" data-editable="publishedDate">
+            {{#if date}}
+              {{#if dateUpdated}}
+                <span class="article-update">Updated </span>
+              {{/if}}
+              <span class="article-date">{{ articleTimestamp date }}</span>
+            {{/if}}
+          </time>
+        </div>
+        <div class="article-header-section">
+          {{! title }}
+          <h1 class="headline-primary" data-editable="headline" itemprop="headline">{{{ headline }}}</h1>
+          <div class="bylines">
+            {{! authors }}
+            <span data-editable="bylines" class="primary-bylines">
+              {{{ byline bylines=byline }}}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
   <section class="body">
     <div class="article-content" data-editable="content" itemprop="articleBody">
       {{#unless @root.locals.edit}}

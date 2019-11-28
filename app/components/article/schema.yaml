@@ -21,6 +21,13 @@ headline:
       max: 100
       maxMessage: Headline must be 100 characters or fewer
 
+byline:
+  _label: Byline
+  _publish: pageAuthors
+  _has:
+    input: simple-list
+    help: An array of Authors
+
 # users edit the published date from the articleDate and articleTime fields
 date:
   _label: Published Date
@@ -65,6 +72,13 @@ _groups:
       text: Custom Published Date
       height: 30px
       ifEmpty: articleDate or articleTime
+  bylines:
+    fields:
+      - byline
+    _placeholder:
+      text: Byline
+      height: 30px
+      ifEmpty: 'byline'
 
 # non-user-editable fields, set by model.js and used for pubsub
 canonicalUrl:

@@ -1,4 +1,6 @@
 _components:
   article:
+    authors: []
+    byline: []
     dateUpdated: false
     content: []
