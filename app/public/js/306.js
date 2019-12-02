@@ -1,13 +1,24 @@
 window.modules["306"] = [function(require,module,exports){/**
- * The base implementation of `_.isNaN` without support for number objects.
+ * A specialized version of `_.indexOf` which performs strict equality
+ * comparisons of values, i.e. `===`.
  *
  * @private
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is `NaN`, else `false`.
+ * @param {Array} array The array to inspect.
+ * @param {*} value The value to search for.
+ * @param {number} fromIndex The index to search from.
+ * @returns {number} Returns the index of the matched value, else `-1`.
  */
-function baseIsNaN(value) {
-  return value !== value;
+function strictIndexOf(array, value, fromIndex) {
+  var index = fromIndex - 1,
+      length = array.length;
+
+  while (++index < length) {
+    if (array[index] === value) {
+      return index;
+    }
+  }
+  return -1;
 }
 
-module.exports = baseIsNaN;
+module.exports = strictIndexOf;
 }, {}];

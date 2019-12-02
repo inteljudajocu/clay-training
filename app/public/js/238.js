@@ -1,10 +1,18 @@
-window.modules["238"] = [function(require,module,exports){var freeGlobal = require(361);
+window.modules["238"] = [function(require,module,exports){var baseIsNative = require(316),
+    getValue = require(365);
 
-/** Detect free variable `self`. */
-var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+/**
+ * Gets the native function at `key` of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {string} key The key of the method to get.
+ * @returns {*} Returns the function if it's native, else `undefined`.
+ */
+function getNative(object, key) {
+  var value = getValue(object, key);
+  return baseIsNative(value) ? value : undefined;
+}
 
-/** Used as a reference to the global object. */
-var root = freeGlobal || freeSelf || Function('return this')();
-
-module.exports = root;
-}, {"361":361}];
+module.exports = getNative;
+}, {"316":316,"365":365}];

@@ -4,7 +4,7 @@ window.modules["310"] = [function(require,module,exports){var Stack = require(26
     equalObjects = require(314),
     getTag = require(311),
     isArray = require(275),
-    isBuffer = require(279),
+    isBuffer = require(277),
     isTypedArray = require(278);
 
 /** Used to compose bitmasks for value comparisons. */
@@ -81,4 +81,4 @@ function baseIsEqualDeep(object, other, bitmask, customizer, equalFunc, stack) {
 }
 
 module.exports = baseIsEqualDeep;
-}, {"263":263,"275":275,"278":278,"279":279,"311":311,"312":312,"313":313,"314":314}];
+}, {"263":263,"275":275,"277":277,"278":278,"311":311,"312":312,"313":313,"314":314}];

@@ -65,8 +65,7 @@ function putToElastic(obj) {
 
 function parseComponent(ops) {
   const mainComponent = getMainComponentRef(ops),
-    { canonicalUrl, date } = mainComponent.value,
-    { title, reviews, imageUrl } = getComponentByName(ops, 'recipe').value;
+    { canonicalUrl, date, title, reviews, imageUrl } = mainComponent.value;
 
   return {
     key: mainComponent.key,

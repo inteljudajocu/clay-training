@@ -2,11 +2,11 @@ window.modules["87"] = [function(require,module,exports){module.exports = {
     'dir': require(139),
     'has': require(140),
     'lang': require(141),
-    'matches': require(146),
-    'not': require(144),
-    'nth-child': require(145),
-    'nth-last-child': require(148),
-    'nth-last-of-type': require(143),
+    'matches': require(145),
+    'not': require(148),
+    'nth-child': require(146),
+    'nth-last-child': require(143),
+    'nth-last-of-type': require(144),
     'nth-of-type': require(147),
     'slotted': require(142)
 };

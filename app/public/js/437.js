@@ -4,7 +4,7 @@ exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _declaration = require(443);
+var _declaration = require(441);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -787,7 +787,7 @@ var Container = function (_Node) {
             }
             nodes = [new _declaration2.default(nodes)];
         } else if (nodes.selector) {
-            var Rule = require(441);
+            var Rule = require(443);
             nodes = [new Rule(nodes)];
         } else if (nodes.name) {
             var AtRule = require(436);
@@ -825,7 +825,7 @@ var Container = function (_Node) {
             var AtRule = require(436);
             fix = new AtRule();
         } else if (node.type === 'rule') {
-            var Rule = require(441);
+            var Rule = require(443);
             fix = new Rule();
         } else if (node.type === 'decl') {
             fix = new _declaration2.default();

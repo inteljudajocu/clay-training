@@ -1,15 +1,20 @@
-window.modules["262"] = [function(require,module,exports){/**
- * Checks if `value` is in the array cache.
+window.modules["262"] = [function(require,module,exports){/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED = '__lodash_hash_undefined__';
+
+/**
+ * Adds `value` to the array cache.
  *
  * @private
- * @name has
+ * @name add
  * @memberOf SetCache
- * @param {*} value The value to search for.
- * @returns {number} Returns `true` if `value` is found, else `false`.
+ * @alias push
+ * @param {*} value The value to cache.
+ * @returns {Object} Returns the cache instance.
  */
-function setCacheHas(value) {
-  return this.__data__.has(value);
+function setCacheAdd(value) {
+  this.__data__.set(value, HASH_UNDEFINED);
+  return this;
 }
 
-module.exports = setCacheHas;
+module.exports = setCacheAdd;
 }, {}];

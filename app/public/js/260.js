@@ -1,6 +1,6 @@
 window.modules["260"] = [function(require,module,exports){var MapCache = require(252),
-    setCacheAdd = require(261),
-    setCacheHas = require(262);
+    setCacheAdd = require(262),
+    setCacheHas = require(261);
 
 /**
  *

@@ -1,35 +1,46 @@
 window.modules["171"] = [function(require,module,exports){var parse = require(5)
 var startOfISOWeek = require(177)
-var startOfISOYear = require(176)
-
-var MILLISECONDS_IN_WEEK = 604800000
 
 /**
- * @category ISO Week Helpers
- * @summary Get the ISO week of the given date.
+ * @category ISO Week-Numbering Year Helpers
+ * @summary Get the ISO week-numbering year of the given date.
  *
  * @description
- * Get the ISO week of the given date.
+ * Get the ISO week-numbering year of the given date,
+ * which always starts 3 days before the year's first Thursday.
  *
  * ISO week-numbering year: http://en.wikipedia.org/wiki/ISO_week_date
  *
  * @param {Date|String|Number} date - the given date
- * @returns {Number} the ISO week
+ * @returns {Number} the ISO week-numbering year
  *
  * @example
- * // Which week of the ISO-week numbering year is 2 January 2005?
- * var result = getISOWeek(new Date(2005, 0, 2))
- * //=> 53
+ * // Which ISO-week numbering year is 2 January 2005?
+ * var result = getISOYear(new Date(2005, 0, 2))
+ * //=> 2004
  */
-function getISOWeek (dirtyDate) {
+function getISOYear (dirtyDate) {
   var date = parse(dirtyDate)
-  var diff = startOfISOWeek(date).getTime() - startOfISOYear(date).getTime()
+  var year = date.getFullYear()
 
-  // Round the number of days to the nearest integer
-  // because the number of milliseconds in a week is not constant
-  // (e.g. it's different in the week of the daylight saving time clock shift)
-  return Math.round(diff / MILLISECONDS_IN_WEEK) + 1
+  var fourthOfJanuaryOfNextYear = new Date(0)
+  fourthOfJanuaryOfNextYear.setFullYear(year + 1, 0, 4)
+  fourthOfJanuaryOfNextYear.setHours(0, 0, 0, 0)
+  var startOfNextYear = startOfISOWeek(fourthOfJanuaryOfNextYear)
+
+  var fourthOfJanuaryOfThisYear = new Date(0)
+  fourthOfJanuaryOfThisYear.setFullYear(year, 0, 4)
+  fourthOfJanuaryOfThisYear.setHours(0, 0, 0, 0)
+  var startOfThisYear = startOfISOWeek(fourthOfJanuaryOfThisYear)
+
+  if (date.getTime() >= startOfNextYear.getTime()) {
+    return year + 1
+  } else if (date.getTime() >= startOfThisYear.getTime()) {
+    return year
+  } else {
+    return year - 1
+  }
 }
 
-module.exports = getISOWeek
-}, {"5":5,"176":176,"177":177}];
+module.exports = getISOYear
+}, {"5":5,"177":177}];

@@ -1,28 +1,35 @@
 'use strict';
 
 const _get = require('lodash/get'),
-  defaultWidth = 'inline';
+  dateFormat = require('date-fns/format'),
+  dateParse = require('date-fns/parse'),
+  utils = require('../../services/universal/utils'),
+  has = utils.has;
 
-module.exports.render = function(uri, data) {
+function formatDate(data, locals) {
+  if (_get(locals, 'date')) {
+    // if locals and locals.date exists, set the article date (overriding any date already set)
+    data.date = dateFormat(locals.date); // ISO 8601 date string
+  } else if (has(data.articleDate) || has(data.articleTime)) {
+    // make sure both date and time are set. if the user only set one, set the other to today / right now
+    data.articleDate = has(data.articleDate)
+      ? data.articleDate
+      : dateFormat(new Date(), 'YYYY-MM-DD');
+    data.articleTime = has(data.articleTime) ? data.articleTime : dateFormat(new Date(), 'HH:mm');
+    // generate the `date` data from these two fields
+    data.date = dateFormat(dateParse(`${data.articleDate} ${data.articleTime}`)); // ISO 8601 date string
+  }
+}
+
+function setCanonicalUrl(data, locals) {
+  if (_get(locals, 'publishUrl')) {
+    data.canonicalUrl = locals.publishUrl;
+  }
+}
+
+module.exports.save = function(uri, data, locals) {
+  formatDate(data, locals);
+  setCanonicalUrl(data, locals);
+
   return data;
-};
-
-module.exports.save = function(uri, data) {
-  const imageAspectRatio = _get(data, 'imageAspectRatio', null),
-    imageAspectRatioFlexOverride = _get(data, 'imageAspectRatioFlexOverride', false),
-    imageCaption = _get(data, 'imageCaption', null),
-    imageCreditOverride = _get(data, 'imageCreditOverride', null),
-    imageUrl = _get(data, 'imageUrl', null),
-    imageWidth = _get(data, 'imageWidth', null) || defaultWidth,
-    image = {
-      imageAspectRatio,
-      imageAspectRatioFlexOverride,
-      imageCaption,
-      imageCredit: imageCreditOverride,
-      imageType: 'Photo',
-      imageUrl,
-      imageWidth
-    };
-
-  return Object.assign(data, image);
 };

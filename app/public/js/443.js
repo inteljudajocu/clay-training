@@ -2,9 +2,15 @@ window.modules["443"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(439);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _node2 = _interopRequireDefault(_node);
+var _container = require(437);
+
+var _container2 = _interopRequireDefault(_container);
+
+var _list = require(453);
+
+var _list2 = _interopRequireDefault(_list);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15,88 +21,104 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
- * Represents a CSS declaration.
+ * Represents a CSS rule: a selector followed by a declaration block.
  *
- * @extends Node
+ * @extends Container
  *
  * @example
- * const root = postcss.parse('a { color: black }');
- * const decl = root.first.first;
- * decl.type       //=> 'decl'
- * decl.toString() //=> ' color: black'
+ * const root = postcss.parse('a{}');
+ * const rule = root.first;
+ * rule.type       //=> 'rule'
+ * rule.toString() //=> 'a{}'
  */
-var Declaration = function (_Node) {
-  _inherits(Declaration, _Node);
+var Rule = function (_Container) {
+  _inherits(Rule, _Container);
 
-  function Declaration(defaults) {
-    _classCallCheck(this, Declaration);
+  function Rule(defaults) {
+    _classCallCheck(this, Rule);
 
-    var _this = _possibleConstructorReturn(this, _Node.call(this, defaults));
+    var _this = _possibleConstructorReturn(this, _Container.call(this, defaults));
 
-    _this.type = 'decl';
+    _this.type = 'rule';
+    if (!_this.nodes) _this.nodes = [];
     return _this;
   }
 
   /**
-   * @memberof Declaration#
-   * @member {string} prop - the declaration’s property name
+   * An array containing the rule’s individual selectors.
+   * Groups of selectors are split at commas.
+   *
+   * @type {string[]}
    *
    * @example
-   * const root = postcss.parse('a { color: black }');
-   * const decl = root.first.first;
-   * decl.prop //=> 'color'
+   * const root = postcss.parse('a, b { }');
+   * const rule = root.first;
+   *
+   * rule.selector  //=> 'a, b'
+   * rule.selectors //=> ['a', 'b']
+   *
+   * rule.selectors = ['a', 'strong'];
+   * rule.selector //=> 'a, strong'
    */
 
-  /**
-   * @memberof Declaration#
-   * @member {string} value - the declaration’s value
-   *
-   * @example
-   * const root = postcss.parse('a { color: black }');
-   * const decl = root.first.first;
-   * decl.value //=> 'black'
-   */
 
-  /**
-   * @memberof Declaration#
-   * @member {boolean} important - `true` if the declaration
-   *                               has an !important annotation.
-   *
-   * @example
-   * const root = postcss.parse('a { color: black !important; color: red }');
-   * root.first.first.important //=> true
-   * root.first.last.important  //=> undefined
-   */
+  _createClass(Rule, [{
+    key: 'selectors',
+    get: function get() {
+      return _list2.default.comma(this.selector);
+    },
+    set: function set(values) {
+      var match = this.selector ? this.selector.match(/,\s*/) : null;
+      var sep = match ? match[0] : ',' + this.raw('between', 'beforeOpen');
+      this.selector = values.join(sep);
+    }
 
-  /**
-   * @memberof Declaration#
-   * @member {object} raws - Information to generate byte-to-byte equal
-   *                         node string as it was in the origin input.
-   *
-   * Every parser saves its own properties,
-   * but the default CSS parser uses:
-   *
-   * * `before`: the space symbols before the node. It also stores `*`
-   *   and `_` symbols before the declaration (IE hack).
-   * * `between`: the symbols between the property and value
-   *   for declarations.
-   * * `important`: the content of the important statement,
-   *   if it is not just `!important`.
-   *
-   * PostCSS cleans declaration from comments and extra spaces,
-   * but it stores origin content in raws properties.
-   * As such, if you don’t change a declaration’s value,
-   * PostCSS will use the raw value with comments.
-   *
-   * @example
-   * const root = postcss.parse('a {\n  color:black\n}')
-   * root.first.first.raws //=> { before: '\n  ', between: ':' }
-   */
+    /**
+     * @memberof Rule#
+     * @member {string} selector - the rule’s full selector represented
+     *                             as a string
+     *
+     * @example
+     * const root = postcss.parse('a, b { }');
+     * const rule = root.first;
+     * rule.selector //=> 'a, b'
+     */
 
-  return Declaration;
-}(_node2.default);
+    /**
+     * @memberof Rule#
+     * @member {object} raws - Information to generate byte-to-byte equal
+     *                         node string as it was in the origin input.
+     *
+     * Every parser saves its own properties,
+     * but the default CSS parser uses:
+     *
+     * * `before`: the space symbols before the node. It also stores `*`
+     *   and `_` symbols before the declaration (IE hack).
+     * * `after`: the space symbols after the last child of the node
+     *   to the end of the node.
+     * * `between`: the symbols between the property and value
+     *   for declarations, selector and `{` for rules, or last parameter
+     *   and `{` for at-rules.
+     * * `semicolon`: contains `true` if the last child has
+     *   an (optional) semicolon.
+     * * `ownSemicolon`: contains `true` if there is semicolon after rule.
+     *
+     * PostCSS cleans selectors from comments and extra spaces,
+     * but it stores origin content in raws properties.
+     * As such, if you don’t change a declaration’s value,
+     * PostCSS will use the raw value with comments.
+     *
+     * @example
+     * const root = postcss.parse('a {\n  color:black\n}')
+     * root.first.first.raws //=> { before: '', between: ' ', after: '\n' }
+     */
 
-exports.default = Declaration;
+  }]);
+
+  return Rule;
+}(_container2.default);
+
+exports.default = Rule;
 module.exports = exports['default'];
 
-}, {"439":439}];
+}, {"437":437,"453":453}];

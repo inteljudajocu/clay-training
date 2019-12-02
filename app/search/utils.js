@@ -15,7 +15,7 @@ function createFilter({ components, includePage }) {
 
 function getMainComponentRef(ops) {
   const page = getPage(ops),
-    mainComponent = getComponentByName(ops, 'article');
+    mainComponent = getComponentByName(ops, 'recipe');
 
   mainComponent.key = page.key;
 

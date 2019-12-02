@@ -1,42 +1,102 @@
 window.modules["526"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.default = parse;
 
-var _parser = require(540);
+var _node = require(524);
 
-var _parser2 = _interopRequireDefault(_parser);
-
-var _input = require(531);
-
-var _input2 = _interopRequireDefault(_input);
+var _node2 = _interopRequireDefault(_node);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function parse(css, opts) {
-    if (opts && opts.safe) {
-        throw new Error('Option safe was removed. ' + 'Use parser: require("postcss-safe-parser")');
-    }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-    var input = new _input2.default(css, opts);
-    var parser = new _parser2.default(input);
-    try {
-        parser.parse();
-    } catch (e) {
-        if (e.name === 'CssSyntaxError' && opts && opts.from) {
-            if (/\.scss$/i.test(opts.from)) {
-                e.message += '\nYou tried to parse SCSS with ' + 'the standard CSS parser; ' + 'try again with the postcss-scss parser';
-            } else if (/\.sass/i.test(opts.from)) {
-                e.message += '\nYou tried to parse Sass with ' + 'the standard CSS parser; ' + 'try again with the postcss-sass parser';
-            } else if (/\.less$/i.test(opts.from)) {
-                e.message += '\nYou tried to parse Less with ' + 'the standard CSS parser; ' + 'try again with the postcss-less parser';
-            }
-        }
-        throw e;
-    }
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-    return parser.root;
-}
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Represents a CSS declaration.
+ *
+ * @extends Node
+ *
+ * @example
+ * const root = postcss.parse('a { color: black }');
+ * const decl = root.first.first;
+ * decl.type       //=> 'decl'
+ * decl.toString() //=> ' color: black'
+ */
+var Declaration = function (_Node) {
+  _inherits(Declaration, _Node);
+
+  function Declaration(defaults) {
+    _classCallCheck(this, Declaration);
+
+    var _this = _possibleConstructorReturn(this, _Node.call(this, defaults));
+
+    _this.type = 'decl';
+    return _this;
+  }
+
+  /**
+   * @memberof Declaration#
+   * @member {string} prop - the declaration’s property name
+   *
+   * @example
+   * const root = postcss.parse('a { color: black }');
+   * const decl = root.first.first;
+   * decl.prop //=> 'color'
+   */
+
+  /**
+   * @memberof Declaration#
+   * @member {string} value - the declaration’s value
+   *
+   * @example
+   * const root = postcss.parse('a { color: black }');
+   * const decl = root.first.first;
+   * decl.value //=> 'black'
+   */
+
+  /**
+   * @memberof Declaration#
+   * @member {boolean} important - `true` if the declaration
+   *                               has an !important annotation.
+   *
+   * @example
+   * const root = postcss.parse('a { color: black !important; color: red }');
+   * root.first.first.important //=> true
+   * root.first.last.important  //=> undefined
+   */
+
+  /**
+   * @memberof Declaration#
+   * @member {object} raws - Information to generate byte-to-byte equal
+   *                         node string as it was in the origin input.
+   *
+   * Every parser saves its own properties,
+   * but the default CSS parser uses:
+   *
+   * * `before`: the space symbols before the node. It also stores `*`
+   *   and `_` symbols before the declaration (IE hack).
+   * * `between`: the symbols between the property and value
+   *   for declarations.
+   * * `important`: the content of the important statement,
+   *   if it is not just `!important`.
+   *
+   * PostCSS cleans declaration from comments and extra spaces,
+   * but it stores origin content in raws properties.
+   * As such, if you don’t change a declaration’s value,
+   * PostCSS will use the raw value with comments.
+   *
+   * @example
+   * const root = postcss.parse('a {\n  color:black\n}')
+   * root.first.first.raws //=> { before: '\n  ', between: ':' }
+   */
+
+  return Declaration;
+}(_node2.default);
+
+exports.default = Declaration;
 module.exports = exports['default'];
 
-}, {"531":531,"540":540}];
+}, {"524":524}];

@@ -4085,8 +4085,8 @@ var defaults = baseRest(function(object, sources) {
 
 module.exports = defaults;
 }, {"285":285,"341":341,"357":357,"376":376}];
-window.modules["397"] = [function(require,module,exports){var postcss = require(396);
-var translate = require(394).syntax.translate;
+window.modules["396"] = [function(require,module,exports){var postcss = require(394);
+var translate = require(395).syntax.translate;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 var DEFAULT_RAWS = {
@@ -4237,7 +4237,7 @@ module.exports = function(node) {
 
     return result;
 };
-}, {"394":394,"396":396}];
+}, {"394":394,"395":395}];
 window.modules["398"] = [function(require,module,exports){var resolveKeyword = require(58).keyword;
 
 module.exports = function cleanAtrule(node, item, list) {
@@ -5451,7 +5451,7 @@ exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _declaration = require(443);
+var _declaration = require(441);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -6234,7 +6234,7 @@ var Container = function (_Node) {
             }
             nodes = [new _declaration2.default(nodes)];
         } else if (nodes.selector) {
-            var Rule = require(441);
+            var Rule = require(443);
             nodes = [new Rule(nodes)];
         } else if (nodes.name) {
             var AtRule = require(436);
@@ -6272,7 +6272,7 @@ var Container = function (_Node) {
             var AtRule = require(436);
             fix = new AtRule();
         } else if (node.type === 'rule') {
-            var Rule = require(441);
+            var Rule = require(443);
             fix = new Rule();
         } else if (node.type === 'decl') {
             fix = new _declaration2.default();
@@ -6610,7 +6610,7 @@ exports.default = CssSyntaxError;
 module.exports = exports['default'];
 
 }, {"20":20,"445":445}];
-window.modules["443"] = [function(require,module,exports){'use strict';
+window.modules["441"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6712,7 +6712,7 @@ exports.default = Declaration;
 module.exports = exports['default'];
 
 }, {"439":439}];
-window.modules["474"] = [function(require,module,exports){'use strict';
+window.modules["473"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6908,7 +6908,7 @@ function defaultAttrConcat(attrValue, attrSpaces) {
     return '' + attrSpaces.before + attrValue + attrSpaces.after;
 }
 module.exports = exports['default'];}, {"470":470,"484":484}];
-window.modules["482"] = [function(require,module,exports){'use strict';
+window.modules["479"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7022,11 +7022,11 @@ window.modules["486"] = [function(require,module,exports){'use strict';
 exports.__esModule = true;
 exports.universal = exports.tag = exports.string = exports.selector = exports.root = exports.pseudo = exports.nesting = exports.id = exports.comment = exports.combinator = exports.className = exports.attribute = undefined;
 
-var _attribute = require(474);
+var _attribute = require(473);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
-var _className = require(482);
+var _className = require(479);
 
 var _className2 = _interopRequireDefault(_className);
 
@@ -7038,7 +7038,7 @@ var _comment = require(478);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _id = require(471);
+var _id = require(482);
 
 var _id2 = _interopRequireDefault(_id);
 
@@ -7050,7 +7050,7 @@ var _pseudo = require(472);
 
 var _pseudo2 = _interopRequireDefault(_pseudo);
 
-var _root = require(479);
+var _root = require(480);
 
 var _root2 = _interopRequireDefault(_root);
 
@@ -7058,15 +7058,15 @@ var _selector = require(481);
 
 var _selector2 = _interopRequireDefault(_selector);
 
-var _string = require(473);
+var _string = require(471);
 
 var _string2 = _interopRequireDefault(_string);
 
-var _tag = require(480);
+var _tag = require(475);
 
 var _tag2 = _interopRequireDefault(_tag);
 
-var _universal = require(475);
+var _universal = require(474);
 
 var _universal2 = _interopRequireDefault(_universal);
 
@@ -8435,7 +8435,7 @@ var Container = function (_Node) {
             }
             nodes = [new _declaration2.default(nodes)];
         } else if (nodes.selector) {
-            var Rule = require(496);
+            var Rule = require(495);
             nodes = [new Rule(nodes)];
         } else if (nodes.name) {
             var AtRule = require(489);
@@ -8467,13 +8467,13 @@ var Container = function (_Node) {
 
         var fix = void 0;
         if (node.type === 'root') {
-            var Root = require(495);
+            var Root = require(496);
             fix = new Root();
         } else if (node.type === 'atrule') {
             var AtRule = require(489);
             fix = new AtRule();
         } else if (node.type === 'rule') {
-            var Rule = require(496);
+            var Rule = require(495);
             fix = new Rule();
         } else if (node.type === 'decl') {
             fix = new _declaration2.default();
@@ -9113,7 +9113,7 @@ exports.__esModule = true;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _declaration = require(525);
+var _declaration = require(526);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -9848,7 +9848,7 @@ var Container = function (_Node) {
         var _this2 = this;
 
         if (typeof nodes === 'string') {
-            var parse = require(526);
+            var parse = require(525);
             nodes = cleanSource(parse(nodes).nodes);
         } else if (Array.isArray(nodes)) {
             nodes = nodes.slice(0);
@@ -9896,7 +9896,7 @@ var Container = function (_Node) {
             }
             nodes = [new _declaration2.default(nodes)];
         } else if (nodes.selector) {
-            var Rule = require(527);
+            var Rule = require(528);
             nodes = [new Rule(nodes)];
         } else if (nodes.name) {
             var AtRule = require(521);
@@ -9928,13 +9928,13 @@ var Container = function (_Node) {
 
         var fix = void 0;
         if (node.type === 'root') {
-            var Root = require(528);
+            var Root = require(527);
             fix = new Root();
         } else if (node.type === 'atrule') {
             var AtRule = require(521);
             fix = new AtRule();
         } else if (node.type === 'rule') {
-            var Rule = require(527);
+            var Rule = require(528);
             fix = new Rule();
         } else if (node.type === 'decl') {
             fix = new _declaration2.default();
@@ -10272,7 +10272,7 @@ exports.default = CssSyntaxError;
 module.exports = exports['default'];
 
 }, {"20":20,"530":530}];
-window.modules["525"] = [function(require,module,exports){'use strict';
+window.modules["526"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 

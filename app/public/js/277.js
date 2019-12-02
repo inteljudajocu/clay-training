@@ -1,37 +1,39 @@
-window.modules["277"] = [function(require,module,exports){var baseIsArguments = require(307),
-    isObjectLike = require(308);
+window.modules["277"] = [function(require,module,exports){var root = require(237),
+    stubFalse = require(380);
 
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
+/** Detect free variable `exports`. */
+var freeExports = typeof exports == 'object' && exports && !exports.nodeType && exports;
 
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
+/** Detect free variable `module`. */
+var freeModule = freeExports && typeof module == 'object' && module && !module.nodeType && module;
+
+/** Detect the popular CommonJS extension `module.exports`. */
+var moduleExports = freeModule && freeModule.exports === freeExports;
 
 /** Built-in value references. */
-var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+var Buffer = moduleExports ? root.Buffer : undefined;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined;
 
 /**
- * Checks if `value` is likely an `arguments` object.
+ * Checks if `value` is a buffer.
  *
  * @static
  * @memberOf _
- * @since 0.1.0
+ * @since 4.3.0
  * @category Lang
  * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an `arguments` object,
- *  else `false`.
+ * @returns {boolean} Returns `true` if `value` is a buffer, else `false`.
  * @example
  *
- * _.isArguments(function() { return arguments; }());
+ * _.isBuffer(new Buffer(2));
  * // => true
  *
- * _.isArguments([1, 2, 3]);
+ * _.isBuffer(new Uint8Array(2));
  * // => false
  */
-var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsArguments : function(value) {
-  return isObjectLike(value) && hasOwnProperty.call(value, 'callee') &&
-    !propertyIsEnumerable.call(value, 'callee');
-};
+var isBuffer = nativeIsBuffer || stubFalse;
 
-module.exports = isArguments;
-}, {"307":307,"308":308}];
+module.exports = isBuffer;
+}, {"237":237,"380":380}];

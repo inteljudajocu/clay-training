@@ -502,7 +502,7 @@ parse('[a&&<b>#|<\'c\'>*||e(){2,} f{2} /,(% g#{1,2})]!');
 
 module.exports = parse;
 }, {"72":72}];
-window.modules["64"] = [function(require,module,exports){'use strict';
+window.modules["65"] = [function(require,module,exports){'use strict';
 
 var names = require(61);
 var MULTIPLIER_DEFAULT = {
@@ -1018,7 +1018,7 @@ function matchSyntax(lexer, syntaxNode, node) {
 
 module.exports = matchSyntax;
 }, {"61":61}];
-window.modules["80"] = [function(require,module,exports){var List = require(54);
+window.modules["81"] = [function(require,module,exports){var List = require(54);
 
 module.exports = {
     parse: {
@@ -1033,7 +1033,7 @@ module.exports = {
     }
 };
 }, {"54":54}];
-window.modules["81"] = [function(require,module,exports){var List = require(54);
+window.modules["80"] = [function(require,module,exports){var List = require(54);
 
 module.exports = {
     parse: {
@@ -1644,15 +1644,15 @@ module.exports = {
     }
 };
 }, {"54":54}];
-window.modules["146"] = [function(require,module,exports){module.exports = require(138);
+window.modules["145"] = [function(require,module,exports){module.exports = require(138);
 }, {"138":138}];
-window.modules["144"] = [function(require,module,exports){module.exports = require(138);
+window.modules["148"] = [function(require,module,exports){module.exports = require(138);
 }, {"138":138}];
-window.modules["145"] = [function(require,module,exports){module.exports = require(137);
+window.modules["146"] = [function(require,module,exports){module.exports = require(137);
 }, {"137":137}];
-window.modules["148"] = [function(require,module,exports){module.exports = require(137);
+window.modules["143"] = [function(require,module,exports){module.exports = require(137);
 }, {"137":137}];
-window.modules["143"] = [function(require,module,exports){module.exports = require(136);
+window.modules["144"] = [function(require,module,exports){module.exports = require(136);
 }, {"136":136}];
 window.modules["147"] = [function(require,module,exports){module.exports = require(136);
 }, {"136":136}];
@@ -7167,7 +7167,7 @@ window.modules["391"] = [function(require,module,exports){//! moment.js
 
 })));
 }, {}];
-window.modules["395"] = [function(require,module,exports){var parse = require(394).syntax.parse;
+window.modules["397"] = [function(require,module,exports){var parse = require(395).syntax.parse;
 
 function getInfo(postcssNode) {
     return {
@@ -7254,7 +7254,7 @@ function postcssToCsso(node) {
 }
 
 module.exports = postcssToCsso;
-}, {"394":394}];
+}, {"395":395}];
 window.modules["401"] = [function(require,module,exports){// remove white spaces around operators when safe
 module.exports = function cleanWhitespace(node, item, list) {
     if (node.value === '+' || node.value === '-') {
@@ -7523,7 +7523,7 @@ window.modules["410"] = [function(require,module,exports){module.exports={
   "version": "3.3.1"
 }
 }, {}];
-window.modules["451"] = [function(require,module,exports){(function (Buffer){
+window.modules["452"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
 exports.__esModule = true;
@@ -8521,7 +8521,7 @@ window.modules["456"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(443);
+var _declaration = require(441);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -8541,7 +8541,7 @@ var _root = require(442);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _rule = require(441);
+var _rule = require(443);
 
 var _rule2 = _interopRequireDefault(_rule);
 
@@ -9070,11 +9070,11 @@ exports.default = Parser;
 module.exports = exports['default'];
 
 }, {"436":436,"438":438,"441":441,"442":442,"443":443,"457":457}];
-window.modules["396"] = [function(require,module,exports){'use strict';
+window.modules["394"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(443);
+var _declaration = require(441);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -9106,7 +9106,7 @@ var _list = require(453);
 
 var _list2 = _interopRequireDefault(_list);
 
-var _rule = require(441);
+var _rule = require(443);
 
 var _rule2 = _interopRequireDefault(_rule);
 
@@ -9795,7 +9795,7 @@ var _uniq = require(483);
 
 var _uniq2 = _interopRequireDefault(_uniq);
 
-var _root = require(479);
+var _root = require(480);
 
 var _root2 = _interopRequireDefault(_root);
 
@@ -9803,7 +9803,7 @@ var _selector = require(481);
 
 var _selector2 = _interopRequireDefault(_selector);
 
-var _className = require(482);
+var _className = require(479);
 
 var _className2 = _interopRequireDefault(_className);
 
@@ -9811,15 +9811,15 @@ var _comment = require(478);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _id = require(471);
+var _id = require(482);
 
 var _id2 = _interopRequireDefault(_id);
 
-var _tag = require(480);
+var _tag = require(475);
 
 var _tag2 = _interopRequireDefault(_tag);
 
-var _string = require(473);
+var _string = require(471);
 
 var _string2 = _interopRequireDefault(_string);
 
@@ -9827,11 +9827,11 @@ var _pseudo = require(472);
 
 var _pseudo2 = _interopRequireDefault(_pseudo);
 
-var _attribute = require(474);
+var _attribute = require(473);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
-var _universal = require(475);
+var _universal = require(474);
 
 var _universal2 = _interopRequireDefault(_universal);
 
@@ -11997,11 +11997,11 @@ var _atRule = require(489);
 
 var _atRule2 = _interopRequireDefault(_atRule);
 
-var _root = require(495);
+var _root = require(496);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _rule = require(496);
+var _rule = require(495);
 
 var _rule2 = _interopRequireDefault(_rule);
 
@@ -12566,11 +12566,11 @@ var _list = require(506);
 
 var _list2 = _interopRequireDefault(_list);
 
-var _rule = require(496);
+var _rule = require(495);
 
 var _rule2 = _interopRequireDefault(_rule);
 
-var _root = require(495);
+var _root = require(496);
 
 var _root2 = _interopRequireDefault(_root);
 
@@ -13577,11 +13577,11 @@ var _stringifier = require(539);
 
 var _stringifier2 = _interopRequireDefault(_stringifier);
 
-var _stringify = require(535);
+var _stringify = require(534);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _warnOnce = require(534);
+var _warnOnce = require(535);
 
 var _warnOnce2 = _interopRequireDefault(_warnOnce);
 
@@ -14189,7 +14189,7 @@ exports.default = Node;
 module.exports = exports['default'];
 
 }, {"529":529,"534":534,"535":535,"539":539}];
-window.modules["526"] = [function(require,module,exports){'use strict';
+window.modules["525"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 exports.default = parse;
@@ -14235,7 +14235,7 @@ window.modules["540"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(525);
+var _declaration = require(526);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -14251,11 +14251,11 @@ var _atRule = require(521);
 
 var _atRule2 = _interopRequireDefault(_atRule);
 
-var _root = require(528);
+var _root = require(527);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _rule = require(527);
+var _rule = require(528);
 
 var _rule2 = _interopRequireDefault(_rule);
 
@@ -14783,12 +14783,12 @@ var Parser = function () {
 exports.default = Parser;
 module.exports = exports['default'];
 
-}, {"521":521,"523":523,"525":525,"527":527,"528":528,"541":541}];
+}, {"521":521,"523":523,"526":526,"527":527,"528":528,"541":541}];
 window.modules["520"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _declaration = require(525);
+var _declaration = require(526);
 
 var _declaration2 = _interopRequireDefault(_declaration);
 
@@ -14796,7 +14796,7 @@ var _processor = require(543);
 
 var _processor2 = _interopRequireDefault(_processor);
 
-var _stringify = require(535);
+var _stringify = require(534);
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
@@ -14812,7 +14812,7 @@ var _vendor = require(542);
 
 var _vendor2 = _interopRequireDefault(_vendor);
 
-var _parse = require(526);
+var _parse = require(525);
 
 var _parse2 = _interopRequireDefault(_parse);
 
@@ -14820,11 +14820,11 @@ var _list = require(538);
 
 var _list2 = _interopRequireDefault(_list);
 
-var _rule = require(527);
+var _rule = require(528);
 
 var _rule2 = _interopRequireDefault(_rule);
 
-var _root = require(528);
+var _root = require(527);
 
 var _root2 = _interopRequireDefault(_root);
 
@@ -15076,7 +15076,7 @@ postcss.root = function (defaults) {
 exports.default = postcss;
 module.exports = exports['default'];
 
-}, {"521":521,"523":523,"525":525,"526":526,"527":527,"528":528,"535":535,"538":538,"542":542,"543":543}];
+}, {"521":521,"523":523,"525":525,"526":526,"527":527,"528":528,"534":534,"538":538,"542":542,"543":543}];
 window.modules["532"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
@@ -18928,7 +18928,7 @@ module.exports = function makeString(object) {
   return '' + object;
 };
 }, {}];
-window.modules["642"] = [function(require,module,exports){var makeString = require(586);
+window.modules["641"] = [function(require,module,exports){var makeString = require(586);
 
 module.exports = function(str, callback) {
   str = makeString(str);
@@ -18938,7 +18938,7 @@ module.exports = function(str, callback) {
   return str.replace(/./g, callback);
 };
 }, {"586":586}];
-window.modules["612"] = [function(require,module,exports){module.exports = function naturalCmp(str1, str2) {
+window.modules["613"] = [function(require,module,exports){module.exports = function naturalCmp(str1, str2) {
   if (str1 == str2) return 0;
   if (!str1) return -1;
   if (!str2) return 1;
@@ -19008,19 +19008,19 @@ module.exports = function pad(str, length, padStr, type) {
   }
 };
 }, {"586":586,"604":604}];
-window.modules["647"] = [function(require,module,exports){var adjacent = require(600);
+window.modules["646"] = [function(require,module,exports){var adjacent = require(600);
 
 module.exports = function succ(str) {
   return adjacent(str, -1);
 };
 }, {"600":600}];
-window.modules["634"] = [function(require,module,exports){/**
+window.modules["633"] = [function(require,module,exports){/**
  * _s.prune: a more elegant version of truncate
  * prune extra chars, never leaving a half-chopped word.
  * @author github.com/rwz
  */
 var makeString = require(586);
-var rtrim = require(633);
+var rtrim = require(631);
 
 module.exports = function prune(str, length, pruneStr) {
   str = makeString(str);
@@ -19041,7 +19041,7 @@ module.exports = function prune(str, length, pruneStr) {
 
   return (template + pruneStr).length > str.length ? str : str.slice(0, template.length) + pruneStr;
 };
-}, {"586":586,"633":633}];
+}, {"586":586,"631":631}];
 window.modules["655"] = [function(require,module,exports){'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }

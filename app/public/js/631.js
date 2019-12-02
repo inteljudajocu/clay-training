@@ -1,8 +1,11 @@
 window.modules["631"] = [function(require,module,exports){var makeString = require(586);
+var defaultToWhiteSpace = require(601);
+var nativeTrimRight = String.prototype.trimRight;
 
-module.exports = function titleize(str) {
-  return makeString(str).toLowerCase().replace(/(?:^|\s|-)\S/g, function(c) {
-    return c.toUpperCase();
-  });
+module.exports = function rtrim(str, characters) {
+  str = makeString(str);
+  if (!characters && nativeTrimRight) return nativeTrimRight.call(str);
+  characters = defaultToWhiteSpace(characters);
+  return str.replace(new RegExp(characters + '+$'), '');
 };
-}, {"586":586}];
+}, {"586":586,"601":601}];

@@ -1,6 +1,6 @@
-window.modules["623"] = [function(require,module,exports){var surround = require(613);
+window.modules["623"] = [function(require,module,exports){var surround = require(611);
 
 module.exports = function quote(str, quoteChar) {
   return surround(str, quoteChar || '"');
 };
-}, {"613":613}];
+}, {"611":611}];

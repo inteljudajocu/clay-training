@@ -1,8 +1,8 @@
 window.modules["274"] = [function(require,module,exports){var baseTimes = require(280),
-    isArguments = require(277),
+    isArguments = require(276),
     isArray = require(275),
-    isBuffer = require(279),
-    isIndex = require(276),
+    isBuffer = require(277),
+    isIndex = require(279),
     isTypedArray = require(278);
 
 /** Used for built-in method references. */

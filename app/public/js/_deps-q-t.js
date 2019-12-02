@@ -203,7 +203,7 @@ function translate(node, forceBraces, decorate) {
 
 module.exports = translate;
 }, {}];
-window.modules["65"] = [function(require,module,exports){var List = require(54);
+window.modules["64"] = [function(require,module,exports){var List = require(54);
 
 function getFirstMatchNode(matchNode) {
     if (matchNode.type === 'ASTNode') {
@@ -5637,7 +5637,7 @@ window.modules["435"] = [function(require,module,exports){module.exports = funct
     return [A, B, C];
 };
 }, {}];
-window.modules["452"] = [function(require,module,exports){'use strict';
+window.modules["451"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -5974,7 +5974,7 @@ exports.default = Root;
 module.exports = exports['default'];
 
 }, {"437":437,"448":448,"459":459}];
-window.modules["441"] = [function(require,module,exports){'use strict';
+window.modules["443"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6852,7 +6852,7 @@ function tokenizer(input) {
 module.exports = exports['default'];
 
 }, {}];
-window.modules["479"] = [function(require,module,exports){'use strict';
+window.modules["480"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6947,7 +6947,7 @@ var Selector = function (_Container) {
 
 exports.default = Selector;
 module.exports = exports['default'];}, {"470":470,"487":487}];
-window.modules["473"] = [function(require,module,exports){'use strict';
+window.modules["471"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6982,7 +6982,7 @@ var String = function (_Node) {
 
 exports.default = String;
 module.exports = exports['default'];}, {"470":470,"485":485}];
-window.modules["480"] = [function(require,module,exports){'use strict';
+window.modules["475"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7504,7 +7504,7 @@ exports.default = Result;
 module.exports = exports['default'];
 
 }, {"512":512}];
-window.modules["495"] = [function(require,module,exports){'use strict';
+window.modules["496"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7634,7 +7634,7 @@ exports.default = Root;
 module.exports = exports['default'];
 
 }, {"490":490,"501":501,"511":511}];
-window.modules["496"] = [function(require,module,exports){'use strict';
+window.modules["495"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -8842,7 +8842,7 @@ exports.default = Result;
 module.exports = exports['default'];
 
 }, {"544":544}];
-window.modules["528"] = [function(require,module,exports){'use strict';
+window.modules["527"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -8972,7 +8972,7 @@ exports.default = Root;
 module.exports = exports['default'];
 
 }, {"522":522,"533":533,"543":543}];
-window.modules["527"] = [function(require,module,exports){'use strict';
+window.modules["528"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -9441,7 +9441,7 @@ exports.default = Stringifier;
 module.exports = exports['default'];
 
 }, {}];
-window.modules["535"] = [function(require,module,exports){'use strict';
+window.modules["534"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 exports.default = stringify;
@@ -16079,12 +16079,12 @@ window.modules["596"] = [function(require,module,exports){module.exports = funct
   return number < 0 ? 0 : (+number || 0);
 };
 }, {}];
-window.modules["623"] = [function(require,module,exports){var surround = require(613);
+window.modules["623"] = [function(require,module,exports){var surround = require(611);
 
 module.exports = function quote(str, quoteChar) {
   return surround(str, quoteChar || '"');
 };
-}, {"613":613}];
+}, {"611":611}];
 window.modules["638"] = [function(require,module,exports){var makeString = require(586);
 var strRepeat = require(604);
 
@@ -16102,7 +16102,7 @@ module.exports = function repeat(str, qty, separator) {
   return repeat.join(separator);
 };
 }, {"586":586,"604":604}];
-window.modules["630"] = [function(require,module,exports){var makeString = require(586);
+window.modules["628"] = [function(require,module,exports){var makeString = require(586);
 
 module.exports = function replaceAll(str, find, replace, ignorecase) {
   var flags = (ignorecase === true)?'gi':'g';
@@ -16123,7 +16123,7 @@ module.exports = function rpad(str, length, padStr) {
   return pad(str, length, padStr, 'right');
 };
 }, {"645":645}];
-window.modules["633"] = [function(require,module,exports){var makeString = require(586);
+window.modules["631"] = [function(require,module,exports){var makeString = require(586);
 var defaultToWhiteSpace = require(601);
 var nativeTrimRight = String.prototype.trimRight;
 
@@ -16165,7 +16165,7 @@ module.exports = function startsWith(str, starts, position) {
   return str.lastIndexOf(starts, position) === position;
 };
 }, {"586":586,"596":596}];
-window.modules["639"] = [function(require,module,exports){var makeString = require(586);
+window.modules["634"] = [function(require,module,exports){var makeString = require(586);
 
 module.exports = function strLeft(str, sep) {
   str = makeString(str);
@@ -16201,23 +16201,23 @@ module.exports = function strRightBack(str, sep) {
   return~ pos ? str.slice(pos + sep.length, str.length) : str;
 };
 }, {"586":586}];
-window.modules["627"] = [function(require,module,exports){var makeString = require(586);
+window.modules["626"] = [function(require,module,exports){var makeString = require(586);
 
 module.exports = function stripTags(str) {
   return makeString(str).replace(/<\/?[^>]+>/g, '');
 };
 }, {"586":586}];
-window.modules["646"] = [function(require,module,exports){var adjacent = require(600);
+window.modules["647"] = [function(require,module,exports){var adjacent = require(600);
 
 module.exports = function succ(str) {
   return adjacent(str, 1);
 };
 }, {"600":600}];
-window.modules["613"] = [function(require,module,exports){module.exports = function surround(str, wrapper) {
+window.modules["611"] = [function(require,module,exports){module.exports = function surround(str, wrapper) {
   return [wrapper, str, wrapper].join('');
 };
 }, {}];
-window.modules["629"] = [function(require,module,exports){var makeString = require(586);
+window.modules["627"] = [function(require,module,exports){var makeString = require(586);
 
 module.exports = function swapCase(str) {
   return makeString(str).replace(/\S/g, function(c) {
@@ -16225,7 +16225,7 @@ module.exports = function swapCase(str) {
   });
 };
 }, {"586":586}];
-window.modules["631"] = [function(require,module,exports){var makeString = require(586);
+window.modules["630"] = [function(require,module,exports){var makeString = require(586);
 
 module.exports = function titleize(str) {
   return makeString(str).toLowerCase().replace(/(?:^|\s|-)\S/g, function(c) {
@@ -16260,7 +16260,7 @@ window.modules["609"] = [function(require,module,exports){module.exports = funct
   return Math.round(num * factor) / factor;
 };
 }, {}];
-window.modules["621"] = [function(require,module,exports){var rtrim = require(633);
+window.modules["621"] = [function(require,module,exports){var rtrim = require(631);
 
 module.exports = function toSentence(array, separator, lastSeparator, serial) {
   separator = separator || ', ';
@@ -16272,7 +16272,7 @@ module.exports = function toSentence(array, separator, lastSeparator, serial) {
 
   return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
 };
-}, {"633":633}];
+}, {"631":631}];
 window.modules["622"] = [function(require,module,exports){var toSentence = require(621);
 
 module.exports = function toSentenceSerial(array, sep, lastSep) {

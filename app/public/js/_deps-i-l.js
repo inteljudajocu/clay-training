@@ -1933,34 +1933,34 @@ function numberIsNaN (obj) {
 window.modules["24"] = [function(require,module,exports){'use strict';
 module.exports.findComponentRefInPage = require(47);
 module.exports.getComponentInstance = require(46);
-module.exports.getLayoutInstance = require(28);
-module.exports.getComponentName = require(25);
-module.exports.getLayoutName = require(50);
-module.exports.getComponentVersion = require(31);
-module.exports.getPageInstance = require(26);
-module.exports.getPageVersion = require(33);
-module.exports.getListInstance = require(30);
-module.exports.getPrefix = require(27);
+module.exports.getLayoutInstance = require(25);
+module.exports.getComponentName = require(50);
+module.exports.getLayoutName = require(30);
+module.exports.getComponentVersion = require(26);
+module.exports.getPageInstance = require(28);
+module.exports.getPageVersion = require(29);
+module.exports.getListInstance = require(27);
+module.exports.getPrefix = require(31);
 module.exports.isComponent = require(32);
-module.exports.isLayout = require(29);
-module.exports.isLayoutMeta = require(48);
-module.exports.isDefaultComponent = require(35);
-module.exports.isDefaultLayout = require(34);
-module.exports.isPage = require(40);
-module.exports.isPageMeta = require(49);
-module.exports.isPublished = require(37);
-module.exports.isList = require(36);
+module.exports.isLayout = require(33);
+module.exports.isLayoutMeta = require(49);
+module.exports.isDefaultComponent = require(34);
+module.exports.isDefaultLayout = require(36);
+module.exports.isPage = require(35);
+module.exports.isPageMeta = require(48);
+module.exports.isPublished = require(38);
+module.exports.isList = require(37);
 module.exports.isUri = require(39);
-module.exports.isUser = require(38);
-module.exports.replaceVersion = require(41);
-module.exports.uriPrefixToSlug = require(45);
-module.exports.uriSlugToPrefix = require(43);
-module.exports.jsonPrefixToSlug = require(44);
-module.exports.jsonSlugToPrefix = require(42);
+module.exports.isUser = require(45);
+module.exports.replaceVersion = require(40);
+module.exports.uriPrefixToSlug = require(41);
+module.exports.uriSlugToPrefix = require(42);
+module.exports.jsonPrefixToSlug = require(43);
+module.exports.jsonSlugToPrefix = require(44);
 }, {"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50}];
 window.modules["47"] = [function(require,module,exports){'use strict';
 
-const getComponentName = require(25),
+const getComponentName = require(50),
   { strCheck } = require(51);
 
 module.exports = (page, componentName) => {
@@ -1972,7 +1972,7 @@ module.exports = (page, componentName) => {
 
   return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
 };
-}, {"25":25,"51":51}];
+}, {"50":50,"51":51}];
 window.modules["46"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
@@ -1991,7 +1991,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["25"] = [function(require,module,exports){'use strict';
+window.modules["50"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2011,7 +2011,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["31"] = [function(require,module,exports){'use strict';
+window.modules["26"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2029,7 +2029,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["28"] = [function(require,module,exports){'use strict';
+window.modules["25"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2047,7 +2047,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["50"] = [function(require,module,exports){'use strict';
+window.modules["30"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2067,7 +2067,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["30"] = [function(require,module,exports){'use strict';
+window.modules["27"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2085,7 +2085,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["26"] = [function(require,module,exports){'use strict';
+window.modules["28"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2103,7 +2103,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["33"] = [function(require,module,exports){'use strict';
+window.modules["29"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2121,7 +2121,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["27"] = [function(require,module,exports){'use strict';
+window.modules["31"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2150,7 +2150,7 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_components/') > -1;
 };
 }, {"51":51}];
-window.modules["35"] = [function(require,module,exports){'use strict';
+window.modules["34"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2166,7 +2166,7 @@ module.exports = function (uri) {
   return !!uri.match(/\/_components\/[A-Za-z0-9\-]+$/);
 };
 }, {"51":51}];
-window.modules["34"] = [function(require,module,exports){'use strict';
+window.modules["36"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2182,7 +2182,7 @@ module.exports = function (uri) {
   return !!uri.match(/\/_layouts\/[A-Za-z0-9\-]+$/);
 };
 }, {"51":51}];
-window.modules["29"] = [function(require,module,exports){'use strict';
+window.modules["33"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2197,11 +2197,11 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_layouts/') > -1;
 };
 }, {"51":51}];
-window.modules["48"] = [function(require,module,exports){'use strict';
+window.modules["49"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51),
-  isLayout = require(29),
-  getLayoutInstance = require(28);
+  isLayout = require(33),
+  getLayoutInstance = require(25);
 
 /**
  * First test if argument is a String. If true, test if '/_layouts/:name/instances/:id/meta' is in the string.
@@ -2213,8 +2213,8 @@ module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
   return isLayout(uri) && !!getLayoutInstance(uri) && !!uri.match(/\/meta$/i);
 };
-}, {"28":28,"29":29,"51":51}];
-window.modules["36"] = [function(require,module,exports){'use strict';
+}, {"25":25,"33":33,"51":51}];
+window.modules["37"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2230,7 +2230,7 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_lists/') > -1;
 };
 }, {"51":51}];
-window.modules["40"] = [function(require,module,exports){'use strict';
+window.modules["35"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2245,10 +2245,10 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_pages/') > -1;
 };
 }, {"51":51}];
-window.modules["49"] = [function(require,module,exports){'use strict';
+window.modules["48"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51),
-  isPage = require(40);
+  isPage = require(35);
 
 /**
  * First test if argument is a String. If true, test if '/_pages/:id/meta' is in the string.
@@ -2260,8 +2260,8 @@ module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
   return isPage(uri) && !!uri.match(/\/meta$/i);
 };
-}, {"40":40,"51":51}];
-window.modules["37"] = [function(require,module,exports){'use strict';
+}, {"35":35,"51":51}];
+window.modules["38"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2291,7 +2291,7 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_uris/') > -1;
 };
 }, {"51":51}];
-window.modules["38"] = [function(require,module,exports){'use strict';
+window.modules["45"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2307,7 +2307,7 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_users/') > -1;
 };
 }, {"51":51}];
-window.modules["44"] = [function(require,module,exports){'use strict';
+window.modules["43"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2336,7 +2336,7 @@ module.exports = function (json, site, ref = false) {
   return json.replace(searchRegex, replaceString);
 };
 }, {"51":51}];
-window.modules["42"] = [function(require,module,exports){'use strict';
+window.modules["44"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2366,7 +2366,7 @@ module.exports = function (site, ref = false) {
   };
 };
 }, {"51":51}];
-window.modules["41"] = [function(require,module,exports){'use strict';
+window.modules["40"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2387,7 +2387,7 @@ module.exports = function (uri, version) {
   }
 };
 }, {"51":51}];
-window.modules["45"] = [function(require,module,exports){'use strict';
+window.modules["41"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2410,7 +2410,7 @@ module.exports = function (uri, site) {
   return uri.replace(`${prefix}${hasSlash ? '/' : ''}`, `${slug}${hasSlash ? '/' : ''}`);
 };
 }, {"51":51}];
-window.modules["43"] = [function(require,module,exports){'use strict';
+window.modules["42"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2446,9 +2446,9 @@ var generic = require(63);
 var parse = require(70);
 var translate = require(67);
 var walk = require(68);
-var match = require(64);
+var match = require(65);
 var trace = require(62);
-var search = require(65);
+var search = require(64);
 var getStructureFromConfig = require(66).getStructureFromConfig;
 var cssWideKeywords = parse('inherit | initial | unset');
 var cssWideKeywordsWithExpression = parse('inherit | initial | unset | <expression>');
@@ -2835,8 +2835,8 @@ module.exports = {
 window.modules["79"] = [function(require,module,exports){module.exports = {
     'font-face': require(77),
     'import': require(78),
-    'media': require(80),
-    'page': require(81),
+    'media': require(81),
+    'page': require(80),
     'supports': require(82)
 };
 }, {"77":77,"78":78,"80":80,"81":81,"82":82}];
@@ -2962,11 +2962,11 @@ window.modules["87"] = [function(require,module,exports){module.exports = {
     'dir': require(139),
     'has': require(140),
     'lang': require(141),
-    'matches': require(146),
-    'not': require(144),
-    'nth-child': require(145),
-    'nth-last-child': require(148),
-    'nth-last-of-type': require(143),
+    'matches': require(145),
+    'not': require(148),
+    'nth-child': require(146),
+    'nth-last-child': require(143),
+    'nth-last-of-type': require(144),
     'nth-of-type': require(147),
     'slotted': require(142)
 };
@@ -3542,9 +3542,9 @@ function differenceInCalendarDays (dirtyDateLeft, dirtyDateRight) {
 
 module.exports = differenceInCalendarDays
 }, {"169":169}];
-window.modules["6"] = [function(require,module,exports){var getDayOfYear = require(174)
-var getISOWeek = require(171)
-var getISOYear = require(173)
+window.modules["6"] = [function(require,module,exports){var getDayOfYear = require(173)
+var getISOWeek = require(174)
+var getISOYear = require(171)
 var parse = require(5)
 var isValid = require(170)
 var enLocale = require(172)
@@ -3871,7 +3871,7 @@ function addLeadingZeros (number, targetLength) {
 
 module.exports = format
 }, {"5":5,"170":170,"171":171,"172":172,"173":173,"174":174}];
-window.modules["174"] = [function(require,module,exports){var parse = require(5)
+window.modules["173"] = [function(require,module,exports){var parse = require(5)
 var startOfYear = require(175)
 var differenceInCalendarDays = require(168)
 
@@ -3899,7 +3899,7 @@ function getDayOfYear (dirtyDate) {
 
 module.exports = getDayOfYear
 }, {"5":5,"168":168,"175":175}];
-window.modules["171"] = [function(require,module,exports){var parse = require(5)
+window.modules["174"] = [function(require,module,exports){var parse = require(5)
 var startOfISOWeek = require(177)
 var startOfISOYear = require(176)
 
@@ -3934,7 +3934,7 @@ function getISOWeek (dirtyDate) {
 
 module.exports = getISOWeek
 }, {"5":5,"176":176,"177":177}];
-window.modules["173"] = [function(require,module,exports){var parse = require(5)
+window.modules["171"] = [function(require,module,exports){var parse = require(5)
 var startOfISOWeek = require(177)
 
 /**
@@ -4652,7 +4652,7 @@ function startOfISOWeek (dirtyDate) {
 
 module.exports = startOfISOWeek
 }, {"182":182}];
-window.modules["176"] = [function(require,module,exports){var getISOYear = require(173)
+window.modules["176"] = [function(require,module,exports){var getISOYear = require(171)
 var startOfISOWeek = require(177)
 
 /**
@@ -4684,7 +4684,7 @@ function startOfISOYear (dirtyDate) {
 }
 
 module.exports = startOfISOYear
-}, {"173":173,"177":177}];
+}, {"171":171,"177":177}];
 window.modules["182"] = [function(require,module,exports){var parse = require(5)
 
 /**
@@ -6125,7 +6125,7 @@ function includes(collection, value, fromIndex, guard) {
 
 module.exports = includes;
 }, {"304":304,"333":333,"377":377,"378":378,"379":379}];
-window.modules["277"] = [function(require,module,exports){var baseIsArguments = require(307),
+window.modules["276"] = [function(require,module,exports){var baseIsArguments = require(307),
     isObjectLike = require(308);
 
 /** Used for built-in method references. */
@@ -6223,7 +6223,7 @@ function isArrayLike(value) {
 
 module.exports = isArrayLike;
 }, {"317":317,"321":321}];
-window.modules["279"] = [function(require,module,exports){var root = require(238),
+window.modules["277"] = [function(require,module,exports){var root = require(237),
     stubFalse = require(380);
 
 /** Detect free variable `exports`. */
@@ -6261,13 +6261,13 @@ var nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined;
 var isBuffer = nativeIsBuffer || stubFalse;
 
 module.exports = isBuffer;
-}, {"238":238,"380":380}];
+}, {"237":237,"380":380}];
 window.modules["14"] = [function(require,module,exports){var baseKeys = require(327),
     getTag = require(311),
-    isArguments = require(277),
+    isArguments = require(276),
     isArray = require(275),
     isArrayLike = require(333),
-    isBuffer = require(279),
+    isBuffer = require(277),
     isPrototype = require(328),
     isTypedArray = require(278);
 
@@ -6339,7 +6339,7 @@ function isEmpty(value) {
 }
 
 module.exports = isEmpty;
-}, {"275":275,"277":277,"278":278,"279":279,"311":311,"327":327,"328":328,"333":333}];
+}, {"275":275,"276":276,"277":277,"278":278,"311":311,"327":327,"328":328,"333":333}];
 window.modules["317"] = [function(require,module,exports){var baseGetTag = require(300),
     isObject = require(12);
 
@@ -7095,10 +7095,10 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require(233))}, {"233":233}];
-window.modules["393"] = [function(require,module,exports){var postcss = require(396);
-var compress = require(394).compress;
-var postcssToCsso = require(395);
-var cssoToPostcss = require(397);
+window.modules["393"] = [function(require,module,exports){var postcss = require(394);
+var compress = require(395).compress;
+var postcssToCsso = require(397);
+var cssoToPostcss = require(396);
 
 var postcssCsso = postcss.plugin('postcss-csso', function postcssCsso(options) {
     return function(root, result) {
@@ -7131,7 +7131,7 @@ module.exports = function(ast, options) {
     });
 };
 }, {"58":58,"398":398,"399":399,"400":400,"401":401,"402":402,"403":403,"404":404}];
-window.modules["394"] = [function(require,module,exports){var csstree = require(58);
+window.modules["395"] = [function(require,module,exports){var csstree = require(58);
 var parse = csstree.parse;
 var compress = require(406);
 var translate = csstree.translate;
@@ -7615,7 +7615,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _mapGenerator = require(451);
+var _mapGenerator = require(452);
 
 var _mapGenerator2 = _interopRequireDefault(_mapGenerator);
 
@@ -7627,7 +7627,7 @@ var _warnOnce = require(450);
 
 var _warnOnce2 = _interopRequireDefault(_warnOnce);
 
-var _result = require(452);
+var _result = require(451);
 
 var _result2 = _interopRequireDefault(_result);
 
@@ -8290,7 +8290,7 @@ delete parser.__esModule;
 
 exports.default = parser;
 module.exports = exports['default'];}, {"464":464,"465":465}];
-window.modules["471"] = [function(require,module,exports){'use strict';
+window.modules["482"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -9481,11 +9481,11 @@ var _mapGenerator = require(537);
 
 var _mapGenerator2 = _interopRequireDefault(_mapGenerator);
 
-var _stringify2 = require(535);
+var _stringify2 = require(534);
 
 var _stringify3 = _interopRequireDefault(_stringify2);
 
-var _warnOnce = require(534);
+var _warnOnce = require(535);
 
 var _warnOnce2 = _interopRequireDefault(_warnOnce);
 
@@ -9493,7 +9493,7 @@ var _result = require(536);
 
 var _result2 = _interopRequireDefault(_result);
 
-var _parse = require(526);
+var _parse = require(525);
 
 var _parse2 = _interopRequireDefault(_parse);
 
@@ -9904,7 +9904,7 @@ exports.default = LazyResult;
 
 module.exports = exports['default'];
 
-}, {"526":526,"534":534,"535":535,"536":536,"537":537}];
+}, {"525":525,"534":534,"535":535,"536":536,"537":537}];
 window.modules["538"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
@@ -11009,8 +11009,8 @@ function s(value) {
 
 s.VERSION = '3.3.4';
 
-s.isBlank          = require(626);
-s.stripTags        = require(627);
+s.isBlank          = require(642);
+s.stripTags        = require(626);
 s.capitalize       = require(585);
 s.decapitalize     = require(584);
 s.chop             = require(588);
@@ -11019,34 +11019,34 @@ s.clean            = require(590);
 s.cleanDiacritics  = require(591);
 s.count            = require(592);
 s.chars            = require(587);
-s.swapCase         = require(629);
+s.swapCase         = require(627);
 s.escapeHTML       = require(597);
 s.unescapeHTML     = require(643);
 s.splice           = require(614);
 s.insert           = require(615);
-s.replaceAll       = require(630);
+s.replaceAll       = require(628);
 s.include          = require(607);
-s.join             = require(628);
+s.join             = require(629);
 s.lines            = require(608);
 s.dedent           = require(594);
 s.reverse          = require(616);
 s.startsWith       = require(644);
 s.endsWith         = require(595);
-s.pred             = require(647);
-s.succ             = require(646);
-s.titleize         = require(631);
+s.pred             = require(646);
+s.succ             = require(647);
+s.titleize         = require(630);
 s.camelize         = require(582);
 s.underscored      = require(606);
 s.dasherize        = require(593);
 s.classify         = require(589);
 s.humanize         = require(605);
 s.ltrim            = require(648);
-s.rtrim            = require(633);
+s.rtrim            = require(631);
 s.truncate         = require(632);
-s.prune            = require(634);
-s.words            = require(619);
+s.prune            = require(633);
+s.words            = require(617);
 s.pad              = require(645);
-s.lpad             = require(617);
+s.lpad             = require(619);
 s.rpad             = require(618);
 s.lrpad            = require(620);
 s.sprintf          = require(650);
@@ -11055,22 +11055,22 @@ s.toNumber         = require(609);
 s.numberFormat     = require(610);
 s.strRight         = require(635);
 s.strRightBack     = require(636);
-s.strLeft          = require(639);
+s.strLeft          = require(634);
 s.strLeftBack      = require(637);
 s.toSentence       = require(621);
 s.toSentenceSerial = require(622);
 s.slugify          = require(624);
-s.surround         = require(613);
+s.surround         = require(611);
 s.quote            = require(623);
-s.unquote          = require(611);
+s.unquote          = require(612);
 s.repeat           = require(638);
-s.naturalCmp       = require(612);
+s.naturalCmp       = require(613);
 s.levenshtein      = require(640);
 s.toBoolean        = require(625);
 s.exports          = require(599);
 s.escapeRegExp     = require(602);
-s.wrap             = require(641);
-s.map              = require(642);
+s.wrap             = require(639);
+s.map              = require(641);
 
 // Aliases
 s.strip     = s.trim;
@@ -11139,13 +11139,13 @@ module.exports = function insert(str, i, substr) {
   return splice(str, i, 0, substr);
 };
 }, {"614":614}];
-window.modules["626"] = [function(require,module,exports){var makeString = require(586);
+window.modules["642"] = [function(require,module,exports){var makeString = require(586);
 
 module.exports = function isBlank(str) {
   return (/^\s*$/).test(makeString(str));
 };
 }, {"586":586}];
-window.modules["628"] = [function(require,module,exports){var makeString = require(586);
+window.modules["629"] = [function(require,module,exports){var makeString = require(586);
 var slice = [].slice;
 
 module.exports = function join() {
@@ -11213,7 +11213,7 @@ window.modules["608"] = [function(require,module,exports){module.exports = funct
   return String(str).split(/\r\n?|\n/);
 };
 }, {}];
-window.modules["617"] = [function(require,module,exports){var pad = require(645);
+window.modules["619"] = [function(require,module,exports){var pad = require(645);
 
 module.exports = function lpad(str, length, padStr) {
   return pad(str, length, padStr);

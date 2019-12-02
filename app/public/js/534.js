@@ -1,15 +1,18 @@
 window.modules["534"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
-exports.default = warnOnce;
-var printed = {};
+exports.default = stringify;
 
-function warnOnce(message) {
-    if (printed[message]) return;
-    printed[message] = true;
+var _stringifier = require(539);
 
-    if (typeof console !== 'undefined' && console.warn) console.warn(message);
+var _stringifier2 = _interopRequireDefault(_stringifier);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function stringify(node, builder) {
+    var str = new _stringifier2.default(builder);
+    str.stringify(node);
 }
 module.exports = exports['default'];
 
-}, {}];
+}, {"539":539}];

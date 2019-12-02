@@ -4,11 +4,11 @@ module.exports = {
     parse: {
         prelude: function() {
             return new List().appendData(
-                this.SelectorList()
+                this.MediaQueryList()
             );
         },
         block: function() {
-            return this.Block(true);
+            return this.Block(false);
         }
     }
 };
