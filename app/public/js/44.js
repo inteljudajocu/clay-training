@@ -1,18 +1,15 @@
 window.modules["44"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51);
+const getComponentName = require(47),
+  { strCheck } = require(51);
 
-/**
- * First test if argument passed in is a String. If true, get component instance
- * from uri without the component version. Otherwise, throw an error.
- * @example /_components/text/instances/0@published returns 0
- * @param  {string} uri
- * @return {string|null}
- */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
-  const result = /\/_components\/.+?\/instances\/([^\.@]+)/.exec(uri);
+module.exports = (page, componentName) => {
+  strCheck(componentName);
 
-  return result && result[1];
+  if (typeof page !== 'object') {
+    throw new Error(`Page argument must be an object, not ${typeof page}`);
+  }
+
+  return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
 };
-}, {"51":51}];
+}, {"47":47,"51":51}];

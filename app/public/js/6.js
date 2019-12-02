@@ -1,215 +1,236 @@
-window.modules["6"] = [function(require,module,exports){(function (process){
-'use strict';
+window.modules["6"] = [function(require,module,exports){'use strict';
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+(function (global) {
 
-var _isArray = require(275),
-    _isObject = require(12),
-    _isEmpty = require(14),
-    _isString = require(377),
-    _isNull = require(381),
-    _isUndefined = require(383),
-    _get = require(2),
-    _parse = require(652),
-    publishedVersionSuffix = '@published',
-    kilnUrlParam = '&currentUrl=';
-/**
- * determine if a field is empty
- * @param  {*}  val
- * @return {Boolean}
- */
+    // minimal symbol polyfill for IE11 and others
+    if (typeof Symbol !== 'function') {
+        var Symbol = function(name) {
+            return name;
+        }
 
+        Symbol.nonNative = true;
+    }
 
-function isFieldEmpty(val) {
-  if (_isArray(val) || _isObject(val)) {
-    return _isEmpty(val);
-  } else if (_isString(val)) {
-    return val.length === 0; // emptystring is empty
-  } else if (_isNull(val) || _isUndefined(val)) {
-    return true; // null and undefined are empty
-  } else {
-    // numbers, booleans, etc are never empty
-    return false;
-  }
-}
-/**
- * convenience function to determine if a field exists and has a value
- * @param  {*}  val
- * @return {Boolean}
- */
+    const STATE_PLAINTEXT = Symbol('plaintext');
+    const STATE_HTML      = Symbol('html');
+    const STATE_COMMENT   = Symbol('comment');
 
+    const ALLOWED_TAGS_REGEX  = /<(\w*)>/g;
+    const NORMALIZE_TAG_REGEX = /<\/?([^\s\/>]+)/;
 
-function has(val) {
-  return !isFieldEmpty(val);
-}
-/**
- * replace version in uri
- * e.g. when fetching @published data, or previous component data
- * @param  {string} uri
- * @param  {string} [version] defaults to latest
- * @return {string}
- */
+    function striptags(html, allowable_tags, tag_replacement) {
+        html            = html || '';
+        allowable_tags  = allowable_tags || [];
+        tag_replacement = tag_replacement || '';
 
+        let context = init_context(allowable_tags, tag_replacement);
 
-function replaceVersion(uri, version) {
-  if (!_isString(uri)) {
-    throw new TypeError('Uri must be a string, not ' + _typeof(uri));
-  }
+        return striptags_internal(html, context);
+    }
 
-  if (version) {
-    uri = uri.split('@')[0] + '@' + version;
-  } else {
-    // no version is still a kind of version
-    uri = uri.split('@')[0];
-  }
+    function init_striptags_stream(allowable_tags, tag_replacement) {
+        allowable_tags  = allowable_tags || [];
+        tag_replacement = tag_replacement || '';
 
-  return uri;
-}
-/**
- * generate a url from a uri (and some site data)
- * @param  {string} uri
- * @param  {object} locals
- * @return {string}
- */
+        let context = init_context(allowable_tags, tag_replacement);
 
+        return function striptags_stream(html) {
+            return striptags_internal(html || '', context);
+        };
+    }
 
-function uriToUrl(uri, locals) {
-  var protocol = _get(locals, 'site.protocol') || 'http',
-      port = _get(locals, 'site.port'),
-      parsed = _parse("".concat(protocol, "://").concat(uri));
+    striptags.init_streaming_mode = init_striptags_stream;
 
-  if (port !== 80) {
-    parsed.set('port', port);
-  }
+    function init_context(allowable_tags, tag_replacement) {
+        allowable_tags = parse_allowable_tags(allowable_tags);
 
-  return parsed.href;
-}
-/**
- * generate a uri from a url
- * @param  {string} url
- * @return {string}
- */
+        return {
+            allowable_tags : allowable_tags,
+            tag_replacement: tag_replacement,
 
+            state         : STATE_PLAINTEXT,
+            tag_buffer    : '',
+            depth         : 0,
+            in_quote_char : ''
+        };
+    }
 
-function urlToUri(url) {
-  var parsed = _parse(url);
+    function striptags_internal(html, context) {
+        let allowable_tags  = context.allowable_tags;
+        let tag_replacement = context.tag_replacement;
 
-  return "".concat(parsed.hostname).concat(parsed.pathname);
-}
-/**
- * Make sure start is defined and within a justifiable range
- *
- * @param {int} n
- * @returns {int}
- */
+        let state         = context.state;
+        let tag_buffer    = context.tag_buffer;
+        let depth         = context.depth;
+        let in_quote_char = context.in_quote_char;
+        let output        = '';
 
+        for (let idx = 0, length = html.length; idx < length; idx++) {
+            let char = html[idx];
 
-function formatStart(n) {
-  var min = 0,
-      max = 100000000;
+            if (state === STATE_PLAINTEXT) {
+                switch (char) {
+                    case '<':
+                        state       = STATE_HTML;
+                        tag_buffer += char;
+                        break;
 
-  if (typeof n === 'undefined' || Number.isNaN(n) || n < min || n > max) {
-    return 0;
-  } else {
-    return n;
-  }
-}
-/*
- *
- * @param {object} locals
- * @param {string} [locals.site.protocol]
- * @param {string} locals.site.host
- * @param {string} [locals.site.port]
- * @param {string} [locals.site.path]
- * @returns {string} e.g. `http://localhost/somesite`
- */
+                    default:
+                        output += char;
+                        break;
+                }
+            }
 
+            else if (state === STATE_HTML) {
+                switch (char) {
+                    case '<':
+                        // ignore '<' if inside a quote
+                        if (in_quote_char) {
+                            break;
+                        }
 
-function getSiteBaseUrl(locals) {
-  var site = locals.site || {},
-      protocol = site.protocol || 'http',
-      host = site.host,
-      port = (site.port || '80').toString(),
-      path = site.path || '';
-  return "".concat(protocol, "://").concat(host).concat(port === '80' ? '' : ':' + port).concat(path);
-}
-/**
- *
- * @param {string} uri
- * @returns {boolean}
- */
+                        // we're seeing a nested '<'
+                        depth++;
+                        break;
 
+                    case '>':
+                        // ignore '>' if inside a quote
+                        if (in_quote_char) {
+                            break;
+                        }
 
-function isPublishedVersion(uri) {
-  return uri.indexOf(publishedVersionSuffix) === uri.length - 10;
-}
-/**
- * takes a uri and always returns the published version of that uri
- * @param {string} uri
- * @returns {string}
- */
+                        // something like this is happening: '<<>>'
+                        if (depth) {
+                            depth--;
 
+                            break;
+                        }
 
-function ensurePublishedVersion(uri) {
-  return isPublishedVersion(uri) ? uri : uri.split('@')[0] + publishedVersionSuffix;
-}
-/**
- * checks if uri is an instance of a component
- * @param {string} uri
- * @returns {boolean}
- */
+                        // this is closing the tag in tag_buffer
+                        in_quote_char = '';
+                        state         = STATE_PLAINTEXT;
+                        tag_buffer   += '>';
 
+                        if (allowable_tags.has(normalize_tag(tag_buffer))) {
+                            output += tag_buffer;
+                        } else {
+                            output += tag_replacement;
+                        }
 
-function isInstance(uri) {
-  return uri.indexOf('/instances/') > -1;
-}
-/**
- * kiln sometimes stores the url in a query param
- * @param {string} url
- * @returns {string}
- */
+                        tag_buffer = '';
+                        break;
 
+                    case '"':
+                    case '\'':
+                        // catch both single and double quotes
 
-function kilnUrlToPageUrl(url) {
-  return url.indexOf(kilnUrlParam) > -1 ? decodeURIComponent(url.split(kilnUrlParam).pop()) : url;
-}
-/**
- * removes query params and hashes
- * e.g. `http://canonicalurl?utm-source=facebook#heading` becomes `http://canonicalurl`
- * @param {string} url
- * @returns {string}
- */
+                        if (char === in_quote_char) {
+                            in_quote_char = '';
+                        } else {
+                            in_quote_char = in_quote_char || char;
+                        }
 
+                        tag_buffer += char;
+                        break;
 
-function urlToCanonicalUrl(url) {
-  return kilnUrlToPageUrl(url).split('?')[0].split('#')[0];
-}
-/**
- * prefixes a given elastic index depending on the current environment
- * e.g. `published-articles` becomes `local_published-articles`
- * @param {string} indexString
- * @returns {string}
- */
+                    case '-':
+                        if (tag_buffer === '<!-') {
+                            state = STATE_COMMENT;
+                        }
 
+                        tag_buffer += char;
+                        break;
 
-function prefixElasticIndex(indexString) {
-  var prefix = window.process.env.ELASTIC_PREFIX;
-  return prefix ? indexString.split(',').map(function (index) {
-    return "".concat(prefix, "_").concat(index).trim();
-  }).join(',') : indexString;
-}
+                    case ' ':
+                    case '\n':
+                        if (tag_buffer === '<') {
+                            state      = STATE_PLAINTEXT;
+                            output    += '< ';
+                            tag_buffer = '';
 
-module.exports.isFieldEmpty = isFieldEmpty;
-module.exports.has = has;
-module.exports.replaceVersion = replaceVersion;
-module.exports.uriToUrl = uriToUrl;
-module.exports.urlToUri = urlToUri;
-module.exports.formatStart = formatStart;
-module.exports.getSiteBaseUrl = getSiteBaseUrl;
-module.exports.isPublishedVersion = isPublishedVersion;
-module.exports.ensurePublishedVersion = ensurePublishedVersion;
-module.exports.isInstance = isInstance;
-module.exports.urlToCanonicalUrl = urlToCanonicalUrl;
-module.exports.prefixElasticIndex = prefixElasticIndex;
+                            break;
+                        }
 
-}).call(this,require(233))}, {"2":2,"12":12,"14":14,"233":233,"275":275,"377":377,"381":381,"383":383,"652":652}];
+                        tag_buffer += char;
+                        break;
+
+                    default:
+                        tag_buffer += char;
+                        break;
+                }
+            }
+
+            else if (state === STATE_COMMENT) {
+                switch (char) {
+                    case '>':
+                        if (tag_buffer.slice(-2) == '--') {
+                            // close the comment
+                            state = STATE_PLAINTEXT;
+                        }
+
+                        tag_buffer = '';
+                        break;
+
+                    default:
+                        tag_buffer += char;
+                        break;
+                }
+            }
+        }
+
+        // save the context for future iterations
+        context.state         = state;
+        context.tag_buffer    = tag_buffer;
+        context.depth         = depth;
+        context.in_quote_char = in_quote_char;
+
+        return output;
+    }
+
+    function parse_allowable_tags(allowable_tags) {
+        let tag_set = new Set();
+
+        if (typeof allowable_tags === 'string') {
+            let match;
+
+            while ((match = ALLOWED_TAGS_REGEX.exec(allowable_tags))) {
+                tag_set.add(match[1]);
+            }
+        }
+
+        else if (!Symbol.nonNative &&
+                 typeof allowable_tags[Symbol.iterator] === 'function') {
+
+            tag_set = new Set(allowable_tags);
+        }
+
+        else if (typeof allowable_tags.forEach === 'function') {
+            // IE11 compatible
+            allowable_tags.forEach(tag_set.add, tag_set);
+        }
+
+        return tag_set;
+    }
+
+    function normalize_tag(tag_buffer) {
+        let match = NORMALIZE_TAG_REGEX.exec(tag_buffer);
+
+        return match ? match[1].toLowerCase() : null;
+    }
+
+    if (typeof define === 'function' && define.amd) {
+        // AMD
+        define(function module_factory() { return striptags; });
+    }
+
+    else if (typeof module === 'object' && module.exports) {
+        // Node
+        module.exports = striptags;
+    }
+
+    else {
+        // Browser
+        global.striptags = striptags;
+    }
+}(this));
+}, {}];

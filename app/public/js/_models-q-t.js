@@ -1,9 +1,9 @@
 window.modules["recipe.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(2),
-    dateFormat = require(3),
-    dateParse = require(4),
-    utils = require(6),
+var _get = require(3),
+    dateFormat = require(4),
+    dateParse = require(5),
+    utils = require(2),
     has = utils.has;
 
 function formatDate(data, locals) {
@@ -30,7 +30,7 @@ module.exports.save = function (uri, data, locals) {
   setCanonicalUrl(data, locals);
   return data;
 };
-}, {"2":2,"3":3,"4":4,"6":6}];
+}, {"2":2,"3":3,"4":4,"5":5}];
 window.modules["subheader.model"] = [function(require,module,exports){'use strict';
 
 var sanitize = require(1);
@@ -43,10 +43,10 @@ module.exports.save = function (ref, data) {
 }, {"1":1}];
 window.modules["tags.model"] = [function(require,module,exports){'use strict';
 
-var _map = require(15),
-    _assign = require(17),
-    _set = require(16),
-    _includes = require(18),
+var _map = require(18),
+    _assign = require(16),
+    _set = require(15),
+    _includes = require(17),
     _require = require(1),
     removeNonAlphanumericCharacters = _require.removeNonAlphanumericCharacters,
     invisibleTags = [];
@@ -104,8 +104,8 @@ module.exports.save = function (uri, data) {
 }, {"1":1,"15":15,"16":16,"17":17,"18":18}];
 window.modules["title-ingridients.model"] = [function(require,module,exports){'use strict';
 
-var striptags = require(5),
-    _require = require(6),
+var striptags = require(6),
+    _require = require(2),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
     _require2 = require(9),
@@ -132,4 +132,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"1":1,"5":5,"6":6,"9":9}];
+}, {"1":1,"2":2,"6":6,"9":9}];

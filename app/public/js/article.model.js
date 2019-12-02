@@ -1,10 +1,10 @@
 window.modules["article.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(2),
-    striptags = require(5),
-    dateFormat = require(3),
-    dateParse = require(4),
-    utils = require(6),
+var _get = require(3),
+    striptags = require(6),
+    dateFormat = require(4),
+    dateParse = require(5),
+    utils = require(2),
     has = utils.has,
     // convenience
 sanitize = require(1);

@@ -2468,9 +2468,9 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
   return index;
 };
 }, {}];
-window.modules["199"] = [function(require,module,exports){var entityMap = require(201),
-    legacyMap = require(200),
-    xmlMap = require(202),
+window.modules["199"] = [function(require,module,exports){var entityMap = require(202),
+    legacyMap = require(201),
+    xmlMap = require(200),
     decodeCodePoint = require(203);
 
 var decodeXMLStrict = getStrictDecoder(xmlMap),
@@ -3934,7 +3934,7 @@ CollectingHandler.prototype.restart = function() {
     }
 };
 }, {"216":216}];
-window.modules["17"] = [function(require,module,exports){var assignValue = require(284),
+window.modules["16"] = [function(require,module,exports){var assignValue = require(284),
     copyObject = require(354),
     createAssigner = require(356),
     isArrayLike = require(333),
@@ -4086,7 +4086,7 @@ var defaults = baseRest(function(object, sources) {
 module.exports = defaults;
 }, {"285":285,"341":341,"357":357,"376":376}];
 window.modules["397"] = [function(require,module,exports){var postcss = require(394);
-var translate = require(395).syntax.translate;
+var translate = require(396).syntax.translate;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 var DEFAULT_RAWS = {
@@ -4237,7 +4237,7 @@ module.exports = function(node) {
 
     return result;
 };
-}, {"394":394,"395":395}];
+}, {"394":394,"396":396}];
 window.modules["398"] = [function(require,module,exports){var resolveKeyword = require(58).keyword;
 
 module.exports = function cleanAtrule(node, item, list) {
@@ -5187,7 +5187,7 @@ module.exports = function compressBackground(node) {
     node.children = new List().fromArray(newValue);
 };
 }, {"58":58}];
-window.modules["421"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
+window.modules["420"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
     var prev = item.prev;
     var next = item.next;
 
@@ -6712,7 +6712,7 @@ exports.default = Declaration;
 module.exports = exports['default'];
 
 }, {"439":439}];
-window.modules["480"] = [function(require,module,exports){'use strict';
+window.modules["478"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6908,7 +6908,7 @@ function defaultAttrConcat(attrValue, attrSpaces) {
     return '' + attrSpaces.before + attrValue + attrSpaces.after;
 }
 module.exports = exports['default'];}, {"470":470,"484":484}];
-window.modules["476"] = [function(require,module,exports){'use strict';
+window.modules["475"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6947,7 +6947,7 @@ var ClassName = function (_Namespace) {
 
 exports.default = ClassName;
 module.exports = exports['default'];}, {"470":470,"484":484}];
-window.modules["474"] = [function(require,module,exports){'use strict';
+window.modules["473"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6982,7 +6982,7 @@ var Combinator = function (_Node) {
 
 exports.default = Combinator;
 module.exports = exports['default'];}, {"470":470,"485":485}];
-window.modules["475"] = [function(require,module,exports){'use strict';
+window.modules["474"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7022,39 +7022,39 @@ window.modules["486"] = [function(require,module,exports){'use strict';
 exports.__esModule = true;
 exports.universal = exports.tag = exports.string = exports.selector = exports.root = exports.pseudo = exports.nesting = exports.id = exports.comment = exports.combinator = exports.className = exports.attribute = undefined;
 
-var _attribute = require(480);
+var _attribute = require(478);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
-var _className = require(476);
+var _className = require(475);
 
 var _className2 = _interopRequireDefault(_className);
 
-var _combinator = require(474);
+var _combinator = require(473);
 
 var _combinator2 = _interopRequireDefault(_combinator);
 
-var _comment = require(475);
+var _comment = require(474);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _id = require(478);
+var _id = require(476);
 
 var _id2 = _interopRequireDefault(_id);
 
-var _nesting = require(473);
+var _nesting = require(472);
 
 var _nesting2 = _interopRequireDefault(_nesting);
 
-var _pseudo = require(479);
+var _pseudo = require(477);
 
 var _pseudo2 = _interopRequireDefault(_pseudo);
 
-var _root = require(482);
+var _root = require(480);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _selector = require(477);
+var _selector = require(482);
 
 var _selector2 = _interopRequireDefault(_selector);
 
@@ -7062,11 +7062,11 @@ var _string = require(471);
 
 var _string2 = _interopRequireDefault(_string);
 
-var _tag = require(472);
+var _tag = require(481);
 
 var _tag2 = _interopRequireDefault(_tag);
 
-var _universal = require(481);
+var _universal = require(479);
 
 var _universal2 = _interopRequireDefault(_universal);
 
@@ -12724,9 +12724,9 @@ module.exports = function (date) {
 }, {"391":391}];
 window.modules["659"] = [function(require,module,exports){'use strict';
 
-var _get = require(2),
+var _get = require(3),
     _join = require(384),
-    _map = require(15),
+    _map = require(18),
     _isObject = require(12);
 /**
  * Comma separate a list of author strings
@@ -12757,10 +12757,10 @@ function formatSimpleByline() {
 }
 
 module.exports = formatSimpleByline;
-}, {"2":2,"12":12,"15":15,"384":384}];
+}, {"3":3,"12":12,"18":18,"384":384}];
 window.modules["660"] = [function(require,module,exports){'use strict';
 
-var _includes = require(18);
+var _includes = require(17);
 
 function isVideo(contentData) {
   return contentData.featureTypes && (contentData.featureTypes['Video-Original'] || contentData.featureTypes['Video-Aggregation'] || contentData.featureTypes['Video-Original News']);
@@ -12783,4 +12783,4 @@ function getCalloutType(contentData) {
 }
 
 module.exports = getCalloutType;
-}, {"18":18}];
+}, {"17":17}];

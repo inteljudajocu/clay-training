@@ -17,29 +17,9 @@ recipeName:
   _has: 
     input: text
 
-score:
-  _label: score
-  _has:
-    input: range
-    min: 0
-    max: 5
-
 reviews:
   _label: reviews
   _has:
     input: range
     min: 0
     max: 100
-
-# _groups:
-#   settings:
-#     fields:
-#       - title
-#       - recipeName
-#       - score
-#       - reviews
-#       - imageUrl (Image)
-#     _placeholder:
-#       text: Explore
-#       height: 250px
-#       ifEmpty: imageUrl

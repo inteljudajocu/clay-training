@@ -1,7 +1,7 @@
 window.modules["direcctions.model"] = [function(require,module,exports){'use strict';
 
-var striptags = require(5),
-    _require = require(6),
+var striptags = require(6),
+    _require = require(2),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
     _require2 = require(9),
@@ -28,4 +28,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"1":1,"5":5,"6":6,"9":9}];
+}, {"1":1,"2":2,"6":6,"9":9}];

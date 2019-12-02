@@ -1,10 +1,10 @@
 window.modules["article.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(2),
-    striptags = require(5),
-    dateFormat = require(3),
-    dateParse = require(4),
-    utils = require(6),
+var _get = require(3),
+    striptags = require(6),
+    dateFormat = require(4),
+    dateParse = require(5),
+    utils = require(2),
     has = utils.has,
     // convenience
 sanitize = require(1);
@@ -101,8 +101,8 @@ module.exports.save = function (uri, data) {
 }, {"7":7,"8":8}];
 window.modules["direcctions.model"] = [function(require,module,exports){'use strict';
 
-var striptags = require(5),
-    _require = require(6),
+var striptags = require(6),
+    _require = require(2),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
     _require2 = require(9),
@@ -129,7 +129,7 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"1":1,"5":5,"6":6,"9":9}];
+}, {"1":1,"2":2,"6":6,"9":9}];
 window.modules["divider.model"] = [function(require,module,exports){'use strict';
 
 var sanitize = require(1);

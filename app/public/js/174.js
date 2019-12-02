@@ -1,5 +1,5 @@
-window.modules["174"] = [function(require,module,exports){var parse = require(4)
-var startOfISOWeek = require(176)
+window.modules["174"] = [function(require,module,exports){var parse = require(5)
+var startOfISOWeek = require(177)
 
 /**
  * @category ISO Week-Numbering Year Helpers
@@ -43,4 +43,4 @@ function getISOYear (dirtyDate) {
 }
 
 module.exports = getISOYear
-}, {"4":4,"176":176}];
+}, {"5":5,"177":177}];

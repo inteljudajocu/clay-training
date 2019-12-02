@@ -16,20 +16,20 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Combinator = function (_Node) {
-    _inherits(Combinator, _Node);
+var Comment = function (_Node) {
+    _inherits(Comment, _Node);
 
-    function Combinator(opts) {
-        _classCallCheck(this, Combinator);
+    function Comment(opts) {
+        _classCallCheck(this, Comment);
 
         var _this = _possibleConstructorReturn(this, _Node.call(this, opts));
 
-        _this.type = _types.COMBINATOR;
+        _this.type = _types.COMMENT;
         return _this;
     }
 
-    return Combinator;
+    return Comment;
 }(_node2.default);
 
-exports.default = Combinator;
+exports.default = Comment;
 module.exports = exports['default'];}, {"470":470,"485":485}];
