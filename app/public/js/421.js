@@ -1,46 +1,32 @@
-window.modules["421"] = [function(require,module,exports){module.exports = function compressFont(node) {
-    var list = node.children;
+window.modules["421"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
+    var prev = item.prev;
+    var next = item.next;
 
-    list.eachRight(function(node, item) {
-        if (node.type === 'Identifier') {
-            if (node.name === 'bold') {
+    if (next !== null) {
+        if (next.data.type === 'WhiteSpace' && (prev === null || prev.data.type === 'WhiteSpace')) {
+            list.remove(next);
+        }
+    } else if (prev !== null && prev.data.type === 'WhiteSpace') {
+        list.remove(prev);
+    }
+
+    list.remove(item);
+}
+
+module.exports = function compressBorder(node) {
+    node.children.each(function(node, item, list) {
+        if (node.type === 'Identifier' && node.name.toLowerCase() === 'none') {
+            if (list.head === list.tail) {
+                // replace `none` for zero when `none` is a single term
                 item.data = {
                     type: 'Number',
                     loc: node.loc,
-                    value: '700'
+                    value: '0'
                 };
-            } else if (node.name === 'normal') {
-                var prev = item.prev;
-
-                if (prev && prev.data.type === 'Operator' && prev.data.value === '/') {
-                    this.remove(prev);
-                }
-
-                this.remove(item);
-            } else if (node.name === 'medium') {
-                var next = item.next;
-
-                if (!next || next.data.type !== 'Operator') {
-                    this.remove(item);
-                }
+            } else {
+                removeItemAndRedundantWhiteSpace(list, item);
             }
         }
     });
-
-    // remove redundant spaces
-    list.each(function(node, item) {
-        if (node.type === 'WhiteSpace') {
-            if (!item.prev || !item.next || item.next.data.type === 'WhiteSpace') {
-                this.remove(item);
-            }
-        }
-    });
-
-    if (list.isEmpty()) {
-        list.insert(list.createItem({
-            type: 'Identifier',
-            name: 'normal'
-        }));
-    }
 };
 }, {}];

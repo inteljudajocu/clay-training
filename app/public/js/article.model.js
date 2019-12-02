@@ -1,13 +1,13 @@
 window.modules["article.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(3),
+var _get = require(2),
     striptags = require(5),
-    dateFormat = require(6),
+    dateFormat = require(3),
     dateParse = require(4),
-    utils = require(1),
+    utils = require(6),
     has = utils.has,
     // convenience
-sanitize = require(2);
+sanitize = require(1);
 /**
  * only allow emphasis, italic, and strikethroughs in headlines
  * @param  {string} oldHeadline

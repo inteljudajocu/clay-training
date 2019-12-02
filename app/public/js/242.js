@@ -1,24 +1,16 @@
 window.modules["242"] = [function(require,module,exports){var nativeCreate = require(370);
 
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
 /**
- * Checks if a hash value for `key` exists.
+ * Removes all key-value entries from the hash.
  *
  * @private
- * @name has
+ * @name clear
  * @memberOf Hash
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function hashHas(key) {
-  var data = this.__data__;
-  return nativeCreate ? (data[key] !== undefined) : hasOwnProperty.call(data, key);
+function hashClear() {
+  this.__data__ = nativeCreate ? nativeCreate(null) : {};
+  this.size = 0;
 }
 
-module.exports = hashHas;
+module.exports = hashClear;
 }, {"370":370}];

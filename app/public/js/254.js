@@ -1,19 +1,17 @@
 window.modules["254"] = [function(require,module,exports){var getMapData = require(363);
 
 /**
- * Removes `key` and its value from the map.
+ * Gets the map value for `key`.
  *
  * @private
- * @name delete
+ * @name get
  * @memberOf MapCache
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
  */
-function mapCacheDelete(key) {
-  var result = getMapData(this, key)['delete'](key);
-  this.size -= result ? 1 : 0;
-  return result;
+function mapCacheGet(key) {
+  return getMapData(this, key).get(key);
 }
 
-module.exports = mapCacheDelete;
+module.exports = mapCacheGet;
 }, {"363":363}];

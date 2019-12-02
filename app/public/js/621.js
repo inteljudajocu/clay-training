@@ -1,4 +1,4 @@
-window.modules["621"] = [function(require,module,exports){var rtrim = require(647);
+window.modules["621"] = [function(require,module,exports){var rtrim = require(646);
 
 module.exports = function toSentence(array, separator, lastSeparator, serial) {
   separator = separator || ', ';
@@ -10,4 +10,4 @@ module.exports = function toSentence(array, separator, lastSeparator, serial) {
 
   return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
 };
-}, {"647":647}];
+}, {"646":646}];

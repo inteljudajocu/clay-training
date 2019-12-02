@@ -3,14 +3,16 @@ window.modules["44"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * First test if argument is a String. If true, test if '/_users/' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
+ * First test if argument passed in is a String. If true, get component instance
+ * from uri without the component version. Otherwise, throw an error.
+ * @example /_components/text/instances/0@published returns 0
+ * @param  {string} uri
+ * @return {string|null}
  */
 module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
+  const result = /\/_components\/.+?\/instances\/([^\.@]+)/.exec(uri);
 
-  return uri.toLowerCase().indexOf('/_users/') > -1;
+  return result && result[1];
 };
 }, {"51":51}];

@@ -4,7 +4,7 @@ window.modules["632"] = [function(require,module,exports){/**
  * @author github.com/rwz
  */
 var makeString = require(586);
-var rtrim = require(647);
+var rtrim = require(646);
 
 module.exports = function prune(str, length, pruneStr) {
   str = makeString(str);
@@ -25,4 +25,4 @@ module.exports = function prune(str, length, pruneStr) {
 
   return (template + pruneStr).length > str.length ? str : str.slice(0, template.length) + pruneStr;
 };
-}, {"586":586,"647":647}];
+}, {"586":586,"646":646}];

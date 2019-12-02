@@ -1644,17 +1644,17 @@ module.exports = {
     }
 };
 }, {"54":54}];
-window.modules["147"] = [function(require,module,exports){module.exports = require(138);
+window.modules["143"] = [function(require,module,exports){module.exports = require(138);
 }, {"138":138}];
-window.modules["144"] = [function(require,module,exports){module.exports = require(138);
+window.modules["146"] = [function(require,module,exports){module.exports = require(138);
 }, {"138":138}];
-window.modules["148"] = [function(require,module,exports){module.exports = require(137);
+window.modules["144"] = [function(require,module,exports){module.exports = require(137);
 }, {"137":137}];
-window.modules["145"] = [function(require,module,exports){module.exports = require(137);
+window.modules["147"] = [function(require,module,exports){module.exports = require(137);
 }, {"137":137}];
-window.modules["146"] = [function(require,module,exports){module.exports = require(136);
+window.modules["148"] = [function(require,module,exports){module.exports = require(136);
 }, {"136":136}];
-window.modules["143"] = [function(require,module,exports){module.exports = require(136);
+window.modules["145"] = [function(require,module,exports){module.exports = require(136);
 }, {"136":136}];
 window.modules["61"] = [function(require,module,exports){'use strict';
 
@@ -1870,7 +1870,7 @@ Object.keys(domLvl1).forEach(function(key) {
 	});
 });
 }, {}];
-window.modules["194"] = [function(require,module,exports){exports.removeElement = function(elem){
+window.modules["193"] = [function(require,module,exports){exports.removeElement = function(elem){
 	if(elem.prev) elem.prev.next = elem.next;
 	if(elem.next) elem.next.prev = elem.prev;
 
@@ -2359,7 +2359,7 @@ Object.keys(EVENTS).forEach(function(name) {
     }
 });
 }, {"216":216}];
-window.modules["18"] = [function(require,module,exports){var arrayMap = require(281),
+window.modules["15"] = [function(require,module,exports){var arrayMap = require(281),
     baseIteratee = require(322),
     baseMap = require(332),
     isArray = require(275);
@@ -7167,7 +7167,7 @@ window.modules["391"] = [function(require,module,exports){//! moment.js
 
 })));
 }, {}];
-window.modules["397"] = [function(require,module,exports){var parse = require(396).syntax.parse;
+window.modules["396"] = [function(require,module,exports){var parse = require(395).syntax.parse;
 
 function getInfo(postcssNode) {
     return {
@@ -7254,7 +7254,7 @@ function postcssToCsso(node) {
 }
 
 module.exports = postcssToCsso;
-}, {"396":396}];
+}, {"395":395}];
 window.modules["401"] = [function(require,module,exports){// remove white spaces around operators when safe
 module.exports = function cleanWhitespace(node, item, list) {
     if (node.value === '+' || node.value === '-') {
@@ -7523,7 +7523,7 @@ window.modules["410"] = [function(require,module,exports){module.exports={
   "version": "3.3.1"
 }
 }, {}];
-window.modules["451"] = [function(require,module,exports){(function (Buffer){
+window.modules["452"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
 exports.__esModule = true;
@@ -9795,27 +9795,27 @@ var _uniq = require(483);
 
 var _uniq2 = _interopRequireDefault(_uniq);
 
-var _root = require(478);
+var _root = require(482);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _selector = require(479);
+var _selector = require(477);
 
 var _selector2 = _interopRequireDefault(_selector);
 
-var _className = require(477);
+var _className = require(476);
 
 var _className2 = _interopRequireDefault(_className);
 
-var _comment = require(476);
+var _comment = require(475);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _id = require(480);
+var _id = require(478);
 
 var _id2 = _interopRequireDefault(_id);
 
-var _tag = require(473);
+var _tag = require(472);
 
 var _tag2 = _interopRequireDefault(_tag);
 
@@ -9823,23 +9823,23 @@ var _string = require(471);
 
 var _string2 = _interopRequireDefault(_string);
 
-var _pseudo = require(481);
+var _pseudo = require(479);
 
 var _pseudo2 = _interopRequireDefault(_pseudo);
 
-var _attribute = require(482);
+var _attribute = require(480);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
-var _universal = require(472);
+var _universal = require(481);
 
 var _universal2 = _interopRequireDefault(_universal);
 
-var _combinator = require(475);
+var _combinator = require(474);
 
 var _combinator2 = _interopRequireDefault(_combinator);
 
-var _nesting = require(474);
+var _nesting = require(473);
 
 var _nesting2 = _interopRequireDefault(_nesting);
 
@@ -10812,7 +10812,7 @@ var Namespace = function (_Node) {
 exports.default = Namespace;
 ;
 module.exports = exports['default'];}, {"485":485}];
-window.modules["474"] = [function(require,module,exports){'use strict';
+window.modules["473"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -10943,7 +10943,7 @@ var _class = function () {
 
 exports.default = _class;
 module.exports = exports['default'];}, {}];
-window.modules["481"] = [function(require,module,exports){'use strict';
+window.modules["479"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -10983,7 +10983,7 @@ var Pseudo = function (_Container) {
 
 exports.default = Pseudo;
 module.exports = exports['default'];}, {"470":470,"487":487}];
-window.modules["504"] = [function(require,module,exports){(function (Buffer){
+window.modules["505"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
 exports.__esModule = true;
@@ -13237,7 +13237,7 @@ exports.default = Processor;
 module.exports = exports['default'];
 
 }, {"501":501}];
-window.modules["536"] = [function(require,module,exports){(function (Buffer){
+window.modules["537"] = [function(require,module,exports){(function (Buffer){
 'use strict';
 
 exports.__esModule = true;
@@ -19008,7 +19008,7 @@ module.exports = function pad(str, length, padStr, type) {
   }
 };
 }, {"586":586,"604":604}];
-window.modules["648"] = [function(require,module,exports){var adjacent = require(600);
+window.modules["647"] = [function(require,module,exports){var adjacent = require(600);
 
 module.exports = function succ(str) {
   return adjacent(str, -1);
@@ -19020,7 +19020,7 @@ window.modules["632"] = [function(require,module,exports){/**
  * @author github.com/rwz
  */
 var makeString = require(586);
-var rtrim = require(647);
+var rtrim = require(646);
 
 module.exports = function prune(str, length, pruneStr) {
   str = makeString(str);
@@ -19041,7 +19041,7 @@ module.exports = function prune(str, length, pruneStr) {
 
   return (template + pruneStr).length > str.length ? str : str.slice(0, template.length) + pruneStr;
 };
-}, {"586":586,"647":647}];
+}, {"586":586,"646":646}];
 window.modules["655"] = [function(require,module,exports){'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }

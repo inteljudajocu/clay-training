@@ -21,13 +21,6 @@ headline:
       max: 100
       maxMessage: Headline must be 100 characters or fewer
 
-byline:
-  _label: Byline
-  _publish: pageAuthors
-  _has:
-    input: simple-list
-    help: An array of Authors
-
 # users edit the published date from the articleDate and articleTime fields
 date:
   _label: Published Date

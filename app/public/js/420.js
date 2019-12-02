@@ -1,23 +1,46 @@
-window.modules["420"] = [function(require,module,exports){module.exports = function compressFontWeight(node) {
-    var value = node.children.head.data;
+window.modules["420"] = [function(require,module,exports){module.exports = function compressFont(node) {
+    var list = node.children;
 
-    if (value.type === 'Identifier') {
-        switch (value.name) {
-            case 'normal':
-                node.children.head.data = {
+    list.eachRight(function(node, item) {
+        if (node.type === 'Identifier') {
+            if (node.name === 'bold') {
+                item.data = {
                     type: 'Number',
-                    loc: value.loc,
-                    value: '400'
-                };
-                break;
-            case 'bold':
-                node.children.head.data = {
-                    type: 'Number',
-                    loc: value.loc,
+                    loc: node.loc,
                     value: '700'
                 };
-                break;
+            } else if (node.name === 'normal') {
+                var prev = item.prev;
+
+                if (prev && prev.data.type === 'Operator' && prev.data.value === '/') {
+                    this.remove(prev);
+                }
+
+                this.remove(item);
+            } else if (node.name === 'medium') {
+                var next = item.next;
+
+                if (!next || next.data.type !== 'Operator') {
+                    this.remove(item);
+                }
+            }
         }
+    });
+
+    // remove redundant spaces
+    list.each(function(node, item) {
+        if (node.type === 'WhiteSpace') {
+            if (!item.prev || !item.next || item.next.data.type === 'WhiteSpace') {
+                this.remove(item);
+            }
+        }
+    });
+
+    if (list.isEmpty()) {
+        list.insert(list.createItem({
+            type: 'Identifier',
+            name: 'normal'
+        }));
     }
 };
 }, {}];

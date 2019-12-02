@@ -1,8 +1,5 @@
 window.modules["241"] = [function(require,module,exports){var nativeCreate = require(370);
 
-/** Used to stand-in for `undefined` hash values. */
-var HASH_UNDEFINED = '__lodash_hash_undefined__';
-
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
 
@@ -10,22 +7,18 @@ var objectProto = Object.prototype;
 var hasOwnProperty = objectProto.hasOwnProperty;
 
 /**
- * Gets the hash value for `key`.
+ * Checks if a hash value for `key` exists.
  *
  * @private
- * @name get
+ * @name has
  * @memberOf Hash
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function hashGet(key) {
+function hashHas(key) {
   var data = this.__data__;
-  if (nativeCreate) {
-    var result = data[key];
-    return result === HASH_UNDEFINED ? undefined : result;
-  }
-  return hasOwnProperty.call(data, key) ? data[key] : undefined;
+  return nativeCreate ? (data[key] !== undefined) : hasOwnProperty.call(data, key);
 }
 
-module.exports = hashGet;
+module.exports = hashHas;
 }, {"370":370}];

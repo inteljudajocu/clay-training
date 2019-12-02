@@ -1,15 +1,16 @@
 window.modules["46"] = [function(require,module,exports){'use strict';
 
-const getComponentName = require(49),
-  { strCheck } = require(51);
+const isUriStringCheck = require(51),
+  isPage = require(33);
 
-module.exports = (page, componentName) => {
-  strCheck(componentName);
-
-  if (typeof page !== 'object') {
-    throw new Error(`Page argument must be an object, not ${typeof page}`);
-  }
-
-  return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
+/**
+ * First test if argument is a String. If true, test if '/_pages/:id/meta' is in the string.
+ * Otherwise, throw an error.
+ * @param  {string}  uri
+ * @return {Boolean}
+ */
+module.exports = function (uri) {
+  isUriStringCheck.strCheck(uri);
+  return isPage(uri) && !!uri.match(/\/meta$/i);
 };
-}, {"49":49,"51":51}];
+}, {"33":33,"51":51}];

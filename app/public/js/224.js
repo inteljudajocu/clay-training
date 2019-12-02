@@ -1,9 +1,9 @@
 window.modules["224"] = [function(require,module,exports){module.exports = Tokenizer;
 
 var decodeCodePoint = require(203);
-var entityMap = require(200);
-var legacyMap = require(202);
-var xmlMap = require(201);
+var entityMap = require(201);
+var legacyMap = require(200);
+var xmlMap = require(202);
 
 var i = 0;
 

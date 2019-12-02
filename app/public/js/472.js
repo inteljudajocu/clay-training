@@ -16,21 +16,20 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Universal = function (_Namespace) {
-    _inherits(Universal, _Namespace);
+var Tag = function (_Namespace) {
+    _inherits(Tag, _Namespace);
 
-    function Universal(opts) {
-        _classCallCheck(this, Universal);
+    function Tag(opts) {
+        _classCallCheck(this, Tag);
 
         var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
 
-        _this.type = _types.UNIVERSAL;
-        _this.value = '*';
+        _this.type = _types.TAG;
         return _this;
     }
 
-    return Universal;
+    return Tag;
 }(_namespace2.default);
 
-exports.default = Universal;
+exports.default = Tag;
 module.exports = exports['default'];}, {"470":470,"484":484}];

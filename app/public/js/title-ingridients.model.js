@@ -1,12 +1,12 @@
 window.modules["title-ingridients.model"] = [function(require,module,exports){'use strict';
 
 var striptags = require(5),
-    _require = require(1),
+    _require = require(6),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
     _require2 = require(9),
     render = _require2.render,
-    _require3 = require(2),
+    _require3 = require(1),
     toSmartText = _require3.toSmartText;
 
 module.exports.save = function (uri, data) {
@@ -28,4 +28,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"1":1,"2":2,"5":5,"9":9}];
+}, {"1":1,"5":5,"6":6,"9":9}];
