@@ -1,32 +1,36 @@
 window.modules["recipe.model"] = [function(require,module,exports){'use strict';
 
 var _get = require(3),
-    defaultWidth = 'inline';
+    dateFormat = require(6),
+    dateParse = require(4),
+    utils = require(1),
+    has = utils.has;
 
-module.exports.render = function (uri, data) {
+function formatDate(data, locals) {
+  if (_get(locals, 'date')) {
+    // if locals and locals.date exists, set the article date (overriding any date already set)
+    data.date = dateFormat(locals.date); // ISO 8601 date string
+  } else if (has(data.articleDate) || has(data.articleTime)) {
+    // make sure both date and time are set. if the user only set one, set the other to today / right now
+    data.articleDate = has(data.articleDate) ? data.articleDate : dateFormat(new Date(), 'YYYY-MM-DD');
+    data.articleTime = has(data.articleTime) ? data.articleTime : dateFormat(new Date(), 'HH:mm'); // generate the `date` data from these two fields
+
+    data.date = dateFormat(dateParse("".concat(data.articleDate, " ").concat(data.articleTime))); // ISO 8601 date string
+  }
+}
+
+function setCanonicalUrl(data, locals) {
+  if (_get(locals, 'publishUrl')) {
+    data.canonicalUrl = locals.publishUrl;
+  }
+}
+
+module.exports.save = function (uri, data, locals) {
+  formatDate(data, locals);
+  setCanonicalUrl(data, locals);
   return data;
 };
-
-module.exports.save = function (uri, data) {
-  var imageAspectRatio = _get(data, 'imageAspectRatio', null),
-      imageAspectRatioFlexOverride = _get(data, 'imageAspectRatioFlexOverride', false),
-      imageCaption = _get(data, 'imageCaption', null),
-      imageCreditOverride = _get(data, 'imageCreditOverride', null),
-      imageUrl = _get(data, 'imageUrl', null),
-      imageWidth = _get(data, 'imageWidth', null) || defaultWidth,
-      image = {
-    imageAspectRatio: imageAspectRatio,
-    imageAspectRatioFlexOverride: imageAspectRatioFlexOverride,
-    imageCaption: imageCaption,
-    imageCredit: imageCreditOverride,
-    imageType: 'Photo',
-    imageUrl: imageUrl,
-    imageWidth: imageWidth
-  };
-
-  return Object.assign(data, image);
-};
-}, {"3":3}];
+}, {"1":1,"3":3,"4":4,"6":6}];
 window.modules["subheader.model"] = [function(require,module,exports){'use strict';
 
 var sanitize = require(2);
@@ -40,9 +44,9 @@ module.exports.save = function (ref, data) {
 window.modules["tags.model"] = [function(require,module,exports){'use strict';
 
 var _map = require(18),
-    _assign = require(16),
+    _assign = require(17),
     _set = require(15),
-    _includes = require(17),
+    _includes = require(16),
     _require = require(2),
     removeNonAlphanumericCharacters = _require.removeNonAlphanumericCharacters,
     invisibleTags = [];
@@ -100,7 +104,7 @@ module.exports.save = function (uri, data) {
 }, {"2":2,"15":15,"16":16,"17":17,"18":18}];
 window.modules["title-ingridients.model"] = [function(require,module,exports){'use strict';
 
-var striptags = require(4),
+var striptags = require(5),
     _require = require(1),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
@@ -128,4 +132,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"1":1,"2":2,"4":4,"9":9}];
+}, {"1":1,"2":2,"5":5,"9":9}];

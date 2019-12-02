@@ -1,103 +1,53 @@
-window.modules["639"] = [function(require,module,exports){// Wrap
-// wraps a string by a certain width
+window.modules["639"] = [function(require,module,exports){var makeString = require(586);
 
-var makeString = require(586);
+/**
+ * Based on the implementation here: https://github.com/hiddentao/fast-levenshtein
+ */
+module.exports = function levenshtein(str1, str2) {
+  'use strict';
+  str1 = makeString(str1);
+  str2 = makeString(str2);
 
-module.exports = function wrap(str, options){
-  str = makeString(str);
-  
-  options = options || {};
-  
-  var width = options.width || 75;
-  var seperator = options.seperator || '\n';
-  var cut = options.cut || false;
-  var preserveSpaces = options.preserveSpaces || false;
-  var trailingSpaces = options.trailingSpaces || false;
-  
-  var result;
-  
-  if(width <= 0){
-    return str;
+  // Short cut cases  
+  if (str1 === str2) return 0;
+  if (!str1 || !str2) return Math.max(str1.length, str2.length);
+
+  // two rows
+  var prevRow = new Array(str2.length + 1);
+
+  // initialise previous row
+  for (var i = 0; i < prevRow.length; ++i) {
+    prevRow[i] = i;
   }
-  
-  else if(!cut){
-  
-    var words = str.split(' ');
-    var current_column = 0;
-    result = '';
-  
-    while(words.length > 0){
-      
-      // if adding a space and the next word would cause this line to be longer than width...
-      if(1 + words[0].length + current_column > width){
-        //start a new line if this line is not already empty
-        if(current_column > 0){
-          // add a space at the end of the line is preserveSpaces is true
-          if (preserveSpaces){
-            result += ' ';
-            current_column++;
-          }
-          // fill the rest of the line with spaces if trailingSpaces option is true
-          else if(trailingSpaces){
-            while(current_column < width){
-              result += ' ';
-              current_column++;
-            }            
-          }
-          //start new line
-          result += seperator;
-          current_column = 0;
-        }
+
+  // calculate current row distance from previous row
+  for (i = 0; i < str1.length; ++i) {
+    var nextCol = i + 1;
+
+    for (var j = 0; j < str2.length; ++j) {
+      var curCol = nextCol;
+
+      // substution
+      nextCol = prevRow[j] + ( (str1.charAt(i) === str2.charAt(j)) ? 0 : 1 );
+      // insertion
+      var tmp = curCol + 1;
+      if (nextCol > tmp) {
+        nextCol = tmp;
       }
-  
-      // if not at the begining of the line, add a space in front of the word
-      if(current_column > 0){
-        result += ' ';
-        current_column++;
+      // deletion
+      tmp = prevRow[j + 1] + 1;
+      if (nextCol > tmp) {
+        nextCol = tmp;
       }
-  
-      // tack on the next word, update current column, a pop words array
-      result += words[0];
-      current_column += words[0].length;
-      words.shift();
-  
+
+      // copy current col value into previous (in preparation for next iteration)
+      prevRow[j] = curCol;
     }
-  
-    // fill the rest of the line with spaces if trailingSpaces option is true
-    if(trailingSpaces){
-      while(current_column < width){
-        result += ' ';
-        current_column++;
-      }            
-    }
-  
-    return result;
-  
+
+    // copy last col value into previous (in preparation for next iteration)
+    prevRow[j] = nextCol;
   }
-  
-  else {
-  
-    var index = 0;
-    result = '';
-  
-    // walk through each character and add seperators where appropriate
-    while(index < str.length){
-      if(index % width == 0 && index > 0){
-        result += seperator;
-      }
-      result += str.charAt(index);
-      index++;
-    }
-  
-    // fill the rest of the line with spaces if trailingSpaces option is true
-    if(trailingSpaces){
-      while(index % width > 0){
-        result += ' ';
-        index++;
-      }            
-    }
-    
-    return result;
-  }
+
+  return nextCol;
 };
 }, {"586":586}];

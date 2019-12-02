@@ -2,9 +2,9 @@ window.modules["475"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _namespace = require(484);
+var _node = require(485);
 
-var _namespace2 = _interopRequireDefault(_namespace);
+var _node2 = _interopRequireDefault(_node);
 
 var _types = require(470);
 
@@ -16,20 +16,20 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Tag = function (_Namespace) {
-    _inherits(Tag, _Namespace);
+var Combinator = function (_Node) {
+    _inherits(Combinator, _Node);
 
-    function Tag(opts) {
-        _classCallCheck(this, Tag);
+    function Combinator(opts) {
+        _classCallCheck(this, Combinator);
 
-        var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
+        var _this = _possibleConstructorReturn(this, _Node.call(this, opts));
 
-        _this.type = _types.TAG;
+        _this.type = _types.COMBINATOR;
         return _this;
     }
 
-    return Tag;
-}(_namespace2.default);
+    return Combinator;
+}(_node2.default);
 
-exports.default = Tag;
-module.exports = exports['default'];}, {"470":470,"484":484}];
+exports.default = Combinator;
+module.exports = exports['default'];}, {"470":470,"485":485}];

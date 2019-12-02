@@ -1,20 +1,36 @@
 window.modules["247"] = [function(require,module,exports){var assocIndexOf = require(287);
 
+/** Used for built-in method references. */
+var arrayProto = Array.prototype;
+
+/** Built-in value references. */
+var splice = arrayProto.splice;
+
 /**
- * Gets the list cache value for `key`.
+ * Removes `key` and its value from the list cache.
  *
  * @private
- * @name get
+ * @name delete
  * @memberOf ListCache
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
  */
-function listCacheGet(key) {
+function listCacheDelete(key) {
   var data = this.__data__,
       index = assocIndexOf(data, key);
 
-  return index < 0 ? undefined : data[index][1];
+  if (index < 0) {
+    return false;
+  }
+  var lastIndex = data.length - 1;
+  if (index == lastIndex) {
+    data.pop();
+  } else {
+    splice.call(data, index, 1);
+  }
+  --this.size;
+  return true;
 }
 
-module.exports = listCacheGet;
+module.exports = listCacheDelete;
 }, {"287":287}];

@@ -4,7 +4,7 @@ var speakingurl = require(578),
     he = require(207),
     typogr = require(581),
     headQuotes = require(208),
-    striptags = require(4),
+    striptags = require(5),
     _isString = require(377),
     _isPlainObject = require(382),
     _isArray = require(275),
@@ -151,4 +151,4 @@ module.exports.validateTagContent = validateTagContent;
 module.exports.recursivelyStripSeperators = recursivelyStripSeperators;
 module.exports.removeNonAlphanumericCharacters = removeNonAlphanumericCharacters;
 module.exports.normalizeName = normalizeName;
-}, {"4":4,"206":206,"207":207,"208":208,"275":275,"377":377,"382":382,"385":385,"388":388,"578":578,"581":581}];
+}, {"5":5,"206":206,"207":207,"208":208,"275":275,"377":377,"382":382,"385":385,"388":388,"578":578,"581":581}];

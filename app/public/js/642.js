@@ -1,6 +1,21 @@
 window.modules["642"] = [function(require,module,exports){var makeString = require(586);
+var htmlEntities = require(603);
 
-module.exports = function isBlank(str) {
-  return (/^\s*$/).test(makeString(str));
+module.exports = function unescapeHTML(str) {
+  return makeString(str).replace(/\&([^;]{1,10});/g, function(entity, entityCode) {
+    var match;
+
+    if (entityCode in htmlEntities) {
+      return htmlEntities[entityCode];
+    /*eslint no-cond-assign: 0*/
+    } else if (match = entityCode.match(/^#x([\da-fA-F]+)$/)) {
+      return String.fromCharCode(parseInt(match[1], 16));
+    /*eslint no-cond-assign: 0*/
+    } else if (match = entityCode.match(/^#(\d+)$/)) {
+      return String.fromCharCode(~~match[1]);
+    } else {
+      return entity;
+    }
+  });
 };
-}, {"586":586}];
+}, {"586":586,"603":603}];

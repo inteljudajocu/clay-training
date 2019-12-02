@@ -1,7 +1,7 @@
 window.modules["74"] = [function(require,module,exports){'use strict';
 
-var Tokenizer = require(76);
-var sequence = require(75);
+var Tokenizer = require(75);
+var sequence = require(76);
 var noop = function() {};
 
 function createParseContext(name) {

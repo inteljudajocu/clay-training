@@ -5,27 +5,6 @@ title:
   _has:
     input: text
 
-date:
-  _label: Published Date
-  _publish: publishDate
-  _has:
-    help: Date that is generated from the articleDate and articleTime fields
-articleDate:
-  _label: First Published Date
-  _has:
-    input: datepicker
-    help: Custom published date, if it should be different than the actual date the article was first published
-articleTime:
-  _label: First Published Time
-  _has:
-    input: timepicker
-    help: Custom published time
-dateUpdated:
-  _label: Display Updated Date
-  _has:
-    input: checkbox
-    help: Display "Updated On" in the article with the latest published date
-
 imageUrl:
   _label: URL
   _has:
@@ -52,20 +31,15 @@ reviews:
     min: 0
     max: 100
 
-_groups:
-  settings:
-    fields:
-      - title
-      - recipeName
-      - score
-      - reviews
-      - imageUrl (Image)
-    _placeholder:
-      text: Explore
-      height: 250px
-      ifEmpty: imageUrl
-
-canonicalUrl:
-  _publish: url
-  _has:
-    help: Canonical URL of an article. Set when the article publishes.
+# _groups:
+#   settings:
+#     fields:
+#       - title
+#       - recipeName
+#       - score
+#       - reviews
+#       - imageUrl (Image)
+#     _placeholder:
+#       text: Explore
+#       height: 250px
+#       ifEmpty: imageUrl

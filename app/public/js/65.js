@@ -1,516 +1,504 @@
 window.modules["65"] = [function(require,module,exports){'use strict';
 
-var names = require(61);
+var SyntaxParseError = require(72).SyntaxParseError;
+
+var TAB = 9;
+var N = 10;
+var F = 12;
+var R = 13;
+var SPACE = 32;
+var EXCLAMATIONMARK = 33;    // !
+var NUMBERSIGN = 35;         // #
+var PERCENTSIGN = 37;        // %
+var AMPERSAND = 38;          // &
+var APOSTROPHE = 39;         // '
+var LEFTPARENTHESIS = 40;    // (
+var RIGHTPARENTHESIS = 41;   // )
+var ASTERISK = 42;           // *
+var PLUSSIGN = 43;           // +
+var COMMA = 44;              // ,
+var SOLIDUS = 47;            // /
+var LESSTHANSIGN = 60;       // <
+var GREATERTHANSIGN = 62;    // >
+var QUESTIONMARK = 63;       // ?
+var LEFTSQUAREBRACKET = 91;  // [
+var RIGHTSQUAREBRACKET = 93; // ]
+var LEFTCURLYBRACKET = 123;  // {
+var VERTICALLINE = 124;      // |
+var RIGHTCURLYBRACKET = 125; // }
+var COMBINATOR_PRECEDENCE = {
+    ' ': 1,
+    '&&': 2,
+    '||': 3,
+    '|': 4
+};
 var MULTIPLIER_DEFAULT = {
     comma: false,
     min: 1,
     max: 1
 };
+var MULTIPLIER_ZERO_OR_MORE = {
+    comma: false,
+    min: 0,
+    max: 0
+};
+var MULTIPLIER_ONE_OR_MORE = {
+    comma: false,
+    min: 1,
+    max: 0
+};
+var MULTIPLIER_ONE_OR_MORE_COMMA_SEPARATED = {
+    comma: true,
+    min: 1,
+    max: 0
+};
+var MULTIPLIER_ZERO_OR_ONE = {
+    comma: false,
+    min: 0,
+    max: 1
+};
+var NAME_CHAR = (function() {
+    var array = typeof Uint32Array === 'function' ? new Uint32Array(128) : new Array(128);
+    for (var i = 0; i < 128; i++) {
+        array[i] = /[a-zA-Z0-9\-]/.test(String.fromCharCode(i)) ? 1 : 0;
+    }
+    return array;
+})();
 
-function skipSpaces(node) {
-    while (node !== null && (node.data.type === 'WhiteSpace' || node.data.type === 'Comment')) {
-        node = node.next;
+var Tokenizer = function(str) {
+    this.str = str;
+    this.pos = 0;
+};
+Tokenizer.prototype = {
+    charCode: function() {
+        return this.pos < this.str.length ? this.str.charCodeAt(this.pos) : 0;
+    },
+    nextCharCode: function() {
+        return this.pos + 1 < this.str.length ? this.str.charCodeAt(this.pos + 1) : 0;
+    },
+    substringToPos: function(end) {
+        return this.str.substring(this.pos, this.pos = end);
+    },
+    eat: function(code) {
+        if (this.charCode() !== code) {
+            error(this, this.pos, 'Expect `' + String.fromCharCode(code) + '`');
+        }
+
+        this.pos++;
+    }
+};
+
+function scanSpaces(tokenizer) {
+    var end = tokenizer.pos + 1;
+
+    for (; end < tokenizer.str.length; end++) {
+        var code = tokenizer.str.charCodeAt(end);
+        if (code !== R && code !== N && code !== F && code !== SPACE && code !== TAB) {
+            break;
+        }
+    }
+
+    return tokenizer.substringToPos(end);
+}
+
+function scanWord(tokenizer) {
+    var end = tokenizer.pos;
+
+    for (; end < tokenizer.str.length; end++) {
+        var code = tokenizer.str.charCodeAt(end);
+        if (code >= 128 || NAME_CHAR[code] === 0) {
+            break;
+        }
+    }
+
+    if (tokenizer.pos === end) {
+        error(tokenizer, tokenizer.pos, 'Expect a keyword');
+    }
+
+    return tokenizer.substringToPos(end);
+}
+
+function scanNumber(tokenizer) {
+    var end = tokenizer.pos;
+
+    for (; end < tokenizer.str.length; end++) {
+        var code = tokenizer.str.charCodeAt(end);
+        if (code < 48 || code > 57) {
+            break;
+        }
+    }
+
+    if (tokenizer.pos === end) {
+        error(tokenizer, tokenizer.pos, 'Expect a number');
+    }
+
+    return tokenizer.substringToPos(end);
+}
+
+function scanString(tokenizer) {
+    var end = tokenizer.str.indexOf('\'', tokenizer.pos + 1);
+
+    if (end === -1) {
+        error(tokenizer, tokenizer.str.length, 'Expect a quote');
+    }
+
+    return tokenizer.substringToPos(end + 1);
+}
+
+function readMultiplierRange(tokenizer, comma) {
+    var min = null;
+    var max = null;
+
+    tokenizer.eat(LEFTCURLYBRACKET);
+
+    min = scanNumber(tokenizer);
+
+    if (tokenizer.charCode() === COMMA) {
+        tokenizer.pos++;
+        if (tokenizer.charCode() !== RIGHTCURLYBRACKET) {
+            max = scanNumber(tokenizer);
+        }
+    } else {
+        max = min;
+    }
+
+    tokenizer.eat(RIGHTCURLYBRACKET);
+
+    return {
+        comma: comma,
+        min: Number(min),
+        max: max ? Number(max) : 0
+    };
+}
+
+function readMultiplier(tokenizer) {
+    switch (tokenizer.charCode()) {
+        case ASTERISK:
+            tokenizer.pos++;
+            return MULTIPLIER_ZERO_OR_MORE;
+
+        case PLUSSIGN:
+            tokenizer.pos++;
+            return MULTIPLIER_ONE_OR_MORE;
+
+        case QUESTIONMARK:
+            tokenizer.pos++;
+            return MULTIPLIER_ZERO_OR_ONE;
+
+        case NUMBERSIGN:
+            tokenizer.pos++;
+
+            if (tokenizer.charCode() !== LEFTCURLYBRACKET) {
+                return MULTIPLIER_ONE_OR_MORE_COMMA_SEPARATED;
+            }
+
+            return readMultiplierRange(tokenizer, true);
+
+        case LEFTCURLYBRACKET:
+            return readMultiplierRange(tokenizer, false);
+    }
+
+    return MULTIPLIER_DEFAULT;
+}
+
+function maybeMultiplied(tokenizer, node) {
+    var multiplier = readMultiplier(tokenizer);
+
+    if (multiplier !== MULTIPLIER_DEFAULT) {
+        return {
+            type: 'Group',
+            terms: [node],
+            combinator: '|',  // `|` combinator is simplest in implementation (and therefore faster)
+            disallowEmpty: false,
+            multiplier: multiplier,
+            explicit: false
+        };
     }
 
     return node;
 }
 
-function putResult(buffer, match) {
-    var type = match.type || match.syntax.type;
+function readProperty(tokenizer) {
+    var name;
 
-    // ignore groups
-    if (type === 'Group') {
-        buffer.push.apply(buffer, match.match);
-    } else {
-        buffer.push(match);
+    tokenizer.eat(LESSTHANSIGN);
+    tokenizer.eat(APOSTROPHE);
+
+    name = scanWord(tokenizer);
+
+    tokenizer.eat(APOSTROPHE);
+    tokenizer.eat(GREATERTHANSIGN);
+
+    return maybeMultiplied(tokenizer, {
+        type: 'Property',
+        name: name
+    });
+}
+
+function readType(tokenizer) {
+    var name;
+
+    tokenizer.eat(LESSTHANSIGN);
+    name = scanWord(tokenizer);
+
+    if (tokenizer.charCode() === LEFTPARENTHESIS &&
+        tokenizer.nextCharCode() === RIGHTPARENTHESIS) {
+        tokenizer.pos += 2;
+        name += '()';
     }
+
+    tokenizer.eat(GREATERTHANSIGN);
+
+    return maybeMultiplied(tokenizer, {
+        type: 'Type',
+        name: name
+    });
 }
 
-function matchToJSON() {
-    return {
-        type: this.syntax.type,
-        name: this.syntax.name,
-        match: this.match,
-        node: this.node
-    };
+function readKeywordOrFunction(tokenizer) {
+    var children = null;
+    var name;
+
+    name = scanWord(tokenizer);
+
+    if (tokenizer.charCode() === LEFTPARENTHESIS) {
+        tokenizer.pos++;
+        children = readImplicitGroup(tokenizer);
+        tokenizer.eat(RIGHTPARENTHESIS);
+
+        return maybeMultiplied(tokenizer, {
+            type: 'Function',
+            name: name,
+            children: children
+        });
+    }
+
+    return maybeMultiplied(tokenizer, {
+        type: 'Keyword',
+        name: name
+    });
 }
 
-function buildMatchNode(badNode, lastNode, next, match) {
-    if (badNode) {
+function regroupTerms(terms, combinators) {
+    function createGroup(terms, combinator) {
         return {
-            badNode: badNode,
-            lastNode: null,
-            next: null,
-            match: null
+            type: 'Group',
+            terms: terms,
+            combinator: combinator,
+            disallowEmpty: false,
+            multiplier: MULTIPLIER_DEFAULT,
+            explicit: false
         };
     }
 
+    combinators = Object.keys(combinators).sort(function(a, b) {
+        return COMBINATOR_PRECEDENCE[a] - COMBINATOR_PRECEDENCE[b];
+    });
+
+    while (combinators.length > 0) {
+        var combinator = combinators.shift();
+        for (var i = 0, subgroupStart = 0; i < terms.length; i++) {
+            var term = terms[i];
+            if (term.type === 'Combinator') {
+                if (term.value === combinator) {
+                    if (subgroupStart === -1) {
+                        subgroupStart = i - 1;
+                    }
+                    terms.splice(i, 1);
+                    i--;
+                } else {
+                    if (subgroupStart !== -1 && i - subgroupStart > 1) {
+                        terms.splice(
+                            subgroupStart,
+                            i - subgroupStart,
+                            createGroup(terms.slice(subgroupStart, i), combinator)
+                        );
+                        i = subgroupStart + 1;
+                    }
+                    subgroupStart = -1;
+                }
+            }
+        }
+
+        if (subgroupStart !== -1 && combinators.length) {
+            terms.splice(
+                subgroupStart,
+                i - subgroupStart,
+                createGroup(terms.slice(subgroupStart, i), combinator)
+            );
+        }
+    }
+
+    return combinator;
+}
+
+function readImplicitGroup(tokenizer) {
+    var terms = [];
+    var combinators = {};
+    var token;
+    var prevToken = null;
+    var prevTokenPos = tokenizer.pos;
+
+    while (token = peek(tokenizer)) {
+        if (token.type !== 'Spaces') {
+            if (token.type === 'Combinator') {
+                // check for combinator in group beginning and double combinator sequence
+                if (prevToken === null || prevToken.type === 'Combinator') {
+                    error(tokenizer, prevTokenPos, 'Unexpected combinator');
+                }
+
+                combinators[token.value] = true;
+            } else if (prevToken !== null && prevToken.type !== 'Combinator') {
+                combinators[' '] = true;  // a b
+                terms.push({
+                    type: 'Combinator',
+                    value: ' '
+                });
+            }
+
+            terms.push(token);
+            prevToken = token;
+            prevTokenPos = tokenizer.pos;
+        }
+    }
+
+    // check for combinator in group ending
+    if (prevToken !== null && prevToken.type === 'Combinator') {
+        error(tokenizer, tokenizer.pos - prevTokenPos, 'Unexpected combinator');
+    }
+
     return {
-        badNode: null,
-        lastNode: lastNode,
-        next: next,
-        match: match
+        type: 'Group',
+        terms: terms,
+        combinator: regroupTerms(terms, combinators) || ' ',
+        disallowEmpty: false,
+        multiplier: MULTIPLIER_DEFAULT,
+        explicit: false
     };
 }
 
-function matchGroup(lexer, syntaxNode, node) {
-    var result = [];
-    var buffer;
-    var multiplier = syntaxNode.multiplier || MULTIPLIER_DEFAULT;
-    var min = multiplier.min;
-    var max = multiplier.max === 0 ? Infinity : multiplier.max;
-    var lastCommaTermCount;
-    var lastComma;
-    var matchCount = 0;
-    var lastNode = null;
-    var badNode = null;
+function readGroup(tokenizer) {
+    var result;
 
-    mismatch:
-    while (matchCount < max) {
-        node = skipSpaces(node);
-        buffer = [];
+    tokenizer.eat(LEFTSQUAREBRACKET);
+    result = readImplicitGroup(tokenizer);
+    tokenizer.eat(RIGHTSQUAREBRACKET);
 
-        switch (syntaxNode.combinator) {
-            case '|':
-                for (var i = 0; i < syntaxNode.terms.length; i++) {
-                    var term = syntaxNode.terms[i];
-                    var res = matchSyntax(lexer, term, node);
+    result.explicit = true;
+    result.multiplier = readMultiplier(tokenizer);
 
-                    if (res.match) {
-                        putResult(buffer, res.match);
-                        node = res.next;
-                        break;  // continue matching
-                    } else if (res.badNode) {
-                        badNode = res.badNode;
-                        break mismatch;
-                    } else if (res.lastNode) {
-                        lastNode = res.lastNode;
-                    }
-                }
-
-                if (buffer.length === 0) {
-                    break mismatch; // nothing found -> stop matching
-                }
-
-                break;
-
-            case ' ':
-                var beforeMatchNode = node;
-                var lastMatchedTerm = null;
-                var hasTailMatch = false;
-                var commaMissed = false;
-
-                for (var i = 0; i < syntaxNode.terms.length; i++) {
-                    var term = syntaxNode.terms[i];
-                    var res = matchSyntax(lexer, term, node);
-
-                    if (res.match) {
-                        if (term.type === 'Comma' && i !== 0 && !hasTailMatch) {
-                            // recover cursor to state before last match and stop matching
-                            lastNode = node && node.data;
-                            node = beforeMatchNode;
-                            break mismatch;
-                        }
-
-                        // non-empty match (res.next will refer to another node)
-                        if (res.next !== node) {
-                            // match should be preceded by a comma
-                            if (commaMissed) {
-                                lastNode = node && node.data;
-                                node = beforeMatchNode;
-                                break mismatch;
-                            }
-
-                            hasTailMatch = term.type !== 'Comma';
-                            lastMatchedTerm = term;
-                        }
-
-                        putResult(buffer, res.match);
-                        node = skipSpaces(res.next);
-                    } else if (res.badNode) {
-                        badNode = res.badNode;
-                        break mismatch;
-                    } else {
-                        if (res.lastNode) {
-                            lastNode = res.lastNode;
-                        }
-
-                        // it's ok when comma doesn't match when no matches yet
-                        // but only if comma is not first or last term
-                        if (term.type === 'Comma' && i !== 0 && i !== syntaxNode.terms.length - 1) {
-                            if (hasTailMatch) {
-                                commaMissed = true;
-                            }
-                            continue;
-                        }
-
-                        // recover cursor to state before last match and stop matching
-                        lastNode = res.lastNode || (node && node.data);
-                        node = beforeMatchNode;
-                        break mismatch;
-                    }
-                }
-
-                // don't allow empty match when [ ]!
-                if (!lastMatchedTerm && syntaxNode.disallowEmpty) {
-                    // empty match but shouldn't
-                    // recover cursor to state before last match and stop matching
-                    lastNode = node && node.data;
-                    node = beforeMatchNode;
-                    break mismatch;
-                }
-
-                // don't allow comma at the end but only if last term isn't a comma
-                if (lastMatchedTerm && lastMatchedTerm.type === 'Comma' && term.type !== 'Comma') {
-                    lastNode = node && node.data;
-                    node = beforeMatchNode;
-                    break mismatch;
-                }
-
-                break;
-
-            case '&&':
-                var beforeMatchNode = node;
-                var lastMatchedTerm = null;
-                var terms = syntaxNode.terms.slice();
-
-                while (terms.length) {
-                    var wasMatch = false;
-                    var emptyMatched = 0;
-
-                    for (var i = 0; i < terms.length; i++) {
-                        var term = terms[i];
-                        var res = matchSyntax(lexer, term, node);
-
-                        if (res.match) {
-                            // non-empty match (res.next will refer to another node)
-                            if (res.next !== node) {
-                                lastMatchedTerm = term;
-                            } else {
-                                emptyMatched++;
-                                continue;
-                            }
-
-                            wasMatch = true;
-                            terms.splice(i--, 1);
-                            putResult(buffer, res.match);
-                            node = skipSpaces(res.next);
-                            break;
-                        } else if (res.badNode) {
-                            badNode = res.badNode;
-                            break mismatch;
-                        } else if (res.lastNode) {
-                            lastNode = res.lastNode;
-                        }
-                    }
-
-                    if (!wasMatch) {
-                        // terms left, but they all are optional
-                        if (emptyMatched === terms.length) {
-                            break;
-                        }
-
-                        // not ok
-                        lastNode = node && node.data;
-                        node = beforeMatchNode;
-                        break mismatch;
-                    }
-                }
-
-                if (!lastMatchedTerm && syntaxNode.disallowEmpty) { // don't allow empty match when [ ]!
-                    // empty match but shouldn't
-                    // recover cursor to state before last match and stop matching
-                    lastNode = node && node.data;
-                    node = beforeMatchNode;
-                    break mismatch;
-                }
-
-                break;
-
-            case '||':
-                var beforeMatchNode = node;
-                var lastMatchedTerm = null;
-                var terms = syntaxNode.terms.slice();
-
-                while (terms.length) {
-                    var wasMatch = false;
-                    var emptyMatched = 0;
-
-                    for (var i = 0; i < terms.length; i++) {
-                        var term = terms[i];
-                        var res = matchSyntax(lexer, term, node);
-
-                        if (res.match) {
-                            // non-empty match (res.next will refer to another node)
-                            if (res.next !== node) {
-                                lastMatchedTerm = term;
-                            } else {
-                                emptyMatched++;
-                                continue;
-                            }
-
-                            wasMatch = true;
-                            terms.splice(i--, 1);
-                            putResult(buffer, res.match);
-                            node = skipSpaces(res.next);
-                            break;
-                        } else if (res.badNode) {
-                            badNode = res.badNode;
-                            break mismatch;
-                        } else if (res.lastNode) {
-                            lastNode = res.lastNode;
-                        }
-                    }
-
-                    if (!wasMatch) {
-                        break;
-                    }
-                }
-
-                // don't allow empty match
-                if (!lastMatchedTerm && (emptyMatched !== terms.length || syntaxNode.disallowEmpty)) {
-                    // empty match but shouldn't
-                    // recover cursor to state before last match and stop matching
-                    lastNode = node && node.data;
-                    node = beforeMatchNode;
-                    break mismatch;
-                }
-
-                break;
-        }
-
-        // flush buffer
-        result.push.apply(result, buffer);
-        matchCount++;
-
-        if (!node) {
-            break;
-        }
-
-        if (multiplier.comma) {
-            if (lastComma && lastCommaTermCount === result.length) {
-                // nothing match after comma
-                break mismatch;
-            }
-
-            node = skipSpaces(node);
-            if (node !== null && node.data.type === 'Operator' && node.data.value === ',') {
-                result.push({
-                    syntax: syntaxNode,
-                    match: [{
-                        type: 'ASTNode',
-                        node: node.data,
-                        childrenMatch: null
-                    }]
-                });
-                lastCommaTermCount = result.length;
-                lastComma = node;
-                node = node.next;
-            } else {
-                lastNode = node !== null ? node.data : null;
-                break mismatch;
-            }
-        }
+    if (tokenizer.charCode() === EXCLAMATIONMARK) {
+        tokenizer.pos++;
+        result.disallowEmpty = true;
     }
 
-    // console.log(syntaxNode.type, badNode, lastNode);
-
-    if (lastComma && lastCommaTermCount === result.length) {
-        // nothing match after comma
-        node = lastComma;
-        result.pop();
-    }
-
-    return buildMatchNode(badNode, lastNode, node, matchCount < min ? null : {
-        syntax: syntaxNode,
-        match: result,
-        toJSON: matchToJSON
-    });
+    return result;
 }
 
-function matchSyntax(lexer, syntaxNode, node) {
-    var badNode = null;
-    var lastNode = null;
-    var match = null;
+function peek(tokenizer) {
+    var code = tokenizer.charCode();
 
-    switch (syntaxNode.type) {
-        case 'Group':
-            return matchGroup(lexer, syntaxNode, node);
-
-        case 'Function':
-            // expect a function node
-            if (!node || node.data.type !== 'Function') {
-                break;
-            }
-
-            var keyword = names.keyword(node.data.name);
-            var name = syntaxNode.name.toLowerCase();
-
-            // check function name with vendor consideration
-            if (name !== keyword.vendor + keyword.name) {
-                break;
-            }
-
-            var res = matchSyntax(lexer, syntaxNode.children, node.data.children.head);
-            if (!res.match || res.next) {
-                badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;
-                break;
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: res.match.match
-            }];
-
-            // Use node.next instead of res.next here since syntax is matching
-            // for internal list and it should be completelly matched (res.next is null at this point).
-            // Therefore function is matched and we are going to next node
-            node = node.next;
-            break;
-
-        case 'Parentheses':
-            if (!node || node.data.type !== 'Parentheses') {
-                break;
-            }
-
-            var res = matchSyntax(lexer, syntaxNode.children, node.data.children.head);
-            if (!res.match || res.next) {
-                badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;  // TODO: case when res.next === null
-                break;
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: res.match.match
-            }];
-
-            node = res.next;
-            break;
-
-        case 'Type':
-            var typeSyntax = lexer.getType(syntaxNode.name);
-            if (!typeSyntax) {
-                throw new Error('Unknown syntax type `' + syntaxNode.name + '`');
-            }
-
-            var res = typeSyntax.match(node);
-            if (!res.match) {
-                badNode = res && res.badNode; // TODO: case when res.next === null
-                lastNode = (res && res.lastNode) || (node && node.data);
-                break;
-            }
-
-            node = res.next;
-            putResult(match = [], res.match);
-            if (match.length === 0) {
-                match = null;
-            }
-            break;
-
-        case 'Property':
-            var propertySyntax = lexer.getProperty(syntaxNode.name);
-            if (!propertySyntax) {
-                throw new Error('Unknown property `' + syntaxNode.name + '`');
-            }
-
-            var res = propertySyntax.match(node);
-            if (!res.match) {
-                badNode = res && res.badNode; // TODO: case when res.next === null
-                lastNode = (res && res.lastNode) || (node && node.data);
-                break;
-            }
-
-            node = res.next;
-            putResult(match = [], res.match);
-            if (match.length === 0) {
-                match = null;
-            }
-            break;
-
-        case 'Keyword':
-            if (!node) {
-                break;
-            }
-
-            if (node.data.type === 'Identifier') {
-                var keyword = names.keyword(node.data.name);
-                var keywordName = keyword.name;
-                var name = syntaxNode.name.toLowerCase();
-
-                // drop \0 and \9 hack from keyword name
-                if (keywordName.indexOf('\\') !== -1) {
-                    keywordName = keywordName.replace(/\\[09].*$/, '');
-                }
-
-                if (name !== keyword.vendor + keywordName) {
-                    break;
-                }
-            } else {
-                // keyword may to be a number (e.g. font-weight: 400 )
-                if (node.data.type !== 'Number' || node.data.value !== syntaxNode.name) {
-                    break;
-                }
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: null
-            }];
-            node = node.next;
-            break;
-
-        case 'Slash':
-        case 'Comma':
-            if (!node || node.data.type !== 'Operator' || node.data.value !== syntaxNode.value) {
-                break;
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: null
-            }];
-            node = node.next;
-            break;
-
-        case 'String':
-            if (!node || node.data.type !== 'String') {
-                break;
-            }
-
-            match = [{
-                type: 'ASTNode',
-                node: node.data,
-                childrenMatch: null
-            }];
-            node = node.next;
-            break;
-
-        case 'ASTNode':
-            if (node && syntaxNode.match(node)) {
-                match = {
-                    type: 'ASTNode',
-                    node: node.data,
-                    childrenMatch: null
-                };
-                node = node.next;
-            }
-            return buildMatchNode(badNode, lastNode, node, match);
-
-        default:
-            throw new Error('Not implemented yet node type: ' + syntaxNode.type);
+    if (code < 128 && NAME_CHAR[code] === 1) {
+        return readKeywordOrFunction(tokenizer);
     }
 
-    return buildMatchNode(badNode, lastNode, node, match === null ? null : {
-        syntax: syntaxNode,
-        match: match,
-        toJSON: matchToJSON
-    });
+    switch (code) {
+        case LEFTSQUAREBRACKET:
+            return readGroup(tokenizer);
 
-};
+        case LESSTHANSIGN:
+            if (tokenizer.nextCharCode() === APOSTROPHE) {
+                return readProperty(tokenizer);
+            } else {
+                return readType(tokenizer);
+            }
 
-module.exports = matchSyntax;
-}, {"61":61}];
+        case VERTICALLINE:
+            return {
+                type: 'Combinator',
+                value: tokenizer.substringToPos(tokenizer.nextCharCode() === VERTICALLINE ? tokenizer.pos + 2 : tokenizer.pos + 1)
+            };
+
+        case AMPERSAND:
+            tokenizer.pos++;
+            tokenizer.eat(AMPERSAND);
+            return {
+                type: 'Combinator',
+                value: '&&'
+            };
+
+        case COMMA:
+            tokenizer.pos++;
+            return {
+                type: 'Comma',
+                value: ','
+            };
+
+        case SOLIDUS:
+            tokenizer.pos++;
+            return {
+                type: 'Slash',
+                value: '/'
+            };
+
+        case PERCENTSIGN:  // looks like exception, needs for attr()'s <type-or-unit>
+            tokenizer.pos++;
+            return {
+                type: 'Percent',
+                value: '%'
+            };
+
+        case LEFTPARENTHESIS:
+            tokenizer.pos++;
+            var children = readImplicitGroup(tokenizer);
+            tokenizer.eat(RIGHTPARENTHESIS);
+
+            return {
+                type: 'Parentheses',
+                children: children
+            };
+
+        case APOSTROPHE:
+            return {
+                type: 'String',
+                value: scanString(tokenizer)
+            };
+
+        case SPACE:
+        case TAB:
+        case N:
+        case R:
+        case F:
+            return {
+                type: 'Spaces',
+                value: scanSpaces(tokenizer)
+            };
+    }
+}
+
+function error(tokenizer, pos, msg) {
+    throw new SyntaxParseError(msg || 'Unexpected input', tokenizer.str, pos);
+}
+
+function parse(str) {
+    var tokenizer = new Tokenizer(str);
+    var result = readImplicitGroup(tokenizer);
+
+    if (tokenizer.pos !== str.length) {
+        error(tokenizer, tokenizer.pos);
+    }
+
+    // reduce redundant groups with single group term
+    if (result.terms.length === 1 && result.terms[0].type === 'Group') {
+        result = result.terms[0];
+    }
+
+    return result;
+}
+
+// warm up parse to elimitate code branches that never execute
+// fix soft deoptimizations (insufficient type feedback)
+parse('[a&&<b>#|<\'c\'>*||e(){2,} f{2} /,(% g#{1,2})]!');
+
+module.exports = parse;
+}, {"72":72}];

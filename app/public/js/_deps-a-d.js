@@ -191,8 +191,8 @@ module.exports.sourceMap = require(56);
 }, {"56":56}];
 window.modules["74"] = [function(require,module,exports){'use strict';
 
-var Tokenizer = require(76);
-var sequence = require(75);
+var Tokenizer = require(75);
+var sequence = require(76);
 var noop = function() {};
 
 function createParseContext(name) {
@@ -349,7 +349,7 @@ module.exports = function createParser(config) {
 };
 }, {"75":75,"76":76}];
 window.modules["90"] = [function(require,module,exports){var List = require(54);
-var Tokenizer = require(76);
+var Tokenizer = require(75);
 var Lexer = require(60);
 var grammar = require(73);
 var createParser = require(74);
@@ -430,10 +430,10 @@ function createSyntax(config) {
 exports.create = function(config) {
     return createSyntax(mix({}, config));
 };
-}, {"53":53,"54":54,"55":55,"60":60,"61":61,"73":73,"74":74,"76":76,"85":85,"91":91,"92":92}];
-window.modules["96"] = [function(require,module,exports){var cmpChar = require(76).cmpChar;
-var isNumber = require(76).isNumber;
-var TYPE = require(76).TYPE;
+}, {"53":53,"54":54,"55":55,"60":60,"61":61,"73":73,"74":74,"75":75,"85":85,"91":91,"92":92}];
+window.modules["96"] = [function(require,module,exports){var cmpChar = require(75).cmpChar;
+var isNumber = require(75).isNumber;
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var NUMBER = TYPE.Number;
@@ -611,8 +611,8 @@ module.exports = {
         }
     }
 };
-}, {"76":76}];
-window.modules["97"] = [function(require,module,exports){var TYPE = require(76).TYPE;
+}, {"75":75}];
+window.modules["97"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var ATRULE = TYPE.Atrule;
 var SEMICOLON = TYPE.Semicolon;
@@ -746,7 +746,7 @@ module.exports = {
     },
     walkContext: 'atrule'
 };
-}, {"76":76}];
+}, {"75":75}];
 window.modules["98"] = [function(require,module,exports){var List = require(54);
 
 module.exports = {
@@ -788,7 +788,7 @@ module.exports = {
     walkContext: 'atrulePrelude'
 };
 }, {"54":54}];
-window.modules["99"] = [function(require,module,exports){var TYPE = require(76).TYPE;
+window.modules["99"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var STRING = TYPE.String;
@@ -950,9 +950,9 @@ module.exports = {
         processChunk(']');
     }
 };
-}, {"76":76}];
+}, {"75":75}];
 window.modules["100"] = [function(require,module,exports){var List = require(54);
-var TYPE = require(76).TYPE;
+var TYPE = require(75).TYPE;
 
 var WHITESPACE = TYPE.WhiteSpace;
 var COMMENT = TYPE.Comment;
@@ -1030,8 +1030,8 @@ module.exports = {
     },
     walkContext: 'block'
 };
-}, {"54":54,"76":76}];
-window.modules["101"] = [function(require,module,exports){var TYPE = require(76).TYPE;
+}, {"54":54,"75":75}];
+window.modules["101"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
 var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
 
@@ -1063,8 +1063,8 @@ module.exports = {
         processChunk(']');
     }
 };
-}, {"76":76}];
-window.modules["102"] = [function(require,module,exports){var CDC = require(76).TYPE.CDC;
+}, {"75":75}];
+window.modules["102"] = [function(require,module,exports){var CDC = require(75).TYPE.CDC;
 
 module.exports = {
     name: 'CDC',
@@ -1083,8 +1083,8 @@ module.exports = {
         processChunk('-->');
     }
 };
-}, {"76":76}];
-window.modules["103"] = [function(require,module,exports){var CDO = require(76).TYPE.CDO;
+}, {"75":75}];
+window.modules["103"] = [function(require,module,exports){var CDO = require(75).TYPE.CDO;
 
 module.exports = {
     name: 'CDO',
@@ -1103,8 +1103,8 @@ module.exports = {
         processChunk('<!--');
     }
 };
-}, {"76":76}];
-window.modules["104"] = [function(require,module,exports){var TYPE = require(76).TYPE;
+}, {"75":75}];
+window.modules["104"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 var IDENTIFIER = TYPE.Identifier;
 var FULLSTOP = TYPE.FullStop;
 
@@ -1128,8 +1128,8 @@ module.exports = {
         processChunk(node.name);
     }
 };
-}, {"76":76}];
-window.modules["105"] = [function(require,module,exports){var TYPE = require(76).TYPE;
+}, {"75":75}];
+window.modules["105"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var PLUSSIGN = TYPE.PlusSign;
 var SOLIDUS = TYPE.Solidus;
@@ -1172,8 +1172,8 @@ module.exports = {
         processChunk(node.name);
     }
 };
-}, {"76":76}];
-window.modules["106"] = [function(require,module,exports){var TYPE = require(76).TYPE;
+}, {"75":75}];
+window.modules["106"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var ASTERISK = TYPE.Asterisk;
 var SOLIDUS = TYPE.Solidus;
@@ -1208,8 +1208,8 @@ module.exports = {
         processChunk('*/');
     }
 };
-}, {"76":76}];
-window.modules["107"] = [function(require,module,exports){var TYPE = require(76).TYPE;
+}, {"75":75}];
+window.modules["107"] = [function(require,module,exports){var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var COLON = TYPE.Colon;
@@ -1336,9 +1336,9 @@ function getImportant(scanner) {
     // for better original source restoring and hacks like `!ie` support
     return important === 'important' ? true : important;
 }
-}, {"76":76}];
+}, {"75":75}];
 window.modules["108"] = [function(require,module,exports){var List = require(54);
-var TYPE = require(76).TYPE;
+var TYPE = require(75).TYPE;
 
 var WHITESPACE = TYPE.WhiteSpace;
 var COMMENT = TYPE.Comment;
@@ -1380,8 +1380,8 @@ module.exports = {
         this.each(processChunk, node);
     }
 };
-}, {"54":54,"76":76}];
-window.modules["109"] = [function(require,module,exports){var NUMBER = require(76).TYPE.Number;
+}, {"54":54,"75":75}];
+window.modules["109"] = [function(require,module,exports){var NUMBER = require(75).TYPE.Number;
 
 // special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
 function readUnit(scanner) {
@@ -1426,7 +1426,7 @@ module.exports = {
         processChunk(node.unit);
     }
 };
-}, {"76":76}];
+}, {"75":75}];
 window.modules["139"] = [function(require,module,exports){var List = require(54);
 
 module.exports = {
@@ -1441,8 +1441,8 @@ window.modules["149"] = [function(require,module,exports){module.exports = {
     getNode: require(150)
 };
 }, {"150":150}];
-window.modules["150"] = [function(require,module,exports){var cmpChar = require(76).cmpChar;
-var TYPE = require(76).TYPE;
+window.modules["150"] = [function(require,module,exports){var cmpChar = require(75).cmpChar;
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var STRING = TYPE.String;
@@ -1519,7 +1519,7 @@ module.exports = function defaultRecognizer(context) {
             }
     }
 };
-}, {"76":76}];
+}, {"75":75}];
 window.modules["154"] = [function(require,module,exports){'use strict';
 
 // token types (note: value shouldn't intersect with used char codes)
@@ -2468,9 +2468,9 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
   return index;
 };
 }, {}];
-window.modules["199"] = [function(require,module,exports){var entityMap = require(201),
+window.modules["199"] = [function(require,module,exports){var entityMap = require(200),
     legacyMap = require(202),
-    xmlMap = require(200),
+    xmlMap = require(201),
     decodeCodePoint = require(203);
 
 var decodeXMLStrict = getStrictDecoder(xmlMap),
@@ -3934,7 +3934,7 @@ CollectingHandler.prototype.restart = function() {
     }
 };
 }, {"216":216}];
-window.modules["16"] = [function(require,module,exports){var assignValue = require(284),
+window.modules["17"] = [function(require,module,exports){var assignValue = require(284),
     copyObject = require(354),
     createAssigner = require(356),
     isArrayLike = require(333),
@@ -4085,8 +4085,8 @@ var defaults = baseRest(function(object, sources) {
 
 module.exports = defaults;
 }, {"285":285,"341":341,"357":357,"376":376}];
-window.modules["396"] = [function(require,module,exports){var postcss = require(394);
-var translate = require(395).syntax.translate;
+window.modules["395"] = [function(require,module,exports){var postcss = require(394);
+var translate = require(396).syntax.translate;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 var DEFAULT_RAWS = {
@@ -4237,7 +4237,7 @@ module.exports = function(node) {
 
     return result;
 };
-}, {"394":394,"395":395}];
+}, {"394":394,"396":396}];
 window.modules["398"] = [function(require,module,exports){var resolveKeyword = require(58).keyword;
 
 module.exports = function cleanAtrule(node, item, list) {
@@ -5187,7 +5187,7 @@ module.exports = function compressBackground(node) {
     node.children = new List().fromArray(newValue);
 };
 }, {"58":58}];
-window.modules["420"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
+window.modules["419"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
     var prev = item.prev;
     var next = item.next;
 
@@ -6712,7 +6712,7 @@ exports.default = Declaration;
 module.exports = exports['default'];
 
 }, {"439":439}];
-window.modules["473"] = [function(require,module,exports){'use strict';
+window.modules["482"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6908,7 +6908,7 @@ function defaultAttrConcat(attrValue, attrSpaces) {
     return '' + attrSpaces.before + attrValue + attrSpaces.after;
 }
 module.exports = exports['default'];}, {"470":470,"484":484}];
-window.modules["479"] = [function(require,module,exports){'use strict';
+window.modules["477"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6947,7 +6947,7 @@ var ClassName = function (_Namespace) {
 
 exports.default = ClassName;
 module.exports = exports['default'];}, {"470":470,"484":484}];
-window.modules["477"] = [function(require,module,exports){'use strict';
+window.modules["475"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6982,7 +6982,7 @@ var Combinator = function (_Node) {
 
 exports.default = Combinator;
 module.exports = exports['default'];}, {"470":470,"485":485}];
-window.modules["478"] = [function(require,module,exports){'use strict';
+window.modules["476"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7022,39 +7022,39 @@ window.modules["486"] = [function(require,module,exports){'use strict';
 exports.__esModule = true;
 exports.universal = exports.tag = exports.string = exports.selector = exports.root = exports.pseudo = exports.nesting = exports.id = exports.comment = exports.combinator = exports.className = exports.attribute = undefined;
 
-var _attribute = require(473);
+var _attribute = require(482);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
-var _className = require(479);
+var _className = require(477);
 
 var _className2 = _interopRequireDefault(_className);
 
-var _combinator = require(477);
+var _combinator = require(475);
 
 var _combinator2 = _interopRequireDefault(_combinator);
 
-var _comment = require(478);
+var _comment = require(476);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _id = require(482);
+var _id = require(480);
 
 var _id2 = _interopRequireDefault(_id);
 
-var _nesting = require(476);
+var _nesting = require(474);
 
 var _nesting2 = _interopRequireDefault(_nesting);
 
-var _pseudo = require(472);
+var _pseudo = require(481);
 
 var _pseudo2 = _interopRequireDefault(_pseudo);
 
-var _root = require(480);
+var _root = require(478);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _selector = require(481);
+var _selector = require(479);
 
 var _selector2 = _interopRequireDefault(_selector);
 
@@ -7062,11 +7062,11 @@ var _string = require(471);
 
 var _string2 = _interopRequireDefault(_string);
 
-var _tag = require(475);
+var _tag = require(473);
 
 var _tag2 = _interopRequireDefault(_tag);
 
-var _universal = require(474);
+var _universal = require(472);
 
 var _universal2 = _interopRequireDefault(_universal);
 
@@ -12760,7 +12760,7 @@ module.exports = formatSimpleByline;
 }, {"3":3,"12":12,"18":18,"384":384}];
 window.modules["660"] = [function(require,module,exports){'use strict';
 
-var _includes = require(17);
+var _includes = require(16);
 
 function isVideo(contentData) {
   return contentData.featureTypes && (contentData.featureTypes['Video-Original'] || contentData.featureTypes['Video-Aggregation'] || contentData.featureTypes['Video-Original News']);
@@ -12783,4 +12783,4 @@ function getCalloutType(contentData) {
 }
 
 module.exports = getCalloutType;
-}, {"17":17}];
+}, {"16":16}];

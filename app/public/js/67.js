@@ -1,107 +1,85 @@
-window.modules["67"] = [function(require,module,exports){'use strict';
+window.modules["67"] = [function(require,module,exports){var List = require(54);
 
-function isNodeType(node, type) {
-    return node && node.type === type;
+function getFirstMatchNode(matchNode) {
+    if (matchNode.type === 'ASTNode') {
+        return matchNode.node;
+    }
+
+    if (matchNode.match.length !== 0) {
+        return getFirstMatchNode(matchNode.match[0]);
+    }
+
+    return null;
 }
 
-function serializeMultiplier(multiplier) {
-    if (multiplier.min === 0 && multiplier.max === 0) {
-        return '*';
+function getLastMatchNode(matchNode) {
+    if (matchNode.type === 'ASTNode') {
+        return matchNode.node;
     }
 
-    if (multiplier.min === 0 && multiplier.max === 1) {
-        return '?';
+    if (matchNode.match.length !== 0) {
+        return getLastMatchNode(matchNode.match[matchNode.match.length - 1]);
     }
 
-    if (multiplier.min === 1 && multiplier.max === 0) {
-        return multiplier.comma ? '#' : '+';
-    }
-
-    if (multiplier.min === 1 && multiplier.max === 1) {
-        return '';
-    }
-
-    return (
-        (multiplier.comma ? '#' : '') +
-        '{' + multiplier.min + (multiplier.min !== multiplier.max ? ',' + (multiplier.max !== 0 ? multiplier.max : '') : '') + '}'
-    );
+    return null;
 }
 
-function translateSequence(node, forceBraces, decorate) {
-    var result = '';
+function matchFragments(lexer, ast, match, type, name) {
+    function findFragments(matchNode) {
+        if (matchNode.type === 'ASTNode') {
+            return;
+        }
 
-    if (node.explicit || forceBraces) {
-        result += '[' + (!isNodeType(node.terms[0], 'Comma') ? ' ' : '');
+        if (matchNode.syntax.type === type &&
+            matchNode.syntax.name === name) {
+            var start = getFirstMatchNode(matchNode);
+            var end = getLastMatchNode(matchNode);
+
+            lexer.syntax.walk(ast, function(node, item, list) {
+                if (node === start) {
+                    var nodes = new List();
+                    var loc = null;
+
+                    do {
+                        nodes.appendData(item.data);
+
+                        if (item.data === end) {
+                            break;
+                        }
+
+                        item = item.next;
+                    } while (item !== null);
+
+                    if (start.loc !== null && end.loc !== null) {
+                        loc = {
+                            source: start.loc.source,
+                            start: start.loc.start,
+                            end: end.loc.end
+                        };
+                    }
+
+                    fragments.push({
+                        parent: list,
+                        loc: loc,
+                        nodes: nodes
+                    });
+                }
+            });
+        }
+
+        matchNode.match.forEach(findFragments);
     }
 
-    result += node.terms.map(function(term) {
-        return translate(term, forceBraces, decorate);
-    }).join(node.combinator === ' ' ? ' ' : ' ' + node.combinator + ' ');
+    var fragments = [];
 
-    if (node.explicit || forceBraces) {
-        result += ' ]';
+    if (match.matched !== null) {
+        findFragments(match.matched);
     }
 
-    return result;
+    return fragments;
 }
 
-function translateParentheses(group, forceBraces, decorate) {
-    if (!group.terms.length) {
-        return '()';
-    }
-
-    return '( ' + translateSequence(group, forceBraces, decorate) + ' )';
-}
-
-function translate(node, forceBraces, decorate) {
-    var result;
-
-    switch (node.type) {
-        case 'Group':
-            result =
-                translateSequence(node, forceBraces, decorate) +
-                (node.disallowEmpty ? '!' : '') +
-                serializeMultiplier(node.multiplier);
-            break;
-
-        case 'Keyword':
-            result = node.name;
-            break;
-
-        case 'Function':
-            result = node.name + translateParentheses(node.children, forceBraces, decorate);
-            break;
-
-        case 'Parentheses': // replace for seq('(' seq(...node.children) ')')
-            result = translateParentheses(node.children, forceBraces, decorate);
-            break;
-
-        case 'Type':
-            result = '<' + node.name + '>';
-            break;
-
-        case 'Property':
-            result = '<\'' + node.name + '\'>';
-            break;
-
-        case 'Combinator': // remove?
-        case 'Slash':      // replace for String? '/'
-        case 'Percent':    // replace for String? '%'
-        case 'String':
-        case 'Comma':
-            result = node.value;
-            break;
-
-        default:
-            throw new Error('Unknown node type `' + node.type + '`');
-    }
-
-    if (typeof decorate === 'function') {
-        result = decorate(result, node);
-    }
-
-    return result;
-}
-
-module.exports = translate;
-}, {}];
+module.exports = {
+    matchFragments: matchFragments
+};
+}, {"54":54}];

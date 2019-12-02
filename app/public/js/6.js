@@ -1,7 +1,7 @@
 window.modules["6"] = [function(require,module,exports){var getDayOfYear = require(173)
-var getISOWeek = require(174)
-var getISOYear = require(171)
-var parse = require(5)
+var getISOWeek = require(171)
+var getISOYear = require(174)
+var parse = require(4)
 var isValid = require(170)
 var enLocale = require(172)
 
@@ -326,4 +326,4 @@ function addLeadingZeros (number, targetLength) {
 }
 
 module.exports = format
-}, {"5":5,"170":170,"171":171,"172":172,"173":173,"174":174}];
+}, {"4":4,"170":170,"171":171,"172":172,"173":173,"174":174}];

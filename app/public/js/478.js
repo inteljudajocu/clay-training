@@ -2,9 +2,11 @@ window.modules["478"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
-var _node = require(485);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _node2 = _interopRequireDefault(_node);
+var _container = require(487);
+
+var _container2 = _interopRequireDefault(_container);
 
 var _types = require(470);
 
@@ -16,20 +18,43 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Comment = function (_Node) {
-    _inherits(Comment, _Node);
+var Root = function (_Container) {
+    _inherits(Root, _Container);
 
-    function Comment(opts) {
-        _classCallCheck(this, Comment);
+    function Root(opts) {
+        _classCallCheck(this, Root);
 
-        var _this = _possibleConstructorReturn(this, _Node.call(this, opts));
+        var _this = _possibleConstructorReturn(this, _Container.call(this, opts));
 
-        _this.type = _types.COMMENT;
+        _this.type = _types.ROOT;
         return _this;
     }
 
-    return Comment;
-}(_node2.default);
+    Root.prototype.toString = function toString() {
+        var str = this.reduce(function (memo, selector) {
+            var sel = String(selector);
+            return sel ? memo + sel + ',' : '';
+        }, '').slice(0, -1);
+        return this.trailingComma ? str + ',' : str;
+    };
 
-exports.default = Comment;
-module.exports = exports['default'];}, {"470":470,"485":485}];
+    Root.prototype.error = function error(message, options) {
+        if (this._error) {
+            return this._error(message, options);
+        } else {
+            return new Error(message);
+        }
+    };
+
+    _createClass(Root, [{
+        key: 'errorGenerator',
+        set: function set(handler) {
+            this._error = handler;
+        }
+    }]);
+
+    return Root;
+}(_container2.default);
+
+exports.default = Root;
+module.exports = exports['default'];}, {"470":470,"487":487}];

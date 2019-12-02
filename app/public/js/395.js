@@ -1,144 +1,153 @@
-window.modules["395"] = [function(require,module,exports){var csstree = require(58);
-var parse = csstree.parse;
-var compress = require(406);
-var translate = csstree.translate;
-var translateWithSourceMap = csstree.translateWithSourceMap;
+window.modules["395"] = [function(require,module,exports){var postcss = require(394);
+var translate = require(396).syntax.translate;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-function debugOutput(name, options, startTime, data) {
-    if (options.debug) {
-        console.error('## ' + name + ' done in %d ms\n', Date.now() - startTime);
+var DEFAULT_RAWS = {
+    before: '',
+    after: '',
+    between: '',
+    semicolon: false,
+    left: '',
+    right: ''
+};
+var ROOT_RAWS = {
+    semicolon: true
+};
+var DECL_RAWS = {
+    before: '',
+    after: '',
+    between: ':',
+    important: '!important'
+};
+
+function clone(source) {
+    var result = Object.create(Object.getPrototypeOf(source));
+
+    for (var key in source) {
+        if (hasOwnProperty.call(source, key)) {
+            result[key] = source[key];
+        }
     }
 
-    return data;
+    return result;
 }
 
-function createDefaultLogger(level) {
-    var lastDebug;
+function listToPostcss(list, used) {
+    var result = [];
+    var before = '';
 
-    return function logger(title, ast) {
-        var line = title;
+    list.each(function(node) {
+        if (node.type === 'Raw' || node.type === 'Space') {
+            // attach raw and spaces to next node
+            before += node.value;
+        } else {
+            var postcssNode = cssoToPostcss(node, used);
 
-        if (ast) {
-            line = '[' + ((Date.now() - lastDebug) / 1000).toFixed(3) + 's] ' + line;
-        }
-
-        if (level > 1 && ast) {
-            var css = translate(ast, true);
-
-            // when level 2, limit css to 256 symbols
-            if (level === 2 && css.length > 256) {
-                css = css.substr(0, 256) + '...';
+            if (before !== '') {
+                postcssNode.raws = clone(postcssNode.raws);
+                postcssNode.raws.before = before;
+                before = '';
             }
 
-            line += '\n  ' + css + '\n';
+            result.push(postcssNode);
         }
-
-        console.error(line);
-        lastDebug = Date.now();
-    };
-}
-
-function copy(obj) {
-    var result = {};
-
-    for (var key in obj) {
-        result[key] = obj[key];
-    }
-
-    return result;
-}
-
-function buildCompressOptions(options) {
-    options = copy(options);
-
-    if (typeof options.logger !== 'function' && options.debug) {
-        options.logger = createDefaultLogger(options.debug);
-    }
-
-    return options;
-}
-
-function runHandler(ast, options, handlers) {
-    if (!Array.isArray(handlers)) {
-        handlers = [handlers];
-    }
-
-    handlers.forEach(function(fn) {
-        fn(ast, options);
     });
-}
-
-function minify(context, source, options) {
-    options = options || {};
-
-    var filename = options.filename || '<unknown>';
-    var result;
-
-    // parse
-    var ast = debugOutput('parsing', options, Date.now(),
-        parse(source, {
-            context: context,
-            filename: filename,
-            positions: Boolean(options.sourceMap)
-        })
-    );
-
-    // before compress handlers
-    if (options.beforeCompress) {
-        debugOutput('beforeCompress', options, Date.now(),
-            runHandler(ast, options, options.beforeCompress)
-        );
-    }
-
-    // compress
-    var compressResult = debugOutput('compress', options, Date.now(),
-        compress(ast, buildCompressOptions(options))
-    );
-
-    // after compress handlers
-    if (options.afterCompress) {
-        debugOutput('afterCompress', options, Date.now(),
-            runHandler(compressResult, options, options.afterCompress)
-        );
-    }
-
-    // translate
-    if (options.sourceMap) {
-        result = debugOutput('translateWithSourceMap', options, Date.now(), (function() {
-            var tmp = translateWithSourceMap(compressResult.ast);
-            tmp.map._file = filename; // since other tools can relay on file in source map transform chain
-            tmp.map.setSourceContent(filename, source);
-            return tmp;
-        })());
-    } else {
-        result = debugOutput('translate', options, Date.now(), {
-            css: translate(compressResult.ast),
-            map: null
-        });
-    }
 
     return result;
 }
 
-function minifyStylesheet(source, options) {
-    return minify('stylesheet', source, options);
-}
+function cssoToPostcss(node, used) {
+    var postcssNode = node.loc ? node.loc.postcssNode : null;
 
-function minifyBlock(source, options) {
-    return minify('declarationList', source, options);
-}
+    if (postcssNode) {
+        // used is null when WeakSet is not supported
+        if (used === null || used.has(postcssNode)) {
+            // make node clone if it's already used in resulting tree
+            postcssNode = clone(postcssNode);
+        } else {
+            used.add(postcssNode);
+        }
+    }
 
-module.exports = {
-    version: require(410).version,
+    switch (node.type) {
+        case 'StyleSheet':
+            if (!postcssNode) {
+                postcssNode = postcss.root();
+            }
 
-    // main methods
-    minify: minifyStylesheet,
-    minifyBlock: minifyBlock,
+            postcssNode.raws = ROOT_RAWS;
+            postcssNode.nodes = listToPostcss(node.children, used);
 
-    // compress an AST
-    compress: compress,
+            break;
 
-    // css syntax parser/walkers/generator/etc
-    syntax: csstree
+        case 'Atrule':
+            if (!postcssNode) {
+                postcssNode = postcss.atRule();
+            }
+
+            postcssNode.raws = DEFAULT_RAWS;
+            postcssNode.name = node.name;
+            postcssNode.params = node.prelude ? translate(node.prelude) : '';
+            postcssNode.nodes = node.block ? listToPostcss(node.block.children, used) : undefined;
+
+            break;
+
+        case 'Rule':
+            if (!postcssNode) {
+                postcssNode = postcss.rule();
+            }
+
+            postcssNode.raws = DEFAULT_RAWS;
+            postcssNode.selector = translate(node.prelude);
+            postcssNode.nodes = listToPostcss(node.block.children, used);
+
+            break;
+
+        case 'Declaration':
+            if (!postcssNode) {
+                postcssNode = postcss.decl();
+            }
+
+            if (typeof node.important === 'string') {
+                postcssNode.raws = clone(DECL_RAWS);
+                postcssNode.raws.important = '!' + node.important;
+            } else {
+                postcssNode.raws = DECL_RAWS;
+            }
+
+            postcssNode.prop = node.property;
+            postcssNode.value = translate(node.value);
+            postcssNode.important = Boolean(node.important);
+
+            break;
+
+        case 'Comment':
+            if (!postcssNode) {
+                postcssNode = postcss.comment();
+            }
+
+            postcssNode.raws = DEFAULT_RAWS;
+            postcssNode.text = node.value;
+
+            break;
+    }
+
+    return postcssNode;
 };
-}, {"58":58,"406":406,"410":410}];
+
+module.exports = function(node) {
+    var result;
+    var used = null;
+
+    // node.js 0.10 doesn't support for WeakSet -> always clone nodes
+    if (typeof WeakSet === 'function') {
+        // use weak set to avoid using the same original postcss node twice
+        // in resulting tree, since nodes are changing on tree building
+        used = new WeakSet();
+    }
+
+    result = cssoToPostcss(node, used);
+
+    return result;
+};
+}, {"394":394,"396":396}];

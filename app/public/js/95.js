@@ -1,5 +1,5 @@
 window.modules["95"] = [function(require,module,exports){var List = require(54);
-var TYPE = require(76).TYPE;
+var TYPE = require(75).TYPE;
 
 var IDENTIFIER = TYPE.Identifier;
 var COMMA = TYPE.Comma;
@@ -39,4 +39,4 @@ module.exports = function() {
 
     return children;
 };
-}, {"54":54,"76":76}];
+}, {"54":54,"75":75}];

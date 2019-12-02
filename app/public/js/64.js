@@ -1,85 +1,32 @@
-window.modules["64"] = [function(require,module,exports){var List = require(54);
+window.modules["64"] = [function(require,module,exports){'use strict';
 
-function getFirstMatchNode(matchNode) {
-    if (matchNode.type === 'ASTNode') {
-        return matchNode.node;
-    }
-
-    if (matchNode.match.length !== 0) {
-        return getFirstMatchNode(matchNode.match[0]);
-    }
-
-    return null;
-}
-
-function getLastMatchNode(matchNode) {
-    if (matchNode.type === 'ASTNode') {
-        return matchNode.node;
-    }
-
-    if (matchNode.match.length !== 0) {
-        return getLastMatchNode(matchNode.match[matchNode.match.length - 1]);
-    }
-
-    return null;
-}
-
-function matchFragments(lexer, ast, match, type, name) {
-    function findFragments(matchNode) {
-        if (matchNode.type === 'ASTNode') {
-            return;
-        }
-
-        if (matchNode.syntax.type === type &&
-            matchNode.syntax.name === name) {
-            var start = getFirstMatchNode(matchNode);
-            var end = getLastMatchNode(matchNode);
-
-            lexer.syntax.walk(ast, function(node, item, list) {
-                if (node === start) {
-                    var nodes = new List();
-                    var loc = null;
-
-                    do {
-                        nodes.appendData(item.data);
-
-                        if (item.data === end) {
-                            break;
-                        }
-
-                        item = item.next;
-                    } while (item !== null);
-
-                    if (start.loc !== null && end.loc !== null) {
-                        loc = {
-                            source: start.loc.source,
-                            start: start.loc.start,
-                            end: end.loc.end
-                        };
-                    }
-
-                    fragments.push({
-                        parent: list,
-                        loc: loc,
-                        nodes: nodes
-                    });
-                }
+module.exports = function walk(node, fn, context) {
+    switch (node.type) {
+        case 'Group':
+            node.terms.forEach(function(term) {
+                walk(term, fn, context);
             });
-        }
+            break;
 
-        matchNode.match.forEach(findFragments);
+        case 'Function':
+        case 'Parentheses':
+            walk(node.children, fn, context);
+            break;
+
+        case 'Keyword':
+        case 'Type':
+        case 'Property':
+        case 'Combinator':
+        case 'Comma':
+        case 'Slash':
+        case 'String':
+        case 'Percent':
+            break;
+
+        default:
+            throw new Error('Unknown type: ' + node.type);
     }
 
-    var fragments = [];
-
-    if (match.matched !== null) {
-        findFragments(match.matched);
-    }
-
-    return fragments;
-}
-
-module.exports = {
-    matchFragments: matchFragments
+    fn.call(context, node);
 };
-}, {"54":54}];
+}, {}];

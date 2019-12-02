@@ -29,7 +29,7 @@ module.exports.save = function (uri, data) {
 }, {"3":3}];
 window.modules["list.model"] = [function(require,module,exports){'use strict';
 
-var striptags = require(4),
+var striptags = require(5),
     _require = require(1),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
@@ -58,4 +58,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"1":1,"2":2,"4":4,"9":9}];
+}, {"1":1,"2":2,"5":5,"9":9}];
