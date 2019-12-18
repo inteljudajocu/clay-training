@@ -1,88 +1,144 @@
-window.modules["395"] = [function(require,module,exports){var parse = require(396).syntax.parse;
+window.modules["395"] = [function(require,module,exports){var csstree = require(58);
+var parse = csstree.parse;
+var compress = require(406);
+var translate = csstree.translate;
+var translateWithSourceMap = csstree.translateWithSourceMap;
 
-function getInfo(postcssNode) {
-    return {
-        postcssNode: postcssNode
+function debugOutput(name, options, startTime, data) {
+    if (options.debug) {
+        console.error('## ' + name + ' done in %d ms\n', Date.now() - startTime);
+    }
+
+    return data;
+}
+
+function createDefaultLogger(level) {
+    var lastDebug;
+
+    return function logger(title, ast) {
+        var line = title;
+
+        if (ast) {
+            line = '[' + ((Date.now() - lastDebug) / 1000).toFixed(3) + 's] ' + line;
+        }
+
+        if (level > 1 && ast) {
+            var css = translate(ast, true);
+
+            // when level 2, limit css to 256 symbols
+            if (level === 2 && css.length > 256) {
+                css = css.substr(0, 256) + '...';
+            }
+
+            line += '\n  ' + css + '\n';
+        }
+
+        console.error(line);
+        lastDebug = Date.now();
     };
 }
 
-function appendChildren(cssoNode, nodes) {
-    cssoNode.children.fromArray(nodes.map(postcssToCsso));
-    return cssoNode;
-}
+function copy(obj) {
+    var result = {};
 
-function parseToCsso(css, config, postcssNode) {
-    var cssoNode;
-
-    try {
-        cssoNode = parse(css || '', config);
-    } catch (e) {
-        if (e.name === 'CssSyntaxError') {
-            throw postcssNode.error(e.message, { index: e.offset });
-        }
-
-        throw e;
+    for (var key in obj) {
+        result[key] = obj[key];
     }
 
-    cssoNode.loc = getInfo(postcssNode);
-
-    return cssoNode;
+    return result;
 }
 
-function postcssToCsso(node) {
-    switch (node.type) {
-        case 'root':
-            return appendChildren(
-                parseToCsso('', { context: 'stylesheet' }, node),
-                node.nodes
-            );
+function buildCompressOptions(options) {
+    options = copy(options);
 
-        case 'rule':
-            return {
-                type: 'Rule',
-                loc: getInfo(node),
-                prelude: parseToCsso(node.selector, { context: 'selectorList' }, node),
-                block: appendChildren(
-                    parseToCsso('{}', { context: 'block' }, node),
-                    node.nodes
-                )
-            };
-
-        case 'atrule':
-            var cssoNode = {
-                type: 'Atrule',
-                loc: getInfo(node),
-                name: node.name,
-                prelude: node.params
-                    ? parseToCsso(node.params, { context: 'atrulePrelude', atrule: node.name }, node)
-                    : null,
-                block: null
-            };
-
-            if (node.nodes) {
-                cssoNode.block = appendChildren(
-                    parseToCsso('{}', { context: 'block' }, node),
-                    node.nodes
-                );
-            }
-
-            return cssoNode;
-
-        case 'decl':
-            return parseToCsso(
-                (node.raws.before || '').trimLeft() + node.toString(),
-                { context: 'declaration' },
-                node
-            );
-
-        case 'comment':
-            return {
-                type: 'Comment',
-                loc: getInfo(node),
-                value: node.raws.left + node.text + node.raws.right
-            };
+    if (typeof options.logger !== 'function' && options.debug) {
+        options.logger = createDefaultLogger(options.debug);
     }
+
+    return options;
 }
 
-module.exports = postcssToCsso;
-}, {"396":396}];
+function runHandler(ast, options, handlers) {
+    if (!Array.isArray(handlers)) {
+        handlers = [handlers];
+    }
+
+    handlers.forEach(function(fn) {
+        fn(ast, options);
+    });
+}
+
+function minify(context, source, options) {
+    options = options || {};
+
+    var filename = options.filename || '<unknown>';
+    var result;
+
+    // parse
+    var ast = debugOutput('parsing', options, Date.now(),
+        parse(source, {
+            context: context,
+            filename: filename,
+            positions: Boolean(options.sourceMap)
+        })
+    );
+
+    // before compress handlers
+    if (options.beforeCompress) {
+        debugOutput('beforeCompress', options, Date.now(),
+            runHandler(ast, options, options.beforeCompress)
+        );
+    }
+
+    // compress
+    var compressResult = debugOutput('compress', options, Date.now(),
+        compress(ast, buildCompressOptions(options))
+    );
+
+    // after compress handlers
+    if (options.afterCompress) {
+        debugOutput('afterCompress', options, Date.now(),
+            runHandler(compressResult, options, options.afterCompress)
+        );
+    }
+
+    // translate
+    if (options.sourceMap) {
+        result = debugOutput('translateWithSourceMap', options, Date.now(), (function() {
+            var tmp = translateWithSourceMap(compressResult.ast);
+            tmp.map._file = filename; // since other tools can relay on file in source map transform chain
+            tmp.map.setSourceContent(filename, source);
+            return tmp;
+        })());
+    } else {
+        result = debugOutput('translate', options, Date.now(), {
+            css: translate(compressResult.ast),
+            map: null
+        });
+    }
+
+    return result;
+}
+
+function minifyStylesheet(source, options) {
+    return minify('stylesheet', source, options);
+}
+
+function minifyBlock(source, options) {
+    return minify('declarationList', source, options);
+}
+
+module.exports = {
+    version: require(410).version,
+
+    // main methods
+    minify: minifyStylesheet,
+    minifyBlock: minifyBlock,
+
+    // compress an AST
+    compress: compress,
+
+    // css syntax parser/walkers/generator/etc
+    syntax: csstree
+};
+}, {"58":58,"406":406,"410":410}];

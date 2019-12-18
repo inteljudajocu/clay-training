@@ -1,59 +1,54 @@
-window.modules["16"] = [function(require,module,exports){var assignValue = require(284),
-    copyObject = require(354),
-    createAssigner = require(356),
+window.modules["16"] = [function(require,module,exports){var baseIndexOf = require(304),
     isArrayLike = require(333),
-    isPrototype = require(328),
-    keys = require(295);
+    isString = require(377),
+    toInteger = require(379),
+    values = require(378);
 
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeMax = Math.max;
 
 /**
- * Assigns own enumerable string keyed properties of source objects to the
- * destination object. Source objects are applied from left to right.
- * Subsequent sources overwrite property assignments of previous sources.
- *
- * **Note:** This method mutates `object` and is loosely based on
- * [`Object.assign`](https://mdn.io/Object/assign).
+ * Checks if `value` is in `collection`. If `collection` is a string, it's
+ * checked for a substring of `value`, otherwise
+ * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+ * is used for equality comparisons. If `fromIndex` is negative, it's used as
+ * the offset from the end of `collection`.
  *
  * @static
  * @memberOf _
- * @since 0.10.0
- * @category Object
- * @param {Object} object The destination object.
- * @param {...Object} [sources] The source objects.
- * @returns {Object} Returns `object`.
- * @see _.assignIn
+ * @since 0.1.0
+ * @category Collection
+ * @param {Array|Object|string} collection The collection to inspect.
+ * @param {*} value The value to search for.
+ * @param {number} [fromIndex=0] The index to search from.
+ * @param- {Object} [guard] Enables use as an iteratee for methods like `_.reduce`.
+ * @returns {boolean} Returns `true` if `value` is found, else `false`.
  * @example
  *
- * function Foo() {
- *   this.a = 1;
- * }
+ * _.includes([1, 2, 3], 1);
+ * // => true
  *
- * function Bar() {
- *   this.c = 3;
- * }
+ * _.includes([1, 2, 3], 1, 2);
+ * // => false
  *
- * Foo.prototype.b = 2;
- * Bar.prototype.d = 4;
+ * _.includes({ 'a': 1, 'b': 2 }, 1);
+ * // => true
  *
- * _.assign({ 'a': 0 }, new Foo, new Bar);
- * // => { 'a': 1, 'c': 3 }
+ * _.includes('abcd', 'bc');
+ * // => true
  */
-var assign = createAssigner(function(object, source) {
-  if (isPrototype(source) || isArrayLike(source)) {
-    copyObject(source, keys(source), object);
-    return;
-  }
-  for (var key in source) {
-    if (hasOwnProperty.call(source, key)) {
-      assignValue(object, key, source[key]);
-    }
-  }
-});
+function includes(collection, value, fromIndex, guard) {
+  collection = isArrayLike(collection) ? collection : values(collection);
+  fromIndex = (fromIndex && !guard) ? toInteger(fromIndex) : 0;
 
-module.exports = assign;
-}, {"284":284,"295":295,"328":328,"333":333,"354":354,"356":356}];
+  var length = collection.length;
+  if (fromIndex < 0) {
+    fromIndex = nativeMax(length + fromIndex, 0);
+  }
+  return isString(collection)
+    ? (fromIndex <= length && collection.indexOf(value, fromIndex) > -1)
+    : (!!length && baseIndexOf(collection, value, fromIndex) > -1);
+}
+
+module.exports = includes;
+}, {"304":304,"333":333,"377":377,"378":378,"379":379}];

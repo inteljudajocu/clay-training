@@ -16,7 +16,7 @@
 
 
 .title-ingridients-feat{
-  width: 20%;
+  width: 40%;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -36,21 +36,29 @@
   border-right: outset black;
   padding-right: 5%;
   height: inherit;
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
 }
 
 
 .title-ingridients-options{
   height: 40%;
+  background-color: blue;
 }
 
 
 .title-ingridients-options-button{
   width: 16%;
   height: 60%;
+  background-color: blue;
+  color: white;
+  border: none;
+  font-size: larger;
 }
 
 
-ul{
+ul.title-ingridients-list{
   list-style-type: circle;
   display: -webkit-box;
   display: -webkit-flex;
@@ -68,7 +76,7 @@ li{
 }
 
 
-.title-ingridients-list {
+.title-ingridients-container-list {
     width: 60%;
   }
 

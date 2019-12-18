@@ -46,12 +46,10 @@ nutritionLink:
 _groups:
   settings:
     fields:
-      - title
       - items (List Items)
       - prep
       - cook
       - readyTime
-      - nutrition
       - nutritionDetail
       - nutritionLink
     _placeholder:

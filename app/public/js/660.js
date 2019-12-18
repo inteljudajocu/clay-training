@@ -1,6 +1,6 @@
 window.modules["660"] = [function(require,module,exports){'use strict';
 
-var _includes = require(17);
+var _includes = require(16);
 
 function isVideo(contentData) {
   return contentData.featureTypes && (contentData.featureTypes['Video-Original'] || contentData.featureTypes['Video-Aggregation'] || contentData.featureTypes['Video-Original News']);
@@ -23,4 +23,4 @@ function getCalloutType(contentData) {
 }
 
 module.exports = getCalloutType;
-}, {"17":17}];
+}, {"16":16}];

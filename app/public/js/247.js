@@ -1,17 +1,20 @@
 window.modules["247"] = [function(require,module,exports){var assocIndexOf = require(287);
 
 /**
- * Checks if a list cache value for `key` exists.
+ * Gets the list cache value for `key`.
  *
  * @private
- * @name has
+ * @name get
  * @memberOf ListCache
- * @param {string} key The key of the entry to check.
- * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
  */
-function listCacheHas(key) {
-  return assocIndexOf(this.__data__, key) > -1;
+function listCacheGet(key) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  return index < 0 ? undefined : data[index][1];
 }
 
-module.exports = listCacheHas;
+module.exports = listCacheGet;
 }, {"287":287}];

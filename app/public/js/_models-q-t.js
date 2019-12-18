@@ -1,21 +1,18 @@
 window.modules["recipe.model"] = [function(require,module,exports){'use strict';
 
 var _get = require(3),
-    dateFormat = require(4),
-    dateParse = require(5),
+    dateFormat = require(5),
+    dateParse = require(4),
     utils = require(2),
     has = utils.has;
 
 function formatDate(data, locals) {
   if (_get(locals, 'date')) {
-    // if locals and locals.date exists, set the article date (overriding any date already set)
-    data.date = dateFormat(locals.date); // ISO 8601 date string
+    data.date = dateFormat(locals.date);
   } else if (has(data.articleDate) || has(data.articleTime)) {
-    // make sure both date and time are set. if the user only set one, set the other to today / right now
     data.articleDate = has(data.articleDate) ? data.articleDate : dateFormat(new Date(), 'YYYY-MM-DD');
-    data.articleTime = has(data.articleTime) ? data.articleTime : dateFormat(new Date(), 'HH:mm'); // generate the `date` data from these two fields
-
-    data.date = dateFormat(dateParse("".concat(data.articleDate, " ").concat(data.articleTime))); // ISO 8601 date string
+    data.articleTime = has(data.articleTime) ? data.articleTime : dateFormat(new Date(), 'HH:mm');
+    data.date = dateFormat(dateParse("".concat(data.articleDate, " ").concat(data.articleTime)));
   }
 }
 
@@ -44,9 +41,9 @@ module.exports.save = function (ref, data) {
 window.modules["tags.model"] = [function(require,module,exports){'use strict';
 
 var _map = require(18),
-    _assign = require(16),
+    _assign = require(17),
     _set = require(15),
-    _includes = require(17),
+    _includes = require(16),
     _require = require(1),
     removeNonAlphanumericCharacters = _require.removeNonAlphanumericCharacters,
     invisibleTags = [];

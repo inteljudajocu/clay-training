@@ -9,7 +9,7 @@
       </div>
       <div class="title-ingridients">
                 <div class="title-ingridients-title">
-                      {{#if title}}<h2 >{{ title }}</h2>{{/if}}
+                      <h2 >Ingridients</h2>
                 </div>
                 <div class="title-ingridients-feat">
                         {{#if time}} <h3 class="feature title-ingridients-vdivider">Cook time: {{ time }}</h3>{{/if}}
@@ -18,8 +18,8 @@
                 </div>
       </div>
       <div class="title-ingridients-divider">
-              <div class="title-ingridients-list">
-                <ul>
+              <div class="title-ingridients-container-list">
+                <ul class="title-ingridients-list">
                         {{#each items as |item|}}
                         {{#if item.ingridients}}<li><span>{{{ item.ingridients }}}</span></li>{{/if}}
                         {{/each}}

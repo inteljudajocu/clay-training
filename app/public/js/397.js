@@ -1,5 +1,5 @@
-window.modules["397"] = [function(require,module,exports){var postcss = require(394);
-var translate = require(396).syntax.translate;
+window.modules["397"] = [function(require,module,exports){var postcss = require(396);
+var translate = require(395).syntax.translate;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 var DEFAULT_RAWS = {
@@ -150,4 +150,4 @@ module.exports = function(node) {
 
     return result;
 };
-}, {"394":394,"396":396}];
+}, {"395":395,"396":396}];

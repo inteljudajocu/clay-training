@@ -1,7 +1,7 @@
 window.modules["344"] = [function(require,module,exports){var assignValue = require(284),
     castPath = require(298),
     isIndex = require(279),
-    isObject = require(12),
+    isObject = require(13),
     toKey = require(297);
 
 /**
@@ -45,4 +45,4 @@ function baseSet(object, path, value, customizer) {
 }
 
 module.exports = baseSet;
-}, {"12":12,"279":279,"284":284,"297":297,"298":298}];
+}, {"13":13,"279":279,"284":284,"297":297,"298":298}];

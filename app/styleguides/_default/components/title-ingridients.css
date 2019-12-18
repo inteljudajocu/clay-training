@@ -12,7 +12,7 @@ $divider_color: #767676;
 }
 
 .title-ingridients-feat{
-  width: 20%;
+  width: 40%;
   display: flex;
   text-align: right;
 }
@@ -27,28 +27,35 @@ $divider_color: #767676;
   border-right: outset black;
   padding-right: 5%;
   height: inherit;
+  width: max-content;
 }
 
 .title-ingridients-options{
   height: 40%;
+  background-color: blue;
 }
 
 .title-ingridients-options-button{
   width: 16%;
   height: 60%;
+  background-color: blue;
+  color: white;
+  border: none;
+  font-size: larger;
 }
 
-ul{
+ul.title-ingridients-list{
   list-style-type: circle;
   display: flex;
   flex-wrap: wrap;
 }
+
 li{
   width: 50%;
   margin-bottom: 2%;
 }
 
-.title-ingridients-list {
+.title-ingridients-container-list {
     width: 60%;
   }
 

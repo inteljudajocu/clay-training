@@ -1,33 +1,26 @@
-window.modules["176"] = [function(require,module,exports){var getISOYear = require(174)
-var startOfISOWeek = require(177)
+window.modules["176"] = [function(require,module,exports){var startOfWeek = require(182)
 
 /**
- * @category ISO Week-Numbering Year Helpers
- * @summary Return the start of an ISO week-numbering year for the given date.
+ * @category ISO Week Helpers
+ * @summary Return the start of an ISO week for the given date.
  *
  * @description
- * Return the start of an ISO week-numbering year,
- * which always starts 3 days before the year's first Thursday.
+ * Return the start of an ISO week for the given date.
  * The result will be in the local timezone.
  *
  * ISO week-numbering year: http://en.wikipedia.org/wiki/ISO_week_date
  *
  * @param {Date|String|Number} date - the original date
- * @returns {Date} the start of an ISO year
+ * @returns {Date} the start of an ISO week
  *
  * @example
- * // The start of an ISO week-numbering year for 2 July 2005:
- * var result = startOfISOYear(new Date(2005, 6, 2))
- * //=> Mon Jan 03 2005 00:00:00
+ * // The start of an ISO week for 2 September 2014 11:55:00:
+ * var result = startOfISOWeek(new Date(2014, 8, 2, 11, 55, 0))
+ * //=> Mon Sep 01 2014 00:00:00
  */
-function startOfISOYear (dirtyDate) {
-  var year = getISOYear(dirtyDate)
-  var fourthOfJanuary = new Date(0)
-  fourthOfJanuary.setFullYear(year, 0, 4)
-  fourthOfJanuary.setHours(0, 0, 0, 0)
-  var date = startOfISOWeek(fourthOfJanuary)
-  return date
+function startOfISOWeek (dirtyDate) {
+  return startOfWeek(dirtyDate, {weekStartsOn: 1})
 }
 
-module.exports = startOfISOYear
-}, {"174":174,"177":177}];
+module.exports = startOfISOWeek
+}, {"182":182}];

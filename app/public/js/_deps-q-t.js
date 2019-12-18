@@ -4206,9 +4206,9 @@ Object.keys(EVENTS).forEach(function(name) {
 window.modules["224"] = [function(require,module,exports){module.exports = Tokenizer;
 
 var decodeCodePoint = require(203);
-var entityMap = require(202);
-var legacyMap = require(201);
-var xmlMap = require(200);
+var entityMap = require(201);
+var legacyMap = require(200);
+var xmlMap = require(202);
 
 var i = 0;
 
@@ -5362,7 +5362,7 @@ function toLower(value) {
 
 module.exports = toLower;
 }, {"352":352}];
-window.modules["387"] = [function(require,module,exports){var isObject = require(12),
+window.modules["387"] = [function(require,module,exports){var isObject = require(13),
     isSymbol = require(348);
 
 /** Used as references for various `Number` constants. */
@@ -5428,7 +5428,7 @@ function toNumber(value) {
 }
 
 module.exports = toNumber;
-}, {"12":12,"348":348}];
+}, {"13":13,"348":348}];
 window.modules["352"] = [function(require,module,exports){var baseToString = require(347);
 
 /**
@@ -5637,7 +5637,7 @@ window.modules["435"] = [function(require,module,exports){module.exports = funct
     return [A, B, C];
 };
 }, {}];
-window.modules["451"] = [function(require,module,exports){'use strict';
+window.modules["452"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6852,7 +6852,7 @@ function tokenizer(input) {
 module.exports = exports['default'];
 
 }, {}];
-window.modules["480"] = [function(require,module,exports){'use strict';
+window.modules["482"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6912,7 +6912,7 @@ var Root = function (_Container) {
 
 exports.default = Root;
 module.exports = exports['default'];}, {"470":470,"487":487}];
-window.modules["482"] = [function(require,module,exports){'use strict';
+window.modules["478"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7297,7 +7297,7 @@ function tokenize(input) {
     return tokens;
 }
 module.exports = exports['default'];}, {"468":468}];
-window.modules["504"] = [function(require,module,exports){'use strict';
+window.modules["505"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -8635,7 +8635,7 @@ var SafeParser = function (_Parser) {
 module.exports = SafeParser;
 
 }, {"516":516,"517":517,"518":518}];
-window.modules["536"] = [function(require,module,exports){'use strict';
+window.modules["537"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -16123,7 +16123,7 @@ module.exports = function rpad(str, length, padStr) {
   return pad(str, length, padStr, 'right');
 };
 }, {"644":644}];
-window.modules["645"] = [function(require,module,exports){var makeString = require(586);
+window.modules["646"] = [function(require,module,exports){var makeString = require(586);
 var defaultToWhiteSpace = require(601);
 var nativeTrimRight = String.prototype.trimRight;
 
@@ -16207,7 +16207,7 @@ module.exports = function stripTags(str) {
   return makeString(str).replace(/<\/?[^>]+>/g, '');
 };
 }, {"586":586}];
-window.modules["646"] = [function(require,module,exports){var adjacent = require(600);
+window.modules["648"] = [function(require,module,exports){var adjacent = require(600);
 
 module.exports = function succ(str) {
   return adjacent(str, 1);
@@ -16260,7 +16260,7 @@ window.modules["609"] = [function(require,module,exports){module.exports = funct
   return Math.round(num * factor) / factor;
 };
 }, {}];
-window.modules["621"] = [function(require,module,exports){var rtrim = require(645);
+window.modules["621"] = [function(require,module,exports){var rtrim = require(646);
 
 module.exports = function toSentence(array, separator, lastSeparator, serial) {
   separator = separator || ', ';
@@ -16272,7 +16272,7 @@ module.exports = function toSentence(array, separator, lastSeparator, serial) {
 
   return a.length ? a.join(separator) + lastSeparator + lastMember : lastMember;
 };
-}, {"645":645}];
+}, {"646":646}];
 window.modules["622"] = [function(require,module,exports){var toSentence = require(621);
 
 module.exports = function toSentenceSerial(array, sep, lastSep) {

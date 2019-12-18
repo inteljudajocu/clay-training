@@ -1,23 +1,15 @@
 window.modules["39"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51);
+const getComponentName = require(42),
+  { strCheck } = require(51);
 
-/**
- * Remove the site's slug for the url-patterned prefix
- *
- * @param  {String} uri
- * @param  {Object} site
- * @return {String}
- */
-module.exports = function (uri, site) {
-  var { slug, prefix, host, path } = site,
-    hasSlash = uri.indexOf('/_') !== -1;
+module.exports = (page, componentName) => {
+  strCheck(componentName);
 
-  if (!prefix) {
-    prefix = path && path.length > 1 ? `${host}${path}` : host;
+  if (typeof page !== 'object') {
+    throw new Error(`Page argument must be an object, not ${typeof page}`);
   }
 
-  isUriStringCheck.strCheck(uri);
-  return uri.replace(`${slug}${hasSlash ? '/' : ''}`, `${prefix}${hasSlash ? '/' : ''}`);
+  return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
 };
-}, {"51":51}];
+}, {"42":42,"51":51}];

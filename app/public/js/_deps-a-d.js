@@ -2468,9 +2468,9 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
   return index;
 };
 }, {}];
-window.modules["199"] = [function(require,module,exports){var entityMap = require(202),
-    legacyMap = require(201),
-    xmlMap = require(200),
+window.modules["199"] = [function(require,module,exports){var entityMap = require(201),
+    legacyMap = require(200),
+    xmlMap = require(202),
     decodeCodePoint = require(203);
 
 var decodeXMLStrict = getStrictDecoder(xmlMap),
@@ -3934,7 +3934,7 @@ CollectingHandler.prototype.restart = function() {
     }
 };
 }, {"216":216}];
-window.modules["16"] = [function(require,module,exports){var assignValue = require(284),
+window.modules["17"] = [function(require,module,exports){var assignValue = require(284),
     copyObject = require(354),
     createAssigner = require(356),
     isArrayLike = require(333),
@@ -4085,8 +4085,8 @@ var defaults = baseRest(function(object, sources) {
 
 module.exports = defaults;
 }, {"285":285,"341":341,"357":357,"376":376}];
-window.modules["397"] = [function(require,module,exports){var postcss = require(394);
-var translate = require(396).syntax.translate;
+window.modules["397"] = [function(require,module,exports){var postcss = require(396);
+var translate = require(395).syntax.translate;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 var DEFAULT_RAWS = {
@@ -4237,7 +4237,7 @@ module.exports = function(node) {
 
     return result;
 };
-}, {"394":394,"396":396}];
+}, {"395":395,"396":396}];
 window.modules["398"] = [function(require,module,exports){var resolveKeyword = require(58).keyword;
 
 module.exports = function cleanAtrule(node, item, list) {
@@ -4318,8 +4318,8 @@ window.modules["406"] = [function(require,module,exports){var List = require(58)
 var clone = require(58).clone;
 var usageUtils = require(407);
 var clean = require(405);
-var replace = require(408);
-var restructure = require(409);
+var replace = require(409);
+var restructure = require(408);
 var walkRules = require(58).walkRules;
 
 function readChunk(children, specialComments) {
@@ -5187,7 +5187,7 @@ module.exports = function compressBackground(node) {
     node.children = new List().fromArray(newValue);
 };
 }, {"58":58}];
-window.modules["420"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
+window.modules["421"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
     var prev = item.prev;
     var next = item.next;
 
@@ -6712,7 +6712,7 @@ exports.default = Declaration;
 module.exports = exports['default'];
 
 }, {"439":439}];
-window.modules["478"] = [function(require,module,exports){'use strict';
+window.modules["477"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7022,7 +7022,7 @@ window.modules["486"] = [function(require,module,exports){'use strict';
 exports.__esModule = true;
 exports.universal = exports.tag = exports.string = exports.selector = exports.root = exports.pseudo = exports.nesting = exports.id = exports.comment = exports.combinator = exports.className = exports.attribute = undefined;
 
-var _attribute = require(478);
+var _attribute = require(477);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
@@ -7046,15 +7046,15 @@ var _nesting = require(472);
 
 var _nesting2 = _interopRequireDefault(_nesting);
 
-var _pseudo = require(477);
+var _pseudo = require(480);
 
 var _pseudo2 = _interopRequireDefault(_pseudo);
 
-var _root = require(480);
+var _root = require(482);
 
 var _root2 = _interopRequireDefault(_root);
 
-var _selector = require(482);
+var _selector = require(478);
 
 var _selector2 = _interopRequireDefault(_selector);
 
@@ -12727,7 +12727,7 @@ window.modules["659"] = [function(require,module,exports){'use strict';
 var _get = require(3),
     _join = require(384),
     _map = require(18),
-    _isObject = require(12);
+    _isObject = require(13);
 /**
  * Comma separate a list of author strings
  * or simple-list objects
@@ -12757,10 +12757,10 @@ function formatSimpleByline() {
 }
 
 module.exports = formatSimpleByline;
-}, {"3":3,"12":12,"18":18,"384":384}];
+}, {"3":3,"13":13,"18":18,"384":384}];
 window.modules["660"] = [function(require,module,exports){'use strict';
 
-var _includes = require(17);
+var _includes = require(16);
 
 function isVideo(contentData) {
   return contentData.featureTypes && (contentData.featureTypes['Video-Original'] || contentData.featureTypes['Video-Aggregation'] || contentData.featureTypes['Video-Original News']);
@@ -12783,4 +12783,4 @@ function getCalloutType(contentData) {
 }
 
 module.exports = getCalloutType;
-}, {"17":17}];
+}, {"16":16}];

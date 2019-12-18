@@ -4,9 +4,11 @@ var _require = require(10),
     search = _require.search,
     query = {
   size: 5,
-  sort: [{
-    date: 'desc'
-  }],
+  // sort: [
+  //   {
+  //     date: 'desc'
+  //   }
+  // ],
   query: {
     match_all: {}
   }

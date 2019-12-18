@@ -2,8 +2,8 @@ window.modules["406"] = [function(require,module,exports){var List = require(58)
 var clone = require(58).clone;
 var usageUtils = require(407);
 var clean = require(405);
-var replace = require(408);
-var restructure = require(409);
+var replace = require(409);
+var restructure = require(408);
 var walkRules = require(58).walkRules;
 
 function readChunk(children, specialComments) {

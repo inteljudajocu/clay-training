@@ -1,9 +1,9 @@
 window.modules["tags.model"] = [function(require,module,exports){'use strict';
 
 var _map = require(18),
-    _assign = require(16),
+    _assign = require(17),
     _set = require(15),
-    _includes = require(17),
+    _includes = require(16),
     _require = require(1),
     removeNonAlphanumericCharacters = _require.removeNonAlphanumericCharacters,
     invisibleTags = [];

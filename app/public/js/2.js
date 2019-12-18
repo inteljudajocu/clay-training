@@ -4,7 +4,7 @@ window.modules["2"] = [function(require,module,exports){(function (process){
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 var _isArray = require(275),
-    _isObject = require(12),
+    _isObject = require(13),
     _isEmpty = require(14),
     _isString = require(377),
     _isNull = require(381),
@@ -212,4 +212,4 @@ module.exports.isInstance = isInstance;
 module.exports.urlToCanonicalUrl = urlToCanonicalUrl;
 module.exports.prefixElasticIndex = prefixElasticIndex;
 
-}).call(this,require(233))}, {"3":3,"12":12,"14":14,"233":233,"275":275,"377":377,"381":381,"383":383,"652":652}];
+}).call(this,require(233))}, {"3":3,"13":13,"14":14,"233":233,"275":275,"377":377,"381":381,"383":383,"652":652}];

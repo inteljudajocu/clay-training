@@ -1,4 +1,4 @@
-window.modules["387"] = [function(require,module,exports){var isObject = require(12),
+window.modules["387"] = [function(require,module,exports){var isObject = require(13),
     isSymbol = require(348);
 
 /** Used as references for various `Number` constants. */
@@ -64,4 +64,4 @@ function toNumber(value) {
 }
 
 module.exports = toNumber;
-}, {"12":12,"348":348}];
+}, {"13":13,"348":348}];

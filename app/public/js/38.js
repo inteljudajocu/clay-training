@@ -3,21 +3,16 @@ window.modules["38"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * Remove the url-patterned prefix for the site's slug.
- *
- * @param  {String} uri
- * @param  {Object} site
- * @return {String}
+ * First test if argument passed in is a String. If true, get component instance
+ * from uri without the component version. Otherwise, throw an error.
+ * @example /_components/text/instances/0@published returns 0
+ * @param  {string} uri
+ * @return {string|null}
  */
-module.exports = function (uri, site) {
-  var { host, path, slug, prefix } = site,
-    hasSlash = uri.indexOf('/_') !== -1;
-
-  if (!prefix) {
-    prefix = path && path.length > 1 ? `${host}${path}` : host;
-  }
-
+module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return uri.replace(`${prefix}${hasSlash ? '/' : ''}`, `${slug}${hasSlash ? '/' : ''}`);
+  const result = /\/_components\/.+?\/instances\/([^\.@]+)/.exec(uri);
+
+  return result && result[1];
 };
 }, {"51":51}];

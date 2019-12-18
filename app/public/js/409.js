@@ -1,36 +1,23 @@
-window.modules["409"] = [function(require,module,exports){var prepare = require(432);
-var mergeAtrule = require(424);
-var initialMergeRuleset = require(425);
-var disjoinRuleset = require(427);
-var restructShorthand = require(428);
-var restructBlock = require(429);
-var mergeRuleset = require(430);
-var restructRuleset = require(431);
-
-module.exports = function(ast, options) {
-    // prepare ast for restructing
-    var indexer = prepare(ast, options);
-    options.logger('prepare', ast);
-
-    mergeAtrule(ast, options);
-    options.logger('mergeAtrule', ast);
-
-    initialMergeRuleset(ast);
-    options.logger('initialMergeRuleset', ast);
-
-    disjoinRuleset(ast);
-    options.logger('disjoinRuleset', ast);
-
-    restructShorthand(ast, indexer);
-    options.logger('restructShorthand', ast);
-
-    restructBlock(ast);
-    options.logger('restructBlock', ast);
-
-    mergeRuleset(ast);
-    options.logger('mergeRuleset', ast);
-
-    restructRuleset(ast);
-    options.logger('restructRuleset', ast);
+window.modules["409"] = [function(require,module,exports){var walk = require(58).walkUp;
+var handlers = {
+    Atrule: require(411),
+    AttributeSelector: require(413),
+    Value: require(418),
+    Dimension: require(414),
+    Percentage: require(415),
+    Number: require(415),
+    String: require(416),
+    Url: require(417),
+    HexColor: require(423).compressHex,
+    Identifier: require(423).compressIdent,
+    Function: require(423).compressFunction
 };
-}, {"424":424,"425":425,"427":427,"428":428,"429":429,"430":430,"431":431,"432":432}];
+
+module.exports = function(ast) {
+    walk(ast, function(node, item, list) {
+        if (handlers.hasOwnProperty(node.type)) {
+            handlers[node.type].call(this, node, item, list);
+        }
+    });
+};
+}, {"58":58,"411":411,"413":413,"414":414,"415":415,"416":416,"417":417,"418":418,"423":423}];

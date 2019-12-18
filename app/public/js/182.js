@@ -1,4 +1,4 @@
-window.modules["182"] = [function(require,module,exports){var parse = require(5)
+window.modules["182"] = [function(require,module,exports){var parse = require(4)
 
 /**
  * @category Week Helpers
@@ -36,4 +36,4 @@ function startOfWeek (dirtyDate, dirtyOptions) {
 }
 
 module.exports = startOfWeek
-}, {"5":5}];
+}, {"4":4}];

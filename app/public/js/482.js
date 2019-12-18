@@ -2,6 +2,8 @@ window.modules["482"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _container = require(487);
 
 var _container2 = _interopRequireDefault(_container);
@@ -16,20 +18,43 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Selector = function (_Container) {
-    _inherits(Selector, _Container);
+var Root = function (_Container) {
+    _inherits(Root, _Container);
 
-    function Selector(opts) {
-        _classCallCheck(this, Selector);
+    function Root(opts) {
+        _classCallCheck(this, Root);
 
         var _this = _possibleConstructorReturn(this, _Container.call(this, opts));
 
-        _this.type = _types.SELECTOR;
+        _this.type = _types.ROOT;
         return _this;
     }
 
-    return Selector;
+    Root.prototype.toString = function toString() {
+        var str = this.reduce(function (memo, selector) {
+            var sel = String(selector);
+            return sel ? memo + sel + ',' : '';
+        }, '').slice(0, -1);
+        return this.trailingComma ? str + ',' : str;
+    };
+
+    Root.prototype.error = function error(message, options) {
+        if (this._error) {
+            return this._error(message, options);
+        } else {
+            return new Error(message);
+        }
+    };
+
+    _createClass(Root, [{
+        key: 'errorGenerator',
+        set: function set(handler) {
+            this._error = handler;
+        }
+    }]);
+
+    return Root;
 }(_container2.default);
 
-exports.default = Selector;
+exports.default = Root;
 module.exports = exports['default'];}, {"470":470,"487":487}];

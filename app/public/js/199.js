@@ -1,6 +1,6 @@
-window.modules["199"] = [function(require,module,exports){var entityMap = require(202),
-    legacyMap = require(201),
-    xmlMap = require(200),
+window.modules["199"] = [function(require,module,exports){var entityMap = require(201),
+    legacyMap = require(200),
+    xmlMap = require(202),
     decodeCodePoint = require(203);
 
 var decodeXMLStrict = getStrictDecoder(xmlMap),

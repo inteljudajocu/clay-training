@@ -1,32 +1,24 @@
 window.modules["12"] = [function(require,module,exports){/**
- * Checks if `value` is the
- * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
- * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ * Gets the first element of `array`.
  *
  * @static
  * @memberOf _
  * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @alias first
+ * @category Array
+ * @param {Array} array The array to query.
+ * @returns {*} Returns the first element of `array`.
  * @example
  *
- * _.isObject({});
- * // => true
+ * _.head([1, 2, 3]);
+ * // => 1
  *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
+ * _.head([]);
+ * // => undefined
  */
-function isObject(value) {
-  var type = typeof value;
-  return value != null && (type == 'object' || type == 'function');
+function head(array) {
+  return (array && array.length) ? array[0] : undefined;
 }
 
-module.exports = isObject;
+module.exports = head;
 }, {}];
