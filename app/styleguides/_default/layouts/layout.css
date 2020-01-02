@@ -42,7 +42,7 @@ html {
 }
 
 .layout {
-  background-color: $background-primary-color;
+  background-color: aliceblue;
   margin: 0;
   padding: 0;
   width: 100%;

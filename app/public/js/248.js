@@ -1,36 +1,17 @@
 window.modules["248"] = [function(require,module,exports){var assocIndexOf = require(287);
 
-/** Used for built-in method references. */
-var arrayProto = Array.prototype;
-
-/** Built-in value references. */
-var splice = arrayProto.splice;
-
 /**
- * Removes `key` and its value from the list cache.
+ * Checks if a list cache value for `key` exists.
  *
  * @private
- * @name delete
+ * @name has
  * @memberOf ListCache
- * @param {string} key The key of the value to remove.
- * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function listCacheDelete(key) {
-  var data = this.__data__,
-      index = assocIndexOf(data, key);
-
-  if (index < 0) {
-    return false;
-  }
-  var lastIndex = data.length - 1;
-  if (index == lastIndex) {
-    data.pop();
-  } else {
-    splice.call(data, index, 1);
-  }
-  --this.size;
-  return true;
+function listCacheHas(key) {
+  return assocIndexOf(this.__data__, key) > -1;
 }
 
-module.exports = listCacheDelete;
+module.exports = listCacheHas;
 }, {"287":287}];

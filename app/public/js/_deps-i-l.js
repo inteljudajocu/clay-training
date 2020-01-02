@@ -1931,36 +1931,36 @@ function numberIsNaN (obj) {
 
 }).call(this,require(22).Buffer)}, {"19":19,"22":22,"23":23}];
 window.modules["24"] = [function(require,module,exports){'use strict';
-module.exports.findComponentRefInPage = require(39);
-module.exports.getComponentInstance = require(38);
-module.exports.getLayoutInstance = require(43);
-module.exports.getComponentName = require(42);
-module.exports.getLayoutName = require(48);
-module.exports.getComponentVersion = require(44);
-module.exports.getPageInstance = require(46);
-module.exports.getPageVersion = require(47);
-module.exports.getListInstance = require(45);
-module.exports.getPrefix = require(49);
-module.exports.isComponent = require(50);
-module.exports.isLayout = require(25);
-module.exports.isLayoutMeta = require(41);
-module.exports.isDefaultComponent = require(26);
-module.exports.isDefaultLayout = require(28);
-module.exports.isPage = require(27);
-module.exports.isPageMeta = require(40);
-module.exports.isPublished = require(30);
-module.exports.isList = require(29);
-module.exports.isUri = require(31);
-module.exports.isUser = require(37);
-module.exports.replaceVersion = require(32);
-module.exports.uriPrefixToSlug = require(33);
-module.exports.uriSlugToPrefix = require(34);
-module.exports.jsonPrefixToSlug = require(35);
-module.exports.jsonSlugToPrefix = require(36);
+module.exports.findComponentRefInPage = require(47);
+module.exports.getComponentInstance = require(46);
+module.exports.getLayoutInstance = require(26);
+module.exports.getComponentName = require(50);
+module.exports.getLayoutName = require(30);
+module.exports.getComponentVersion = require(25);
+module.exports.getPageInstance = require(27);
+module.exports.getPageVersion = require(29);
+module.exports.getListInstance = require(28);
+module.exports.getPrefix = require(31);
+module.exports.isComponent = require(32);
+module.exports.isLayout = require(33);
+module.exports.isLayoutMeta = require(48);
+module.exports.isDefaultComponent = require(34);
+module.exports.isDefaultLayout = require(37);
+module.exports.isPage = require(35);
+module.exports.isPageMeta = require(49);
+module.exports.isPublished = require(38);
+module.exports.isList = require(36);
+module.exports.isUri = require(39);
+module.exports.isUser = require(45);
+module.exports.replaceVersion = require(41);
+module.exports.uriPrefixToSlug = require(40);
+module.exports.uriSlugToPrefix = require(42);
+module.exports.jsonPrefixToSlug = require(43);
+module.exports.jsonSlugToPrefix = require(44);
 }, {"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50}];
-window.modules["39"] = [function(require,module,exports){'use strict';
+window.modules["47"] = [function(require,module,exports){'use strict';
 
-const getComponentName = require(42),
+const getComponentName = require(50),
   { strCheck } = require(51);
 
 module.exports = (page, componentName) => {
@@ -1972,8 +1972,8 @@ module.exports = (page, componentName) => {
 
   return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
 };
-}, {"42":42,"51":51}];
-window.modules["38"] = [function(require,module,exports){'use strict';
+}, {"50":50,"51":51}];
+window.modules["46"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -1991,7 +1991,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["42"] = [function(require,module,exports){'use strict';
+window.modules["50"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2011,7 +2011,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["44"] = [function(require,module,exports){'use strict';
+window.modules["25"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2029,7 +2029,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["43"] = [function(require,module,exports){'use strict';
+window.modules["26"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2047,7 +2047,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["48"] = [function(require,module,exports){'use strict';
+window.modules["30"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2067,7 +2067,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["45"] = [function(require,module,exports){'use strict';
+window.modules["28"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2085,7 +2085,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["46"] = [function(require,module,exports){'use strict';
+window.modules["27"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2103,7 +2103,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["47"] = [function(require,module,exports){'use strict';
+window.modules["29"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2121,7 +2121,7 @@ module.exports = function (uri) {
   return result && result[1];
 };
 }, {"51":51}];
-window.modules["49"] = [function(require,module,exports){'use strict';
+window.modules["31"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2135,7 +2135,7 @@ module.exports = function (uri) {
   return uri.split(/\/_(pages|components|lists|uris|schedule|users|layouts)/)[0];
 };
 }, {"51":51}];
-window.modules["50"] = [function(require,module,exports){'use strict';
+window.modules["32"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2150,7 +2150,7 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_components/') > -1;
 };
 }, {"51":51}];
-window.modules["26"] = [function(require,module,exports){'use strict';
+window.modules["34"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2166,7 +2166,7 @@ module.exports = function (uri) {
   return !!uri.match(/\/_components\/[A-Za-z0-9\-]+$/);
 };
 }, {"51":51}];
-window.modules["28"] = [function(require,module,exports){'use strict';
+window.modules["37"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2182,7 +2182,7 @@ module.exports = function (uri) {
   return !!uri.match(/\/_layouts\/[A-Za-z0-9\-]+$/);
 };
 }, {"51":51}];
-window.modules["25"] = [function(require,module,exports){'use strict';
+window.modules["33"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2197,11 +2197,11 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_layouts/') > -1;
 };
 }, {"51":51}];
-window.modules["41"] = [function(require,module,exports){'use strict';
+window.modules["48"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51),
-  isLayout = require(25),
-  getLayoutInstance = require(43);
+  isLayout = require(33),
+  getLayoutInstance = require(26);
 
 /**
  * First test if argument is a String. If true, test if '/_layouts/:name/instances/:id/meta' is in the string.
@@ -2213,8 +2213,8 @@ module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
   return isLayout(uri) && !!getLayoutInstance(uri) && !!uri.match(/\/meta$/i);
 };
-}, {"25":25,"43":43,"51":51}];
-window.modules["29"] = [function(require,module,exports){'use strict';
+}, {"26":26,"33":33,"51":51}];
+window.modules["36"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2230,7 +2230,7 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_lists/') > -1;
 };
 }, {"51":51}];
-window.modules["27"] = [function(require,module,exports){'use strict';
+window.modules["35"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2245,10 +2245,10 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_pages/') > -1;
 };
 }, {"51":51}];
-window.modules["40"] = [function(require,module,exports){'use strict';
+window.modules["49"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51),
-  isPage = require(27);
+  isPage = require(35);
 
 /**
  * First test if argument is a String. If true, test if '/_pages/:id/meta' is in the string.
@@ -2260,8 +2260,8 @@ module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
   return isPage(uri) && !!uri.match(/\/meta$/i);
 };
-}, {"27":27,"51":51}];
-window.modules["30"] = [function(require,module,exports){'use strict';
+}, {"35":35,"51":51}];
+window.modules["38"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2276,7 +2276,7 @@ module.exports = function (uri) {
   return uri.indexOf('@published') !== -1;
 };
 }, {"51":51}];
-window.modules["31"] = [function(require,module,exports){'use strict';
+window.modules["39"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2291,7 +2291,7 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_uris/') > -1;
 };
 }, {"51":51}];
-window.modules["37"] = [function(require,module,exports){'use strict';
+window.modules["45"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2307,7 +2307,7 @@ module.exports = function (uri) {
   return uri.toLowerCase().indexOf('/_users/') > -1;
 };
 }, {"51":51}];
-window.modules["35"] = [function(require,module,exports){'use strict';
+window.modules["43"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2336,7 +2336,7 @@ module.exports = function (json, site, ref = false) {
   return json.replace(searchRegex, replaceString);
 };
 }, {"51":51}];
-window.modules["36"] = [function(require,module,exports){'use strict';
+window.modules["44"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2366,7 +2366,7 @@ module.exports = function (site, ref = false) {
   };
 };
 }, {"51":51}];
-window.modules["32"] = [function(require,module,exports){'use strict';
+window.modules["41"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2387,7 +2387,7 @@ module.exports = function (uri, version) {
   }
 };
 }, {"51":51}];
-window.modules["33"] = [function(require,module,exports){'use strict';
+window.modules["40"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -2410,7 +2410,7 @@ module.exports = function (uri, site) {
   return uri.replace(`${prefix}${hasSlash ? '/' : ''}`, `${slug}${hasSlash ? '/' : ''}`);
 };
 }, {"51":51}];
-window.modules["34"] = [function(require,module,exports){'use strict';
+window.modules["42"] = [function(require,module,exports){'use strict';
 
 const isUriStringCheck = require(51);
 
@@ -3542,10 +3542,10 @@ function differenceInCalendarDays (dirtyDateLeft, dirtyDateRight) {
 
 module.exports = differenceInCalendarDays
 }, {"169":169}];
-window.modules["5"] = [function(require,module,exports){var getDayOfYear = require(174)
+window.modules["6"] = [function(require,module,exports){var getDayOfYear = require(173)
 var getISOWeek = require(171)
-var getISOYear = require(173)
-var parse = require(4)
+var getISOYear = require(174)
+var parse = require(5)
 var isValid = require(170)
 var enLocale = require(172)
 
@@ -3870,8 +3870,8 @@ function addLeadingZeros (number, targetLength) {
 }
 
 module.exports = format
-}, {"4":4,"170":170,"171":171,"172":172,"173":173,"174":174}];
-window.modules["174"] = [function(require,module,exports){var parse = require(4)
+}, {"5":5,"170":170,"171":171,"172":172,"173":173,"174":174}];
+window.modules["173"] = [function(require,module,exports){var parse = require(5)
 var startOfYear = require(175)
 var differenceInCalendarDays = require(168)
 
@@ -3898,10 +3898,10 @@ function getDayOfYear (dirtyDate) {
 }
 
 module.exports = getDayOfYear
-}, {"4":4,"168":168,"175":175}];
-window.modules["171"] = [function(require,module,exports){var parse = require(4)
-var startOfISOWeek = require(176)
-var startOfISOYear = require(177)
+}, {"5":5,"168":168,"175":175}];
+window.modules["171"] = [function(require,module,exports){var parse = require(5)
+var startOfISOWeek = require(177)
+var startOfISOYear = require(176)
 
 var MILLISECONDS_IN_WEEK = 604800000
 
@@ -3933,9 +3933,9 @@ function getISOWeek (dirtyDate) {
 }
 
 module.exports = getISOWeek
-}, {"4":4,"176":176,"177":177}];
-window.modules["173"] = [function(require,module,exports){var parse = require(4)
-var startOfISOWeek = require(176)
+}, {"5":5,"176":176,"177":177}];
+window.modules["174"] = [function(require,module,exports){var parse = require(5)
+var startOfISOWeek = require(177)
 
 /**
  * @category ISO Week-Numbering Year Helpers
@@ -3979,7 +3979,7 @@ function getISOYear (dirtyDate) {
 }
 
 module.exports = getISOYear
-}, {"4":4,"176":176}];
+}, {"5":5,"177":177}];
 window.modules["178"] = [function(require,module,exports){/**
  * @category Common Helpers
  * @summary Is the given argument an instance of Date?
@@ -4267,7 +4267,7 @@ module.exports = {
   format: buildFormatLocale()
 }
 }, {"180":180,"181":181}];
-window.modules["4"] = [function(require,module,exports){var getTimezoneOffsetInMilliseconds = require(167)
+window.modules["5"] = [function(require,module,exports){var getTimezoneOffsetInMilliseconds = require(167)
 var isDate = require(178)
 
 var MILLISECONDS_IN_HOUR = 3600000
@@ -4600,7 +4600,7 @@ function dayOfISOYear (isoYear, week, day) {
 
 module.exports = parse
 }, {"167":167,"178":178}];
-window.modules["169"] = [function(require,module,exports){var parse = require(4)
+window.modules["169"] = [function(require,module,exports){var parse = require(5)
 
 /**
  * @category Day Helpers
@@ -4625,8 +4625,8 @@ function startOfDay (dirtyDate) {
 }
 
 module.exports = startOfDay
-}, {"4":4}];
-window.modules["176"] = [function(require,module,exports){var startOfWeek = require(182)
+}, {"5":5}];
+window.modules["177"] = [function(require,module,exports){var startOfWeek = require(182)
 
 /**
  * @category ISO Week Helpers
@@ -4652,8 +4652,8 @@ function startOfISOWeek (dirtyDate) {
 
 module.exports = startOfISOWeek
 }, {"182":182}];
-window.modules["177"] = [function(require,module,exports){var getISOYear = require(173)
-var startOfISOWeek = require(176)
+window.modules["176"] = [function(require,module,exports){var getISOYear = require(174)
+var startOfISOWeek = require(177)
 
 /**
  * @category ISO Week-Numbering Year Helpers
@@ -4684,8 +4684,8 @@ function startOfISOYear (dirtyDate) {
 }
 
 module.exports = startOfISOYear
-}, {"173":173,"176":176}];
-window.modules["182"] = [function(require,module,exports){var parse = require(4)
+}, {"174":174,"177":177}];
+window.modules["182"] = [function(require,module,exports){var parse = require(5)
 
 /**
  * @category Week Helpers
@@ -4723,8 +4723,8 @@ function startOfWeek (dirtyDate, dirtyOptions) {
 }
 
 module.exports = startOfWeek
-}, {"4":4}];
-window.modules["175"] = [function(require,module,exports){var parse = require(4)
+}, {"5":5}];
+window.modules["175"] = [function(require,module,exports){var parse = require(5)
 
 /**
  * @category Year Helpers
@@ -4751,7 +4751,7 @@ function startOfYear (dirtyDate) {
 }
 
 module.exports = startOfYear
-}, {"4":4}];
+}, {"5":5}];
 window.modules["183"] = [function(require,module,exports){/*
   Module dependencies
 */
@@ -5139,18 +5139,18 @@ window.modules["189"] = [function(require,module,exports){var DomUtils = module.
 
 [
 	require(195),
+	require(193),
+	require(194),
 	require(191),
 	require(192),
-	require(194),
-	require(190),
-	require(193)
+	require(190)
 ].forEach(function(ext){
 	Object.keys(ext).forEach(function(key){
 		DomUtils[key] = ext[key].bind(DomUtils);
 	});
 });
 }, {"190":190,"191":191,"192":192,"193":193,"194":194,"195":195}];
-window.modules["190"] = [function(require,module,exports){var ElementType = require(184);
+window.modules["192"] = [function(require,module,exports){var ElementType = require(184);
 var isTag = exports.isTag = ElementType.isTag;
 
 exports.testElement = function(options, element){
@@ -6341,7 +6341,7 @@ function isEmpty(value) {
 module.exports = isEmpty;
 }, {"275":275,"276":276,"277":277,"278":278,"311":311,"327":327,"328":328,"333":333}];
 window.modules["317"] = [function(require,module,exports){var baseGetTag = require(300),
-    isObject = require(13);
+    isObject = require(12);
 
 /** `Object#toString` result references. */
 var asyncTag = '[object AsyncFunction]',
@@ -6377,7 +6377,7 @@ function isFunction(value) {
 }
 
 module.exports = isFunction;
-}, {"13":13,"300":300}];
+}, {"12":12,"300":300}];
 window.modules["321"] = [function(require,module,exports){/** Used as references for various `Number` constants. */
 var MAX_SAFE_INTEGER = 9007199254740991;
 
@@ -6437,7 +6437,7 @@ function isNull(value) {
 
 module.exports = isNull;
 }, {}];
-window.modules["13"] = [function(require,module,exports){/**
+window.modules["12"] = [function(require,module,exports){/**
  * Checks if `value` is the
  * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
  * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
@@ -7097,8 +7097,8 @@ var substr = 'ab'.substr(-1) === 'b'
 }).call(this,require(233))}, {"233":233}];
 window.modules["393"] = [function(require,module,exports){var postcss = require(396);
 var compress = require(395).compress;
-var postcssToCsso = require(394);
-var cssoToPostcss = require(397);
+var postcssToCsso = require(397);
+var cssoToPostcss = require(394);
 
 var postcssCsso = postcss.plugin('postcss-csso', function postcssCsso(options) {
     return function(root, result) {
@@ -7615,7 +7615,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _mapGenerator = require(451);
+var _mapGenerator = require(452);
 
 var _mapGenerator2 = _interopRequireDefault(_mapGenerator);
 
@@ -7627,7 +7627,7 @@ var _warnOnce = require(450);
 
 var _warnOnce2 = _interopRequireDefault(_warnOnce);
 
-var _result = require(452);
+var _result = require(451);
 
 var _result2 = _interopRequireDefault(_result);
 
@@ -8290,7 +8290,7 @@ delete parser.__esModule;
 
 exports.default = parser;
 module.exports = exports['default'];}, {"464":464,"465":465}];
-window.modules["476"] = [function(require,module,exports){'use strict';
+window.modules["479"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -8581,7 +8581,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _mapGenerator = require(504);
+var _mapGenerator = require(505);
 
 var _mapGenerator2 = _interopRequireDefault(_mapGenerator);
 
@@ -8593,7 +8593,7 @@ var _warnOnce = require(503);
 
 var _warnOnce2 = _interopRequireDefault(_warnOnce);
 
-var _result = require(505);
+var _result = require(504);
 
 var _result2 = _interopRequireDefault(_result);
 
@@ -9477,7 +9477,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _mapGenerator = require(536);
+var _mapGenerator = require(537);
 
 var _mapGenerator2 = _interopRequireDefault(_mapGenerator);
 
@@ -9489,7 +9489,7 @@ var _warnOnce = require(535);
 
 var _warnOnce2 = _interopRequireDefault(_warnOnce);
 
-var _result = require(537);
+var _result = require(536);
 
 var _result2 = _interopRequireDefault(_result);
 
@@ -10989,7 +10989,7 @@ module.exports = function include(str, needle) {
   return makeString(str).indexOf(needle) !== -1;
 };
 }, {"586":586}];
-window.modules["213"] = [function(require,module,exports){/*
+window.modules["214"] = [function(require,module,exports){/*
 * Underscore.string
 * (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
 * Underscore.string is freely distributable under the terms of the MIT license.

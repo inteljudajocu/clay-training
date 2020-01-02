@@ -2,8 +2,8 @@ window.modules["659"] = [function(require,module,exports){'use strict';
 
 var _get = require(3),
     _join = require(384),
-    _map = require(18),
-    _isObject = require(13);
+    _map = require(17),
+    _isObject = require(12);
 /**
  * Comma separate a list of author strings
  * or simple-list objects
@@ -33,4 +33,4 @@ function formatSimpleByline() {
 }
 
 module.exports = formatSimpleByline;
-}, {"3":3,"13":13,"18":18,"384":384}];
+}, {"3":3,"12":12,"17":17,"384":384}];

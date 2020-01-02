@@ -1,207 +1,326 @@
-window.modules["452"] = [function(require,module,exports){'use strict';
+window.modules["452"] = [function(require,module,exports){(function (Buffer){
+'use strict';
 
 exports.__esModule = true;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _sourceMap = require(454);
 
-var _warning = require(460);
+var _sourceMap2 = _interopRequireDefault(_sourceMap);
 
-var _warning2 = _interopRequireDefault(_warning);
+var _path = require(392);
+
+var _path2 = _interopRequireDefault(_path);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/**
- * Provides the result of the PostCSS transformations.
- *
- * A Result instance is returned by {@link LazyResult#then}
- * or {@link Root#toResult} methods.
- *
- * @example
- * postcss([cssnext]).process(css).then(function (result) {
- *    console.log(result.css);
- * });
- *
- * @example
- * var result2 = postcss.parse(css).toResult();
- */
-var Result = function () {
+var MapGenerator = function () {
+    function MapGenerator(stringify, root, opts) {
+        _classCallCheck(this, MapGenerator);
 
-  /**
-   * @param {Processor} processor - processor used for this transformation.
-   * @param {Root}      root      - Root node after all transformations.
-   * @param {processOptions} opts - options from the {@link Processor#process}
-   *                                or {@link Root#toResult}
-   */
-  function Result(processor, root, opts) {
-    _classCallCheck(this, Result);
-
-    /**
-     * @member {Processor} - The Processor instance used
-     *                       for this transformation.
-     *
-     * @example
-     * for ( let plugin of result.processor.plugins) {
-     *   if ( plugin.postcssPlugin === 'postcss-bad' ) {
-     *     throw 'postcss-good is incompatible with postcss-bad';
-     *   }
-     * });
-     */
-    this.processor = processor;
-    /**
-     * @member {Message[]} - Contains messages from plugins
-     *                       (e.g., warnings or custom messages).
-     *                       Each message should have type
-     *                       and plugin properties.
-     *
-     * @example
-     * postcss.plugin('postcss-min-browser', () => {
-     *   return (root, result) => {
-     *     var browsers = detectMinBrowsersByCanIUse(root);
-     *     result.messages.push({
-     *       type:    'min-browser',
-     *       plugin:  'postcss-min-browser',
-     *       browsers: browsers
-     *     });
-     *   };
-     * });
-     */
-    this.messages = [];
-    /**
-     * @member {Root} - Root node after all transformations.
-     *
-     * @example
-     * root.toResult().root == root;
-     */
-    this.root = root;
-    /**
-     * @member {processOptions} - Options from the {@link Processor#process}
-     *                            or {@link Root#toResult} call
-     *                            that produced this Result instance.
-     *
-     * @example
-     * root.toResult(opts).opts == opts;
-     */
-    this.opts = opts;
-    /**
-     * @member {string} - A CSS string representing of {@link Result#root}.
-     *
-     * @example
-     * postcss.parse('a{}').toResult().css //=> "a{}"
-     */
-    this.css = undefined;
-    /**
-     * @member {SourceMapGenerator} - An instance of `SourceMapGenerator`
-     *                                class from the `source-map` library,
-     *                                representing changes
-     *                                to the {@link Result#root} instance.
-     *
-     * @example
-     * result.map.toJSON() //=> { version: 3, file: 'a.css', … }
-     *
-     * @example
-     * if ( result.map ) {
-     *   fs.writeFileSync(result.opts.to + '.map', result.map.toString());
-     * }
-     */
-    this.map = undefined;
-  }
-
-  /**
-   * Returns for @{link Result#css} content.
-   *
-   * @example
-   * result + '' === result.css
-   *
-   * @return {string} string representing of {@link Result#root}
-   */
-
-
-  Result.prototype.toString = function toString() {
-    return this.css;
-  };
-
-  /**
-   * Creates an instance of {@link Warning} and adds it
-   * to {@link Result#messages}.
-   *
-   * @param {string} text        - warning message
-   * @param {Object} [opts]      - warning options
-   * @param {Node}   opts.node   - CSS node that caused the warning
-   * @param {string} opts.word   - word in CSS source that caused the warning
-   * @param {number} opts.index  - index in CSS node string that caused
-   *                               the warning
-   * @param {string} opts.plugin - name of the plugin that created
-   *                               this warning. {@link Result#warn} fills
-   *                               this property automatically.
-   *
-   * @return {Warning} created warning
-   */
-
-
-  Result.prototype.warn = function warn(text) {
-    var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    if (!opts.plugin) {
-      if (this.lastPlugin && this.lastPlugin.postcssPlugin) {
-        opts.plugin = this.lastPlugin.postcssPlugin;
-      }
+        this.stringify = stringify;
+        this.mapOpts = opts.map || {};
+        this.root = root;
+        this.opts = opts;
     }
 
-    var warning = new _warning2.default(text, opts);
-    this.messages.push(warning);
+    MapGenerator.prototype.isMap = function isMap() {
+        if (typeof this.opts.map !== 'undefined') {
+            return !!this.opts.map;
+        } else {
+            return this.previous().length > 0;
+        }
+    };
 
-    return warning;
-  };
+    MapGenerator.prototype.previous = function previous() {
+        var _this = this;
 
-  /**
-   * Returns warnings from plugins. Filters {@link Warning} instances
-   * from {@link Result#messages}.
-   *
-   * @example
-   * result.warnings().forEach(warn => {
-   *   console.warn(warn.toString());
-   * });
-   *
-   * @return {Warning[]} warnings from plugins
-   */
+        if (!this.previousMaps) {
+            this.previousMaps = [];
+            this.root.walk(function (node) {
+                if (node.source && node.source.input.map) {
+                    var map = node.source.input.map;
+                    if (_this.previousMaps.indexOf(map) === -1) {
+                        _this.previousMaps.push(map);
+                    }
+                }
+            });
+        }
 
+        return this.previousMaps;
+    };
 
-  Result.prototype.warnings = function warnings() {
-    return this.messages.filter(function (i) {
-      return i.type === 'warning';
-    });
-  };
+    MapGenerator.prototype.isInline = function isInline() {
+        if (typeof this.mapOpts.inline !== 'undefined') {
+            return this.mapOpts.inline;
+        }
 
-  /**
-   * An alias for the {@link Result#css} property.
-   * Use it with syntaxes that generate non-CSS output.
-   * @type {string}
-   *
-   * @example
-   * result.css === result.content;
-   */
+        var annotation = this.mapOpts.annotation;
+        if (typeof annotation !== 'undefined' && annotation !== true) {
+            return false;
+        }
 
+        if (this.previous().length) {
+            return this.previous().some(function (i) {
+                return i.inline;
+            });
+        } else {
+            return true;
+        }
+    };
 
-  _createClass(Result, [{
-    key: 'content',
-    get: function get() {
-      return this.css;
-    }
-  }]);
+    MapGenerator.prototype.isSourcesContent = function isSourcesContent() {
+        if (typeof this.mapOpts.sourcesContent !== 'undefined') {
+            return this.mapOpts.sourcesContent;
+        }
+        if (this.previous().length) {
+            return this.previous().some(function (i) {
+                return i.withContent();
+            });
+        } else {
+            return true;
+        }
+    };
 
-  return Result;
+    MapGenerator.prototype.clearAnnotation = function clearAnnotation() {
+        if (this.mapOpts.annotation === false) return;
+
+        var node = void 0;
+        for (var i = this.root.nodes.length - 1; i >= 0; i--) {
+            node = this.root.nodes[i];
+            if (node.type !== 'comment') continue;
+            if (node.text.indexOf('# sourceMappingURL=') === 0) {
+                this.root.removeChild(i);
+            }
+        }
+    };
+
+    MapGenerator.prototype.setSourcesContent = function setSourcesContent() {
+        var _this2 = this;
+
+        var already = {};
+        this.root.walk(function (node) {
+            if (node.source) {
+                var from = node.source.input.from;
+                if (from && !already[from]) {
+                    already[from] = true;
+                    var relative = _this2.relative(from);
+                    _this2.map.setSourceContent(relative, node.source.input.css);
+                }
+            }
+        });
+    };
+
+    MapGenerator.prototype.applyPrevMaps = function applyPrevMaps() {
+        for (var _iterator = this.previous(), _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+            var _ref;
+
+            if (_isArray) {
+                if (_i >= _iterator.length) break;
+                _ref = _iterator[_i++];
+            } else {
+                _i = _iterator.next();
+                if (_i.done) break;
+                _ref = _i.value;
+            }
+
+            var prev = _ref;
+
+            var from = this.relative(prev.file);
+            var root = prev.root || _path2.default.dirname(prev.file);
+            var map = void 0;
+
+            if (this.mapOpts.sourcesContent === false) {
+                map = new _sourceMap2.default.SourceMapConsumer(prev.text);
+                if (map.sourcesContent) {
+                    map.sourcesContent = map.sourcesContent.map(function () {
+                        return null;
+                    });
+                }
+            } else {
+                map = prev.consumer();
+            }
+
+            this.map.applySourceMap(map, from, this.relative(root));
+        }
+    };
+
+    MapGenerator.prototype.isAnnotation = function isAnnotation() {
+        if (this.isInline()) {
+            return true;
+        } else if (typeof this.mapOpts.annotation !== 'undefined') {
+            return this.mapOpts.annotation;
+        } else if (this.previous().length) {
+            return this.previous().some(function (i) {
+                return i.annotation;
+            });
+        } else {
+            return true;
+        }
+    };
+
+    MapGenerator.prototype.toBase64 = function toBase64(str) {
+        if (Buffer) {
+            if (Buffer.from && Buffer.from !== Uint8Array.from) {
+                return Buffer.from(str).toString('base64');
+            } else {
+                return new Buffer(str).toString('base64');
+            }
+        } else {
+            return window.btoa(unescape(encodeURIComponent(str)));
+        }
+    };
+
+    MapGenerator.prototype.addAnnotation = function addAnnotation() {
+        var content = void 0;
+
+        if (this.isInline()) {
+
+            content = 'data:application/json;base64,' + this.toBase64(this.map.toString());
+        } else if (typeof this.mapOpts.annotation === 'string') {
+            content = this.mapOpts.annotation;
+        } else {
+            content = this.outputFile() + '.map';
+        }
+
+        var eol = '\n';
+        if (this.css.indexOf('\r\n') !== -1) eol = '\r\n';
+
+        this.css += eol + '/*# sourceMappingURL=' + content + ' */';
+    };
+
+    MapGenerator.prototype.outputFile = function outputFile() {
+        if (this.opts.to) {
+            return this.relative(this.opts.to);
+        } else if (this.opts.from) {
+            return this.relative(this.opts.from);
+        } else {
+            return 'to.css';
+        }
+    };
+
+    MapGenerator.prototype.generateMap = function generateMap() {
+        this.generateString();
+        if (this.isSourcesContent()) this.setSourcesContent();
+        if (this.previous().length > 0) this.applyPrevMaps();
+        if (this.isAnnotation()) this.addAnnotation();
+
+        if (this.isInline()) {
+            return [this.css];
+        } else {
+            return [this.css, this.map];
+        }
+    };
+
+    MapGenerator.prototype.relative = function relative(file) {
+        if (file.indexOf('<') === 0) return file;
+        if (/^\w+:\/\//.test(file)) return file;
+
+        var from = this.opts.to ? _path2.default.dirname(this.opts.to) : '.';
+
+        if (typeof this.mapOpts.annotation === 'string') {
+            from = _path2.default.dirname(_path2.default.resolve(from, this.mapOpts.annotation));
+        }
+
+        file = _path2.default.relative(from, file);
+        if (_path2.default.sep === '\\') {
+            return file.replace(/\\/g, '/');
+        } else {
+            return file;
+        }
+    };
+
+    MapGenerator.prototype.sourcePath = function sourcePath(node) {
+        if (this.mapOpts.from) {
+            return this.mapOpts.from;
+        } else {
+            return this.relative(node.source.input.from);
+        }
+    };
+
+    MapGenerator.prototype.generateString = function generateString() {
+        var _this3 = this;
+
+        this.css = '';
+        this.map = new _sourceMap2.default.SourceMapGenerator({ file: this.outputFile() });
+
+        var line = 1;
+        var column = 1;
+
+        var lines = void 0,
+            last = void 0;
+        this.stringify(this.root, function (str, node, type) {
+            _this3.css += str;
+
+            if (node && type !== 'end') {
+                if (node.source && node.source.start) {
+                    _this3.map.addMapping({
+                        source: _this3.sourcePath(node),
+                        generated: { line: line, column: column - 1 },
+                        original: {
+                            line: node.source.start.line,
+                            column: node.source.start.column - 1
+                        }
+                    });
+                } else {
+                    _this3.map.addMapping({
+                        source: '<no source>',
+                        original: { line: 1, column: 0 },
+                        generated: { line: line, column: column - 1 }
+                    });
+                }
+            }
+
+            lines = str.match(/\n/g);
+            if (lines) {
+                line += lines.length;
+                last = str.lastIndexOf('\n');
+                column = str.length - last;
+            } else {
+                column += str.length;
+            }
+
+            if (node && type !== 'start') {
+                if (node.source && node.source.end) {
+                    _this3.map.addMapping({
+                        source: _this3.sourcePath(node),
+                        generated: { line: line, column: column - 1 },
+                        original: {
+                            line: node.source.end.line,
+                            column: node.source.end.column
+                        }
+                    });
+                } else {
+                    _this3.map.addMapping({
+                        source: '<no source>',
+                        original: { line: 1, column: 0 },
+                        generated: { line: line, column: column - 1 }
+                    });
+                }
+            }
+        });
+    };
+
+    MapGenerator.prototype.generate = function generate() {
+        this.clearAnnotation();
+
+        if (this.isMap()) {
+            return this.generateMap();
+        } else {
+            var result = '';
+            this.stringify(this.root, function (i) {
+                result += i;
+            });
+            return [result];
+        }
+    };
+
+    return MapGenerator;
 }();
 
-exports.default = Result;
-
-/**
- * @typedef  {object} Message
- * @property {string} type   - message type
- * @property {string} plugin - source PostCSS plugin name
- */
-
+exports.default = MapGenerator;
 module.exports = exports['default'];
 
-}, {"460":460}];
+
+}).call(this,require(22).Buffer)}, {"22":22,"392":392,"454":454}];

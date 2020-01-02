@@ -1,16 +1,23 @@
 window.modules["40"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51),
-  isPage = require(27);
+const isUriStringCheck = require(51);
 
 /**
- * First test if argument is a String. If true, test if '/_pages/:id/meta' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
+ * Remove the url-patterned prefix for the site's slug.
+ *
+ * @param  {String} uri
+ * @param  {Object} site
+ * @return {String}
  */
-module.exports = function (uri) {
+module.exports = function (uri, site) {
+  var { host, path, slug, prefix } = site,
+    hasSlash = uri.indexOf('/_') !== -1;
+
+  if (!prefix) {
+    prefix = path && path.length > 1 ? `${host}${path}` : host;
+  }
+
   isUriStringCheck.strCheck(uri);
-  return isPage(uri) && !!uri.match(/\/meta$/i);
+  return uri.replace(`${prefix}${hasSlash ? '/' : ''}`, `${slug}${hasSlash ? '/' : ''}`);
 };
-}, {"27":27,"51":51}];
+}, {"51":51}];

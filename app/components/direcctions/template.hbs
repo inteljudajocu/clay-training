@@ -1,13 +1,14 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div data-uri="{{ default _ref _self }}" data-editable="settings">
   <h2> Direction </h2>
   <div class="direcctions-divider" >
     <div class="prepa">
-      {{#if prep}}<h4 class="direction-vdivider">Prep: {{prep}}</h4>{{/if}}
+      {{#if prep}}<h4 class="direction-vdivider"> <i class="fa fa-clock-o"></i> Prep: {{prep}}</h4>{{/if}}
       {{#if cook}}<h4 class="direction-vdivider">Cook: {{cook}}</h4>{{/if}}
       {{#if readytime}}<h4 >Estimated: {{readytime}}</h4>{{/if}}
     </div>
-    <div class="direclist">
-      <ul>
+    <div>
+      <ul class="direclist">
         {{#each items as |item|}}
           {{#if item.direcctions}}<li><span>{{{ item.direcctions }}}</span></li>{{/if}}
         {{/each}}
@@ -17,17 +18,17 @@
   <div class="direcctions-divider">
     <h2> Nutrition Facts </h2>
     <div class="direcctions-nutrition">
-      <p> {{ nutritiondetail }} <a href={{ nutritionlink }}> see details</a></p>
-      <button> <i></i>I made it!</button>
+      <p> {{ nutritionDetail }} <a href={{ nutritionLink }}> see details</a> </p> 
+      <button class="Share-button"> <i class="fa fa-user"></i> I made it!</button>
     </div>
   </div>
   <div>
     <h2>Share it</h2>
     <div class="direcctions-divider">
-      <button>Pin</button>
-      <button>FB</button>
-      <button>Twtr</button>
-      <button>Email</button>
+      <button class="Share-button"><i class="fa fa-pinterest"></i> </button>
+      <button class="Share-button"><i class="fa fa-facebook"></i></button>
+      <button class="Share-button"><i class="fa fa-twitter"></i></button>
+      <button class="Share-button"><i class="fa fa-inbox"></i></button>
     </div>
   </div>
 </div>

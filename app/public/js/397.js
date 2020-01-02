@@ -1,153 +1,88 @@
-window.modules["397"] = [function(require,module,exports){var postcss = require(396);
-var translate = require(395).syntax.translate;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
+window.modules["397"] = [function(require,module,exports){var parse = require(395).syntax.parse;
 
-var DEFAULT_RAWS = {
-    before: '',
-    after: '',
-    between: '',
-    semicolon: false,
-    left: '',
-    right: ''
-};
-var ROOT_RAWS = {
-    semicolon: true
-};
-var DECL_RAWS = {
-    before: '',
-    after: '',
-    between: ':',
-    important: '!important'
-};
-
-function clone(source) {
-    var result = Object.create(Object.getPrototypeOf(source));
-
-    for (var key in source) {
-        if (hasOwnProperty.call(source, key)) {
-            result[key] = source[key];
-        }
-    }
-
-    return result;
+function getInfo(postcssNode) {
+    return {
+        postcssNode: postcssNode
+    };
 }
 
-function listToPostcss(list, used) {
-    var result = [];
-    var before = '';
-
-    list.each(function(node) {
-        if (node.type === 'Raw' || node.type === 'Space') {
-            // attach raw and spaces to next node
-            before += node.value;
-        } else {
-            var postcssNode = cssoToPostcss(node, used);
-
-            if (before !== '') {
-                postcssNode.raws = clone(postcssNode.raws);
-                postcssNode.raws.before = before;
-                before = '';
-            }
-
-            result.push(postcssNode);
-        }
-    });
-
-    return result;
+function appendChildren(cssoNode, nodes) {
+    cssoNode.children.fromArray(nodes.map(postcssToCsso));
+    return cssoNode;
 }
 
-function cssoToPostcss(node, used) {
-    var postcssNode = node.loc ? node.loc.postcssNode : null;
+function parseToCsso(css, config, postcssNode) {
+    var cssoNode;
 
-    if (postcssNode) {
-        // used is null when WeakSet is not supported
-        if (used === null || used.has(postcssNode)) {
-            // make node clone if it's already used in resulting tree
-            postcssNode = clone(postcssNode);
-        } else {
-            used.add(postcssNode);
+    try {
+        cssoNode = parse(css || '', config);
+    } catch (e) {
+        if (e.name === 'CssSyntaxError') {
+            throw postcssNode.error(e.message, { index: e.offset });
         }
+
+        throw e;
     }
 
+    cssoNode.loc = getInfo(postcssNode);
+
+    return cssoNode;
+}
+
+function postcssToCsso(node) {
     switch (node.type) {
-        case 'StyleSheet':
-            if (!postcssNode) {
-                postcssNode = postcss.root();
+        case 'root':
+            return appendChildren(
+                parseToCsso('', { context: 'stylesheet' }, node),
+                node.nodes
+            );
+
+        case 'rule':
+            return {
+                type: 'Rule',
+                loc: getInfo(node),
+                prelude: parseToCsso(node.selector, { context: 'selectorList' }, node),
+                block: appendChildren(
+                    parseToCsso('{}', { context: 'block' }, node),
+                    node.nodes
+                )
+            };
+
+        case 'atrule':
+            var cssoNode = {
+                type: 'Atrule',
+                loc: getInfo(node),
+                name: node.name,
+                prelude: node.params
+                    ? parseToCsso(node.params, { context: 'atrulePrelude', atrule: node.name }, node)
+                    : null,
+                block: null
+            };
+
+            if (node.nodes) {
+                cssoNode.block = appendChildren(
+                    parseToCsso('{}', { context: 'block' }, node),
+                    node.nodes
+                );
             }
 
-            postcssNode.raws = ROOT_RAWS;
-            postcssNode.nodes = listToPostcss(node.children, used);
+            return cssoNode;
 
-            break;
+        case 'decl':
+            return parseToCsso(
+                (node.raws.before || '').trimLeft() + node.toString(),
+                { context: 'declaration' },
+                node
+            );
 
-        case 'Atrule':
-            if (!postcssNode) {
-                postcssNode = postcss.atRule();
-            }
-
-            postcssNode.raws = DEFAULT_RAWS;
-            postcssNode.name = node.name;
-            postcssNode.params = node.prelude ? translate(node.prelude) : '';
-            postcssNode.nodes = node.block ? listToPostcss(node.block.children, used) : undefined;
-
-            break;
-
-        case 'Rule':
-            if (!postcssNode) {
-                postcssNode = postcss.rule();
-            }
-
-            postcssNode.raws = DEFAULT_RAWS;
-            postcssNode.selector = translate(node.prelude);
-            postcssNode.nodes = listToPostcss(node.block.children, used);
-
-            break;
-
-        case 'Declaration':
-            if (!postcssNode) {
-                postcssNode = postcss.decl();
-            }
-
-            if (typeof node.important === 'string') {
-                postcssNode.raws = clone(DECL_RAWS);
-                postcssNode.raws.important = '!' + node.important;
-            } else {
-                postcssNode.raws = DECL_RAWS;
-            }
-
-            postcssNode.prop = node.property;
-            postcssNode.value = translate(node.value);
-            postcssNode.important = Boolean(node.important);
-
-            break;
-
-        case 'Comment':
-            if (!postcssNode) {
-                postcssNode = postcss.comment();
-            }
-
-            postcssNode.raws = DEFAULT_RAWS;
-            postcssNode.text = node.value;
-
-            break;
+        case 'comment':
+            return {
+                type: 'Comment',
+                loc: getInfo(node),
+                value: node.raws.left + node.text + node.raws.right
+            };
     }
+}
 
-    return postcssNode;
-};
-
-module.exports = function(node) {
-    var result;
-    var used = null;
-
-    // node.js 0.10 doesn't support for WeakSet -> always clone nodes
-    if (typeof WeakSet === 'function') {
-        // use weak set to avoid using the same original postcss node twice
-        // in resulting tree, since nodes are changing on tree building
-        used = new WeakSet();
-    }
-
-    result = cssoToPostcss(node, used);
-
-    return result;
-};
-}, {"395":395,"396":396}];
+module.exports = postcssToCsso;
+}, {"395":395}];

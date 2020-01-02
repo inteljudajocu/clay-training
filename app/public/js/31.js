@@ -3,13 +3,12 @@ window.modules["31"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * First test if argument is a String. If true, test if '/_uris/' is in the string.
- * Otherwise, throw an error.
+ * Return the site prefix from the URI.
  * @param  {string}  uri
- * @return {Boolean}
+ * @return {string}
  */
 module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return uri.toLowerCase().indexOf('/_uris/') > -1;
+  return uri.split(/\/_(pages|components|lists|uris|schedule|users|layouts)/)[0];
 };
 }, {"51":51}];

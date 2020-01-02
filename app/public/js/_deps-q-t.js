@@ -3788,7 +3788,7 @@ exports.SourceMapGenerator = require(165).SourceMapGenerator;
 exports.SourceMapConsumer = require(164).SourceMapConsumer;
 exports.SourceNode = require(166).SourceNode;
 }, {"164":164,"165":165,"166":166}];
-window.modules["194"] = [function(require,module,exports){var isTag = require(184).isTag;
+window.modules["191"] = [function(require,module,exports){var isTag = require(184).isTag;
 
 module.exports = {
 	filter: filter,
@@ -3908,7 +3908,7 @@ function getText(elem){
 	return "";
 }
 }, {"183":183,"184":184}];
-window.modules["191"] = [function(require,module,exports){var getChildren = exports.getChildren = function(elem){
+window.modules["193"] = [function(require,module,exports){var getChildren = exports.getChildren = function(elem){
 	return elem.children;
 };
 
@@ -5174,7 +5174,7 @@ Tokenizer.prototype._emitPartial = function(value) {
     }
 };
 }, {"200":200,"201":201,"202":202,"203":203}];
-window.modules["15"] = [function(require,module,exports){var baseSet = require(344);
+window.modules["18"] = [function(require,module,exports){var baseSet = require(344);
 
 /**
  * Sets the value at `path` of `object`. If a portion of `path` doesn't exist,
@@ -5362,7 +5362,7 @@ function toLower(value) {
 
 module.exports = toLower;
 }, {"352":352}];
-window.modules["387"] = [function(require,module,exports){var isObject = require(13),
+window.modules["387"] = [function(require,module,exports){var isObject = require(12),
     isSymbol = require(348);
 
 /** Used as references for various `Number` constants. */
@@ -5428,7 +5428,7 @@ function toNumber(value) {
 }
 
 module.exports = toNumber;
-}, {"13":13,"348":348}];
+}, {"12":12,"348":348}];
 window.modules["352"] = [function(require,module,exports){var baseToString = require(347);
 
 /**
@@ -5637,7 +5637,7 @@ window.modules["435"] = [function(require,module,exports){module.exports = funct
     return [A, B, C];
 };
 }, {}];
-window.modules["452"] = [function(require,module,exports){'use strict';
+window.modules["451"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6982,7 +6982,7 @@ var String = function (_Node) {
 
 exports.default = String;
 module.exports = exports['default'];}, {"470":470,"485":485}];
-window.modules["481"] = [function(require,module,exports){'use strict';
+window.modules["476"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7297,7 +7297,7 @@ function tokenize(input) {
     return tokens;
 }
 module.exports = exports['default'];}, {"468":468}];
-window.modules["505"] = [function(require,module,exports){'use strict';
+window.modules["504"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -8635,7 +8635,7 @@ var SafeParser = function (_Parser) {
 module.exports = SafeParser;
 
 }, {"516":516,"517":517,"518":518}];
-window.modules["537"] = [function(require,module,exports){'use strict';
+window.modules["536"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -15299,7 +15299,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }}, {"567":567}];
-window.modules["6"] = [function(require,module,exports){'use strict';
+window.modules["4"] = [function(require,module,exports){'use strict';
 
 (function (global) {
 
@@ -16599,13 +16599,13 @@ module.exports.purge = function (url) {
 };
 
 }).call(this,require(233))}, {"230":230,"232":232,"233":233,"375":375}];
-window.modules["1"] = [function(require,module,exports){'use strict';
+window.modules["2"] = [function(require,module,exports){'use strict';
 
 var speakingurl = require(578),
     he = require(207),
     typogr = require(581),
     headQuotes = require(208),
-    striptags = require(6),
+    striptags = require(4),
     _isString = require(377),
     _isPlainObject = require(382),
     _isArray = require(275),
@@ -16752,7 +16752,7 @@ module.exports.validateTagContent = validateTagContent;
 module.exports.recursivelyStripSeperators = recursivelyStripSeperators;
 module.exports.removeNonAlphanumericCharacters = removeNonAlphanumericCharacters;
 module.exports.normalizeName = normalizeName;
-}, {"6":6,"206":206,"207":207,"208":208,"275":275,"377":377,"382":382,"385":385,"388":388,"578":578,"581":581}];
+}, {"4":4,"206":206,"207":207,"208":208,"275":275,"377":377,"382":382,"385":385,"388":388,"578":578,"581":581}];
 window.modules["9"] = [function(require,module,exports){'use strict';
 
 var postcss = require(561),

@@ -26,8 +26,8 @@ module.exports.render = function (ref, data) {
 window.modules["meta-keywords.model"] = [function(require,module,exports){'use strict';
 
 var _isEmpty = require(14),
-    _isObject = require(13),
-    _head = require(12);
+    _isObject = require(12),
+    _head = require(13);
 
 module.exports.save = function (ref, data) {
   // convert array of {text: string} objects into regular array of strings
@@ -42,7 +42,7 @@ module.exports.save = function (ref, data) {
 }, {"12":12,"13":13,"14":14}];
 window.modules["meta-title.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(1);
+var sanitize = require(2);
 
 module.exports.save = function (ref, data) {
   data = sanitize.recursivelyStripSeperators(data);
@@ -56,7 +56,7 @@ module.exports.save = function (ref, data) {
 
   return data;
 };
-}, {"1":1}];
+}, {"2":2}];
 window.modules["meta-url.model"] = [function(require,module,exports){'use strict';
 /**
  * set component canonical url and date if they're passed in through the locals
@@ -81,10 +81,10 @@ module.exports.save = function (ref, data, locals) {
 }, {}];
 window.modules["paragraph.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(1);
+var sanitize = require(2);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   return data;
 };
-}, {"1":1}];
+}, {"2":2}];

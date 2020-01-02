@@ -3,14 +3,16 @@ window.modules["28"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * First test if argument passed in is a String. If true, determine if a uri points
- * to a DEFAULT instance of a layout. Otherwise, throw an error.
- *
- * @param  {string}  uri
- * @return {Boolean}
+ * First test if argument passed in is a String. If true, get list instance
+ * from URI. Otherwise, throw an error.
+ * @example /_lists/foo returns "foo"
+ * @param  {string} uri
+ * @return {string|null}
  */
 module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return !!uri.match(/\/_layouts\/[A-Za-z0-9\-]+$/);
+  const result = /\/_lists\/(.*)/.exec(uri);
+
+  return result && result[1];
 };
 }, {"51":51}];

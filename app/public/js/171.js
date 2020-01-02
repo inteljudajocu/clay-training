@@ -1,6 +1,6 @@
-window.modules["171"] = [function(require,module,exports){var parse = require(4)
-var startOfISOWeek = require(176)
-var startOfISOYear = require(177)
+window.modules["171"] = [function(require,module,exports){var parse = require(5)
+var startOfISOWeek = require(177)
+var startOfISOYear = require(176)
 
 var MILLISECONDS_IN_WEEK = 604800000
 
@@ -32,4 +32,4 @@ function getISOWeek (dirtyDate) {
 }
 
 module.exports = getISOWeek
-}, {"4":4,"176":176,"177":177}];
+}, {"5":5,"176":176,"177":177}];

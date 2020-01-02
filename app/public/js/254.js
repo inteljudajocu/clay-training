@@ -1,23 +1,17 @@
 window.modules["254"] = [function(require,module,exports){var getMapData = require(363);
 
 /**
- * Sets the map `key` to `value`.
+ * Gets the map value for `key`.
  *
  * @private
- * @name set
+ * @name get
  * @memberOf MapCache
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the map cache instance.
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
  */
-function mapCacheSet(key, value) {
-  var data = getMapData(this, key),
-      size = data.size;
-
-  data.set(key, value);
-  this.size += data.size == size ? 0 : 1;
-  return this;
+function mapCacheGet(key) {
+  return getMapData(this, key).get(key);
 }
 
-module.exports = mapCacheSet;
+module.exports = mapCacheGet;
 }, {"363":363}];

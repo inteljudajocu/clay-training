@@ -1,14 +1,16 @@
 window.modules["49"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51);
+const isUriStringCheck = require(51),
+  isPage = require(35);
 
 /**
- * Return the site prefix from the URI.
+ * First test if argument is a String. If true, test if '/_pages/:id/meta' is in the string.
+ * Otherwise, throw an error.
  * @param  {string}  uri
- * @return {string}
+ * @return {Boolean}
  */
 module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return uri.split(/\/_(pages|components|lists|uris|schedule|users|layouts)/)[0];
+  return isPage(uri) && !!uri.match(/\/meta$/i);
 };
-}, {"51":51}];
+}, {"35":35,"51":51}];

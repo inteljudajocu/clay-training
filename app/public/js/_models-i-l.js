@@ -29,13 +29,13 @@ module.exports.save = function (uri, data) {
 }, {"3":3}];
 window.modules["list.model"] = [function(require,module,exports){'use strict';
 
-var striptags = require(6),
-    _require = require(2),
+var striptags = require(4),
+    _require = require(1),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
     _require2 = require(9),
     render = _require2.render,
-    _require3 = require(1),
+    _require3 = require(2),
     toSmartText = _require3.toSmartText;
 
 module.exports.save = function (uri, data) {
@@ -58,4 +58,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"1":1,"2":2,"6":6,"9":9}];
+}, {"1":1,"2":2,"4":4,"9":9}];

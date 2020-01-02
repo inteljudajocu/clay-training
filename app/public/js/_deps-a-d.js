@@ -3934,7 +3934,7 @@ CollectingHandler.prototype.restart = function() {
     }
 };
 }, {"216":216}];
-window.modules["17"] = [function(require,module,exports){var assignValue = require(284),
+window.modules["15"] = [function(require,module,exports){var assignValue = require(284),
     copyObject = require(354),
     createAssigner = require(356),
     isArrayLike = require(333),
@@ -4085,7 +4085,7 @@ var defaults = baseRest(function(object, sources) {
 
 module.exports = defaults;
 }, {"285":285,"341":341,"357":357,"376":376}];
-window.modules["397"] = [function(require,module,exports){var postcss = require(396);
+window.modules["394"] = [function(require,module,exports){var postcss = require(396);
 var translate = require(395).syntax.translate;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -6712,7 +6712,7 @@ exports.default = Declaration;
 module.exports = exports['default'];
 
 }, {"439":439}];
-window.modules["477"] = [function(require,module,exports){'use strict';
+window.modules["481"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -6908,7 +6908,7 @@ function defaultAttrConcat(attrValue, attrSpaces) {
     return '' + attrSpaces.before + attrValue + attrSpaces.after;
 }
 module.exports = exports['default'];}, {"470":470,"484":484}];
-window.modules["475"] = [function(require,module,exports){'use strict';
+window.modules["477"] = [function(require,module,exports){'use strict';
 
 exports.__esModule = true;
 
@@ -7022,11 +7022,11 @@ window.modules["486"] = [function(require,module,exports){'use strict';
 exports.__esModule = true;
 exports.universal = exports.tag = exports.string = exports.selector = exports.root = exports.pseudo = exports.nesting = exports.id = exports.comment = exports.combinator = exports.className = exports.attribute = undefined;
 
-var _attribute = require(477);
+var _attribute = require(481);
 
 var _attribute2 = _interopRequireDefault(_attribute);
 
-var _className = require(475);
+var _className = require(477);
 
 var _className2 = _interopRequireDefault(_className);
 
@@ -7038,7 +7038,7 @@ var _comment = require(474);
 
 var _comment2 = _interopRequireDefault(_comment);
 
-var _id = require(476);
+var _id = require(479);
 
 var _id2 = _interopRequireDefault(_id);
 
@@ -7062,11 +7062,11 @@ var _string = require(471);
 
 var _string2 = _interopRequireDefault(_string);
 
-var _tag = require(481);
+var _tag = require(476);
 
 var _tag2 = _interopRequireDefault(_tag);
 
-var _universal = require(479);
+var _universal = require(475);
 
 var _universal2 = _interopRequireDefault(_universal);
 
@@ -12726,8 +12726,8 @@ window.modules["659"] = [function(require,module,exports){'use strict';
 
 var _get = require(3),
     _join = require(384),
-    _map = require(18),
-    _isObject = require(13);
+    _map = require(17),
+    _isObject = require(12);
 /**
  * Comma separate a list of author strings
  * or simple-list objects
@@ -12757,7 +12757,7 @@ function formatSimpleByline() {
 }
 
 module.exports = formatSimpleByline;
-}, {"3":3,"13":13,"18":18,"384":384}];
+}, {"3":3,"12":12,"17":17,"384":384}];
 window.modules["660"] = [function(require,module,exports){'use strict';
 
 var _includes = require(16);

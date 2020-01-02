@@ -1,78 +1,88 @@
-window.modules["192"] = [function(require,module,exports){exports.removeElement = function(elem){
-	if(elem.prev) elem.prev.next = elem.next;
-	if(elem.next) elem.next.prev = elem.prev;
+window.modules["192"] = [function(require,module,exports){var ElementType = require(184);
+var isTag = exports.isTag = ElementType.isTag;
 
-	if(elem.parent){
-		var childs = elem.parent.children;
-		childs.splice(childs.lastIndexOf(elem), 1);
-	}
-};
-
-exports.replaceElement = function(elem, replacement){
-	var prev = replacement.prev = elem.prev;
-	if(prev){
-		prev.next = replacement;
-	}
-
-	var next = replacement.next = elem.next;
-	if(next){
-		next.prev = replacement;
-	}
-
-	var parent = replacement.parent = elem.parent;
-	if(parent){
-		var childs = parent.children;
-		childs[childs.lastIndexOf(elem)] = replacement;
-	}
-};
-
-exports.appendChild = function(elem, child){
-	child.parent = elem;
-
-	if(elem.children.push(child) !== 1){
-		var sibling = elem.children[elem.children.length - 2];
-		sibling.next = child;
-		child.prev = sibling;
-		child.next = null;
-	}
-};
-
-exports.append = function(elem, next){
-	var parent = elem.parent,
-		currNext = elem.next;
-
-	next.next = currNext;
-	next.prev = elem;
-	elem.next = next;
-	next.parent = parent;
-
-	if(currNext){
-		currNext.prev = next;
-		if(parent){
-			var childs = parent.children;
-			childs.splice(childs.lastIndexOf(currNext), 0, next);
+exports.testElement = function(options, element){
+	for(var key in options){
+		if(!options.hasOwnProperty(key));
+		else if(key === "tag_name"){
+			if(!isTag(element) || !options.tag_name(element.name)){
+				return false;
+			}
+		} else if(key === "tag_type"){
+			if(!options.tag_type(element.type)) return false;
+		} else if(key === "tag_contains"){
+			if(isTag(element) || !options.tag_contains(element.data)){
+				return false;
+			}
+		} else if(!element.attribs || !options[key](element.attribs[key])){
+			return false;
 		}
-	} else if(parent){
-		parent.children.push(next);
+	}
+	return true;
+};
+
+var Checks = {
+	tag_name: function(name){
+		if(typeof name === "function"){
+			return function(elem){ return isTag(elem) && name(elem.name); };
+		} else if(name === "*"){
+			return isTag;
+		} else {
+			return function(elem){ return isTag(elem) && elem.name === name; };
+		}
+	},
+	tag_type: function(type){
+		if(typeof type === "function"){
+			return function(elem){ return type(elem.type); };
+		} else {
+			return function(elem){ return elem.type === type; };
+		}
+	},
+	tag_contains: function(data){
+		if(typeof data === "function"){
+			return function(elem){ return !isTag(elem) && data(elem.data); };
+		} else {
+			return function(elem){ return !isTag(elem) && elem.data === data; };
+		}
 	}
 };
 
-exports.prepend = function(elem, prev){
-	var parent = elem.parent;
-	if(parent){
-		var childs = parent.children;
-		childs.splice(childs.lastIndexOf(elem), 0, prev);
+function getAttribCheck(attrib, value){
+	if(typeof value === "function"){
+		return function(elem){ return elem.attribs && value(elem.attribs[attrib]); };
+	} else {
+		return function(elem){ return elem.attribs && elem.attribs[attrib] === value; };
 	}
+}
 
-	if(elem.prev){
-		elem.prev.next = prev;
-	}
-	
-	prev.parent = parent;
-	prev.prev = elem.prev;
-	prev.next = elem;
-	elem.prev = prev;
+function combineFuncs(a, b){
+	return function(elem){
+		return a(elem) || b(elem);
+	};
+}
+
+exports.getElements = function(options, element, recurse, limit){
+	var funcs = Object.keys(options).map(function(key){
+		var value = options[key];
+		return key in Checks ? Checks[key](value) : getAttribCheck(key, value);
+	});
+
+	return funcs.length === 0 ? [] : this.filter(
+		funcs.reduce(combineFuncs),
+		element, recurse, limit
+	);
 };
 
+exports.getElementById = function(id, element, recurse){
+	if(!Array.isArray(element)) element = [element];
+	return this.findOne(getAttribCheck("id", id), element, recurse !== false);
+};
 
-}, {}];
+exports.getElementsByTagName = function(name, element, recurse, limit){
+	return this.filter(Checks.tag_name(name), element, recurse, limit);
+};
+
+exports.getElementsByTagType = function(type, element, recurse, limit){
+	return this.filter(Checks.tag_type(type), element, recurse, limit);
+};
+}, {"184":184}];

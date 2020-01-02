@@ -1,8 +1,8 @@
 window.modules["252"] = [function(require,module,exports){var mapCacheClear = require(257),
-    mapCacheDelete = require(255),
-    mapCacheGet = require(256),
-    mapCacheHas = require(253),
-    mapCacheSet = require(254);
+    mapCacheDelete = require(253),
+    mapCacheGet = require(254),
+    mapCacheHas = require(255),
+    mapCacheSet = require(256);
 
 /**
  * Creates a map cache object to store key-value pairs.

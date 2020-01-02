@@ -1,28 +1,46 @@
-window.modules["174"] = [function(require,module,exports){var parse = require(4)
-var startOfYear = require(175)
-var differenceInCalendarDays = require(168)
+window.modules["174"] = [function(require,module,exports){var parse = require(5)
+var startOfISOWeek = require(177)
 
 /**
- * @category Day Helpers
- * @summary Get the day of the year of the given date.
+ * @category ISO Week-Numbering Year Helpers
+ * @summary Get the ISO week-numbering year of the given date.
  *
  * @description
- * Get the day of the year of the given date.
+ * Get the ISO week-numbering year of the given date,
+ * which always starts 3 days before the year's first Thursday.
+ *
+ * ISO week-numbering year: http://en.wikipedia.org/wiki/ISO_week_date
  *
  * @param {Date|String|Number} date - the given date
- * @returns {Number} the day of year
+ * @returns {Number} the ISO week-numbering year
  *
  * @example
- * // Which day of the year is 2 July 2014?
- * var result = getDayOfYear(new Date(2014, 6, 2))
- * //=> 183
+ * // Which ISO-week numbering year is 2 January 2005?
+ * var result = getISOYear(new Date(2005, 0, 2))
+ * //=> 2004
  */
-function getDayOfYear (dirtyDate) {
+function getISOYear (dirtyDate) {
   var date = parse(dirtyDate)
-  var diff = differenceInCalendarDays(date, startOfYear(date))
-  var dayOfYear = diff + 1
-  return dayOfYear
+  var year = date.getFullYear()
+
+  var fourthOfJanuaryOfNextYear = new Date(0)
+  fourthOfJanuaryOfNextYear.setFullYear(year + 1, 0, 4)
+  fourthOfJanuaryOfNextYear.setHours(0, 0, 0, 0)
+  var startOfNextYear = startOfISOWeek(fourthOfJanuaryOfNextYear)
+
+  var fourthOfJanuaryOfThisYear = new Date(0)
+  fourthOfJanuaryOfThisYear.setFullYear(year, 0, 4)
+  fourthOfJanuaryOfThisYear.setHours(0, 0, 0, 0)
+  var startOfThisYear = startOfISOWeek(fourthOfJanuaryOfThisYear)
+
+  if (date.getTime() >= startOfNextYear.getTime()) {
+    return year + 1
+  } else if (date.getTime() >= startOfThisYear.getTime()) {
+    return year
+  } else {
+    return year - 1
+  }
 }
 
-module.exports = getDayOfYear
-}, {"4":4,"168":168,"175":175}];
+module.exports = getISOYear
+}, {"5":5,"177":177}];

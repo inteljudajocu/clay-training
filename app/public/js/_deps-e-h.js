@@ -569,7 +569,7 @@ Object.keys(domLvl1).forEach(function(key) {
 	});
 });
 }, {"187":187}];
-window.modules["193"] = [function(require,module,exports){// removeSubsets
+window.modules["190"] = [function(require,module,exports){// removeSubsets
 // Given an array of nodes, remove any member that is contained by another.
 exports.removeSubsets = function(nodes) {
 	var idx = nodes.length, node, ancestor, replace;
@@ -1667,8 +1667,8 @@ window.modules["207"] = [function(require,module,exports){(function (global){
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})}, {}];
-window.modules["211"] = [function(require,module,exports){var _ = require(214);
-var _s = require(213);
+window.modules["211"] = [function(require,module,exports){var _ = require(213);
+var _s = require(214);
 var he = require(207);
 
 var helper = require(212);
@@ -1925,8 +1925,8 @@ exports.unorderedList = formatUnorderedList;
 exports.listItem = formatListItem;
 exports.horizontalLine = formatHorizontalLine;
 }, {"207":207,"212":212,"213":213,"214":214}];
-window.modules["212"] = [function(require,module,exports){var _ = require(214);
-var _s = require(213);
+window.modules["212"] = [function(require,module,exports){var _ = require(213);
+var _s = require(214);
 
 // Split a long word up to fit within the word wrap limit.  Use either a
 // character to split looking back from the word wrap limit, or
@@ -2062,8 +2062,8 @@ exports.splitCssSearchTag = function splitCssSearchTag(tagString) {
 window.modules["210"] = [function(require,module,exports){var fs = require(21);
 var util = require(215);
 
-var _ = require(214);
-var _s = require(213);
+var _ = require(213);
+var _s = require(214);
 var htmlparser = require(216);
 
 var helper = require(212);
@@ -2485,7 +2485,7 @@ function hasIn(object, path) {
 
 module.exports = hasIn;
 }, {"303":303,"369":369}];
-window.modules["12"] = [function(require,module,exports){/**
+window.modules["13"] = [function(require,module,exports){/**
  * Gets the first element of `array`.
  *
  * @static

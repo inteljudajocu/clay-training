@@ -1,11 +1,12 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div class="recipe" data-uri="{{ default _ref _self }}" data-editable="settings">
   <div class="recipe-status">
     <h2>{{ title }}</h2>
     <div class="recipe-info">
-      <h4 class="recipe-vdivider">{{ madeIt }} made it</h4> <h4 class="recipe-vdivider">{{ reviews }} reviews</h4> <h4>{{ photos }} photos</h4>
-      <h5>Recipe by: {{ author }}</h5>
+      <h4 class="recipe-vdivider"><i class="fa fa-user"></i> {{ madeIt }} made it</h4> <h4 class="recipe-vdivider"><i class="fa fa-thumbs-up"></i> {{ reviews }} reviews</h4> <h4 class="recipe-vdivider"><i class="fa fa-photo"></i> {{ photos }} photos</h4>
+      <h3>Recipe by: {{ author }}</h5>
     </div>
-    <p style="width: 80%;" >{{ recipeDescription }}</p>
+    <p>{{ recipeDescription }}</p>
   </div>
   <div class="recipe-imagew">
     <img src="{{ imageUrl }}" class="recipe-image" data-src="{{ imageUrl }}">

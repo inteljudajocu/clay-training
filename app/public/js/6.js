@@ -1,236 +1,329 @@
-window.modules["6"] = [function(require,module,exports){'use strict';
+window.modules["6"] = [function(require,module,exports){var getDayOfYear = require(173)
+var getISOWeek = require(171)
+var getISOYear = require(174)
+var parse = require(5)
+var isValid = require(170)
+var enLocale = require(172)
 
-(function (global) {
+/**
+ * @category Common Helpers
+ * @summary Format the date.
+ *
+ * @description
+ * Return the formatted date string in the given format.
+ *
+ * Accepted tokens:
+ * | Unit                    | Token | Result examples                  |
+ * |-------------------------|-------|----------------------------------|
+ * | Month                   | M     | 1, 2, ..., 12                    |
+ * |                         | Mo    | 1st, 2nd, ..., 12th              |
+ * |                         | MM    | 01, 02, ..., 12                  |
+ * |                         | MMM   | Jan, Feb, ..., Dec               |
+ * |                         | MMMM  | January, February, ..., December |
+ * | Quarter                 | Q     | 1, 2, 3, 4                       |
+ * |                         | Qo    | 1st, 2nd, 3rd, 4th               |
+ * | Day of month            | D     | 1, 2, ..., 31                    |
+ * |                         | Do    | 1st, 2nd, ..., 31st              |
+ * |                         | DD    | 01, 02, ..., 31                  |
+ * | Day of year             | DDD   | 1, 2, ..., 366                   |
+ * |                         | DDDo  | 1st, 2nd, ..., 366th             |
+ * |                         | DDDD  | 001, 002, ..., 366               |
+ * | Day of week             | d     | 0, 1, ..., 6                     |
+ * |                         | do    | 0th, 1st, ..., 6th               |
+ * |                         | dd    | Su, Mo, ..., Sa                  |
+ * |                         | ddd   | Sun, Mon, ..., Sat               |
+ * |                         | dddd  | Sunday, Monday, ..., Saturday    |
+ * | Day of ISO week         | E     | 1, 2, ..., 7                     |
+ * | ISO week                | W     | 1, 2, ..., 53                    |
+ * |                         | Wo    | 1st, 2nd, ..., 53rd              |
+ * |                         | WW    | 01, 02, ..., 53                  |
+ * | Year                    | YY    | 00, 01, ..., 99                  |
+ * |                         | YYYY  | 1900, 1901, ..., 2099            |
+ * | ISO week-numbering year | GG    | 00, 01, ..., 99                  |
+ * |                         | GGGG  | 1900, 1901, ..., 2099            |
+ * | AM/PM                   | A     | AM, PM                           |
+ * |                         | a     | am, pm                           |
+ * |                         | aa    | a.m., p.m.                       |
+ * | Hour                    | H     | 0, 1, ... 23                     |
+ * |                         | HH    | 00, 01, ... 23                   |
+ * |                         | h     | 1, 2, ..., 12                    |
+ * |                         | hh    | 01, 02, ..., 12                  |
+ * | Minute                  | m     | 0, 1, ..., 59                    |
+ * |                         | mm    | 00, 01, ..., 59                  |
+ * | Second                  | s     | 0, 1, ..., 59                    |
+ * |                         | ss    | 00, 01, ..., 59                  |
+ * | 1/10 of second          | S     | 0, 1, ..., 9                     |
+ * | 1/100 of second         | SS    | 00, 01, ..., 99                  |
+ * | Millisecond             | SSS   | 000, 001, ..., 999               |
+ * | Timezone                | Z     | -01:00, +00:00, ... +12:00       |
+ * |                         | ZZ    | -0100, +0000, ..., +1200         |
+ * | Seconds timestamp       | X     | 512969520                        |
+ * | Milliseconds timestamp  | x     | 512969520900                     |
+ *
+ * The characters wrapped in square brackets are escaped.
+ *
+ * The result may vary by locale.
+ *
+ * @param {Date|String|Number} date - the original date
+ * @param {String} [format='YYYY-MM-DDTHH:mm:ss.SSSZ'] - the string of tokens
+ * @param {Object} [options] - the object with options
+ * @param {Object} [options.locale=enLocale] - the locale object
+ * @returns {String} the formatted date string
+ *
+ * @example
+ * // Represent 11 February 2014 in middle-endian format:
+ * var result = format(
+ *   new Date(2014, 1, 11),
+ *   'MM/DD/YYYY'
+ * )
+ * //=> '02/11/2014'
+ *
+ * @example
+ * // Represent 2 July 2014 in Esperanto:
+ * var eoLocale = require('date-fns/locale/eo')
+ * var result = format(
+ *   new Date(2014, 6, 2),
+ *   'Do [de] MMMM YYYY',
+ *   {locale: eoLocale}
+ * )
+ * //=> '2-a de julio 2014'
+ */
+function format (dirtyDate, dirtyFormatStr, dirtyOptions) {
+  var formatStr = dirtyFormatStr ? String(dirtyFormatStr) : 'YYYY-MM-DDTHH:mm:ss.SSSZ'
+  var options = dirtyOptions || {}
 
-    // minimal symbol polyfill for IE11 and others
-    if (typeof Symbol !== 'function') {
-        var Symbol = function(name) {
-            return name;
-        }
+  var locale = options.locale
+  var localeFormatters = enLocale.format.formatters
+  var formattingTokensRegExp = enLocale.format.formattingTokensRegExp
+  if (locale && locale.format && locale.format.formatters) {
+    localeFormatters = locale.format.formatters
 
-        Symbol.nonNative = true;
+    if (locale.format.formattingTokensRegExp) {
+      formattingTokensRegExp = locale.format.formattingTokensRegExp
     }
+  }
 
-    const STATE_PLAINTEXT = Symbol('plaintext');
-    const STATE_HTML      = Symbol('html');
-    const STATE_COMMENT   = Symbol('comment');
+  var date = parse(dirtyDate)
 
-    const ALLOWED_TAGS_REGEX  = /<(\w*)>/g;
-    const NORMALIZE_TAG_REGEX = /<\/?([^\s\/>]+)/;
+  if (!isValid(date)) {
+    return 'Invalid Date'
+  }
 
-    function striptags(html, allowable_tags, tag_replacement) {
-        html            = html || '';
-        allowable_tags  = allowable_tags || [];
-        tag_replacement = tag_replacement || '';
+  var formatFn = buildFormatFn(formatStr, localeFormatters, formattingTokensRegExp)
 
-        let context = init_context(allowable_tags, tag_replacement);
+  return formatFn(date)
+}
 
-        return striptags_internal(html, context);
+var formatters = {
+  // Month: 1, 2, ..., 12
+  'M': function (date) {
+    return date.getMonth() + 1
+  },
+
+  // Month: 01, 02, ..., 12
+  'MM': function (date) {
+    return addLeadingZeros(date.getMonth() + 1, 2)
+  },
+
+  // Quarter: 1, 2, 3, 4
+  'Q': function (date) {
+    return Math.ceil((date.getMonth() + 1) / 3)
+  },
+
+  // Day of month: 1, 2, ..., 31
+  'D': function (date) {
+    return date.getDate()
+  },
+
+  // Day of month: 01, 02, ..., 31
+  'DD': function (date) {
+    return addLeadingZeros(date.getDate(), 2)
+  },
+
+  // Day of year: 1, 2, ..., 366
+  'DDD': function (date) {
+    return getDayOfYear(date)
+  },
+
+  // Day of year: 001, 002, ..., 366
+  'DDDD': function (date) {
+    return addLeadingZeros(getDayOfYear(date), 3)
+  },
+
+  // Day of week: 0, 1, ..., 6
+  'd': function (date) {
+    return date.getDay()
+  },
+
+  // Day of ISO week: 1, 2, ..., 7
+  'E': function (date) {
+    return date.getDay() || 7
+  },
+
+  // ISO week: 1, 2, ..., 53
+  'W': function (date) {
+    return getISOWeek(date)
+  },
+
+  // ISO week: 01, 02, ..., 53
+  'WW': function (date) {
+    return addLeadingZeros(getISOWeek(date), 2)
+  },
+
+  // Year: 00, 01, ..., 99
+  'YY': function (date) {
+    return addLeadingZeros(date.getFullYear(), 4).substr(2)
+  },
+
+  // Year: 1900, 1901, ..., 2099
+  'YYYY': function (date) {
+    return addLeadingZeros(date.getFullYear(), 4)
+  },
+
+  // ISO week-numbering year: 00, 01, ..., 99
+  'GG': function (date) {
+    return String(getISOYear(date)).substr(2)
+  },
+
+  // ISO week-numbering year: 1900, 1901, ..., 2099
+  'GGGG': function (date) {
+    return getISOYear(date)
+  },
+
+  // Hour: 0, 1, ... 23
+  'H': function (date) {
+    return date.getHours()
+  },
+
+  // Hour: 00, 01, ..., 23
+  'HH': function (date) {
+    return addLeadingZeros(date.getHours(), 2)
+  },
+
+  // Hour: 1, 2, ..., 12
+  'h': function (date) {
+    var hours = date.getHours()
+    if (hours === 0) {
+      return 12
+    } else if (hours > 12) {
+      return hours % 12
+    } else {
+      return hours
     }
+  },
 
-    function init_striptags_stream(allowable_tags, tag_replacement) {
-        allowable_tags  = allowable_tags || [];
-        tag_replacement = tag_replacement || '';
+  // Hour: 01, 02, ..., 12
+  'hh': function (date) {
+    return addLeadingZeros(formatters['h'](date), 2)
+  },
 
-        let context = init_context(allowable_tags, tag_replacement);
+  // Minute: 0, 1, ..., 59
+  'm': function (date) {
+    return date.getMinutes()
+  },
 
-        return function striptags_stream(html) {
-            return striptags_internal(html || '', context);
-        };
+  // Minute: 00, 01, ..., 59
+  'mm': function (date) {
+    return addLeadingZeros(date.getMinutes(), 2)
+  },
+
+  // Second: 0, 1, ..., 59
+  's': function (date) {
+    return date.getSeconds()
+  },
+
+  // Second: 00, 01, ..., 59
+  'ss': function (date) {
+    return addLeadingZeros(date.getSeconds(), 2)
+  },
+
+  // 1/10 of second: 0, 1, ..., 9
+  'S': function (date) {
+    return Math.floor(date.getMilliseconds() / 100)
+  },
+
+  // 1/100 of second: 00, 01, ..., 99
+  'SS': function (date) {
+    return addLeadingZeros(Math.floor(date.getMilliseconds() / 10), 2)
+  },
+
+  // Millisecond: 000, 001, ..., 999
+  'SSS': function (date) {
+    return addLeadingZeros(date.getMilliseconds(), 3)
+  },
+
+  // Timezone: -01:00, +00:00, ... +12:00
+  'Z': function (date) {
+    return formatTimezone(date.getTimezoneOffset(), ':')
+  },
+
+  // Timezone: -0100, +0000, ... +1200
+  'ZZ': function (date) {
+    return formatTimezone(date.getTimezoneOffset())
+  },
+
+  // Seconds timestamp: 512969520
+  'X': function (date) {
+    return Math.floor(date.getTime() / 1000)
+  },
+
+  // Milliseconds timestamp: 512969520900
+  'x': function (date) {
+    return date.getTime()
+  }
+}
+
+function buildFormatFn (formatStr, localeFormatters, formattingTokensRegExp) {
+  var array = formatStr.match(formattingTokensRegExp)
+  var length = array.length
+
+  var i
+  var formatter
+  for (i = 0; i < length; i++) {
+    formatter = localeFormatters[array[i]] || formatters[array[i]]
+    if (formatter) {
+      array[i] = formatter
+    } else {
+      array[i] = removeFormattingTokens(array[i])
     }
+  }
 
-    striptags.init_streaming_mode = init_striptags_stream;
-
-    function init_context(allowable_tags, tag_replacement) {
-        allowable_tags = parse_allowable_tags(allowable_tags);
-
-        return {
-            allowable_tags : allowable_tags,
-            tag_replacement: tag_replacement,
-
-            state         : STATE_PLAINTEXT,
-            tag_buffer    : '',
-            depth         : 0,
-            in_quote_char : ''
-        };
+  return function (date) {
+    var output = ''
+    for (var i = 0; i < length; i++) {
+      if (array[i] instanceof Function) {
+        output += array[i](date, formatters)
+      } else {
+        output += array[i]
+      }
     }
+    return output
+  }
+}
 
-    function striptags_internal(html, context) {
-        let allowable_tags  = context.allowable_tags;
-        let tag_replacement = context.tag_replacement;
+function removeFormattingTokens (input) {
+  if (input.match(/\[[\s\S]/)) {
+    return input.replace(/^\[|]$/g, '')
+  }
+  return input.replace(/\\/g, '')
+}
 
-        let state         = context.state;
-        let tag_buffer    = context.tag_buffer;
-        let depth         = context.depth;
-        let in_quote_char = context.in_quote_char;
-        let output        = '';
+function formatTimezone (offset, delimeter) {
+  delimeter = delimeter || ''
+  var sign = offset > 0 ? '-' : '+'
+  var absOffset = Math.abs(offset)
+  var hours = Math.floor(absOffset / 60)
+  var minutes = absOffset % 60
+  return sign + addLeadingZeros(hours, 2) + delimeter + addLeadingZeros(minutes, 2)
+}
 
-        for (let idx = 0, length = html.length; idx < length; idx++) {
-            let char = html[idx];
+function addLeadingZeros (number, targetLength) {
+  var output = Math.abs(number).toString()
+  while (output.length < targetLength) {
+    output = '0' + output
+  }
+  return output
+}
 
-            if (state === STATE_PLAINTEXT) {
-                switch (char) {
-                    case '<':
-                        state       = STATE_HTML;
-                        tag_buffer += char;
-                        break;
-
-                    default:
-                        output += char;
-                        break;
-                }
-            }
-
-            else if (state === STATE_HTML) {
-                switch (char) {
-                    case '<':
-                        // ignore '<' if inside a quote
-                        if (in_quote_char) {
-                            break;
-                        }
-
-                        // we're seeing a nested '<'
-                        depth++;
-                        break;
-
-                    case '>':
-                        // ignore '>' if inside a quote
-                        if (in_quote_char) {
-                            break;
-                        }
-
-                        // something like this is happening: '<<>>'
-                        if (depth) {
-                            depth--;
-
-                            break;
-                        }
-
-                        // this is closing the tag in tag_buffer
-                        in_quote_char = '';
-                        state         = STATE_PLAINTEXT;
-                        tag_buffer   += '>';
-
-                        if (allowable_tags.has(normalize_tag(tag_buffer))) {
-                            output += tag_buffer;
-                        } else {
-                            output += tag_replacement;
-                        }
-
-                        tag_buffer = '';
-                        break;
-
-                    case '"':
-                    case '\'':
-                        // catch both single and double quotes
-
-                        if (char === in_quote_char) {
-                            in_quote_char = '';
-                        } else {
-                            in_quote_char = in_quote_char || char;
-                        }
-
-                        tag_buffer += char;
-                        break;
-
-                    case '-':
-                        if (tag_buffer === '<!-') {
-                            state = STATE_COMMENT;
-                        }
-
-                        tag_buffer += char;
-                        break;
-
-                    case ' ':
-                    case '\n':
-                        if (tag_buffer === '<') {
-                            state      = STATE_PLAINTEXT;
-                            output    += '< ';
-                            tag_buffer = '';
-
-                            break;
-                        }
-
-                        tag_buffer += char;
-                        break;
-
-                    default:
-                        tag_buffer += char;
-                        break;
-                }
-            }
-
-            else if (state === STATE_COMMENT) {
-                switch (char) {
-                    case '>':
-                        if (tag_buffer.slice(-2) == '--') {
-                            // close the comment
-                            state = STATE_PLAINTEXT;
-                        }
-
-                        tag_buffer = '';
-                        break;
-
-                    default:
-                        tag_buffer += char;
-                        break;
-                }
-            }
-        }
-
-        // save the context for future iterations
-        context.state         = state;
-        context.tag_buffer    = tag_buffer;
-        context.depth         = depth;
-        context.in_quote_char = in_quote_char;
-
-        return output;
-    }
-
-    function parse_allowable_tags(allowable_tags) {
-        let tag_set = new Set();
-
-        if (typeof allowable_tags === 'string') {
-            let match;
-
-            while ((match = ALLOWED_TAGS_REGEX.exec(allowable_tags))) {
-                tag_set.add(match[1]);
-            }
-        }
-
-        else if (!Symbol.nonNative &&
-                 typeof allowable_tags[Symbol.iterator] === 'function') {
-
-            tag_set = new Set(allowable_tags);
-        }
-
-        else if (typeof allowable_tags.forEach === 'function') {
-            // IE11 compatible
-            allowable_tags.forEach(tag_set.add, tag_set);
-        }
-
-        return tag_set;
-    }
-
-    function normalize_tag(tag_buffer) {
-        let match = NORMALIZE_TAG_REGEX.exec(tag_buffer);
-
-        return match ? match[1].toLowerCase() : null;
-    }
-
-    if (typeof define === 'function' && define.amd) {
-        // AMD
-        define(function module_factory() { return striptags; });
-    }
-
-    else if (typeof module === 'object' && module.exports) {
-        // Node
-        module.exports = striptags;
-    }
-
-    else {
-        // Browser
-        global.striptags = striptags;
-    }
-}(this));
-}, {}];
+module.exports = format
+}, {"5":5,"170":170,"171":171,"172":172,"173":173,"174":174}];

@@ -3,21 +3,14 @@ window.modules["34"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * Remove the site's slug for the url-patterned prefix
+ * First test if argument passed in is a String. If true, determine if a uri points
+ * to a DEFAULT instance of a component. Otherwise, throw an error.
  *
- * @param  {String} uri
- * @param  {Object} site
- * @return {String}
+ * @param  {string}  uri
+ * @return {Boolean}
  */
-module.exports = function (uri, site) {
-  var { slug, prefix, host, path } = site,
-    hasSlash = uri.indexOf('/_') !== -1;
-
-  if (!prefix) {
-    prefix = path && path.length > 1 ? `${host}${path}` : host;
-  }
-
+module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return uri.replace(`${slug}${hasSlash ? '/' : ''}`, `${prefix}${hasSlash ? '/' : ''}`);
+  return !!uri.match(/\/_components\/[A-Za-z0-9\-]+$/);
 };
 }, {"51":51}];

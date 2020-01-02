@@ -1,20 +1,21 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div  data-uri="{{ default _ref _self }}" data-editable="settings">
       <div class="title-ingridients-options">
-              <button class="title-ingridients-options-button">Save</button>
-              <button class="title-ingridients-options-button">I made it</button>
-              <button class="title-ingridients-options-button"> Rate it</button>
-              <button class="title-ingridients-options-button">Print</button>
-              <button class="title-ingridients-options-button">Pin</button>
-              <button class="title-ingridients-options-button">Share</button>
+              <button class="title-ingridients-options-button"> <i class="fa fa-heart"></i> Save</button>
+              <button class="title-ingridients-options-button"> <i class="fa fa-user"></i> Made it</button>
+              <button class="title-ingridients-options-button"> <i class="fa fa-star"></i> Rate it</button>
+              <button class="title-ingridients-options-button"> <i class="fa fa-print"></i> Print</button>
+              <button class="title-ingridients-options-button"> <i class="fa fa-pinterest"></i> Pin</button>
+              <button class="title-ingridients-options-button"> <i class="fa fa-facebook"></i> Share</button>
       </div>
       <div class="title-ingridients">
                 <div class="title-ingridients-title">
                       <h2 >Ingridients</h2>
                 </div>
                 <div class="title-ingridients-feat">
-                        {{#if time}} <h3 class="feature title-ingridients-vdivider">Cook time: {{ time }}</h3>{{/if}}
-                        {{#if servings}} <h3 class="feature title-ingridients-vdivider">Servings: {{ servings }}</h3>{{/if}}
-                        {{#if calories}} <h3 class="feature">Calories: {{ calories }}</h3>{{/if}}
+                        {{#if time}} <h3 class="feature title-ingridients-vdivider">Cook time: {{ time }} <i class="fa fa-clock-o"></i> </h3>{{/if}}
+                        {{#if servings}} <h3 class="feature title-ingridients-vdivider">Servings: {{ servings }} <i class="fa fa-pie-chart"></i> </h3>{{/if}}
+                        {{#if calories}} <h3 class="feature">Calories: {{ calories }} <i class="fa fa-bar-chart"></i> </h3>{{/if}}
                 </div>
       </div>
       <div class="title-ingridients-divider">

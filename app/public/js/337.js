@@ -1,4 +1,4 @@
-window.modules["337"] = [function(require,module,exports){var isObject = require(13);
+window.modules["337"] = [function(require,module,exports){var isObject = require(12);
 
 /**
  * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
@@ -13,4 +13,4 @@ function isStrictComparable(value) {
 }
 
 module.exports = isStrictComparable;
-}, {"13":13}];
+}, {"12":12}];

@@ -44,17 +44,27 @@
 
 .title-ingridients-options{
   height: 40%;
-  background-color: blue;
+  background-color: gray;
 }
 
 
 .title-ingridients-options-button{
-  width: 16%;
-  height: 60%;
-  background-color: blue;
-  color: white;
-  border: none;
-  font-size: larger;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  display:inline-block;
+  padding:0.35em 1.2em;
+  border:none;
+  border-radius:0.12em;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  text-decoration:none;
+  color:#FFFFFF;
+  background: gray;
+  text-align:center;
+  font-size: 97%;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
 }
 
 
