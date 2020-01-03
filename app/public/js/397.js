@@ -1,4 +1,4 @@
-window.modules["397"] = [function(require,module,exports){var parse = require(395).syntax.parse;
+window.modules["397"] = [function(require,module,exports){var parse = require(394).syntax.parse;
 
 function getInfo(postcssNode) {
     return {
@@ -85,4 +85,4 @@ function postcssToCsso(node) {
 }
 
 module.exports = postcssToCsso;
-}, {"395":395}];
+}, {"394":394}];

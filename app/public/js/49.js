@@ -1,16 +1,15 @@
 window.modules["49"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51),
-  isPage = require(35);
+const isUriStringCheck = require(51);
 
 /**
- * First test if argument is a String. If true, test if '/_pages/:id/meta' is in the string.
+ * First test if argument is a String. If true, test if '/_pages/' is in the string.
  * Otherwise, throw an error.
  * @param  {string}  uri
  * @return {Boolean}
  */
 module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return isPage(uri) && !!uri.match(/\/meta$/i);
+  return uri.toLowerCase().indexOf('/_pages/') > -1;
 };
-}, {"35":35,"51":51}];
+}, {"51":51}];

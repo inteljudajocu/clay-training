@@ -16,24 +16,21 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ClassName = function (_Namespace) {
-    _inherits(ClassName, _Namespace);
+var Universal = function (_Namespace) {
+    _inherits(Universal, _Namespace);
 
-    function ClassName(opts) {
-        _classCallCheck(this, ClassName);
+    function Universal(opts) {
+        _classCallCheck(this, Universal);
 
         var _this = _possibleConstructorReturn(this, _Namespace.call(this, opts));
 
-        _this.type = _types.CLASS;
+        _this.type = _types.UNIVERSAL;
+        _this.value = '*';
         return _this;
     }
 
-    ClassName.prototype.toString = function toString() {
-        return [this.spaces.before, this.ns, String('.' + this.value), this.spaces.after].join('');
-    };
-
-    return ClassName;
+    return Universal;
 }(_namespace2.default);
 
-exports.default = ClassName;
+exports.default = Universal;
 module.exports = exports['default'];}, {"470":470,"484":484}];

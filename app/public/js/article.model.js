@@ -4,10 +4,10 @@ var _get = require(3),
     striptags = require(4),
     dateFormat = require(6),
     dateParse = require(5),
-    utils = require(1),
+    utils = require(2),
     has = utils.has,
     // convenience
-sanitize = require(2);
+sanitize = require(1);
 /**
  * only allow emphasis, italic, and strikethroughs in headlines
  * @param  {string} oldHeadline

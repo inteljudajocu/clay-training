@@ -3,16 +3,21 @@ window.modules["27"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * First test if argument passed in is a String. If true, get page instance
- * from uri that includes page version. Otherwise, throw an error.
- * @example /_pages/cj21ud3rt00wmqpyefc944hez@published returns cj21ud3rt00wmqpyefc944hez@published
- * @param  {string} uri
- * @return {string|null}
+ * Remove the url-patterned prefix for the site's slug.
+ *
+ * @param  {String} uri
+ * @param  {Object} site
+ * @return {String}
  */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
-  const result = /\/_pages\/([^\.\/]+)/.exec(uri);
+module.exports = function (uri, site) {
+  var { host, path, slug, prefix } = site,
+    hasSlash = uri.indexOf('/_') !== -1;
 
-  return result && result[1];
+  if (!prefix) {
+    prefix = path && path.length > 1 ? `${host}${path}` : host;
+  }
+
+  isUriStringCheck.strCheck(uri);
+  return uri.replace(`${prefix}${hasSlash ? '/' : ''}`, `${slug}${hasSlash ? '/' : ''}`);
 };
 }, {"51":51}];

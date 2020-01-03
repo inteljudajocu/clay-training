@@ -1,6 +1,6 @@
 window.modules["meta-title.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(2);
+var sanitize = require(1);
 
 module.exports.save = function (ref, data) {
   data = sanitize.recursivelyStripSeperators(data);
@@ -14,4 +14,4 @@ module.exports.save = function (ref, data) {
 
   return data;
 };
-}, {"2":2}];
+}, {"1":1}];

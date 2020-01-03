@@ -1,15 +1,15 @@
 window.modules["32"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51);
+const getComponentName = require(36),
+  { strCheck } = require(51);
 
-/**
- * First test if argument is a String. If true, test if '/_components/' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
- */
-module.exports = function (uri) {
-  isUriStringCheck.strCheck(uri);
-  return uri.toLowerCase().indexOf('/_components/') > -1;
+module.exports = (page, componentName) => {
+  strCheck(componentName);
+
+  if (typeof page !== 'object') {
+    throw new Error(`Page argument must be an object, not ${typeof page}`);
+  }
+
+  return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
 };
-}, {"51":51}];
+}, {"36":36,"51":51}];

@@ -12,7 +12,7 @@ $divider_color: #767676;
 }
 
 .title-ingridients-feat{
-  width: 40%;
+  width: max-content;
   display: flex;
   text-align: right;
 }
@@ -21,6 +21,7 @@ $divider_color: #767676;
   margin-right: 5%;
   font-size: small;
   margin-bottom: 0%;
+  color: #ec473b;
 }
 
 .title-ingridients-vdivider{

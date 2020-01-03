@@ -2,6 +2,13 @@ $divider_color: #767676;
 
 .direclist{
     list-style-type: decimal;
+    display: flex;
+    flex-flow: wrap;
+}
+
+.direclist > li{
+    text-align: justify;
+    padding-right: 5%;
 }
 
 .prepa{
@@ -20,6 +27,7 @@ $divider_color: #767676;
     text-align: center;
     padding-top: 0px;
     margin-right: 5%;
+    color: #ec473b;
 }
 
 .prepa > .direcctions-nutrition{
@@ -51,6 +59,10 @@ button.Share-button {
 button.Share-button:hover {
     color:#000000;
     background-color:#FFFFFF;
+}
+
+.direcctions-nutrition > p{
+    text-align: justify;
 }
 
 /* @media all and (max-width:30em){

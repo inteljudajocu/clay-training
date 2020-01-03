@@ -1,16 +1,17 @@
 window.modules["34"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51);
+const isUriStringCheck = require(51),
+  isLayout = require(47),
+  getLayoutInstance = require(39);
 
 /**
- * First test if argument passed in is a String. If true, determine if a uri points
- * to a DEFAULT instance of a component. Otherwise, throw an error.
- *
+ * First test if argument is a String. If true, test if '/_layouts/:name/instances/:id/meta' is in the string.
+ * Otherwise, throw an error.
  * @param  {string}  uri
  * @return {Boolean}
  */
 module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return !!uri.match(/\/_components\/[A-Za-z0-9\-]+$/);
+  return isLayout(uri) && !!getLayoutInstance(uri) && !!uri.match(/\/meta$/i);
 };
-}, {"51":51}];
+}, {"39":39,"47":47,"51":51}];

@@ -12,6 +12,16 @@
     padding-right: 4%;
 }
 
+.recipe-rating{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+.recipe-rating > h2{
+    color: #ff7e1a;
+}
+
 .recipe-status > h2{
     text-align: center;
 }

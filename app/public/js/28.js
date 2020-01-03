@@ -3,16 +3,19 @@ window.modules["28"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * First test if argument passed in is a String. If true, get list instance
- * from URI. Otherwise, throw an error.
- * @example /_lists/foo returns "foo"
+ * replace version in uri
  * @param  {string} uri
- * @return {string|null}
+ * @param  {string} [version] defaults to latest
+ * @return {string}
  */
-module.exports = function (uri) {
+module.exports = function (uri, version) {
   isUriStringCheck.strCheck(uri);
-  const result = /\/_lists\/(.*)/.exec(uri);
 
-  return result && result[1];
+  if (version) {
+    return uri.split('@')[0] + '@' + version;
+  } else {
+    // no version is still a kind of version
+    return uri.split('@')[0];
+  }
 };
 }, {"51":51}];

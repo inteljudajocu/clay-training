@@ -1,5 +1,17 @@
 .direclist{
     list-style-type: decimal;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-flow: wrap;
+        -ms-flex-flow: wrap;
+            flex-flow: wrap;
+}
+
+.direclist > li{
+    text-align: justify;
+    padding-right: 5%;
 }
 
 .prepa{
@@ -21,6 +33,7 @@
     text-align: center;
     padding-top: 0px;
     margin-right: 5%;
+    color: #ec473b;
 }
 
 .prepa > .direcctions-nutrition{
@@ -54,6 +67,10 @@ button.Share-button {
 button.Share-button:hover {
     color:#000000;
     background-color:#FFFFFF;
+}
+
+.direcctions-nutrition > p{
+    text-align: justify;
 }
 
 /* @media all and (max-width:30em){

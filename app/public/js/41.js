@@ -3,19 +3,16 @@ window.modules["41"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * replace version in uri
+ * First test if argument passed in is a String. If true, get page instance
+ * from uri that includes page version. Otherwise, throw an error.
+ * @example /_pages/cj21ud3rt00wmqpyefc944hez@published returns cj21ud3rt00wmqpyefc944hez@published
  * @param  {string} uri
- * @param  {string} [version] defaults to latest
- * @return {string}
+ * @return {string|null}
  */
-module.exports = function (uri, version) {
+module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
+  const result = /\/_pages\/([^\.\/]+)/.exec(uri);
 
-  if (version) {
-    return uri.split('@')[0] + '@' + version;
-  } else {
-    // no version is still a kind of version
-    return uri.split('@')[0];
-  }
+  return result && result[1];
 };
 }, {"51":51}];

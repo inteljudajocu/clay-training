@@ -1,10 +1,10 @@
 window.modules["tags.model"] = [function(require,module,exports){'use strict';
 
-var _map = require(17),
-    _assign = require(15),
-    _set = require(18),
-    _includes = require(16),
-    _require = require(2),
+var _map = require(15),
+    _assign = require(17),
+    _set = require(16),
+    _includes = require(18),
+    _require = require(1),
     removeNonAlphanumericCharacters = _require.removeNonAlphanumericCharacters,
     invisibleTags = [];
 /**
@@ -58,4 +58,4 @@ module.exports.save = function (uri, data) {
   data.items = items;
   return data;
 };
-}, {"2":2,"15":15,"16":16,"17":17,"18":18}];
+}, {"1":1,"15":15,"16":16,"17":17,"18":18}];

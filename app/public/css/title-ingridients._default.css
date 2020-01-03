@@ -16,7 +16,9 @@
 
 
 .title-ingridients-feat{
-  width: 40%;
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -29,6 +31,7 @@
   margin-right: 5%;
   font-size: small;
   margin-bottom: 0%;
+  color: #ec473b;
 }
 
 

@@ -1,6 +1,6 @@
 window.modules["6"] = [function(require,module,exports){var getDayOfYear = require(173)
-var getISOWeek = require(171)
-var getISOYear = require(174)
+var getISOWeek = require(174)
+var getISOYear = require(171)
 var parse = require(5)
 var isValid = require(170)
 var enLocale = require(172)

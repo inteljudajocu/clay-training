@@ -3,13 +3,16 @@ window.modules["39"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * First test if argument is a String. If true, test if '/_uris/' is in the string.
- * Otherwise, throw an error.
- * @param  {string}  uri
- * @return {Boolean}
+ * First test if argument passed in is a String. If true, get layout instance
+ * from uri without the layout version. Otherwise, throw an error.
+ * @example /_layouts/text/instances/0@published returns 0
+ * @param  {string} uri
+ * @return {string|null}
  */
 module.exports = function (uri) {
   isUriStringCheck.strCheck(uri);
-  return uri.toLowerCase().indexOf('/_uris/') > -1;
+  const result = /\/_layouts\/.+?\/instances\/([^\.\/@]+)/.exec(uri);
+
+  return result && result[1];
 };
 }, {"51":51}];

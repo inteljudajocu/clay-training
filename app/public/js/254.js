@@ -1,17 +1,17 @@
 window.modules["254"] = [function(require,module,exports){var getMapData = require(363);
 
 /**
- * Gets the map value for `key`.
+ * Checks if a map value for `key` exists.
  *
  * @private
- * @name get
+ * @name has
  * @memberOf MapCache
- * @param {string} key The key of the value to get.
- * @returns {*} Returns the entry value.
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
  */
-function mapCacheGet(key) {
-  return getMapData(this, key).get(key);
+function mapCacheHas(key) {
+  return getMapData(this, key).has(key);
 }
 
-module.exports = mapCacheGet;
+module.exports = mapCacheHas;
 }, {"363":363}];

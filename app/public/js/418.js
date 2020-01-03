@@ -1,10 +1,10 @@
 window.modules["418"] = [function(require,module,exports){var resolveName = require(58).property;
 var handlers = {
-    'font': require(420),
-    'font-weight': require(419),
+    'font': require(419),
+    'font-weight': require(421),
     'background': require(422),
-    'border': require(421),
-    'outline': require(421)
+    'border': require(420),
+    'outline': require(420)
 };
 
 module.exports = function compressValue(node) {
