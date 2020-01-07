@@ -1,9 +1,9 @@
 window.modules["recipe.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(3),
-    dateFormat = require(6),
-    dateParse = require(5),
-    utils = require(2),
+var _get = require(1),
+    dateFormat = require(3),
+    dateParse = require(2),
+    utils = require(6),
     has = utils.has;
 
 function formatDate(data, locals) {
@@ -27,4 +27,4 @@ module.exports.save = function (uri, data, locals) {
   setCanonicalUrl(data, locals);
   return data;
 };
-}, {"2":2,"3":3,"5":5,"6":6}];
+}, {"1":1,"2":2,"3":3,"6":6}];

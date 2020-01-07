@@ -1,29 +1,15 @@
 window.modules["30"] = [function(require,module,exports){'use strict';
 
-const isUriStringCheck = require(51);
+const getComponentName = require(34),
+  { strCheck } = require(51);
 
-/**
- * Given stringified JSON, swap out the site's url-patterned prefix for
- * the site's slug
- *
- * @param  {String}  json
- * @param  {Object}  site
- * @param  {Boolean} [ref=false]
- * @return {String}
- */
-module.exports = function (json, site, ref = false) {
-  var { slug, host, path, prefix } = site,
-    prefixString, replaceString, searchRegex;
+module.exports = (page, componentName) => {
+  strCheck(componentName);
 
-  isUriStringCheck.strCheck(json);
-
-  if (!prefix) {
-    prefix = path && path.length > 1 ? `${host}${path}` : host;
+  if (typeof page !== 'object') {
+    throw new Error(`Page argument must be an object, not ${typeof page}`);
   }
 
-  prefixString = `${ref ? '"_ref":' : '' }"${prefix}/_components/`;
-  replaceString = `${ref ? '"_ref":' : '' }"${slug}/_components/`;
-  searchRegex = new RegExp(prefixString, 'g');
-  return json.replace(searchRegex, replaceString);
+  return Object.values(page).filter(Array.isArray).reduce((acc, val) => acc.concat(val), []).find(cmpt => getComponentName(cmpt) === componentName);
 };
-}, {"51":51}];
+}, {"34":34,"51":51}];

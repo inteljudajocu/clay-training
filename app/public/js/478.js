@@ -16,25 +16,20 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Pseudo = function (_Container) {
-    _inherits(Pseudo, _Container);
+var Selector = function (_Container) {
+    _inherits(Selector, _Container);
 
-    function Pseudo(opts) {
-        _classCallCheck(this, Pseudo);
+    function Selector(opts) {
+        _classCallCheck(this, Selector);
 
         var _this = _possibleConstructorReturn(this, _Container.call(this, opts));
 
-        _this.type = _types.PSEUDO;
+        _this.type = _types.SELECTOR;
         return _this;
     }
 
-    Pseudo.prototype.toString = function toString() {
-        var params = this.length ? '(' + this.map(String).join(',') + ')' : '';
-        return [this.spaces.before, String(this.value), params, this.spaces.after].join('');
-    };
-
-    return Pseudo;
+    return Selector;
 }(_container2.default);
 
-exports.default = Pseudo;
+exports.default = Selector;
 module.exports = exports['default'];}, {"470":470,"487":487}];

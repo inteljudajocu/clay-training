@@ -3,21 +3,28 @@ window.modules["29"] = [function(require,module,exports){'use strict';
 const isUriStringCheck = require(51);
 
 /**
- * Remove the site's slug for the url-patterned prefix
+ * Given stringified JSON, conver the site's slug
+ * to the url-patterned site prefix
  *
- * @param  {String} uri
  * @param  {Object} site
- * @return {String}
+ * @param  {String} ref
+ * @return {Function}
  */
-module.exports = function (uri, site) {
-  var { slug, prefix, host, path } = site,
-    hasSlash = uri.indexOf('/_') !== -1;
+module.exports = function (site, ref = false) {
+  return function (json) {
+    var { slug, host, path, prefix } = site,
+      prefixString, searchString, searchRegex;
 
-  if (!prefix) {
-    prefix = path && path.length > 1 ? `${host}${path}` : host;
-  }
+    isUriStringCheck.strCheck(json);
 
-  isUriStringCheck.strCheck(uri);
-  return uri.replace(`${slug}${hasSlash ? '/' : ''}`, `${prefix}${hasSlash ? '/' : ''}`);
+    if (!prefix) {
+      prefix = path && path.length > 1 ? `${host}${path}` : host;
+    }
+
+    prefixString = `${ref ? '"_ref":' : '' }"${prefix}/_components/`;
+    searchString = `${ref ? '"_ref":' : '' }"${slug}/_components/`;
+    searchRegex = new RegExp(searchString, 'g');
+    return json.replace(searchRegex, prefixString);
+  };
 };
 }, {"51":51}];

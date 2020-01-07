@@ -1,23 +1,32 @@
-window.modules["421"] = [function(require,module,exports){module.exports = function compressFontWeight(node) {
-    var value = node.children.head.data;
+window.modules["421"] = [function(require,module,exports){function removeItemAndRedundantWhiteSpace(list, item) {
+    var prev = item.prev;
+    var next = item.next;
 
-    if (value.type === 'Identifier') {
-        switch (value.name) {
-            case 'normal':
-                node.children.head.data = {
-                    type: 'Number',
-                    loc: value.loc,
-                    value: '400'
-                };
-                break;
-            case 'bold':
-                node.children.head.data = {
-                    type: 'Number',
-                    loc: value.loc,
-                    value: '700'
-                };
-                break;
+    if (next !== null) {
+        if (next.data.type === 'WhiteSpace' && (prev === null || prev.data.type === 'WhiteSpace')) {
+            list.remove(next);
         }
+    } else if (prev !== null && prev.data.type === 'WhiteSpace') {
+        list.remove(prev);
     }
+
+    list.remove(item);
+}
+
+module.exports = function compressBorder(node) {
+    node.children.each(function(node, item, list) {
+        if (node.type === 'Identifier' && node.name.toLowerCase() === 'none') {
+            if (list.head === list.tail) {
+                // replace `none` for zero when `none` is a single term
+                item.data = {
+                    type: 'Number',
+                    loc: node.loc,
+                    value: '0'
+                };
+            } else {
+                removeItemAndRedundantWhiteSpace(list, item);
+            }
+        }
+    });
 };
 }, {}];

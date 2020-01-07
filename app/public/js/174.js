@@ -1,35 +1,28 @@
-window.modules["174"] = [function(require,module,exports){var parse = require(5)
-var startOfISOWeek = require(177)
-var startOfISOYear = require(176)
-
-var MILLISECONDS_IN_WEEK = 604800000
+window.modules["174"] = [function(require,module,exports){var parse = require(2)
+var startOfYear = require(175)
+var differenceInCalendarDays = require(168)
 
 /**
- * @category ISO Week Helpers
- * @summary Get the ISO week of the given date.
+ * @category Day Helpers
+ * @summary Get the day of the year of the given date.
  *
  * @description
- * Get the ISO week of the given date.
- *
- * ISO week-numbering year: http://en.wikipedia.org/wiki/ISO_week_date
+ * Get the day of the year of the given date.
  *
  * @param {Date|String|Number} date - the given date
- * @returns {Number} the ISO week
+ * @returns {Number} the day of year
  *
  * @example
- * // Which week of the ISO-week numbering year is 2 January 2005?
- * var result = getISOWeek(new Date(2005, 0, 2))
- * //=> 53
+ * // Which day of the year is 2 July 2014?
+ * var result = getDayOfYear(new Date(2014, 6, 2))
+ * //=> 183
  */
-function getISOWeek (dirtyDate) {
+function getDayOfYear (dirtyDate) {
   var date = parse(dirtyDate)
-  var diff = startOfISOWeek(date).getTime() - startOfISOYear(date).getTime()
-
-  // Round the number of days to the nearest integer
-  // because the number of milliseconds in a week is not constant
-  // (e.g. it's different in the week of the daylight saving time clock shift)
-  return Math.round(diff / MILLISECONDS_IN_WEEK) + 1
+  var diff = differenceInCalendarDays(date, startOfYear(date))
+  var dayOfYear = diff + 1
+  return dayOfYear
 }
 
-module.exports = getISOWeek
-}, {"5":5,"176":176,"177":177}];
+module.exports = getDayOfYear
+}, {"2":2,"168":168,"175":175}];

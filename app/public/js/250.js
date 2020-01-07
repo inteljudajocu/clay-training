@@ -1,27 +1,20 @@
 window.modules["250"] = [function(require,module,exports){var assocIndexOf = require(287);
 
 /**
- * Sets the list cache `key` to `value`.
+ * Gets the list cache value for `key`.
  *
  * @private
- * @name set
+ * @name get
  * @memberOf ListCache
- * @param {string} key The key of the value to set.
- * @param {*} value The value to set.
- * @returns {Object} Returns the list cache instance.
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
  */
-function listCacheSet(key, value) {
+function listCacheGet(key) {
   var data = this.__data__,
       index = assocIndexOf(data, key);
 
-  if (index < 0) {
-    ++this.size;
-    data.push([key, value]);
-  } else {
-    data[index][1] = value;
-  }
-  return this;
+  return index < 0 ? undefined : data[index][1];
 }
 
-module.exports = listCacheSet;
+module.exports = listCacheGet;
 }, {"287":287}];

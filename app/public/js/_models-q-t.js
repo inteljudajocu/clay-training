@@ -1,9 +1,9 @@
 window.modules["recipe.model"] = [function(require,module,exports){'use strict';
 
-var _get = require(3),
-    dateFormat = require(6),
-    dateParse = require(5),
-    utils = require(2),
+var _get = require(1),
+    dateFormat = require(3),
+    dateParse = require(2),
+    utils = require(6),
     has = utils.has;
 
 function formatDate(data, locals) {
@@ -27,24 +27,24 @@ module.exports.save = function (uri, data, locals) {
   setCanonicalUrl(data, locals);
   return data;
 };
-}, {"2":2,"3":3,"5":5,"6":6}];
+}, {"1":1,"2":2,"3":3,"6":6}];
 window.modules["subheader.model"] = [function(require,module,exports){'use strict';
 
-var sanitize = require(1);
+var sanitize = require(5);
 
 module.exports.save = function (ref, data) {
   data.text = sanitize.validateTagContent(sanitize.toSmartText(data.text || ''));
   data.subheaderId = "".concat(data.subheaderId || data.text).trim().replace(/\s+/g, '-');
   return data;
 };
-}, {"1":1}];
+}, {"5":5}];
 window.modules["tags.model"] = [function(require,module,exports){'use strict';
 
-var _map = require(15),
-    _assign = require(17),
-    _set = require(16),
-    _includes = require(18),
-    _require = require(1),
+var _map = require(18),
+    _assign = require(16),
+    _set = require(15),
+    _includes = require(17),
+    _require = require(5),
     removeNonAlphanumericCharacters = _require.removeNonAlphanumericCharacters,
     invisibleTags = [];
 /**
@@ -98,16 +98,16 @@ module.exports.save = function (uri, data) {
   data.items = items;
   return data;
 };
-}, {"1":1,"15":15,"16":16,"17":17,"18":18}];
+}, {"5":5,"15":15,"16":16,"17":17,"18":18}];
 window.modules["title-ingridients.model"] = [function(require,module,exports){'use strict';
 
 var striptags = require(4),
-    _require = require(2),
+    _require = require(6),
     has = _require.has,
     isFieldEmpty = _require.isFieldEmpty,
     _require2 = require(9),
     render = _require2.render,
-    _require3 = require(1),
+    _require3 = require(5),
     toSmartText = _require3.toSmartText;
 
 module.exports.save = function (uri, data) {
@@ -129,4 +129,4 @@ module.exports.save = function (uri, data) {
     });
   }
 };
-}, {"1":1,"2":2,"4":4,"9":9}];
+}, {"4":4,"5":5,"6":6,"9":9}];

@@ -10,6 +10,7 @@
 .recipe-status > p{
     text-align: justify;
     padding-right: 4%;
+    margin-top: 0vh;
 }
 
 .recipe-rating{
@@ -24,6 +25,7 @@
 
 .recipe-status > h2{
     text-align: center;
+    margin-top: 0vh;
 }
 
 .recipe-info{
@@ -43,6 +45,7 @@
     padding-right: 5%;
     padding-left: 5%;
     height: inherit;
+    margin-bottom: 0vh;
   }
 
 .recipe-imagew{
